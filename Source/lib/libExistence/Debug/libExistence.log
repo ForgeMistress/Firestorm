@@ -1,0 +1,9 @@
+﻿  stdafx.cpp
+  Entity.cpp
+  Engine.cpp
+  Component.cpp
+  Generating Code...
+Entity.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+Engine.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+Component.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+  libExistence.vcxproj -> C:\Users\m_ryan\ScratchSpace\RedQueen\Source\lib\libExistence\..\..\..\Build\x86\libExistence.lib

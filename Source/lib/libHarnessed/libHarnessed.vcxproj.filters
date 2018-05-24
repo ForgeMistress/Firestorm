@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\libHarnessed\TestHarness.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\libHarnessed.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\libHarnessed\TestCase.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Private</Filter>
+    </ClInclude>
+    <ClInclude Include="TestCase.h">
+      <Filter>Private</Filter>
+    </ClInclude>
+    <ClInclude Include="TestHarness.h">
+      <Filter>Private</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="TestCase.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="TestHarness.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Private">
+      <UniqueIdentifier>{4dc95e54-7a37-4fdd-a3c6-474c870fd922}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Public">
+      <UniqueIdentifier>{6f554979-b2e9-43c9-aa1a-5837a9a39db5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
