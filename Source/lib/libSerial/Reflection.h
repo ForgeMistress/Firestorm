@@ -13,5 +13,7 @@
 
 OPEN_NAMESPACE(Elf);
 
+
+
 CLOSE_NAMESPACE(Elf);
 #endif
