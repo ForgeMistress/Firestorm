@@ -11,22 +11,29 @@
 #define MIRROR_OBJECT_H_
 #pragma once
 
+#include "rttr/registration"
+#include "rttr/type"
+
 OPEN_NAMESPACE(Elf);
 
 class Object
 {
+	RTTR_ENABLE();
+
 protected:
     Object(){}
     virtual ~Object(){}
 };
 
-class InspectableObject : public Object
+class IInspectableObject
 {
 public:
+	RTTR_ENABLE();
+
     template <class Interface_t>
-    void* Inspect()
+    Interface_t* Inspect()
     {
-        return static_cast<Interface_t>(DoInspect(Interface_t::get_type()));
+        return static_cast<Interface_t*>(DoInspect(Interface_t::get_type()));
     }
 
     template <class Interface_t>
@@ -41,10 +48,9 @@ public:
     }
 
 protected:
-    InspectableObject(){}
-    virtual ~InspectableObject(){}
+    IInspectableObject(){}
+    virtual ~IInspectableObject(){}
 };
 
 CLOSE_NAMESPACE(Elf);
 #endif
-
