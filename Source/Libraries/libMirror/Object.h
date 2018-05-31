@@ -7,8 +7,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef MIRROR_OBJECT_H_
-#define MIRROR_OBJECT_H_
+#ifndef LIBMIRROR_OBJECT_H_
+#define LIBMIRROR_OBJECT_H_
 #pragma once
 
 #include <rttr/registration>
@@ -25,11 +25,18 @@ protected:
     virtual ~Object(){}
 };
 
+/**
+ *
+ *  IInspectableObject
+ *
+ *  An interface for an object that can have its interfaces inspected. Objects that derive from
+ *  this interface must override DoInspect and check the rttr::type that is passed in. If the object matches
+ *  the type, then it must return the pointer to the object static_casted to the apropriate type.
+ **/
 class IInspectableObject
 {
-public:
 	RTTR_ENABLE();
-
+public:
     template <class Interface_t>
     Interface_t* Inspect()
     {
@@ -42,12 +49,16 @@ public:
         return const_cast<const Interface_t*>(DoInspect(Interface_t::get_type()));
     }
 
-    virtual void* DoInspect(rttr::type rttrType)
-    {
-        return nullptr;
-    }
-
 protected:
+	virtual void* DoInspect(rttr::type rttrType)
+	{
+		if(rttrType == IInspectableObject::get_type())
+		{
+			return static_cast<IInspectableObject*>(this);
+		}
+		return nullptr;
+	}
+
     IInspectableObject(){}
     virtual ~IInspectableObject(){}
 };
