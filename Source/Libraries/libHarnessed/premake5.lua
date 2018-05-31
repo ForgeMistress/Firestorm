@@ -1,22 +1,22 @@
 ------------------------------------------------------------------------------------------------------------------------
 --
---  ElflordPP/Source/lib/libMirror/premake5.lua
+--  ElflordPP/Source/lib/libHarnessed/premake5.lua
 --
 --  This file is part of the Elflord Engine.
 --
 ------------------------------------------------------------------------------------------------------------------------
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
-project("libMirror")
+--[[project("libHarnessed")
     language("C++")
     kind("StaticLib")
     targetdir("Build/%{cfg.buildcfg}")
     files({
-        "*.h",
-        "*.cpp"
+        "**.h",
+        "**.cpp"
     })
-
     pchheader("stdafx.h")
     pchsource("stdafx.cpp")
     includedirs({"."})
-    links({ "libCore", "rttr" })
+    links({ "libCore" })]]
+staticlib('libHarnessed', {"libCore"})

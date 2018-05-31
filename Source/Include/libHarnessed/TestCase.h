@@ -1,4 +1,4 @@
 #ifndef LIB_HARNESSED
-#error "libHarnessed.h was not included before ../lib/libHarnessed/TestCase.h"
+#error "libHarnessed.h was not included before ../Libraries/libHarnessed/TestCase.h"
 #endif
-#include "../lib/libHarnessed/TestCase.h"
+#include "../Libraries/libHarnessed/TestCase.h"

@@ -11,8 +11,8 @@
 #define MIRROR_OBJECT_H_
 #pragma once
 
-#include "rttr/registration"
-#include "rttr/type"
+#include <rttr/registration>
+#include <rttr/type>
 
 OPEN_NAMESPACE(Elf);
 

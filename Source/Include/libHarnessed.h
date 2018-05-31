@@ -1,4 +1,4 @@
-
+#pragma once
 #ifdef LIB_HARNESSED
 #error "libHarnessed.h already included"
 #endif
