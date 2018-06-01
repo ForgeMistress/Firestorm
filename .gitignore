@@ -1,39 +1,39 @@
 # Prerequisites
-*.d
+Build/**/*.d
 
 # Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+Build/**/*.slo
+Build/**/*.lo
+Build/**/*.o
+Build/**/*.obj
 
 # Precompiled Headers
-*.gch
-*.pch
+Build/**/*.gch
+Build/**/*.pch
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+Build/**/*.so
+Build/**/*.dylib
+Build/**/*.dll
 
 # Fortran module files
-*.mod
-*.smod
+Build/**/*.mod
+Build/**/*.smod
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+Build/**/*.lai
+Build/**/*.la
+Build/**/*.a
+Build/**/*.lib
 
 # Executables
-*.exe
-*.out
-*.app
+Build/**/*.exe
+Build/**/*.out
+Build/**/*.app
 
 # Visual Studio Stuff
-*.pdb
-*.ilk
+Build/**/*.pdb
+Build/**/*.ilk
 *.vcxproj.user
 
-Premake/*
+Premake/**
