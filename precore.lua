@@ -111,7 +111,7 @@ workspace("*")
 
 -- All projects will have the following build targets available to them.
 configurations({
-    "Debug32", "Release32", "Final32",
+    "Debug", "Release", "Final32",
     "Debug64", "Release64", "Final64"
 })
 
