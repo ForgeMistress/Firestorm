@@ -37,7 +37,7 @@ function unittest(libName, lnk)
     project(libName.."_Test")
         language("C++")
         kind("ConsoleApp")
-        targetdir("Build/Tests/%{cfg.buildcfg}")
+        targetdir("../Build/Tests/%{cfg.buildcfg}")
         files({
             "Tests/"..libName.."/**.h",
             "Tests/"..libName.."/**.cpp"
