@@ -1,7 +1,7 @@
 
 
-#ifndef LIB_CORE_H_
-#define LIB_CORE_H_
+#ifndef LIBCORE_H_
+#define LIBCORE_H_
 #pragma once
 
 #ifdef LIB_CORE

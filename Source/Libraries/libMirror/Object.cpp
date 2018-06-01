@@ -11,12 +11,31 @@
 #include "Object.h"
 
 OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Mirror);
 
 RTTR_REGISTRATION
 {
-	using namespace rttr;
-	registration::class_<Object>("Object");
-	registration::class_<IInspectableObject>("IInspectableObject");
+	Registration::class_<Object>("Mirror::Object");
+
+	Registration::class_<IInspectableObject>("Mirror::IInspectableObject");
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void* IInspectableObject::DoInspect(Type tid)
+{
+    if(tid == IInspectableObject::get_type())
+    {
+        return static_cast<IInspectableObject*>(this);
+    }
+    return nullptr;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CLOSE_NAMESPACE(Mirror);
 CLOSE_NAMESPACE(Elf);

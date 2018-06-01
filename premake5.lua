@@ -7,37 +7,58 @@
 ------------------------------------------------------------------------------------------------------------------------
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
-workspace("*")
-configurations({
-    "Debug32", "Release32", "Final32",
-    "Debug64", "Release64", "Final64"
-})
 
-location("Premake")
-
-includedirs({ "Source/Include" })
-
-
-filter("configurations:*32")
-    architecture("x86")
-
-filter("configurations:*64")
-    architecture("x86_64")
-
-filter("configurations:Debug32")
-    libdirs({ "Bin/x86/Debug" })
-filter("configurations:Release32")
-    libdirs({ "Bin/x86/Release" })
-filter("configurations:Final32")
-    libdirs({ "Bin/x86/Release" })
-
-filter("configurations:Debug64")
-    libdirs({ "Bin/x64/Debug" })
-filter("configurations:Release64")
-    libdirs({ "Bin/x64/Release" })
-filter("configurations:Final64")
-    libdirs({ "Bin/x64/Release" })
+include("precore")
 
 workspace("ElflordPP")
- 
-include("Source")
+
+staticlib('libCore')
+
+staticlib('libMirror', {
+    depends = { 'libCore', 'rttr_core' };
+    incdirs = {
+        "ThirdParty/rttr/src",
+        "ThirdParty/rttr/build/src",
+    };
+    --[[post = function()
+        filter({ "configurations:Debug*" });                            links({ "rttr_core_d" })
+        filter({ "configurations:Release*", "configurations:Final*" }); links({ "rttr_core" })
+    end;]]
+})
+staticlib('libExistence', {
+    depends = { 
+        'libCore', 
+        'libMirror',
+        'rttr_core'
+    };
+    incdirs = {
+        "ThirdParty/rttr/src",
+        "ThirdParty/rttr/build/src",
+    };
+    --[[post = function()
+        filter({ "configurations:Debug*" });                            links({ "rttr_core_d" })
+        filter({ "configurations:Release*", "configurations:Final*" }); links({ "rttr_core" })
+    end;]]
+})
+
+staticlib('libHarnessed', {
+    depends = { 'libCore' };
+})
+
+
+unittest('libHarnessed')
+unittest('libExistence', {
+    depends = { 'libMirror', 'rttr_core' };
+    --[[post = function()
+        links({"rttr_core"})
+        --filter({ "configurations:Debug*" });                            links({ "rttr_core_d" })
+        --filter({ "configurations:Release*", "configurations:Final*" }); links({ "rttr_core" })
+    end;]]
+})
+unittest('libMirror', {
+    post = function()
+        filter({ "configurations:Debug*" });                            links({ "rttr_core_d" })
+        filter({ "configurations:Release*", "configurations:Final*" }); links({ "rttr_core" })
+    end;
+})
+

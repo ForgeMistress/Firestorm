@@ -1,6 +1,6 @@
 
-#ifndef LIB_EXISTENCE
-#error "libExistence not included before including ../lib/libExistence/Engine.h"
+#ifdef LIB_EXISTENCE
+	#include "../Libraries/libExistence/Engine.h"
+#else
+	#error "libExistence not included before including ../Libraries/libExistence/Engine.h"
 #endif
-
-#include "../lib/libExistence/Engine.h"

@@ -11,11 +11,16 @@
 #define LIBMIRROR_OBJECT_H_
 #pragma once
 
-#include <rttr/registration>
-#include <rttr/type>
-
 OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Mirror);
 
+/**
+ *
+ *  Object
+ *
+ *  The base object type that everything should derive from.
+ *
+ **/
 class Object
 {
 	RTTR_ENABLE();
@@ -32,6 +37,7 @@ protected:
  *  An interface for an object that can have its interfaces inspected. Objects that derive from
  *  this interface must override DoInspect and check the rttr::type that is passed in. If the object matches
  *  the type, then it must return the pointer to the object static_casted to the apropriate type.
+ *
  **/
 class IInspectableObject
 {
@@ -46,22 +52,17 @@ public:
     template <class Interface_t>
     const Interface_t* Inspect() const
     {
-        return const_cast<const Interface_t*>(DoInspect(Interface_t::get_type()));
+        return reinterpret_cast<Interface_t*>(DoInspect(Interface_t::get_type()));
     }
 
 protected:
-	virtual void* DoInspect(rttr::type rttrType)
-	{
-		if(rttrType == IInspectableObject::get_type())
-		{
-			return static_cast<IInspectableObject*>(this);
-		}
-		return nullptr;
-	}
-
+	virtual void* DoInspect(Type type);
+	
     IInspectableObject(){}
     virtual ~IInspectableObject(){}
 };
 
+CLOSE_NAMESPACE(Mirror);
 CLOSE_NAMESPACE(Elf);
+
 #endif

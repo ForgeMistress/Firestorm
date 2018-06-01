@@ -1,10 +1,10 @@
 
-#ifndef LIB_HARNESSED_H_
-#define LIB_HARNESSED_H_
+#ifndef LIBHARNESSED_H_
+#define LIBHARNESSED_H_
 #pragma once
 
 #ifdef LIB_HARNESSED
-#error "libHarnessed.h already included"
+	#error "libHarnessed.h already included"
 #endif
 
 #define LIB_HARNESSED

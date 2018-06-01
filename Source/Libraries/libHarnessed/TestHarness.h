@@ -29,7 +29,10 @@ public:
 	// Runs all of the test cases. Reports back the number of errors.
 	uint32_t Run();
 
-	// Inserts a test case.
+	// Inserts a test case. The name should be something descriptive and should be a
+	// sentence that states what it should be doing.
+	//
+	// Example: It("should do this thing properly without errors", ...);
 	void It(const string& name, TestFunction_t testFunction);
 
 private:
@@ -40,4 +43,5 @@ private:
 };
 
 CLOSE_NAMESPACE(Elf);
+
 #endif
