@@ -7,12 +7,6 @@
 ------------------------------------------------------------------------------------------------------------------------
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
-
-
-Constants = {
-    RootDir = os.getcwd();
-}
-
 local function processargs(name, args)
     -- additional build configuration.
     if type(args) == 'table' then
@@ -33,8 +27,8 @@ end
 function staticlib(libname, args)
     filter({})
 
-    local libsrcpath = "Source/Libraries/"..libname
-    local libincpath = "Source/Include/"..libname
+    local libsrcpath = "Source/Libraries"
+    --local libincpath = "Source/Include/"..libname
 
     group("Libraries")
 
@@ -44,24 +38,24 @@ function staticlib(libname, args)
     targetdir("Build/Libraries/%{cfg.buildcfg}")
 
     files({
-        libsrcpath.."/**.h",   -- all header files
-        libsrcpath.."/**.cpp", -- all source files
-
-        libincpath..".h",      -- public headers in Source/Include
-        libincpath.."/**.h"    -- all other public headers in Source/Include/{libname}
+        libsrcpath.."/"..libname.."/**.h",   -- all header files
+        libsrcpath.."/"..libname.."/**.cpp", -- all source files
+        -- libincpath..".h",      -- public headers in Source/Include
+        -- libincpath.."/**.h"    -- all other public headers in Source/Include/{libname}
     })
 
 
     -- required for precompiled headers.
     includedirs({ 
         libsrcpath,
+        libsrcpath.."/"..libname,
         "ThirdParty/rttr/src",
         "ThirdParty/rttr/build/src",
     })
 
     filter("action:vs*")
         pchheader("stdafx.h")
-        pchsource(libsrcpath.."/stdafx.cpp")
+        pchsource(libsrcpath.."/"..libname.."/stdafx.cpp")
 
     filter("action:not vs*")
         pchheader("stdafx.h")
@@ -75,7 +69,8 @@ function unittest(testname, args)
     filter({})
 
     local tstsrcpath = "Source/Tests/"..testname
-    local libincpath = "Source/Include"
+    local libsrcpath = "Source/Libraries"
+    -- local libincpath = "Source/Include"
 
     group("UnitTests")
     project(testname.."_Test")
@@ -85,14 +80,14 @@ function unittest(testname, args)
 
     targetdir("Build/Tests/%{cfg.buildcfg}")
 
-    --libdirs({ "Build/Libraries/%{cfg.buildtarget}" })
+    -- libdirs({ "Build/Libraries/%{cfg.buildtarget}" })
 
     files({
         tstsrcpath.."/**.h",
         tstsrcpath.."/**.cpp"
     })
     includedirs({ 
-        libincpath,
+        libsrcpath,
         "ThirdParty/rttr/src",
         "ThirdParty/rttr/build/src",
     })
@@ -111,7 +106,7 @@ workspace("*")
 
 -- All projects will have the following build targets available to them.
 configurations({
-    "Debug", "Release", "Final32",
+    "Debug32", "Release32", "Final32",
     "Debug64", "Release64", "Final64"
 })
 
@@ -119,7 +114,7 @@ location("Premake")
 
 includedirs({ "Source/Include" })
 
-filter("configurations:*32"); architecture("x86")
+--filter("configurations:*32"); architecture("x86")
 filter("configurations:*64"); architecture("x86_64")
 
 filter("configurations:Debug32");              libdirs({ "Bin/x86/Debug"   })

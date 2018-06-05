@@ -8,37 +8,39 @@
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
 
+------------------------------------------------------------------------------------------------------------------------
+--  GLOBAL SETUP
+------------------------------------------------------------------------------------------------------------------------
 include("precore")
 
+------------------------------------------------------------------------------------------------------------------------
+--  WORKSPACE DEFINITION
+------------------------------------------------------------------------------------------------------------------------
 workspace("ElflordPP")
 
+------------------------------------------------------------------------------------------------------------------------
+--  LIBRARIES
+------------------------------------------------------------------------------------------------------------------------
 staticlib('libCore')
 
 staticlib('libMirror', {
-    depends = { 'libCore', 'rttr_core' };
+    depends = { 
+        'libCore', 
+    };
     incdirs = {
         "ThirdParty/rttr/src",
         "ThirdParty/rttr/build/src",
     };
-    --[[post = function()
-        filter({ "configurations:Debug*" });                            links({ "rttr_core_d" })
-        filter({ "configurations:Release*", "configurations:Final*" }); links({ "rttr_core" })
-    end;]]
+    post = function()
+        filter({ "configurations:Debug*" });   links({ "librttr_core_d" })
+        filter({ "configurations:Release*" }); links({ "librttr_core" })
+    end;
 })
 staticlib('libExistence', {
     depends = { 
         'libCore', 
         'libMirror',
-        'rttr_core'
     };
-    incdirs = {
-        "ThirdParty/rttr/src",
-        "ThirdParty/rttr/build/src",
-    };
-    --[[post = function()
-        filter({ "configurations:Debug*" });                            links({ "rttr_core_d" })
-        filter({ "configurations:Release*", "configurations:Final*" }); links({ "rttr_core" })
-    end;]]
 })
 
 staticlib('libHarnessed', {
@@ -46,19 +48,20 @@ staticlib('libHarnessed', {
 })
 
 
+------------------------------------------------------------------------------------------------------------------------
+--  UNIT TESTS
+------------------------------------------------------------------------------------------------------------------------
 unittest('libHarnessed')
 unittest('libExistence', {
-    depends = { 'libMirror', 'rttr_core' };
-    --[[post = function()
-        links({"rttr_core"})
-        --filter({ "configurations:Debug*" });                            links({ "rttr_core_d" })
-        --filter({ "configurations:Release*", "configurations:Final*" }); links({ "rttr_core" })
-    end;]]
+    depends = { 
+        'libCore',
+        'libMirror'
+    };
 })
 unittest('libMirror', {
-    post = function()
-        filter({ "configurations:Debug*" });                            links({ "rttr_core_d" })
-        filter({ "configurations:Release*", "configurations:Final*" }); links({ "rttr_core" })
-    end;
+    depends = {
+        'libCore',
+        'libMirror'
+    };
 })
 

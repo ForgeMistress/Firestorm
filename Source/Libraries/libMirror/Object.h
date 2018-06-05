@@ -15,6 +15,26 @@ OPEN_NAMESPACE(Elf);
 OPEN_NAMESPACE(Mirror);
 
 /**
+	Typedef for rttr::type. Use this instead of rttr::type.
+ **/
+typedef rttr::type Type;
+
+/**
+	Typedef for rttr::registration. Use this instead of rttr::registration.
+ **/
+typedef rttr::registration Registration;
+
+
+#define MIRROR_DECLARE(objType, ...) \
+	public: \
+		static rttr::type MyType() { return rttr::type::get<objType>(); } \
+		virtual rttr::type GetType() const { return rttr::type::get<objType>(); } \
+		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); }  \
+		virtual RTTR_INLINE void* get_ptr() { return reinterpret_cast<void*>(this); } \
+		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() { return {reinterpret_cast<void*>(this), rttr::detail::get_type_from_instance(this)}; } \
+		using base_class_list = rttr::detail::type_list<__VA_ARGS__>
+
+/**
  *
  *  Object
  *
@@ -23,7 +43,7 @@ OPEN_NAMESPACE(Mirror);
  **/
 class Object
 {
-	RTTR_ENABLE();
+	MIRROR_DECLARE(Object);
 
 protected:
     Object(){}
@@ -41,18 +61,18 @@ protected:
  **/
 class IInspectableObject
 {
-	RTTR_ENABLE();
+	MIRROR_DECLARE(IInspectableObject);
 public:
     template <class Interface_t>
     Interface_t* Inspect()
     {
-        return static_cast<Interface_t*>(DoInspect(Interface_t::get_type()));
+        return static_cast<Interface_t*>(DoInspect(Interface_t::MyType()));
     }
 
     template <class Interface_t>
     const Interface_t* Inspect() const
     {
-        return reinterpret_cast<Interface_t*>(DoInspect(Interface_t::get_type()));
+        return reinterpret_cast<Interface_t*>(DoInspect(Interface_t::MyType()));
     }
 
 protected:

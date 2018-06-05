@@ -9,6 +9,6 @@
 
 #define LIB_EXISTENCE
 
-#include "libExistence/Engine.h"
+#include "Engine.h"
 
 #endif
