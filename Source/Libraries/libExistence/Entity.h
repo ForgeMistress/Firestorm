@@ -13,10 +13,16 @@
 
 OPEN_NAMESPACE(Elf);
 
-class Entity
+class Component;
+
+class Entity : public Mirror::Object,
+               public Mirror::IInspectableObject
 {
 public:
+	virtual void* DoInspect(Mirror::Type type);
+
 private:
+	vector< shared_ptr<Component> > m_components;
 };
 
 CLOSE_NAMESPACE(Elf);

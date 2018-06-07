@@ -117,6 +117,19 @@ includedirs({ "Source/Include" })
 --filter("configurations:*32"); architecture("x86")
 filter("configurations:*64"); architecture("x86_64")
 
+--filter(
+
+filter("action:vs*")
+defines({ "ELF_PLATFORM_WINDOWS", "ELF_VISUALSTUDIO" })
+
+filter("action:xcode*")
+defines({ "ELF_PLATFORM_OSX", "ELF_XCODE" })
+
+filter("action:gmake*")
+defines({ "ELF_PLATFORM_UNIX"    })
+--defines({ "ELF_PLATFORM_ANDROID" })
+--defines({ "ELF_PLATFORM_IOS"     })
+
 filter("configurations:Debug32");              libdirs({ "Bin/x86/Debug"   })
 filter("configurations:Release32 or Final32"); libdirs({ "Bin/x86/Release" })
 

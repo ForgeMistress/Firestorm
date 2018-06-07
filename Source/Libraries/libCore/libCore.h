@@ -22,6 +22,7 @@
 #include <iostream>
 #include <assert.h>
 #include <functional>
+#include <stdint.h>
 
 OPEN_NAMESPACE(Elf);
 
@@ -39,6 +40,8 @@ using std::unordered_set;
 
 using std::shared_ptr;
 using std::weak_ptr;
+
+static const string str_Default;
 
 CLOSE_NAMESPACE(Elf);
 

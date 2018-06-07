@@ -5,7 +5,7 @@
 //  The base object.
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  
+//  Copyright (c) Project Elflord 2018
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Object.h"
@@ -15,18 +15,18 @@ OPEN_NAMESPACE(Mirror);
 
 RTTR_REGISTRATION
 {
-	Registration::class_<Object>("Mirror::Object");
+	Registration::class_<Object>("Elf::Mirror::Object");
 
-	Registration::class_<IInspectableObject>("Mirror::IInspectableObject");
+	Registration::class_<IInspectableObject>("Elf::Mirror::IInspectableObject");
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void* IInspectableObject::DoInspect(Type tid)
+void* IInspectableObject::DoInspect(Type type)
 {
-    if(tid == IInspectableObject::get_type())
+    if(type == IInspectableObject::MyType())
     {
         return static_cast<IInspectableObject*>(this);
     }

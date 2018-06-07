@@ -7,18 +7,19 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef ELFLORD_COMPONENT_H_
-#define ELFLORD_COMPONENT_H_
+#ifndef LIBEXISTENCE_COMPONENT_H_
+#define LIBEXISTENCE_COMPONENT_H_
 #pragma once
 
-namespace Elf {
+OPEN_NAMESPACE(Elf);
 
-class Component
+class Component : public Mirror::Object, 
+                  public Mirror::IInspectableObject
 {
 public:
 
 private:
 };
 
-}
+CLOSE_NAMESPACE(Elf);
 #endif

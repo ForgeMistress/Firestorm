@@ -5,7 +5,7 @@
 //  The base object.
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  
+//  Copyright (c) Project Elflord 2018
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef LIBMIRROR_OBJECT_H_
 #define LIBMIRROR_OBJECT_H_
@@ -63,19 +63,34 @@ class IInspectableObject
 {
 	MIRROR_DECLARE(IInspectableObject);
 public:
+	/**
+		Inspect an object to see if it implements the type defined in the template.
+	 **/
     template <class Interface_t>
     Interface_t* Inspect()
     {
         return static_cast<Interface_t*>(DoInspect(Interface_t::MyType()));
     }
 
+	/**
+		Inspect an object to see if it implements the type defined in the template.
+	 **/
     template <class Interface_t>
     const Interface_t* Inspect() const
     {
         return reinterpret_cast<Interface_t*>(DoInspect(Interface_t::MyType()));
     }
 
+	/**
+		Inspect an object to see if it implements the provided type.
+	 **/
+	void* Inspect(Type type)
+	{
+		return DoInspect(type);
+	}
+
 protected:
+	/** Override this in implementing classes to provide introspection to the type. **/
 	virtual void* DoInspect(Type type);
 	
     IInspectableObject(){}
