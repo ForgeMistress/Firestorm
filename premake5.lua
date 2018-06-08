@@ -24,27 +24,51 @@ workspace("ElflordPP")
 staticlib('libCore')
 
 staticlib('libMirror', {
-    depends = { 
+    Dependencies = { 
         'libCore', 
+        'libIO'
     };
-    incdirs = {
+    IncludeDirectories = {
         "ThirdParty/rttr/src",
         "ThirdParty/rttr/build/src",
     };
-    post = function()
+    PostArgProcessing = function()
         filter({ "configurations:Debug*" });   links({ "librttr_core_d" })
         filter({ "configurations:Release*" }); links({ "librttr_core" })
     end;
 })
+
+staticlib('libIO', {
+    Dependencies = {
+        'libCore'
+    };
+})
+
 staticlib('libExistence', {
-    depends = { 
-        'libCore', 
-        'libMirror',
+    Dependencies = {
+        'libCore',
+        'libMirror'
     };
 })
 
 staticlib('libHarnessed', {
-    depends = { 'libCore' };
+    Dependencies = {
+        'libCore'
+    };
+})
+
+staticlib('libScript', {
+    Dependencies = {
+        'libCore',
+        'libMirror'
+    };
+
+    IncludeDirectories = {
+        '{LibSourcePath}/{Project}/angelscript/include',
+        '{LibSourcePath}/{Project}/angelscript/source',
+    };
+
+    UsePCH = false;
 })
 
 
@@ -53,15 +77,36 @@ staticlib('libHarnessed', {
 ------------------------------------------------------------------------------------------------------------------------
 unittest('libHarnessed')
 unittest('libExistence', {
-    depends = { 
+    Dependencies = { 
         'libCore',
         'libMirror'
     };
+    UsePCH = false;
 })
+
 unittest('libMirror', {
-    depends = {
+    Dependencies = {
+        'libCore',
+        'libMirror',
+        'libIO'
+    };
+    UsePCH = false;
+})
+
+unittest('libIO', {
+    Dependencies = {
+        'libCore',
+        'libMirror',
+        'libIO'
+    };
+    UsePCH = false;
+})
+
+--[[unittest('libScript', {
+    Dependencies = {
         'libCore',
         'libMirror'
     };
-})
+    UsePCH = false;
+})]]
 

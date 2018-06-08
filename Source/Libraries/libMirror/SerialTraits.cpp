@@ -10,9 +10,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "SerialTraits.h"
-#include "IFile.h"
-#include "IDocumentReader.h"
-#include "IDocumentWriter.h"
+
+#include "Object.h"
+
+#include <libIO/File.h>
+#include <libIO/IDocumentReader.h>
+#include <libIO/IDocumentWriter.h>
 
 #define DEFINE_POD_SERIAL_TRAITS(TYPE, FUNCTYPE) \
 	const Result& SerialTraits<TYPE>::Write(const char* key, std::shared_ptr<IDocumentWriter>& writer, const TYPE& input) \
@@ -41,15 +44,50 @@ inline const Result& SerialTraits<T>::Read(const char* key, shared_ptr<IDocument
 	return Result::ERROR;
 }
 
-DEFINE_POD_SERIAL_TRAITS(int8_t, Int8);
-DEFINE_POD_SERIAL_TRAITS(uint8_t, UInt8);
-DEFINE_POD_SERIAL_TRAITS(int16_t, Int16);
+DEFINE_POD_SERIAL_TRAITS(int8_t,   Int8);
+DEFINE_POD_SERIAL_TRAITS(uint8_t,  UInt8);
+DEFINE_POD_SERIAL_TRAITS(int16_t,  Int16);
 DEFINE_POD_SERIAL_TRAITS(uint16_t, UInt16);
-DEFINE_POD_SERIAL_TRAITS(int32_t, Int32);
+DEFINE_POD_SERIAL_TRAITS(int32_t,  Int32);
 DEFINE_POD_SERIAL_TRAITS(uint32_t, UInt32);
-DEFINE_POD_SERIAL_TRAITS(float, Float);
-DEFINE_POD_SERIAL_TRAITS(double, Double);
-DEFINE_POD_SERIAL_TRAITS(string, String);
+DEFINE_POD_SERIAL_TRAITS(float,    Float);
+DEFINE_POD_SERIAL_TRAITS(double,   Double);
+DEFINE_POD_SERIAL_TRAITS(string,   String);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SerialTraits<Object*>
+ResultCode SerialTraits<Object*>::Write(const char* key, IDocumentWriterPtr& writer, const T& input)
+{
+	//Mirror::Type objType = input->GetType();
+	Mirror::Type objType = Mirror::Type::get(input);
+
+	return Result::OK;
+}
+
+ResultCode SerialTraits<Object*>::Read(const char* key, IDocumentReaderPtr& reader, T& output)
+{
+	return Result::OK;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SerialTraits< shared_ptr<Object> >
+ResultCode SerialTraits< shared_ptr<Object> >::Write(const char* key, IDocumentWriterPtr& writer, const T& input)
+{
+	return Result::OK;
+}
+
+ResultCode SerialTraits< shared_ptr<Object> >::Read(const char* key, IDocumentReaderPtr& reader, T& output)
+{
+	return Result::OK;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SerialTraits<const Object*>
+ResultCode SerialTraits<const Object*>::Write(const char* key, IDocumentWriterPtr& writer, const T& input)
+{
+	return Result::OK;
+}
+
 
 CLOSE_NAMESPACE(Mirror);
 CLOSE_NAMESPACE(Elf);

@@ -12,14 +12,8 @@
 
 OPEN_NAMESPACE(Elf);
 
-const Result& Result::OK    = Result::MSG("");
-const Result& Result::ERROR = Result::MSG("Generic Error Result");
-
-// static
-Result Result::MSG(const string& message)
-{
-	return Result(message);
-}
+ResultCode Result::OK    = Result("");
+ResultCode Result::ERROR = Result("Generic Error Result");
 
 Result::Result(const string& message)
 : m_message(message)
@@ -41,7 +35,7 @@ bool Result::IsNotOK() const
 	return m_message.empty() == false;
 }
 
-bool Result::operator==(const Result& result)
+bool Result::operator==(ResultCode result) const
 {
 	// TODO: Temporary.
 	return result.m_message == m_message;

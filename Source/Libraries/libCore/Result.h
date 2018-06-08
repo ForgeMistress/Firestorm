@@ -51,14 +51,9 @@ public:
 	static ResultCode ERROR;
 
 	/**
-		Either construct a new Result or return an existing one.
-	 **/
-	static Result MSG(const string& message);
-
-	/**
 		Retrieve the string message held by this Result.
 	 **/
-	const string& GetMessage() const;
+	const std::string& GetMessage() const;
 
 	/**
 		Check on whether or not the Result defines an error.
@@ -73,7 +68,7 @@ public:
 	/** 
 		Equivalence Operator 
 	 **/
-	bool operator==(ResultCode result);
+	bool operator==(ResultCode result) const;
 
 	/**
 		Casting Operators
@@ -82,13 +77,8 @@ public:
 	operator string()        { return m_message; }
 	operator const char*()   { return m_message.c_str(); }
 
-protected:
-	Result() {}
 
-	// Only can obtain instance through MSG()
 	explicit Result(const string& message);
-
-	~Result() {}
 
 private:
 	string m_message;

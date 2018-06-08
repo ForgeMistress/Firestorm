@@ -24,7 +24,6 @@ typedef rttr::type Type;
  **/
 typedef rttr::registration Registration;
 
-
 #define MIRROR_DECLARE(objType, ...) \
 	public: \
 		static rttr::type MyType() { return rttr::type::get<objType>(); } \
@@ -33,6 +32,30 @@ typedef rttr::registration Registration;
 		virtual RTTR_INLINE void* get_ptr() { return reinterpret_cast<void*>(this); } \
 		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() { return {reinterpret_cast<void*>(this), rttr::detail::get_type_from_instance(this)}; } \
 		using base_class_list = rttr::detail::type_list<__VA_ARGS__>
+
+struct TypeUtils
+{
+	/**
+		Returns the rttr::type of an object without any qualifiers (const, pointer, etc...).
+	**/
+	static rttr::type get(void* obj);
+
+	/**
+		Returns the rttr::type of a template object without any qualifiers (const, pointer, etc...).
+	 **/
+	template<class T> static rttr::type get();
+};
+
+rttr::type TypeUtils::get(void* obj)
+{
+	return rttr::type::get(obj).get_raw_type();
+}
+
+template <class T>
+rttr::type TypeUtils::get()
+{
+	return rttr::type::get<T>().get_raw_type();
+}
 
 /**
  *
@@ -44,8 +67,7 @@ typedef rttr::registration Registration;
 class Object
 {
 	MIRROR_DECLARE(Object);
-
-protected:
+public:
     Object(){}
     virtual ~Object(){}
 };
