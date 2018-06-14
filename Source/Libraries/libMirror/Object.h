@@ -24,45 +24,33 @@ typedef rttr::type Type;
  **/
 typedef rttr::registration Registration;
 
+#define TYPE_CHECK(t, arg) \
+	rttr::type::get<t>()                 == arg || \
+	rttr::type::get<t*>()                == arg || \
+	rttr::type::get< shared_ptr< t > >() == arg || \
+	rttr::type::get< weak_ptr< t > >()   == arg
+
+/**
+	Macro that provides more functions to a reflected object.
+
+	static MyType - Retrieves a consistent type.
+	static Is     - Checks the type against all common forms.
+	virtual GetType - Retrieve the type at the instance leve.
+ **/
 #define MIRROR_DECLARE(objType, ...) \
 	public: \
-		static rttr::type MyType() { return rttr::type::get<objType>(); } \
-		virtual rttr::type GetType() const { return rttr::type::get<objType>(); } \
+		static  rttr::type MyType()                     { return rttr::type::get<objType>(); } \
+		static  bool       Is(rttr::type t)             { return TYPE_CHECK(objType, t); } \
+		virtual RTTR_INLINE rttr::type GetType() const  { return rttr::type::get<objType>(); } \
 		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); }  \
-		virtual RTTR_INLINE void* get_ptr() { return reinterpret_cast<void*>(this); } \
+		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); } \
 		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() { return {reinterpret_cast<void*>(this), rttr::detail::get_type_from_instance(this)}; } \
 		using base_class_list = rttr::detail::type_list<__VA_ARGS__>
 
-struct TypeUtils
-{
-	/**
-		Returns the rttr::type of an object without any qualifiers (const, pointer, etc...).
-	**/
-	static rttr::type get(void* obj);
-
-	/**
-		Returns the rttr::type of a template object without any qualifiers (const, pointer, etc...).
-	 **/
-	template<class T> static rttr::type get();
-};
-
-rttr::type TypeUtils::get(void* obj)
-{
-	return rttr::type::get(obj).get_raw_type();
-}
-
-template <class T>
-rttr::type TypeUtils::get()
-{
-	return rttr::type::get<T>().get_raw_type();
-}
-
 /**
- *
- *  Object
- *
- *  The base object type that everything should derive from.
- *
+	Object
+	
+	The base object type that everything should derive from.
  **/
 class Object
 {
@@ -73,13 +61,11 @@ public:
 };
 
 /**
- *
- *  IInspectableObject
- *
- *  An interface for an object that can have its interfaces inspected. Objects that derive from
- *  this interface must override DoInspect and check the rttr::type that is passed in. If the object matches
- *  the type, then it must return the pointer to the object static_casted to the apropriate type.
- *
+	IInspectableObject
+	
+	An interface for an object that can have its interfaces inspected. Objects that derive from
+	this interface must override DoInspect and check the rttr::type that is passed in. If the object matches
+	the type, then it must return the pointer to the object static_casted to the apropriate type.
  **/
 class IInspectableObject
 {

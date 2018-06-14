@@ -26,7 +26,7 @@ RTTR_REGISTRATION
 
 void* IInspectableObject::DoInspect(Type type)
 {
-    if(type == IInspectableObject::MyType())
+	if(IInspectableObject::Is(type))
     {
         return static_cast<IInspectableObject*>(this);
     }

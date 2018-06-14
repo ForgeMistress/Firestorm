@@ -44,6 +44,13 @@ staticlib('libIO', {
     };
 })
 
+staticlib('libMath', {
+    Dependencies = {
+        'libCore',
+        'libMirror'
+    };
+})
+
 staticlib('libExistence', {
     Dependencies = {
         'libCore',
@@ -70,6 +77,8 @@ staticlib('libScript', {
 
     UsePCH = false;
 })
+
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
