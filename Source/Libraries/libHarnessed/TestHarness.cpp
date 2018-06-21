@@ -13,7 +13,7 @@
 
 OPEN_NAMESPACE(Elf);
 
-TestHarness::TestHarness(const string& name, bool quietly)
+TestHarness::TestHarness(const String& name, bool quietly)
 : m_name(name)
 , m_quietly(quietly)
 {
@@ -34,7 +34,7 @@ uint32_t TestHarness::Run()
 	for(size_t i=0;i<m_cases.size(); ++i)
 	{
 		const TestFunction_t& test = m_cases[i];
-		const string& testName = m_caseNames[i];
+		const String& testName = m_caseNames[i];
 
 		if(!m_quietly)
 		{
@@ -63,7 +63,7 @@ uint32_t TestHarness::Run()
 	return errors;
 }
 
-void TestHarness::It(const string& caseName, TestFunction_t testFunction)
+void TestHarness::It(const String& caseName, TestFunction_t testFunction)
 {
 	for(const auto& cn : m_caseNames)
 	{

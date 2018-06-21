@@ -14,22 +14,28 @@
 
 #include <libCore/Result.h>
 
-#define DECLARE_POD_SERIAL_TRAITS(TYPE) \
+#define DECLARE_POD_SERIAL_TRAITS(OBJ_T) \
 	template<> \
-	class SerialTraits<TYPE> \
+	class SerialTraits<OBJ_T> \
 	{ \
 	public: \
-		static const Result& Write(const char* key, shared_ptr<IDocumentWriter>& writer, const TYPE& output); \
-		static const Result& Read(const char* key, shared_ptr<IDocumentReader>& reader, TYPE& output); \
+		static const Result& Write(const char* key, SharedPtr<IDocumentWriter>& writer, const OBJ_T& input); \
+		static const Result& Read(const char* key, SharedPtr<IDocumentReader>& reader, OBJ_T& output); \
+	}
+
+#define DECLARE_OBJ_SERIAL_TRAITS(OBJ_T) \
+	template<> \
+	struct SerialTraits< OBJ_T > \
+	{ \
+		typedef OBJ_T T; \
+		static ResultCode Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input); \
+		static ResultCode Read(const char* key, SharedPtr<IDocumentReader>& writer, T& output); \
 	}
 
 OPEN_NAMESPACE(Elf);
 
 class IDocumentWriter;
-typedef shared_ptr<IDocumentWriter> IDocumentWriterPtr;
-
 class IDocumentReader;
-typedef shared_ptr<IDocumentReader> IDocumentReaderPtr;
 
 OPEN_NAMESPACE(Mirror);
 
@@ -43,8 +49,8 @@ class Object;
 template <class T>
 struct SerialTraits
 {
-	static const Result& Write(const char* key, IDocumentWriterPtr& writer, const T& input);
-	static const Result& Read(const char* key, IDocumentReaderPtr& reader, T& output);
+	static const Result& Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input);
+	static const Result& Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output);
 };
 
 DECLARE_POD_SERIAL_TRAITS(int8_t);
@@ -55,34 +61,12 @@ DECLARE_POD_SERIAL_TRAITS(int32_t);
 DECLARE_POD_SERIAL_TRAITS(uint32_t);
 DECLARE_POD_SERIAL_TRAITS(float);
 DECLARE_POD_SERIAL_TRAITS(double);
-DECLARE_POD_SERIAL_TRAITS(string);
+DECLARE_POD_SERIAL_TRAITS(String);
 
-template<>
-struct SerialTraits<Object*>
-{
-	typedef Object* T;
-	static ResultCode Write(const char* key, IDocumentWriterPtr& writer, const T& input);
-	static ResultCode Read(const char* key, IDocumentReaderPtr& writer, T& output);
-};
-
-template<>
-struct SerialTraits<shared_ptr<Object> >
-{
-	typedef shared_ptr<Object> T;
-	static ResultCode Write(const char* key, IDocumentWriterPtr& writer, const T& input);
-	static ResultCode Read(const char* key, IDocumentReaderPtr& reader, T& output);
-};
-
-template<>
-struct SerialTraits<const Object*>
-{
-	typedef const Object* T;
-	static ResultCode Write(const char* key, IDocumentWriterPtr& writer, const T& input);
-	static ResultCode Read(const char* key, IDocumentReaderPtr& reader, T& output)
-	{
-		assert(false && "Object is WriteOnly.");
-	}
-};
+DECLARE_OBJ_SERIAL_TRAITS(Object);
+DECLARE_OBJ_SERIAL_TRAITS(Object*);
+DECLARE_OBJ_SERIAL_TRAITS(const Object*);
+DECLARE_OBJ_SERIAL_TRAITS(SharedPtr<Object>);
 
 CLOSE_NAMESPACE(Mirror);
 CLOSE_NAMESPACE(Elf);

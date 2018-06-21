@@ -13,12 +13,41 @@
 
 OPEN_NAMESPACE(Elf);
 
-class Component : public Mirror::Object, 
+class Entity;
+
+/**
+	\class Component
+
+	A component is an object that contains data and is a part of an Entity. Components should not
+	contain application logic within their class definitions.
+ **/
+class Component : public Mirror::Object,
                   public Mirror::IInspectableObject
 {
+	MIRROR_DECLARE(Component, Mirror::Object, Mirror::IInspectableObject);
 public:
+	Component();
+	virtual ~Component();
+
+	/**
+		Retrieve the entity that this Component is a part of.
+
+		\return entity The internally held WeakPtr<Entity> with const qualifiers.
+	 **/
+	inline const WeakPtr<Entity>& GetEntity() const;
+
+	/**
+		Retrieve the entity that this Component is a part of.
+
+		\return entity The internally held WeakPtr<Entity> without const qualifiers.
+	**/
+	inline WeakPtr<Entity>& GetEntity();
+
+protected:
+	virtual void* DoInspect(Mirror::Type type);
 
 private:
+	WeakPtr<Entity> m_entity;
 };
 
 CLOSE_NAMESPACE(Elf);

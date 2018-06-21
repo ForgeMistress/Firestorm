@@ -32,7 +32,7 @@ public:
 	virtual ResultCode WriteUInt32(const char* key, const uint32_t& inValue)      = 0;
 	virtual ResultCode WriteFloat(const char* key,  const float& inValue)         = 0;
 	virtual ResultCode WriteDouble(const char* key, const double& inValue)        = 0;
-	virtual ResultCode WriteString(const char* key, const string& inValue)        = 0;
+	virtual ResultCode WriteString(const char* key, const String& inValue)        = 0;
 
 	/**
 		Write a subsection of the document.
@@ -52,7 +52,7 @@ public:
 	/**
 		Write to the provided document.
 	 **/
-	virtual ResultCode WriteToDocument(shared_ptr<IDocument>& document) = 0;
+	virtual ResultCode WriteToDocument(SharedPtr<IDocument>& document) = 0;
 };
 
 CLOSE_NAMESPACE(Elf);

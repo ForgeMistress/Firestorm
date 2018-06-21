@@ -3,7 +3,7 @@
 
 OPEN_NAMESPACE(Elf);
 
-void TestCase::Assert(bool assertion, const string& message)
+void TestCase::Assert(bool assertion, const String& message)
 {
 	if(!assertion)
 	{

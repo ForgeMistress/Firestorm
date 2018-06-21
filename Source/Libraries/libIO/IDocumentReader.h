@@ -36,13 +36,13 @@ public:
 	virtual ResultCode ReadUInt32(const char* key, uint32_t& outValue)      const = 0;
 	virtual ResultCode ReadFloat(const char* key,  float& outValue)         const = 0;
 	virtual ResultCode ReadDouble(const char* key, double& outValue)        const = 0;
-	virtual ResultCode ReadString(const char* key, string& outValue)        const = 0;
+	virtual ResultCode ReadString(const char* key, String& outValue)        const = 0;
 
 	virtual ResultCode FindSubsection(const char* sectionName) = 0;
 	virtual ResultCode EnterSubsection(const char* sectionName) = 0;
 	virtual ResultCode LeaveSubsection() = 0;
 
-	virtual ResultCode ReadDocument(shared_ptr<IDocument>& document) = 0;
+	virtual ResultCode ReadDocument(SharedPtr<IDocument>& document) = 0;
 };
 
 CLOSE_NAMESPACE(Elf);

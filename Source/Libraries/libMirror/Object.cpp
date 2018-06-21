@@ -15,9 +15,8 @@ OPEN_NAMESPACE(Mirror);
 
 RTTR_REGISTRATION
 {
-	Registration::class_<Object>("Elf::Mirror::Object");
-
-	Registration::class_<IInspectableObject>("Elf::Mirror::IInspectableObject");
+	MIRROR_DEFINE(Elf::Mirror::Object);
+	MIRROR_DEFINE(Elf::Mirror::IInspectableObject);
 }
 
 
@@ -26,10 +25,7 @@ RTTR_REGISTRATION
 
 void* IInspectableObject::DoInspect(Type type)
 {
-	if(IInspectableObject::Is(type))
-    {
-        return static_cast<IInspectableObject*>(this);
-    }
+	DOINSPECT_SIMPLE(type);
     return nullptr;
 }
 

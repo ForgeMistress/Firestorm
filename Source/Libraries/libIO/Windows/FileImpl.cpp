@@ -8,7 +8,7 @@ OPEN_NAMESPACE(Elf);
 
 struct File::FileImpl
 {
-	FileImpl(const string& filename)
+	FileImpl(const String& filename)
 	: filename(filename)
 	{
 	}
@@ -25,10 +25,10 @@ struct File::FileImpl
 	ResultCode ReadFromDiskAsync(const AsyncCallback& callback);
 	State GetState() const;*/
 
-	string filename;
+	String filename;
 };
 
-File::File(const string& filename)
+File::File(const String& filename)
 	: m_impl(new FileImpl(filename))
 {
 }
@@ -38,22 +38,22 @@ bool File::Exists() const
 	return true;
 }
 
-const string& File::GetFilename() const
+const String& File::GetFilename() const
 {
 	return str_Default;
 }
 
-const string& File::GetFileExtension() const
+const String& File::GetFileExtension() const
 {
 	return str_Default;
 }
 
-const string& File::GetFilenameWithoutExtension() const
+const String& File::GetFilenameWithoutExtension() const
 {
 	return str_Default;
 }
 
-const string& File::GetPath() const
+const String& File::GetPath() const
 {
 	return str_Default;
 }

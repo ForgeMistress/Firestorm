@@ -20,7 +20,7 @@ class TestHarness
 public:
 	typedef std::function<void (TestCase&)> TestFunction_t;
 
-	TestHarness(const string& name, bool quietly = false);
+	TestHarness(const String& name, bool quietly = false);
 	virtual ~TestHarness() {}
 
 	// Run before every test case.
@@ -33,13 +33,13 @@ public:
 	// sentence that states what it should be doing.
 	//
 	// Example: It("should do this thing properly without errors", ...);
-	void It(const string& name, TestFunction_t testFunction);
+	void It(const String& name, TestFunction_t testFunction);
 
 private:
-	string m_name;
+	String m_name;
 	bool m_quietly;
-	vector<string>         m_caseNames;
-	vector<TestFunction_t> m_cases;
+	Vector<String>         m_caseNames;
+	Vector<TestFunction_t> m_cases;
 };
 
 CLOSE_NAMESPACE(Elf);

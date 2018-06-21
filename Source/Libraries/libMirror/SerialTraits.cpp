@@ -18,27 +18,27 @@
 #include <libIO/IDocumentWriter.h>
 
 #define DEFINE_POD_SERIAL_TRAITS(TYPE, FUNCTYPE) \
-	const Result& SerialTraits<TYPE>::Write(const char* key, std::shared_ptr<IDocumentWriter>& writer, const TYPE& input) \
-	{ \
-		return writer -> Write##FUNCTYPE (key, input); \
-	} \
-	const Result& SerialTraits<TYPE>::Read(const char* key, std::shared_ptr<IDocumentReader>& reader, TYPE& output) \
-	{ \
-		return reader -> Read##FUNCTYPE (key, output); \
-	}
+const Result& SerialTraits<TYPE>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const TYPE& input) \
+{ \
+	return writer -> Write##FUNCTYPE (key, input); \
+} \
+const Result& SerialTraits<TYPE>::Read(const char* key, SharedPtr<IDocumentReader>& reader, TYPE& output) \
+{ \
+	return reader -> Read##FUNCTYPE (key, output); \
+}
 
 OPEN_NAMESPACE(Elf);
 OPEN_NAMESPACE(Mirror);
 
 template <class T>
-inline const Result& SerialTraits<T>::Write(const char* key, shared_ptr<IDocumentWriter>& writer, const T& input)
+inline const Result& SerialTraits<T>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input)
 {
 	static_assert("Default SerialTraits has not been implemented.");
 	return Result::ERROR;
 }
 
 template <class T>
-inline const Result& SerialTraits<T>::Read(const char* key, shared_ptr<IDocumentReader>& reader, T& output)
+inline const Result& SerialTraits<T>::Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output)
 {
 	static_assert("Default SerialTraits has not been implemented.");
 	return Result::ERROR;
@@ -52,11 +52,11 @@ DEFINE_POD_SERIAL_TRAITS(int32_t,  Int32);
 DEFINE_POD_SERIAL_TRAITS(uint32_t, UInt32);
 DEFINE_POD_SERIAL_TRAITS(float,    Float);
 DEFINE_POD_SERIAL_TRAITS(double,   Double);
-DEFINE_POD_SERIAL_TRAITS(string,   String);
+DEFINE_POD_SERIAL_TRAITS(String,   String);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits<Object*>
-ResultCode SerialTraits<Object*>::Write(const char* key, IDocumentWriterPtr& writer, const T& input)
+ResultCode SerialTraits<Object*>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input)
 {
 	//Mirror::Type objType = input->GetType();
 	Mirror::Type objType = Mirror::Type::get(input);
@@ -64,30 +64,35 @@ ResultCode SerialTraits<Object*>::Write(const char* key, IDocumentWriterPtr& wri
 	return Result::OK;
 }
 
-ResultCode SerialTraits<Object*>::Read(const char* key, IDocumentReaderPtr& reader, T& output)
-{
-	return Result::OK;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// SerialTraits< shared_ptr<Object> >
-ResultCode SerialTraits< shared_ptr<Object> >::Write(const char* key, IDocumentWriterPtr& writer, const T& input)
-{
-	return Result::OK;
-}
-
-ResultCode SerialTraits< shared_ptr<Object> >::Read(const char* key, IDocumentReaderPtr& reader, T& output)
+ResultCode SerialTraits<Object*>::Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output)
 {
 	return Result::OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits<const Object*>
-ResultCode SerialTraits<const Object*>::Write(const char* key, IDocumentWriterPtr& writer, const T& input)
+ResultCode SerialTraits<const Object*>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input)
 {
 	return Result::OK;
 }
 
+ResultCode SerialTraits<const Object*>::Read(const char* key, SharedPtr<IDocumentReader>& writer, T& input)
+{
+	assert(false && "const Object* is Write-Only.");
+	return Result::OK;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SerialTraits< SharedPtr<Object> >
+ResultCode SerialTraits< SharedPtr<Object> >::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input)
+{
+	return Result::OK;
+}
+
+ResultCode SerialTraits< SharedPtr<Object> >::Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output)
+{
+	return Result::OK;
+}
 
 CLOSE_NAMESPACE(Mirror);
 CLOSE_NAMESPACE(Elf);

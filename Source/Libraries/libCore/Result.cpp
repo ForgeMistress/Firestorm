@@ -15,12 +15,12 @@ OPEN_NAMESPACE(Elf);
 ResultCode Result::OK    = Result("");
 ResultCode Result::ERROR = Result("Generic Error Result");
 
-Result::Result(const string& message)
+Result::Result(const String& message)
 : m_message(message)
 {
 }
 
-const string& Result::GetMessage() const
+const String& Result::GetMessage() const
 {
 	return m_message;
 }

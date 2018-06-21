@@ -19,10 +19,18 @@ class Entity : public Mirror::Object,
                public Mirror::IInspectableObject
 {
 public:
+	Entity();
+	virtual ~Entity();
+
 	virtual void* DoInspect(Mirror::Type type);
 
 private:
-	vector< shared_ptr<Component> > m_components;
+	// Reflected
+	Vector< SharedPtr<Component> > m_components;
+
+	// Not reflected.
+	friend class Engine;
+	WeakPtr< Engine > m_owningEngine;
 };
 
 CLOSE_NAMESPACE(Elf);

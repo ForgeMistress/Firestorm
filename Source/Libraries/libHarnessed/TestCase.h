@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef HARNESSED_TESTCASE_H_
-#define HARNESSED_TESTCASE_H_
+#ifndef LIBHARNESSED_TESTCASE_H_
+#define LIBHARNESSED_TESTCASE_H_
 #pragma once
 
 OPEN_NAMESPACE(Elf);
@@ -18,16 +18,21 @@ class TestCase
 public:
 	struct AssertionException
 	{
-		AssertionException(const string& message)
+		AssertionException(const String& message)
 		: m_message(message) {}
 
-		const string& GetMessage() const { return m_message; }
+		const String& GetMessage() const { return m_message; }
 
 	private:
-		string m_message;
+		String m_message;
 	};
 
-	void Assert(bool assertion, const string& message);
+	void Assert(bool assertion, const String& message);
+
+	template<class T>
+	void AssertNotNull(T ptr, const String& message);
+
+
 	size_t GetFailureCount() const;
 
 protected:
@@ -37,7 +42,7 @@ protected:
 	friend class TestHarness;
 
 private:
-	vector<string> m_failures;
+	Vector<String> m_failures;
 };
 
 CLOSE_NAMESPACE(Elf);

@@ -28,7 +28,7 @@ public:
 	typedef std::function<void(File*, const Result&)> AsyncCallback;
 
 public:
-	File(const string& filename);
+	File(const String& filename);
 
 	/**
 		Check whether or not the file even exists.
@@ -38,22 +38,22 @@ public:
 	/**
 		Retrieve the name of the file (with extension) with absolutely zero path information.
 	 **/
-	const string& GetFilename() const;
+	const String& GetFilename() const;
 
 	/**
 		Retrieve the name of the file (without the extension) with absolutely zero path information.
 	**/
-	const string& GetFilenameWithoutExtension() const;
+	const String& GetFilenameWithoutExtension() const;
 
 	/**
 		Retrieve the extension on its own without a leading '.'
 	 **/
-	const string& GetFileExtension() const;
+	const String& GetFileExtension() const;
 
 	/**
 		Retrieve the absolute path on disk to this file.
 	 **/
-	const string& GetPath() const;
+	const String& GetPath() const;
 
 	/**
 		Retrieve the file size as the OS reports it.

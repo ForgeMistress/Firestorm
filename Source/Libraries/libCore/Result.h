@@ -23,7 +23,7 @@ typedef const Result& ResultCode;
  *  the class definition.
  *
  *  For example:
- *
+ *  \code{.cpp}
  *  // Foo.h
  *  class Foo
  *  {
@@ -36,6 +36,7 @@ typedef const Result& ResultCode;
  *  #include "Foo.h"
  *
  *  const Result& Foo::FOO_ERROR = Result::MSG("Some error that Foo can return in a function.");
+ *  \endcode
  **/
 class Result
 {
@@ -53,7 +54,7 @@ public:
 	/**
 		Retrieve the string message held by this Result.
 	 **/
-	const std::string& GetMessage() const;
+	const String& GetMessage() const;
 
 	/**
 		Check on whether or not the Result defines an error.
@@ -73,15 +74,15 @@ public:
 	/**
 		Casting Operators
 	 **/
-	operator const string&() { return m_message; }
-	operator string()        { return m_message; }
+	operator const String&() { return m_message; }
+	operator String()        { return m_message; }
 	operator const char*()   { return m_message.c_str(); }
 
 
-	explicit Result(const string& message);
+	explicit Result(const String& message);
 
 private:
-	string m_message;
+	String m_message;
 };
 
 CLOSE_NAMESPACE(Elf);
