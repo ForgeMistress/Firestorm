@@ -19,8 +19,8 @@
 	class SerialTraits<OBJ_T> \
 	{ \
 	public: \
-		static const Result& Write(const char* key, SharedPtr<IDocumentWriter>& writer, const OBJ_T& input); \
-		static const Result& Read(const char* key, SharedPtr<IDocumentReader>& reader, OBJ_T& output); \
+		static ResultCode Write(const char* key, SharedPtr<IDocumentWriter>& writer, const OBJ_T& input); \
+		static ResultCode Read(const char* key, SharedPtr<IDocumentReader>& reader, OBJ_T& output); \
 	}
 
 #define DECLARE_OBJ_SERIAL_TRAITS(OBJ_T) \
@@ -41,6 +41,11 @@ OPEN_NAMESPACE(Mirror);
 
 class Object;
 
+struct SerialResults
+{
+	static ResultCode RES_VARIANT_NOT_VALID;
+};
+
 /**
 	SerialTraits
 
@@ -49,8 +54,8 @@ class Object;
 template <class T>
 struct SerialTraits
 {
-	static const Result& Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input);
-	static const Result& Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output);
+	static ResultCode Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input);
+	static ResultCode Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output);
 };
 
 DECLARE_POD_SERIAL_TRAITS(int8_t);
@@ -62,6 +67,7 @@ DECLARE_POD_SERIAL_TRAITS(uint32_t);
 DECLARE_POD_SERIAL_TRAITS(float);
 DECLARE_POD_SERIAL_TRAITS(double);
 DECLARE_POD_SERIAL_TRAITS(String);
+DECLARE_POD_SERIAL_TRAITS(rttr::variant);
 
 DECLARE_OBJ_SERIAL_TRAITS(Object);
 DECLARE_OBJ_SERIAL_TRAITS(Object*);

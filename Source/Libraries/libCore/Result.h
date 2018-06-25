@@ -11,6 +11,8 @@
 #define LIBCORE_RESULT_H_
 #pragma once
 
+#include <functional>
+
 OPEN_NAMESPACE(Elf);
 
 class Result;

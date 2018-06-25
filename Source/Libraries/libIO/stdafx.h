@@ -9,4 +9,7 @@
 #include <libCore/libCore.h>
 #include <libCore/Result.h>
 
+#include <libMirror/libMirror.h>
+#include <libMirror/Object.h>
+
 #endif

@@ -56,6 +56,52 @@ typedef rttr::registration Registration;
 	private:
 
 /**
+	\enum
+ **/
+struct PropMeta
+{
+	enum Type
+	{
+		kSave,
+		kLoad,
+		kDeprecated, //< Mark a property as deprecated.
+		kClassRemap  //< Use this to define another class name when renaming classes.
+	};
+};
+
+/**
+	\macro MIRROR_META_SAVE
+	Tells the serializer that this property should be used to write data to the serialized object's file.
+
+	Wrapper around rttr::metadata(PropMeta::kSave, true)
+ **/
+#define MIRROR_META_SAVE rttr::metadata(PropMeta::kSave, true)
+
+ /**
+	 \macro MIRROR_META_SAVE
+	 Tells the serializer that this property should be used to load data from the serialized object's file
+	 to the object instance we're constructing.
+
+	 Wrapper around rttr::metadata(PropMeta::kLoad, true)
+ **/
+#define MIRROR_META_LOAD rttr::metadata(PropMeta::kLoad, true)
+
+ /**
+	 \macro MIRROR_META_SAVELOAD
+	 Combination of \ref MIRROR_META_SAVE and \ref MIRROR_META_LOAD
+ **/
+#define MIRROR_META_SAVELOAD \
+	rttr::metadata(PropMeta::kSave, true), \
+	rttr::metadata(PropMeta::kLoad, true)
+
+ /**
+	 \macro MIRROR_META_DEPRECATED
+	 Mark a property as deprecated.
+	 Wrapper around rttr::metadata(PropMeta::kDeprecated, true)
+ **/
+#define MIRROR_META_DEPRECATED rttr::metadata(PropMeta::kDeprecated, true)
+
+/**
 	\class Object
 	
 	The base object type that everything should derive from.

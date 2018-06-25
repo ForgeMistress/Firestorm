@@ -21,10 +21,9 @@ class Entity;
 	A component is an object that contains data and is a part of an Entity. Components should not
 	contain application logic within their class definitions.
  **/
-class Component : public Mirror::Object,
-                  public Mirror::IInspectableObject
+class Component : public Mirror::IInspectableObject
 {
-	MIRROR_DECLARE(Component, Mirror::Object, Mirror::IInspectableObject);
+	MIRROR_DECLARE(Component, Mirror::IInspectableObject);
 public:
 	Component();
 	virtual ~Component();
