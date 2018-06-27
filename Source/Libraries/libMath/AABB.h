@@ -13,15 +13,17 @@
 
 OPEN_NAMESPACE(Elf);
 
-class AABB2f : public Mirror::Object
+class AABB2f
 {
-    MIRROR_DECLARE(AABB2f);
 public:
-    AABB();
-    AABB(float minx, float miny, float maxx, float maxy);
+    AABB2f();
+    AABB2f(float minx, float miny, float maxx, float maxy);
 
 private:
-
+	float m_minx, 
+          m_miny,
+          m_maxx,
+          m_maxy;
 };
 
 

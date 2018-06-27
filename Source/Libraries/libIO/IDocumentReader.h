@@ -38,6 +38,8 @@ public:
 	virtual ResultCode ReadDouble(const char* key, double& outValue)        const = 0;
 	virtual ResultCode ReadString(const char* key, String& outValue)        const = 0;
 
+	virtual Mirror::Type GetType(const char* key) const = 0;
+
 	virtual ResultCode FindSubsection(const char* sectionName) = 0;
 	virtual ResultCode EnterSubsection(const char* sectionName) = 0;
 	virtual ResultCode LeaveSubsection() = 0;

@@ -12,6 +12,21 @@
 
 OPEN_NAMESPACE(Elf);
 
-AABB::
+AABB2f::AABB2f()
+: m_minx(0)
+, m_miny(0)
+, m_maxx(0.1f)
+, m_maxy(0.1f)
+{
+}
+
+AABB2f::AABB2f(float minx, float miny, float maxx, float maxy)
+: m_minx(minx)
+, m_miny(miny)
+, m_maxx(maxx)
+, m_maxy(maxy)
+{
+
+}
 
 CLOSE_NAMESPACE(Elf);

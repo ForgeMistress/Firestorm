@@ -34,6 +34,8 @@ public:
 	virtual ResultCode WriteDouble(const char* key, const double& inValue)        = 0;
 	virtual ResultCode WriteString(const char* key, const String& inValue)        = 0;
 
+	virtual Mirror::Type GetType(const char* key) const = 0;
+
 	/**
 		Write a subsection of the document.
 	 **/

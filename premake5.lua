@@ -42,6 +42,10 @@ staticlib('libIO', {
     Dependencies = {
         'libCore'
     };
+    IncludeDirectories = {
+        "{LibSourcePath}/{Project}/json",
+    };
+    UsePCH = false;
 })
 
 staticlib('libMath', {
@@ -71,8 +75,8 @@ staticlib('libScript', {
     };
 
     IncludeDirectories = {
-        '{LibSourcePath}/{Project}/angelscript/include',
-        '{LibSourcePath}/{Project}/angelscript/source',
+        "{LibSourcePath}/{Project}/angelscript/include",
+        "{LibSourcePath}/{Project}/angelscript/source"
     };
 
     UsePCH = false;

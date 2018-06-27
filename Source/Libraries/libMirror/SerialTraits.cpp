@@ -126,31 +126,32 @@ ResultCode SerialTraits<const Object*>::Read(const char* key, SharedPtr<IDocumen
 #define _classtypekey "__ELF_CLASS_TYPE__"
 #define _classdatakey "__ELF_CLASS_INSTANCE_DATA__"
 
+#define OBJ_PTR SharedPtr<Object>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits< SharedPtr<Object> >
-ResultCode SerialTraits< SharedPtr<Object> >::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input)
+ResultCode SerialTraits<OBJ_PTR>::
+	Write(const char* key, SharedPtr<IDocumentWriter>& writer, const SharedPtr<Object>& input)
 {
-	using namespace rttr;
 	Mirror::Type objType = input->GetType();
 
 	assert(objType.is_valid());
 
 	_onfailedreturn(writer->WriteSubsection(key));
 	_onfailedreturn(writer->EnterSubsection(key));
-	_onfailedreturn(writer->WriteString(_classtypekey, key));
+	_onfailedreturn(writer->WriteString(_classtypekey, objType.get_name().to_string()));
 	_onfailedreturn(writer->WriteSubsection(_classdatakey));
 	_onfailedreturn(writer->EnterSubsection(_classdatakey));
 
-	instance inputInstance(input);
+	rttr::instance inputInstance(input);
 
-	array_range<property> properties = objType.get_properties();
-	for(auto prop : properties)
+	for(auto prop : objType.get_properties())
 	{
-		variant propMeta = prop.get_metadata(Mirror::PropMeta::kSave);
-		if(propMeta.get_value<bool>())
+		rttr::variant propMeta = prop.get_metadata(Mirror::PropMeta::kSave);
+		if(propMeta.is_type<bool>() && propMeta.get_value<bool>())
 		{
 			const char* propName = prop.get_name().to_string().c_str();
-			variant propValue(prop.get_value(inputInstance));
+			rttr::variant propValue(prop.get_value(inputInstance));
 
 			ResultCode rc = SerialTraits<rttr::variant>::Write(propName, writer, propValue);
 			if(rc.IsNotOK())
@@ -166,8 +167,35 @@ ResultCode SerialTraits< SharedPtr<Object> >::Write(const char* key, SharedPtr<I
 	return Result::OK;
 }
 
-ResultCode SerialTraits< SharedPtr<Object> >::Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output)
+ResultCode SerialTraits< SharedPtr<Object> >::
+	Read(const char* key, SharedPtr<IDocumentReader>& reader, SharedPtr<Object>& output)
 {
+	Mirror::Type objType = output->GetType();
+
+	assert(objType.is_valid());
+
+	String outputClassType;
+	_onfailedreturn(reader->FindSubsection(key));
+	_onfailedreturn(reader->EnterSubsection(key));
+	_onfailedreturn(reader->ReadString(_classtypekey, outputClassType));
+
+	assert(objType.get_name().to_string() == outputClassType && "Class type mismatch.");
+
+	_onfailedreturn(reader->FindSubsection(_classdatakey));
+	_onfailedreturn(reader->EnterSubsection(_classdatakey));
+
+	rttr::instance outputInstance(output);
+	for(auto prop : objType.get_properties())
+	{
+		rttr::variant propLoadMeta = prop.get_metadata(Mirror::PropMeta::kLoad);
+		if(propLoadMeta.is_type<bool>() && propLoadMeta.get_value<bool>())
+		{
+			const char* propName = prop.get_name().to_string().c_str();
+
+			
+		}
+	}
+
 	return Result::OK;
 }
 
