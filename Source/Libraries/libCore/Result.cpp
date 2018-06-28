@@ -11,7 +11,7 @@
 #include "Result.h"
 
 OPEN_NAMESPACE(Elf);
-
+/*
 ResultCode Result::OK    = Result("");
 ResultCode Result::ERROR = Result("Generic Error Result");
 
@@ -39,6 +39,6 @@ bool Result::operator==(ResultCode result) const
 {
 	// TODO: Temporary.
 	return result.m_message == m_message;
-}
+}*/
 
 CLOSE_NAMESPACE(Elf);

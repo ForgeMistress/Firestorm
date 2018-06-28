@@ -11,8 +11,6 @@
 #define LIBMIRROR_IDOCUMENTREADER_H_
 #pragma once
 
-#include <libCore/Result.h>
-
 OPEN_NAMESPACE(Elf);
 
 class IDocument;
@@ -24,27 +22,36 @@ CLOSE_NAMESPACE(Mirror);
 class IDocumentReader
 {
 public:
-	static ResultCode ERR_SUBSECTION_NOT_FOUND;
+	enum Codes : uint8_t
+	{
+		ERROR, // generic
+		READ_DOCUMENT_FAILED,
+		READ_VALUE_FAILED,
+		SUBSECTION_NOT_FOUND,
+		FIND_SUBSECTION_FAILED,
+		ENTER_SUBSECTION_FAILED,
+		GET_TYPE_FAILED
+	};
 
-	virtual ResultCode ReadChar(const char* key,   char& outValue)          const = 0;
-	virtual ResultCode ReadUChar(const char* key,  unsigned char& outValue) const = 0;
-	virtual ResultCode ReadInt8(const char* key,   int8_t& outValue)        const = 0;
-	virtual ResultCode ReadUInt8(const char* key,  uint8_t& outValue)       const = 0;
-	virtual ResultCode ReadInt16(const char* key,  int16_t& outValue)       const = 0;
-	virtual ResultCode ReadUInt16(const char* key, uint16_t& outValue)      const = 0;
-	virtual ResultCode ReadInt32(const char* key,  int32_t& outValue)       const = 0;
-	virtual ResultCode ReadUInt32(const char* key, uint32_t& outValue)      const = 0;
-	virtual ResultCode ReadFloat(const char* key,  float& outValue)         const = 0;
-	virtual ResultCode ReadDouble(const char* key, double& outValue)        const = 0;
-	virtual ResultCode ReadString(const char* key, String& outValue)        const = 0;
+	virtual Result<char>      ReadChar(const char* key)   const = 0;
+	virtual Result<uchar>     ReadUChar(const char* key)  const = 0;
+	virtual Result<int8_t>    ReadInt8(const char* key)   const = 0;
+	virtual Result<uint8_t>   ReadUInt8(const char* key)  const = 0;
+	virtual Result<int16_t>   ReadInt16(const char* key)  const = 0;
+	virtual Result<uint16_t>  ReadUInt16(const char* key) const = 0;
+	virtual Result<int32_t>   ReadInt32(const char* key)  const = 0;
+	virtual Result<uint32_t>  ReadUInt32(const char* key) const = 0;
+	virtual Result<float>     ReadFloat(const char* key)  const = 0;
+	virtual Result<double>    ReadDouble(const char* key) const = 0;
+	virtual Result<String>    ReadString(const char* key) const = 0;
 
-	virtual Mirror::Type GetType(const char* key) const = 0;
+	virtual Result<Mirror::Type> GetType(const char* key) const = 0;
 
-	virtual ResultCode FindSubsection(const char* sectionName) = 0;
-	virtual ResultCode EnterSubsection(const char* sectionName) = 0;
-	virtual ResultCode LeaveSubsection() = 0;
+	virtual Result<IDocumentReader*> FindSubsection(const char* sectionName) = 0;
+	virtual Result<IDocumentReader*> EnterSubsection(const char* sectionName) = 0;
+	virtual Result<IDocumentReader*> LeaveSubsection() = 0;
 
-	virtual ResultCode ReadDocument(SharedPtr<IDocument>& document) = 0;
+	virtual Result<IDocumentReader*> ReadDocument(SharedPtr<IDocument>& document) = 0;
 };
 
 CLOSE_NAMESPACE(Elf);

@@ -73,24 +73,24 @@ const char* File::GetData() const
 	return nullptr;
 }
 
-ResultCode File::WriteToDiskSync() const
+Result<void> File::WriteToDiskSync() const
 {
-	return Result::OK;
+	return result();
 }
 
-ResultCode File::WriteToDiskAsync(const AsyncCallback& callback) const
+Result<void> File::WriteToDiskAsync(const AsyncCallback& callback) const
 {
-	return Result::OK;
+	return result();
 }
 
-ResultCode File::ReadFromDiskSync()
+Result<void> File::ReadFromDiskSync()
 {
-	return Result::OK;
+	return result();
 }
 
-ResultCode File::ReadFromDiskAsync(const AsyncCallback& callback)
+Result<void> File::ReadFromDiskAsync(const AsyncCallback& callback)
 {
-	return Result::OK;
+	return result();
 }
 
 File::State File::GetState() const

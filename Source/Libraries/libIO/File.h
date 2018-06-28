@@ -25,7 +25,7 @@ public:
 		LOADED_AND_READY
 	};
 public:
-	typedef std::function<void(File*, const Result&)> AsyncCallback;
+	typedef std::function<void(File*, const Result<void>&)> AsyncCallback;
 
 public:
 	File(const String& filename);
@@ -73,22 +73,22 @@ public:
 	/**
 		Synchronously write the data in memory to disk.
 	 **/
-	ResultCode WriteToDiskSync() const;
+	Result<void> WriteToDiskSync() const;
 
 	/**
 		Asynchronously write the data in memory to disk, calling AsyncCallback when complete.
 	 **/
-	ResultCode WriteToDiskAsync(const AsyncCallback& callback) const;
+	Result<void> WriteToDiskAsync(const AsyncCallback& callback) const;
 
 	/**
 		Synchronously read the data on disk to memory.
 	 **/
-	ResultCode ReadFromDiskSync();
+	Result<void> ReadFromDiskSync();
 
 	/**
 		Asynchronously read the data from disk, calling AsyncCallback when complete.
 	 **/
-	ResultCode ReadFromDiskAsync(const AsyncCallback& callback);
+	Result<void> ReadFromDiskAsync(const AsyncCallback& callback);
 
 	/**
 		Retrieve the loading state of the file. Guaranteed atomic operation, so can be safely called across threads.

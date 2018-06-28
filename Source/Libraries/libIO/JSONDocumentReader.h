@@ -27,33 +27,34 @@ public:
 	virtual ~JSONDocumentReader();
 
 private:
-	virtual ResultCode ReadChar(const char* key, char& outValue)           const;
-	virtual ResultCode ReadUChar(const char* key, unsigned char& outValue) const;
-	virtual ResultCode ReadInt8(const char* key, int8_t& outValue)         const;
-	virtual ResultCode ReadUInt8(const char* key, uint8_t& outValue)       const;
-	virtual ResultCode ReadInt16(const char* key, int16_t& outValue)       const;
-	virtual ResultCode ReadUInt16(const char* key, uint16_t& outValue)     const;
-	virtual ResultCode ReadInt32(const char* key, int32_t& outValue)       const;
-	virtual ResultCode ReadUInt32(const char* key, uint32_t& outValue)     const;
-	virtual ResultCode ReadFloat(const char* key, float& outValue)         const;
-	virtual ResultCode ReadDouble(const char* key, double& outValue)       const;
-	virtual ResultCode ReadString(const char* key, String& outValue)       const;
+	virtual Result<char> ReadChar(const char* key)            const;
+	virtual Result<uchar> ReadUChar(const char* key) const;
+	virtual Result<int8_t> ReadInt8(const char* key)        const;
+	virtual Result<uint8_t> ReadUInt8(const char* key)     const;
+	virtual Result<int16_t> ReadInt16(const char* key)     const;
+	virtual Result<uint16_t> ReadUInt16(const char* key)  const;
+	virtual Result<int32_t> ReadInt32(const char* key)     const;
+	virtual Result<uint32_t> ReadUInt32(const char* key)  const;
+	virtual Result<float> ReadFloat(const char* key)         const;
+	virtual Result<double> ReadDouble(const char* key)      const;
+	virtual Result<String> ReadString(const char* key)      const;
 
-	virtual Mirror::Type GetType(const char* key) const;
+	virtual Result<Mirror::Type> GetType(const char* key) const;
 
-	virtual ResultCode FindSubsection(const char* sectionName);
-	virtual ResultCode EnterSubsection(const char* sectionName);
-	virtual ResultCode LeaveSubsection();
+	virtual Result<IDocumentReader*> FindSubsection(const char* sectionName);
+	virtual Result<IDocumentReader*> EnterSubsection(const char* sectionName);
+	virtual Result<IDocumentReader*> LeaveSubsection();
 
-	virtual ResultCode ReadDocument(SharedPtr<IDocument>& document);
+	virtual Result<IDocumentReader*> ReadDocument(SharedPtr<IDocument>& document);
 
-	void SetCursor(const char* section);
+	Result<void> SetCursor(const char* section);
 
 private:
 	struct Section
 	{
-		Json::Value  data;
-		Json::Value* cursor;
+		Json::Value  data;                // Root of the section
+		Json::Value* cursor;              // Current position in the tree.
+		List<Json::Value*> cursorParents; // Cursor parent stack.
 	};
 	Json::Value m_root; // Root of the document.
 	Section m_dataSection;

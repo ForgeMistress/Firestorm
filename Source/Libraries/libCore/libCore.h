@@ -25,7 +25,14 @@
 #include <stdint.h>
 #include <type_traits>
 
+#include "Expected.h"
+
 OPEN_NAMESPACE(Elf);
+
+template<
+	typename Expected_t, 
+	typename Unexpected_t
+> using Expected = tl::expected<Expected_t, Unexpected_t>;
 
 template <typename T>
 bool is_uninitialized(std::weak_ptr<T> const& weak)
@@ -70,6 +77,8 @@ template <class T> using SharedPtr = std::shared_ptr<T>;
 template <class T> using WeakPtr   = std::weak_ptr<T>;
 
 static const String str_Default;
+
+typedef unsigned char uchar;
 
 // Aliases for type_trait structs in type_traits (C++11)
 OPEN_NAMESPACE(Traits);
