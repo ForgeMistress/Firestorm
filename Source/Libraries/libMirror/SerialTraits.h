@@ -19,8 +19,8 @@
 	class SerialTraits<OBJ_T> \
 	{ \
 	public: \
-		static Result<SharedPtr<IDocumentWriter> > Write(const char* key, SharedPtr<IDocumentWriter>& writer, const OBJ_T& input); \
-		static Result<OBJ_T> Read(const char* key, SharedPtr<IDocumentReader>& reader, OBJ_T& output); \
+		static Result<SharedPtr<IDocumentWriter>, Error> Write(const char* key, SharedPtr<IDocumentWriter> writer, const OBJ_T& input); \
+		static Result<OBJ_T, Error> Read(const char* key, SharedPtr<IDocumentReader> reader, OBJ_T& output); \
 	}
 
 #define DECLARE_OBJ_SERIAL_TRAITS(OBJ_T) \
@@ -28,8 +28,8 @@
 	struct SerialTraits< OBJ_T > \
 	{ \
 		typedef OBJ_T T; \
-		static Result<SharedPtr<IDocumentWriter> > Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input); \
-		static Result<T> Read(const char* key, SharedPtr<IDocumentReader>& writer, T& output); \
+		static Result<SharedPtr<IDocumentWriter>, Error> Write(const char* key, SharedPtr<IDocumentWriter> writer, const T& input); \
+		static Result<T, Error> Read(const char* key, SharedPtr<IDocumentReader> reader, T& output); \
 	}
 
 OPEN_NAMESPACE(Elf);
@@ -60,8 +60,8 @@ struct SerialResults
 template <class T>
 struct SerialTraits
 {
-	static Result<SharedPtr<IDocumentWriter> > Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input);
-	static Result<T> Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output);
+	static Result<SharedPtr<IDocumentWriter>, Error> Write(const char* key, SharedPtr<IDocumentWriter> writer, const T& input);
+	static Result<T, Error> Read(const char* key, SharedPtr<IDocumentReader> reader, T& output);
 };
 
 DECLARE_POD_SERIAL_TRAITS(int8_t);

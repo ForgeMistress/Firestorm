@@ -127,6 +127,7 @@ function staticlib(libname, args)
 
     project(libname)
     language("C++")
+    cppdialect("C++17")
     kind("StaticLib")
     targetdir("Build/Libraries/%{cfg.buildcfg}")
 
@@ -134,7 +135,6 @@ function staticlib(libname, args)
         libsrcpath.."/"..libname.."/**.h",   -- all header files
         libsrcpath.."/"..libname.."/**.cpp", -- all source files
     })
-
 
     -- required for precompiled headers.
     includedirs({ 
@@ -191,6 +191,7 @@ function unittest(testname, args)
     project(testname.."_Test")
 
     language("C++")
+    cppdialect("C++17")
     kind("ConsoleApp")
 
     targetdir("Build/Tests/%{cfg.buildcfg}")
@@ -260,6 +261,7 @@ function application(appname, args)
 
     project(appname)
     language("C++")
+    cppdialect("C++17")
     kind("Application")
     targetdir("Build/Applications/%{cfg.buildcfg}")
 

@@ -26,7 +26,11 @@ public:
 	explicit operator String() const { return Message; }
 	explicit operator const String&() const { return Message; }
 	explicit operator int() const { return Code; }
-	template<class Enum_t> operator Enum_t() const { return static_cast<Enum_t>(Code); }
+
+	template<class Enum_t> 
+	Enum_t ToEnum() const { 
+		return static_cast<Enum_t>(Code); 
+	}
 
 	bool operator==(const int& e) const { return Code == e; }
 	bool operator==(const Error& e) const { return Code == e.Code; }
@@ -35,69 +39,53 @@ public:
 	String  Message;
 };
 
-template <class Ex> using Result = tl::expected<Ex, Error>;
-
-
-template <class Expected_t>
-static tl::expected<Expected_t, Error> result(Expected_t&& e)
+template<typename Ex_t>
+struct _ResultTemplate
 {
-	return tl::expected<Expected_t, Error>(e);
+	typedef typename std::remove_reference<Ex_t>::type  expected_type;
+	typedef typename tl::expected<expected_type, Error> result_type;
+};
+
+//template <typename Ex_t> using ResultCode = typename _ResultTemplate<Ex_t>::result_type;
+
+template <typename Ex_t, typename UEx_t> using Result = tl::expected<Ex_t, UEx_t>;
+
+/*template <class Ex_t>
+static typename _ResultTemplate<Ex_t>::result_type result(Ex_t&& e)
+{
+	return _ResultTemplate<Ex_t>::result_type(e);
 }
 
-static tl::expected<void, Error> result()
+static typename _ResultTemplate<void>::result_type void_result()
 {
-	return tl::expected<void, Error>();
+	return _ResultTemplate<void>::result_type();
 }
 
-static Error error(int e, const String& msg)
+static typename _ResultTemplate<void>::result_type void_error(int e, const String& msg)
 {
-	return Error(e, msg);
+	return tl::expected<void, Error>(tl::unexpect, Error(e, msg));
 }
 
+template<typename Ex_t>
+static typename _ResultTemplate<Ex_t>::result_type error(int e, const String& msg)
+{
+	return _ResultTemplate<Ex_t>::result_type(tl::unexpect, Error(e, msg));
+}
 
-	/**
-		Global OK result.
-	 **/
-	// static ResultCode OK;
+OPEN_NAMESPACE(Result);
+template<class Expected_t>
+static bool IsOK(const ResultCode<Expected_t>& result)
+{
+	return result.has_value();
+}
 
-	/**
-		Global generic ERROR result. Prefer custom results over this one.
-	 **/
-	// static ResultCode ERROR;
+template<class Expected_t>
+static bool IsNotOK(const ResultCode<Expected_t>& result)
+{
+	return !result.has_value();
+}
 
-	/**
-		Retrieve the string message held by this Result.
-	 **/
-	//const String& GetMessage() const;
-
-	/**
-		Check on whether or not the Result defines an error.
-	 **/
-	//bool IsOK() const;
-
-	/**
-		Inverse of IsOK.
-	 **/
-	//bool IsNotOK() const;
-
-	/** 
-		Equivalence Operator 
-	 **/
-	//bool operator==(ResultCode result) const;
-
-	/**
-		Casting Operators
-	 **/
-	//operator const String&() { return m_message; }
-	//operator String()        { return m_message; }
-	//operator const char*()   { return m_message.c_str(); }
-
-
-	//explicit Result(const String& message);
-
-//private:
-	//String m_message;
-//};
+CLOSE_NAMESPACE(Result);*/
 
 CLOSE_NAMESPACE(Elf);
 #endif

@@ -33,25 +33,25 @@ public:
 		GET_TYPE_FAILED
 	};
 
-	virtual Result<char>      ReadChar(const char* key)   const = 0;
-	virtual Result<uchar>     ReadUChar(const char* key)  const = 0;
-	virtual Result<int8_t>    ReadInt8(const char* key)   const = 0;
-	virtual Result<uint8_t>   ReadUInt8(const char* key)  const = 0;
-	virtual Result<int16_t>   ReadInt16(const char* key)  const = 0;
-	virtual Result<uint16_t>  ReadUInt16(const char* key) const = 0;
-	virtual Result<int32_t>   ReadInt32(const char* key)  const = 0;
-	virtual Result<uint32_t>  ReadUInt32(const char* key) const = 0;
-	virtual Result<float>     ReadFloat(const char* key)  const = 0;
-	virtual Result<double>    ReadDouble(const char* key) const = 0;
-	virtual Result<String>    ReadString(const char* key) const = 0;
+	virtual Result<char, Error>      ReadChar(const char* key)   const = 0;
+	virtual Result<uchar, Error>     ReadUChar(const char* key)  const = 0;
+	virtual Result<int8_t, Error>    ReadInt8(const char* key)   const = 0;
+	virtual Result<uint8_t, Error>   ReadUInt8(const char* key)  const = 0;
+	virtual Result<int16_t, Error>   ReadInt16(const char* key)  const = 0;
+	virtual Result<uint16_t, Error>  ReadUInt16(const char* key) const = 0;
+	virtual Result<int32_t, Error>   ReadInt32(const char* key)  const = 0;
+	virtual Result<uint32_t, Error>  ReadUInt32(const char* key) const = 0;
+	virtual Result<float, Error>     ReadFloat(const char* key)  const = 0;
+	virtual Result<double, Error>    ReadDouble(const char* key) const = 0;
+	virtual Result<String, Error>    ReadString(const char* key) const = 0;
 
-	virtual Result<Mirror::Type> GetType(const char* key) const = 0;
+	virtual Result<Mirror::Type, Error> GetType(const char* key) const = 0;
 
-	virtual Result<IDocumentReader*> FindSubsection(const char* sectionName) = 0;
-	virtual Result<IDocumentReader*> EnterSubsection(const char* sectionName) = 0;
-	virtual Result<IDocumentReader*> LeaveSubsection() = 0;
+	virtual Result<IDocumentReader*, Error> FindSubsection(const char* sectionName) = 0;
+	virtual Result<IDocumentReader*, Error> EnterSubsection(const char* sectionName) = 0;
+	virtual Result<IDocumentReader*, Error> LeaveSubsection() = 0;
 
-	virtual Result<IDocumentReader*> ReadDocument(SharedPtr<IDocument>& document) = 0;
+	virtual Result<IDocumentReader*, Error> ReadDocument(SharedPtr<IDocument>& document) = 0;
 };
 
 CLOSE_NAMESPACE(Elf);

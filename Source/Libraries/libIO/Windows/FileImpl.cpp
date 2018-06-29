@@ -29,7 +29,7 @@ struct File::FileImpl
 };
 
 File::File(const String& filename)
-	: m_impl(new FileImpl(filename))
+: m_impl(new FileImpl(filename))
 {
 }
 
@@ -73,24 +73,24 @@ const char* File::GetData() const
 	return nullptr;
 }
 
-Result<void> File::WriteToDiskSync() const
+Result<void, Error> File::WriteToDiskSync() const
 {
-	return result();
+	return Result<void, Error>();
 }
 
-Result<void> File::WriteToDiskAsync(const AsyncCallback& callback) const
+Result<void, Error> File::WriteToDiskAsync(const AsyncCallback& callback) const
 {
-	return result();
+	return Result<void, Error>();
 }
 
-Result<void> File::ReadFromDiskSync()
+Result<void, Error> File::ReadFromDiskSync()
 {
-	return result();
+	return Result<void, Error>();
 }
 
-Result<void> File::ReadFromDiskAsync(const AsyncCallback& callback)
+Result<void, Error> File::ReadFromDiskAsync(const AsyncCallback& callback)
 {
-	return result();
+	return Result<void, Error>();
 }
 
 File::State File::GetState() const

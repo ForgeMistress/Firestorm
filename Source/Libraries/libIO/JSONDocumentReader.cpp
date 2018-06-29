@@ -16,72 +16,70 @@ OPEN_NAMESPACE(Elf);
 
 JSONDocumentReader::JSONDocumentReader()
 {
-	m_dataSection.cursor = nullptr;
-	m_typeSection.cursor = nullptr;
 }
 
 JSONDocumentReader::~JSONDocumentReader()
 {
 }
 
-Result<char> JSONDocumentReader::ReadChar(const char* key) const
+Result<char, Error> JSONDocumentReader::ReadChar(const char* key) const
 {
-	return result(0);
+	return Result<char, Error>(0);
 }
 
-Result<uchar> JSONDocumentReader::ReadUChar(const char* key) const
+Result<uchar, Error> JSONDocumentReader::ReadUChar(const char* key) const
 {
-	return result(0);
+	return Result<uchar, Error>(0);
 }
 
-Result<int8_t> JSONDocumentReader::ReadInt8(const char* key) const
+Result<int8_t, Error> JSONDocumentReader::ReadInt8(const char* key) const
 {
-	return result(0);
+	return Result<int8_t, Error>(0);
 }
 
-Result<uint8_t> JSONDocumentReader::ReadUInt8(const char* key) const
+Result<uint8_t, Error> JSONDocumentReader::ReadUInt8(const char* key) const
 {
-	return result(0);
+	return Result<uint8_t, Error>(0);
 }
 
-Result<int16_t> JSONDocumentReader::ReadInt16(const char* key) const
+Result<int16_t, Error> JSONDocumentReader::ReadInt16(const char* key) const
 {
-	return result(0);
+	return Result<int16_t, Error>(0);
 }
 
-Result<uint16_t> JSONDocumentReader::ReadUInt16(const char* key) const
+Result<uint16_t, Error> JSONDocumentReader::ReadUInt16(const char* key) const
 {
-	return result(0);
+	return Result<uint16_t, Error>(0);
 }
 
-Result<int32_t> JSONDocumentReader::ReadInt32(const char* key) const
+Result<int32_t, Error> JSONDocumentReader::ReadInt32(const char* key) const
 {
-	return result(0);
+	return Result<int32_t, Error>(0);
 }
 
-Result<uint32_t> JSONDocumentReader::ReadUInt32(const char* key) const
+Result<uint32_t, Error> JSONDocumentReader::ReadUInt32(const char* key) const
 {
-	return result(0);
+	return Result<uint32_t, Error>(0);
 }
 
-Result<float> JSONDocumentReader::ReadFloat(const char* key) const
+Result<float, Error> JSONDocumentReader::ReadFloat(const char* key) const
 {
-	return result(0.0f);
+	return Result<float, Error>(0.0f);
 }
 
-Result<double> JSONDocumentReader::ReadDouble(const char* key) const
+Result<double, Error> JSONDocumentReader::ReadDouble(const char* key) const
 {
-	return result(0.0);
+	return Result<double, Error>(0.0);
 }
-Result<String> JSONDocumentReader::ReadString(const char* key) const
+Result<String, Error> JSONDocumentReader::ReadString(const char* key) const
 {
-	return result(String(""));
+	return Result<String, Error>(String(""));
 }
 
-Result<Mirror::Type> JSONDocumentReader::GetType(const char* key) const
+Result<Mirror::Type, Error> JSONDocumentReader::GetType(const char* key) const
 {
 	// Check the type section.
-	if(m_typeSection.cursor == nullptr)
+	/*if(m_typeSection.m_cursor == nullptr)
 	{
 		return error(GET_TYPE_FAILED, "type section cursor is invalid");
 	}
@@ -97,66 +95,126 @@ Result<Mirror::Type> JSONDocumentReader::GetType(const char* key) const
 		}
 		String typeonfile((*typeCursor)[key].asString());
 
-	}
+	}*/
 
-	return result(rttr::detail::get_invalid_type());
+	return Result<Mirror::Type, Error>(rttr::detail::get_invalid_type());
 }
 
-Result<IDocumentReader*> JSONDocumentReader::FindSubsection(const char* sectionName)
+Result<IDocumentReader*, Error> JSONDocumentReader::FindSubsection(const char* sectionName)
 {
-	assert(m_dataSection.cursor != nullptr && m_typeSection.cursor != nullptr);
+	/*assert(m_dataSection.cursor != nullptr && m_typeSection.cursor != nullptr);
 	if(m_dataSection.cursor->isMember(sectionName) && m_typeSection.cursor->isMember(sectionName))
 	{
 		m_foundSubsection = sectionName;
 		return result(this);
 	}
 	std::stringstream ss;
-	ss << "subsection " << sectionName << " was not found.";
-	return error(FIND_SUBSECTION_FAILED, ss.str());
+	ss << "subsection " << sectionName << " was not found.";*/
+	return Result<IDocumentReader*, Error>(this); //error(FIND_SUBSECTION_FAILED, "");
 }
 
-Result<IDocumentReader*> JSONDocumentReader::EnterSubsection(const char* sectionName)
+Result<IDocumentReader*, Error> JSONDocumentReader::EnterSubsection(const char* sectionName)
 {
-	Result<IDocumentReader*> findss = FindSubsection(sectionName);
+	Result<IDocumentReader*, Error> findss = FindSubsection(sectionName);
 	if (findss.has_value())
 	{
 		auto setcursor = SetCursor(sectionName);
 		if(setcursor.has_value())
 		{
-			return result(this);
+			return Result<IDocumentReader*, Error>(this);
 		}
-		return error(ENTER_SUBSECTION_FAILED, "failed to enter subsection " + String(sectionName));
+		return Result<IDocumentReader*, Error>(this);//error(ENTER_SUBSECTION_FAILED, "failed to enter subsection " + String(sectionName));
 	}
 	return findss;
 }
 
-Result<IDocumentReader*> JSONDocumentReader::LeaveSubsection()
+Result<IDocumentReader*, Error> JSONDocumentReader::LeaveSubsection()
 {
-	return result(this);
+	return Result<IDocumentReader*, Error>(this);
 }
 
-Result<IDocumentReader*> JSONDocumentReader::ReadDocument(SharedPtr<IDocument>& document)
+Result<IDocumentReader*, Error> JSONDocumentReader::ReadDocument(SharedPtr<IDocument>& document)
 {
-	return result(this);
+	return Result<IDocumentReader*, Error>(this);
 }
 
-Result<void> JSONDocumentReader::SetCursor(const char* section)
+Result<void, Error> JSONDocumentReader::Section::SetPosFromRoot(const std::initializer_list<String>& list)
+{
+	if(list.size() > 0)
+	{
+		MoveToChild();
+		for(const String& item : list)
+		{
+			Result<void, Error> moveResult = MoveToChild(item);
+			if(!moveResult.has_value())
+			{
+				return moveResult;
+			}
+		}
+	}
+}
+
+Result<void, Error> JSONDocumentReader::Section::MoveToChild(const String& toChild)
+{
+	assert(m_cursor != nullptr);
+	if(toChild == "")
+	{
+		// Set it to the root of the document and clear the parent stack.
+		m_cursor = &m_data;
+		m_cursorParents.clear();
+		return Result<void, Error>();
+	}
+	if(m_cursor->isMember(toChild))
+	{
+		m_cursor = &(*m_cursor)[toChild];
+	}
+
+}
+
+Result<void, Error> JSONDocumentReader::Section::MoveToParent()
+{
+	return Result<void, Error>();
+}
+
+Result<void, Error> JSONDocumentReader::Section::MoveToSibling(const String& toSibling)
+{
+	return Result<void, Error>();//void_result();
+}
+
+#define ELF_FAILRETURN(RTYPE, OP) { \
+	RTYPE rc = OP ; \
+	if(!rc.has_value()) {\
+		return rc; \
+	} \
+}
+
+Result<void, Error> JSONDocumentReader::SetCursor(const char* section)
 {
 	if(m_foundSubsection == section)
 	{
-		Json::Value* dataCursor = m_dataSection.cursor;    // Store the current pos
+		/*Section& typeSection = m_typeSection;
+		String sec(section);
+		m_dataSection.MoveToChild(section)
+			.map_error([](const Error& err) {
+				
+			})
+			.and_then([&typeSection, &sec](void) {
+				typeSection.MoveToChild(sec);
+			});*/
+		//m_typeSection.MoveToChild(section)
+		/*Json::Value* dataCursor = m_dataSection.cursor;    // Store the current pos
 		m_dataSection.cursor = &(*dataCursor)[section];    // Set current pos to enter the child
 		m_dataSection.cursorParents.push_back(dataCursor); // Store old pos as parent
 
 		Json::Value* typeCursor = m_typeSection.cursor;    // Store the current pos
 		m_typeSection.cursor = &(*typeCursor)[section];    // Set current pos to enter the child
 		m_typeSection.cursorParents.push_back(typeCursor); // Store old pos on stack.
-		return result();
+		return result();*/
 	}
 	// if section is nullptr, climb up to the parent.
 	else if(section == nullptr)
 	{
-		if(!m_dataSection.cursorParents.empty() && !m_typeSection.cursorParents.empty())
+		/*if(!m_dataSection.cursorParents.empty() && !m_typeSection.cursorParents.empty())
 		{
 			m_dataSection.cursor = m_dataSection.cursorParents.back();
 			m_dataSection.cursorParents.pop_back();
@@ -164,10 +222,10 @@ Result<void> JSONDocumentReader::SetCursor(const char* section)
 			m_typeSection.cursor = m_typeSection.cursorParents.back();
 			m_typeSection.cursorParents.pop_back();
 			return result();
-		}
-		return error(ERROR, "failed to set cursor at " + String(section));
+		}*/
+		return tl::make_unexpected<Error>(Error(ERROR, "failed to set cursor at " + String(section)));
 	}
-	return error(SUBSECTION_NOT_FOUND, "subsection '"+String(section)+"' was not found prior to calling");
+	return tl::make_unexpected<Error>(Error(SUBSECTION_NOT_FOUND, "subsection '" + String(section) + "' was not found prior to calling"));
 }
 
 /*private:

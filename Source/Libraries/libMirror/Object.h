@@ -41,9 +41,9 @@ typedef rttr::registration Registration;
 	private: \
 		typedef objType WhatIAm_t; \
 	public: \
-		static  rttr::type MyType()                     { return rttr::type::get< WhatIAm_t >(); } \
-		static  bool       Is(rttr::type rttr_t)        { return WhatIAm_t:: MyType() == rttr_t; } \
-		virtual RTTR_INLINE rttr::type GetType() const  { return rttr::type::get< WhatIAm_t >(); } \
+		static rttr::type MyType() { return rttr::type::get<WhatIAm_t>(); } \
+		static  bool       Is(rttr::type rttr_t)        { return WhatIAm_t::MyType() == rttr_t; } \
+		virtual RTTR_INLINE rttr::type GetType() const  { return WhatIAm_t::MyType(); } \
 		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); }  \
 		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); } \
 		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() { \
@@ -62,10 +62,10 @@ struct PropMeta
 {
 	enum Type
 	{
-		kSave,
-		kLoad,
-		kDeprecated, //< Mark a property as deprecated.
-		kClassRemap  //< Use this to define another class name when renaming classes.
+		SAVE,
+		LOAD,
+		DEPRECATED, //< Mark a property as deprecated.
+		CLASS_REMAP  //< Use this to define another class name when renaming classes.
 	};
 };
 
@@ -75,7 +75,7 @@ struct PropMeta
 
 	Wrapper around rttr::metadata(PropMeta::kSave, true)
  **/
-#define MIRROR_META_SAVE rttr::metadata(PropMeta::kSave, true)
+#define MIRROR_META_SAVE rttr::metadata(PropMeta::SAVE, true)
 
  /**
 	 \macro MIRROR_META_SAVE
@@ -84,22 +84,22 @@ struct PropMeta
 
 	 Wrapper around rttr::metadata(PropMeta::kLoad, true)
  **/
-#define MIRROR_META_LOAD rttr::metadata(PropMeta::kLoad, true)
+#define MIRROR_META_LOAD rttr::metadata(PropMeta::LOAD, true)
 
  /**
 	 \macro MIRROR_META_SAVELOAD
 	 Combination of \ref MIRROR_META_SAVE and \ref MIRROR_META_LOAD
  **/
 #define MIRROR_META_SAVELOAD \
-	rttr::metadata(PropMeta::kSave, true), \
-	rttr::metadata(PropMeta::kLoad, true)
+	rttr::metadata(PropMeta::SAVE, true), \
+	rttr::metadata(PropMeta::LOAD, true)
 
  /**
 	 \macro MIRROR_META_DEPRECATED
 	 Mark a property as deprecated.
 	 Wrapper around rttr::metadata(PropMeta::kDeprecated, true)
  **/
-#define MIRROR_META_DEPRECATED rttr::metadata(PropMeta::kDeprecated, true)
+#define MIRROR_META_DEPRECATED rttr::metadata(PropMeta::DEPRECATED, true)
 
 /**
 	\class Object

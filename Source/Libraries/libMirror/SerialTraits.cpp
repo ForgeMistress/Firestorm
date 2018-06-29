@@ -18,17 +18,17 @@
 #include <libIO/IDocumentWriter.h>
 
 #define DEFINE_POD_SERIAL_TRAITS(TYPE, FUNCTYPE) \
-Result<SharedPtr<IDocumentWriter> > SerialTraits<TYPE>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const TYPE& input) \
+Result<SharedPtr<IDocumentWriter>, Error > SerialTraits<TYPE>::Write(const char* key, SharedPtr<IDocumentWriter> writer, const TYPE& input) \
 { \
-	Result<IDocumentWriter*> rc = writer -> Write##FUNCTYPE (key, input); \
+	Result<IDocumentWriter*, Error> rc = writer -> Write##FUNCTYPE (key, input); \
 	if(!rc.has_value()) { \
-		return error(SerialResults::WRITE_ERROR, rc.error()); \
+		return tl::make_unexpected<Error>(Error(SerialResults::WRITE_ERROR, rc.error().Message)); \
 	} \
-	return result(writer); \
+	return Result<SharedPtr<IDocumentWriter>,Error>(writer); \
 } \
-Result<TYPE> SerialTraits<TYPE>::Read(const char* key, SharedPtr<IDocumentReader>& reader, TYPE& output) \
+Result<TYPE, Error> SerialTraits<TYPE>::Read(const char* key, SharedPtr<IDocumentReader> reader, TYPE& output) \
 { \
-	Result<TYPE> res = reader -> Read##FUNCTYPE (key); \
+	Result<TYPE, Error> res = reader -> Read##FUNCTYPE (key); \
 	if(res.has_value()) output = res.value(); \
 	return res; \
 }
@@ -40,16 +40,16 @@ OPEN_NAMESPACE(Mirror);
 	Result("Variant passed into SerialTraits<>::Write is not valid and stores no data.");*/
 
 template <class T>
-inline Result<SharedPtr<IDocumentWriter> > SerialTraits<T>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input)
+inline Result<SharedPtr<IDocumentWriter>, Error> SerialTraits<T>::Write(const char* key, SharedPtr<IDocumentWriter> writer, const T& input)
 {
-	static_assert("Default SerialTraits has not been implemented.");
+	static_assert(false, "Default SerialTraits has not been implemented.");
 	return error(SerialResults::NOT_IMPLEMENTED, "Default SerialTraits has not been implemented.");
 }
 
 template <class T>
-inline Result<T> SerialTraits<T>::Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output)
+inline Result<T, Error> SerialTraits<T>::Read(const char* key, SharedPtr<IDocumentReader> reader, T& output)
 {
-	static_assert("Default SerialTraits has not been implemented.");
+	static_assert(false, "Default SerialTraits has not been implemented.");
 	return error(SerialResults::NOT_IMPLEMENTED, "Default SerialTraits has not been implemented.");
 }
 
@@ -79,23 +79,23 @@ t.Assert(extractedValueVariant.get_value<std::string>() == testStringValue, "tes
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits<Object*>
-Result<SharedPtr<IDocumentWriter> > SerialTraits<Object*>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input)
+Result<SharedPtr<IDocumentWriter>, Error> SerialTraits<Object*>::Write(const char* key, SharedPtr<IDocumentWriter> writer, const T& input)
 {
 	return SerialTraits<const Object*>::Write(key, writer, input);
 }
 
-Result<Object*> SerialTraits<Object*>::Read(const char* key, SharedPtr<IDocumentReader>& reader, T& output)
+Result<Object*, Error> SerialTraits<Object*>::Read(const char* key, SharedPtr<IDocumentReader> reader, T& output)
 {
-	return result(output);
+	return Result<Object*,Error>(output);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits<const Object*>
-Result<SharedPtr<IDocumentWriter> > SerialTraits<const Object*>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const T& input)
+Result<SharedPtr<IDocumentWriter>, Error> SerialTraits<const Object*>::Write(const char* key, SharedPtr<IDocumentWriter> writer, const T& input)
 {
 	using namespace rttr;
 	//Mirror::Type objType = input->get_type();
-	return result(writer);
+	return Result<SharedPtr<IDocumentWriter>,Error>(writer);
 }
 	/*using namespace rttr;
 	Mirror::Type objType = input->GetType();
@@ -122,16 +122,16 @@ Result<SharedPtr<IDocumentWriter> > SerialTraits<const Object*>::Write(const cha
 	return Result::OK;
 }*/
 
-Result<const Object*> SerialTraits<const Object*>::Read(const char* key, SharedPtr<IDocumentReader>& writer, T& input)
+Result<const Object*,Error> SerialTraits<const Object*>::Read(const char* key, SharedPtr<IDocumentReader> reader, T& input)
 {
 	assert(false && "const Object* is Write-Only.");
-	return error(SerialResults::INPUT_NOT_VALID, "input is not valid for this operation");
+	return tl::make_unexpected<Error>(Error(SerialResults::INPUT_NOT_VALID, "input is not valid for this operation"));
 }
 
-#define _onfailedreturn(op) { \
-	Result<IDocumentWriter*> rc = op ; \
+#define _onfailedreturn(tt, op) { \
+	ResultCode<IDocumentWriter*> rc = op ; \
 	if(!rc.has_value()) { \
-		return error(SerialResults::WRITE_ERROR, rc.error()); \
+		return tl::make_unexpected(Error(SerialResults::WRITE_ERROR, rc.error())); \
 	} \
 }
 
@@ -142,45 +142,69 @@ Result<const Object*> SerialTraits<const Object*>::Read(const char* key, SharedP
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits< SharedPtr<Object> >
-Result<SharedPtr<IDocumentWriter>> SerialTraits<OBJ_PTR>::
-	Write(const char* key, SharedPtr<IDocumentWriter>& writer, const SharedPtr<Object>& input)
+Result<SharedPtr<IDocumentWriter>,Error> SerialTraits<OBJ_PTR>::
+	Write(const char* key, SharedPtr<IDocumentWriter> writer, const SharedPtr<Object>& input)
 {
 	Mirror::Type objType = input->GetType();
 
 	assert(objType.is_valid());
 
-	_onfailedreturn(writer->WriteSubsection(key));
-	_onfailedreturn(writer->EnterSubsection(key));
-	_onfailedreturn(writer->WriteString(_classtypekey, objType.get_name().to_string()));
-	_onfailedreturn(writer->WriteSubsection(_classdatakey));
-	_onfailedreturn(writer->EnterSubsection(_classdatakey));
+	/*_onfailedreturn(SharedPtr<IDocumentWriter>, writer->WriteSubsection(key));
+	_onfailedreturn(SharedPtr<IDocumentWriter>, writer->EnterSubsection(key));
+	_onfailedreturn(SharedPtr<IDocumentWriter>, writer->WriteString(_classtypekey, objType.get_name().to_string()));
+	_onfailedreturn(SharedPtr<IDocumentWriter>, writer->WriteSubsection(_classdatakey));
+	_onfailedreturn(SharedPtr<IDocumentWriter>, writer->EnterSubsection(_classdatakey));*/
+	using namespace std::placeholders;
+	auto r = writer->WriteSubsection(key);
+		/*.and_then(std::bind(&IDocumentWriter::EnterSubsection, _1, key))
+			.map_error([=](const Error& err) {
+				throw std::exception(err.Message.c_str());
+			})
+		.and_then(std::bind(&IDocumentWriter::WriteString, _1, _classtypekey, objType.get_name().to_string()))
+			.map_error([=](const Error& err) {
+				throw std::exception(err.Message.c_str());
+			})
+		.and_then(std::bind(&IDocumentWriter::WriteSubsection, _1, _classdatakey))
+			.map_error([=](const Error& err) {
+				throw std::exception(err.Message.c_str());
+			})
+		.and_then(std::bind(&IDocumentWriter::EnterSubsection, _1, _classdatakey))
+			.map_error([=](const Error& err) {
+				throw std::exception(err.Message.c_str());
+			})
+		;*/
 
-	rttr::instance inputInstance(input);
-
-	for(auto prop : objType.get_properties())
+	if(r.has_value())
 	{
-		rttr::variant propMeta = prop.get_metadata(Mirror::PropMeta::kSave);
-		if(propMeta.is_type<bool>() && propMeta.get_value<bool>())
-		{
-			const char* propName = prop.get_name().to_string().c_str();
-			rttr::variant propValue(prop.get_value(inputInstance));
+		rttr::instance inputInstance(input);
 
-			Result<SharedPtr<IDocumentWriter> > rc = SerialTraits<rttr::variant>::Write(propName, writer, propValue);
-			if(!rc.has_value())
+		for (auto prop : objType.get_properties())
+		{
+			rttr::variant propMeta = prop.get_metadata(Mirror::PropMeta::SAVE);
+			if (propMeta.is_type<bool>() && propMeta.get_value<bool>())
 			{
-				return rc;
+				const char* propName = prop.get_name().to_string().c_str();
+				rttr::variant propValue(prop.get_value(inputInstance));
+
+				Result<SharedPtr<IDocumentWriter>,Error> rc = SerialTraits<rttr::variant>::Write(propName, writer, propValue);
+				if (!rc.has_value())
+				{
+					return rc;
+				}
 			}
 		}
+
+		writer->LeaveSubsection();
+		writer->LeaveSubsection();
 	}
+	//_onfailedreturn(writer->LeaveSubsection()); // _classdatakey
+	//_onfailedreturn(writer->LeaveSubsection()); // key
 
-	_onfailedreturn(writer->LeaveSubsection()); // _classdatakey
-	_onfailedreturn(writer->LeaveSubsection()); // key
-
-	return result(writer);
+	return Result<SharedPtr<IDocumentWriter>,Error>(writer);
 }
 
-Result<SharedPtr<Object> > SerialTraits< SharedPtr<Object> >::
-	Read(const char* key, SharedPtr<IDocumentReader>& reader, SharedPtr<Object>& output)
+Result<SharedPtr<Object>,Error> SerialTraits< SharedPtr<Object> >::
+	Read(const char* key, SharedPtr<IDocumentReader> reader, SharedPtr<Object>& output)
 {
 	Mirror::Type objType = output->GetType();
 
@@ -208,15 +232,17 @@ Result<SharedPtr<Object> > SerialTraits< SharedPtr<Object> >::
 		}
 	}*/
 
-	return result(output);
+	return Result<SharedPtr<Object>,Error>(output);
 }
 
 #define _writeiftype(ty) if(input.is_type<ty>()) { return SerialTraits<ty>::Write(key, writer, input.get_value<ty>()); }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits<rttr::variant>
-Result<SharedPtr<IDocumentWriter> > SerialTraits<rttr::variant>::Write(const char* key, SharedPtr<IDocumentWriter>& writer, const rttr::variant& input)
+Result<SharedPtr<IDocumentWriter>,Error> SerialTraits<rttr::variant>::Write(const char* key, SharedPtr<IDocumentWriter> writer, const rttr::variant& input)
 {
-	if(!input.is_valid()) { return error(SerialResults::VARIANT_NOT_VALID, "variant "+String(key)+" is not valid"); }
+	if(!input.is_valid()) { 
+		return tl::make_unexpected<Error>(Error(SerialResults::VARIANT_NOT_VALID, "variant "+String(key)+" is not valid"));
+	}
 	/*_writeiftype(int8_t);
 	_writeiftype(uint8_t);
 	_writeiftype(int16_t);
@@ -228,13 +254,13 @@ Result<SharedPtr<IDocumentWriter> > SerialTraits<rttr::variant>::Write(const cha
 	_writeiftype(String);
 	_writeiftype(Object*);
 	_writeiftype(SharedPtr<Object>);*/
-	return result(writer);
+	return Result<SharedPtr<IDocumentWriter>,Error>(writer);
 }
 #undef _writeiftype
 
-Result<rttr::variant> SerialTraits<rttr::variant>::Read(const char* key, SharedPtr<IDocumentReader>& reader, rttr::variant& output)
+Result<rttr::variant,Error> SerialTraits<rttr::variant>::Read(const char* key, SharedPtr<IDocumentReader> reader, rttr::variant& output)
 {
-	return result();
+	return Result<rttr::variant,Error>(output);
 }
 
 CLOSE_NAMESPACE(Mirror);
