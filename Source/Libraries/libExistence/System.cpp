@@ -44,7 +44,6 @@ bool System::Filter(SharedPtr<Entity>& entity) const
 
 void System::DoUpdate(float deltaT)
 {
-
 }
 
 bool System::AddEntity(SharedPtr<Entity>& entity)

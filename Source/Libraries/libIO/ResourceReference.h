@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  File.h
+//  ResourceReference.h
 //
-//  A file that makes use of the pimpl idiom to implement a cross-platform abstraction of a file.
+//  Contains \ref ResourceReference.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
@@ -13,6 +13,11 @@
 
 OPEN_NAMESPACE(Elf);
 
+/**
+	\class ResourceReference
+
+	This class instance does not contain any data. Instead, it merely defines a reference to a resource.
+ **/
 class ResourceReference : public Mirror::Object
 {
 	MIRROR_DECLARE(ResourceReference, Mirror::Object);

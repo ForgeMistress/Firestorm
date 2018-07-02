@@ -21,6 +21,8 @@ RTTR_REGISTRATION
 }
 
 Engine::Engine()
+: m_running(true)
+, m_paused(false)
 {
 }
 
@@ -30,17 +32,14 @@ Engine::~Engine()
 
 void Engine::Update(double deltaT)
 {
-	if(m_systemsToAdd.empty() == false)
+	if(m_running)
 	{
-		
-	}
-
-	// Add entities to systems.
-	if(m_entitiesToAdd.empty() == false)
-	{
-		for(auto entity : m_entitiesToAdd)
+		if(!m_paused)
 		{
+			ManageSystems();
+			ManageEntities();
 
+			
 		}
 	}
 }
@@ -67,7 +66,7 @@ bool Engine::RemoveSystem(SharedPtr<System>& system)
 
 bool Engine::AddEntity(SharedPtr<Entity>& entity)
 {
-	if(std::find(m_entitiesToAdd.begin(), m_entitiesToAdd.end(), entity) == m_entitiesToAdd.end())
+	if(std::find(m_entitiesToChange.begin(), m_entitiesToChange.end(), entity) == m_entitiesToChange.end())
 	{
 		m_entitiesToAdd.push_back(entity);
 		return true;
@@ -83,6 +82,28 @@ bool Engine::RemoveEntity(SharedPtr<Entity>& entity)
 		return true;
 	}
 	return false;
+}
+
+void Engine::ManageSystems()
+{
+	if(m_systemsToAdd.empty() && m_systemsToRemove.empty())
+	{
+		return;
+	}
+
+	for(auto system : m_systemsToRemove)
+	{
+		assert(system);
+		for(auto entity : system->m_entities)
+		{
+			system->OnEntityRemoved(entity);
+		}
+	}
+}
+
+void Engine::ManageEntities()
+{
+
 }
 
 CLOSE_NAMESPACE(Elf);

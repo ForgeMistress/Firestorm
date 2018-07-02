@@ -30,6 +30,11 @@ public:
 	Engine();
 	virtual ~Engine();
 
+	inline void Pause()       { m_paused = true; }
+	inline void Unpause()     { m_paused = false; }
+	inline void TogglePause() { m_paused = !m_paused; }
+	inline void ShutDown()    { m_running = false; }
+
 	void Update(double deltaT);
 
 	bool AddSystem(SharedPtr<System>& obj);
@@ -43,18 +48,26 @@ public:
 
 	bool AddSystemCategory(Mirror::Type systemInterfaceType);
 
+	const String& GetName() const { return m_name; }
+
 private:
+	void ManageSystems();
+	void ManageEntities();
+
 	// Reflected
+	String                      m_name;
 	Vector< SharedPtr<System> > m_systems;
 	Vector< SharedPtr<Entity> > m_entities;
 
 	// Runtime
+	bool m_running;
+	bool m_paused;
 	UnorderedMap< Mirror::Type, Vector<SharedPtr<System> > > m_systemsByType;
 
-	Vector< SharedPtr<System> > m_systemsToAdd;
-	Vector< SharedPtr<System> > m_systemsToRemove;
-	Vector< SharedPtr<Entity> > m_entitiesToAdd;
-	Vector< SharedPtr<Entity> > m_entitiesToRemove;
+	List< SharedPtr<Entity> > m_entitiesToRemove;
+	List< SharedPtr<Entity> > m_entitiesToChange;
+	List< SharedPtr<System> > m_systemsToAdd;
+	List< SharedPtr<System> > m_systemsToRemove;
 };
 
 CLOSE_NAMESPACE(Elf);

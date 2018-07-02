@@ -77,7 +77,7 @@ struct PropMeta
  **/
 #define MIRROR_META_SAVE rttr::metadata(PropMeta::SAVE, true)
 
- /**
+/**
 	 \macro MIRROR_META_SAVE
 	 Tells the serializer that this property should be used to load data from the serialized object's file
 	 to the object instance we're constructing.
@@ -86,7 +86,7 @@ struct PropMeta
  **/
 #define MIRROR_META_LOAD rttr::metadata(PropMeta::LOAD, true)
 
- /**
+/**
 	 \macro MIRROR_META_SAVELOAD
 	 Combination of \ref MIRROR_META_SAVE and \ref MIRROR_META_LOAD
  **/
@@ -94,12 +94,14 @@ struct PropMeta
 	rttr::metadata(PropMeta::SAVE, true), \
 	rttr::metadata(PropMeta::LOAD, true)
 
- /**
+/**
 	 \macro MIRROR_META_DEPRECATED
+
 	 Mark a property as deprecated.
 	 Wrapper around rttr::metadata(PropMeta::kDeprecated, true)
  **/
-#define MIRROR_META_DEPRECATED rttr::metadata(PropMeta::DEPRECATED, true)
+#define MIRROR_META_DEPRECATED \
+	rttr::metadata(PropMeta::DEPRECATED, true)
 
 /**
 	\class Object
@@ -117,6 +119,7 @@ public:
 /**
 	\macro DOINSPECT_SIMPLE
 
+	\code{.cpp}
 	class SomeClass : public Mirror::Object,
                       public Mirror::IInspectableObject
 	{
@@ -133,7 +136,7 @@ public:
 #define DOINSPECT_SIMPLE(ARG) \
 	if(WhatIAm_t::MyType() == ARG) \
 	{ \
-		return static_cast<WhatIAm_t*>(this); \
+		return static_cast< WhatIAm_t* >(this); \
 	}
 
 /**
@@ -162,7 +165,7 @@ public:
 #define DOINSPECT_INTERFACE(INTERFACE, ARG) \
 	if(INTERFACE::MyType() == ARG) \
 	{ \
-		return static_cast<INTERFACE*>(this); \
+		return static_cast< INTERFACE* >(this); \
 	}
 
 /**

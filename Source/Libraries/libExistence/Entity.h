@@ -15,17 +15,19 @@ OPEN_NAMESPACE(Elf);
 
 class Component;
 
-class Entity : public Mirror::Object,
-               public Mirror::IInspectableObject
+class Entity : public Mirror::IInspectableObject
 {
 public:
 	Entity();
 	virtual ~Entity();
 
-	virtual void* DoInspect(Mirror::Type type);
+	inline const String& GetName() const { return m_name; }
 
 private:
+	virtual void* DoInspect(Mirror::Type type);
+
 	// Reflected
+	String                         m_name;
 	Vector< SharedPtr<Component> > m_components;
 
 	// Not reflected.
