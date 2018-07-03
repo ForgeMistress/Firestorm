@@ -68,7 +68,7 @@ bool Engine::AddEntity(SharedPtr<Entity>& entity)
 {
 	if(std::find(m_entitiesToChange.begin(), m_entitiesToChange.end(), entity) == m_entitiesToChange.end())
 	{
-		m_entitiesToAdd.push_back(entity);
+		m_entitiesToChange.push_back(entity);
 		return true;
 	}
 	return false;
