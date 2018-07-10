@@ -43,14 +43,24 @@ bool System::Filter(const SharedPtr<Entity>& entity) const
 	return OnEntityFilter(entity);
 }
 
-void System::DoUpdate(float deltaT)
+const WeakPtr<Engine>& System::GetEngine() const
 {
-	OnUpdate(deltaT, m_entities);
+	return m_engine;
+}
+
+const String& System::GetName() const
+{
+	return m_name;
+}
+
+bool System::Contains(const SharedPtr<Entity>& entity) const
+{
+	return std::find(m_entities.begin(), m_entities.end(), m_entities) != m_entities.end();
 }
 
 bool System::AddEntity(SharedPtr<Entity>& entity)
 {
-	if(OnEntityFilter(entity))
+	if (OnEntityFilter(entity))
 	{
 		m_entities.push_back(entity);
 		return true;

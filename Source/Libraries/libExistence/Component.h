@@ -26,10 +26,14 @@ class Entity;
 class Component : public Mirror::Object,
                   public Mirror::IInspectableObject
 {
-	MIRROR_DECLARE(Component, Mirror::IInspectableObject);
+	MIRROR_DECLARE(Component, Mirror::Object, Mirror::IInspectableObject);
 public:
 	Component();
 	virtual ~Component();
+
+	inline const String& GetName() const;
+
+	inline void SetName(const String& name);
 
 	/**
 		Retrieve the entity that this Component is a part of.
@@ -49,6 +53,7 @@ protected:
 	virtual void* DoInspect(Mirror::Type type);
 
 private:
+	String m_name;
 	WeakPtr<Entity> m_entity;
 };
 

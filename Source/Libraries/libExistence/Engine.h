@@ -49,6 +49,7 @@ public:
 	bool AddSystemCategory(Mirror::Type systemInterfaceType);
 
 	const String& GetName() const { return m_name; }
+	void SetName(const String& name) { m_name = name; }
 
 	inline bool Contains(const WeakPtr<Entity>& entity);
 

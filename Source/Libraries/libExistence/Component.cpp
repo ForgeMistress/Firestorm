@@ -14,7 +14,9 @@ OPEN_NAMESPACE(Elf);
 
 RTTR_REGISTRATION
 {
-	MIRROR_DEFINE(Elf::Component);
+	MIRROR_DEFINE(Elf::Component)
+		.property("name", &Component::GetName, &Component::SetName)
+	;
 }
 
 Component::Component()
@@ -23,6 +25,16 @@ Component::Component()
 
 Component::~Component()
 {
+}
+
+const String& Component::GetName() const
+{
+	return m_name;
+}
+
+void Component::SetName(const String& name)
+{
+	m_name = name;
 }
 
 const WeakPtr<Entity>& Component::GetEntity() const

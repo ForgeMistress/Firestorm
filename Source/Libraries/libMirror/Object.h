@@ -53,6 +53,7 @@ typedef rttr::registration Registration;
 			}; \
 		} \
 		using base_class_list = rttr::detail::type_list<__VA_ARGS__>; \
+		friend class rttr::registration::bind<detail::meth, objType, F, acc_level>; \
 	private:
 
 /**

@@ -18,9 +18,10 @@ OPEN_NAMESPACE(Elf);
 class Engine;
 class Entity;
 
-class System : public Mirror::IInspectableObject
+class System : public Mirror::Object,
+               public Mirror::IInspectableObject
 {
-	MIRROR_DECLARE(System, Mirror::IInspectableObject);
+	MIRROR_DECLARE(System, Mirror::Object, Mirror::IInspectableObject);
 public:
 	System();
 	virtual ~System();
@@ -33,8 +34,17 @@ public:
 
 	inline bool Contains(const SharedPtr<Entity>& entity) const;
 
+	bool AddEntity(SharedPtr<Entity>& entity);
+
 protected:
 	friend class Engine;
+
+	/**
+		\function OnModified
+
+		Called when the system is modified in any conceivable way. Called as part of the update loop.
+	 **/
+	virtual void OnModified(float deltaT) {}
 
 	/**
 		\function OnEntityAdded
@@ -74,9 +84,6 @@ protected:
 	 **/
 	virtual bool OnEntityFilter(const SharedPtr<Entity>& entity) const { return false; }
 
-	void DoUpdate(float deltaT);
-	bool AddEntity(SharedPtr<Entity>& entity);
-
 	virtual void* DoInspect(Mirror::Type type);
 
 private:
@@ -86,21 +93,6 @@ private:
 	WeakPtr<Engine> m_engine;
 	Vector<WeakPtr<Entity> > m_entities;
 };
-
-const WeakPtr<Engine>& System::GetEngine() const
-{ 
-	return m_engine;
-}
-
-const String& System::GetName() const 
-{ 
-	return m_name;
-}
-
-bool System::Contains(const SharedPtr<Entity>& entity) const 
-{ 
-	return std::find(m_entities.begin(), m_entities.end(), m_entities) != m_entities.end(); 
-}
 
 CLOSE_NAMESPACE(Elf);
 #endif
