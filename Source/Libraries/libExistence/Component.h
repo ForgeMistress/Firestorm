@@ -11,6 +11,8 @@
 #define LIBEXISTENCE_COMPONENT_H_
 #pragma once
 
+#include <libMirror/IInspectableObject.h>
+
 OPEN_NAMESPACE(Elf);
 
 class Entity;
@@ -18,10 +20,11 @@ class Entity;
 /**
 	\class Component
 
-	A component is an object that contains data and is a part of an Entity. Components should not
+	A component is an object that contains data and is a part of an \ref Entity. \ref Components should not
 	contain application logic within their class definitions.
  **/
-class Component : public Mirror::IInspectableObject
+class Component : public Mirror::Object,
+                  public Mirror::IInspectableObject
 {
 	MIRROR_DECLARE(Component, Mirror::IInspectableObject);
 public:

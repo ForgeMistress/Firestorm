@@ -103,7 +103,66 @@ void Engine::ManageSystems()
 
 void Engine::ManageEntities()
 {
+	if(m_entitiesToRemove.empty() && m_entitiesToChange.empty())
+	{
+		return;
+	}
 
+	// change entities
+	for(auto entity : m_entitiesToChange)
+	{
+		// add if needed.
+		if(std::find(m_entities.begin(), m_entities.end(), entity) == m_entities.end())
+		{
+			m_entities.push_back(entity);
+		}
+
+		for(auto system : m_systems)
+		{
+			//bool contains = system->Contains(entity);
+			Vector<WeakPtr<Entity> >& entities = system->m_entities;
+			auto found = std::find(entities.begin(), entities.end(), entity);
+			if(system->Filter(entity))
+			{
+				if(found == entities.end())
+				{
+					system->m_modified = true;
+					entities.push_back(entity);
+					system->OnEntityAdded(entity);
+				}
+			}
+			else if(found != entities.end())
+			{
+				system->m_modified = true;
+				entities.erase(found);
+				system->OnEntityRemoved(entity);
+			}
+		}
+	}
+
+	// remove entities
+	for(auto entity : m_entitiesToRemove)
+	{
+		auto entityItr = std::find(m_entities.begin(), m_entities.end(), entity);
+		if(entityItr != m_entities.end())
+		{
+			//m_entities.erase(entityItr);
+			for(auto system : m_systems)
+			{
+				Vector<WeakPtr<Entity> >& entities = system->m_entities;
+				auto systemContainsItr = std::find(entities.begin(), entities.end(), entity);
+				if(systemContainsItr != entities.end())
+				{
+					system->m_modified = true;
+					entities.erase(systemContainsItr);
+					system->OnEntityRemoved(entity);
+				}
+			}
+		}
+	}
+
+	m_entitiesToRemove.clear();
+	m_entitiesToChange.clear();
 }
 
 CLOSE_NAMESPACE(Elf);

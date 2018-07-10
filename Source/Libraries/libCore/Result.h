@@ -46,41 +46,40 @@ struct _ResultTemplate
 	typedef typename tl::expected<expected_type, Error> result_type;
 };
 
-//template <typename Ex_t> using ResultCode = typename _ResultTemplate<Ex_t>::result_type;
-
-template <typename Ex_t, typename UEx_t> using Result = tl::expected<Ex_t, UEx_t>;
+template <typename Ex_t, typename UEx_t> using Result =
+	tl::expected<Ex_t, UEx_t>;
 
 /*template <class Ex_t>
-static typename _ResultTemplate<Ex_t>::result_type result(Ex_t&& e)
+static Result<Ex_t, Error> result(Ex_t&& e)
 {
-	return _ResultTemplate<Ex_t>::result_type(e);
+	return Result<Ex_t, Error>(e);
 }
 
-static typename _ResultTemplate<void>::result_type void_result()
+static Result<void, Error> void_result()
 {
-	return _ResultTemplate<void>::result_type();
+	return Result<void, Error>();
 }
 
-static typename _ResultTemplate<void>::result_type void_error(int e, const String& msg)
+static Result<void, Error> void_error(int e, const String& msg)
 {
-	return tl::expected<void, Error>(tl::unexpect, Error(e, msg));
+	return Result<void, Error>(tl::unexpect, Error(e, msg));
 }
 
 template<typename Ex_t>
-static typename _ResultTemplate<Ex_t>::result_type error(int e, const String& msg)
+static Result<Ex_t, Error> error(int e, const String& msg)
 {
-	return _ResultTemplate<Ex_t>::result_type(tl::unexpect, Error(e, msg));
+	return Result<void, Error>(tl::unexpect, Error(e, msg));
 }
 
 OPEN_NAMESPACE(Result);
 template<class Expected_t>
-static bool IsOK(const ResultCode<Expected_t>& result)
+static bool IsOK(const Result<Expected_t, Error>& result)
 {
 	return result.has_value();
 }
 
 template<class Expected_t>
-static bool IsNotOK(const ResultCode<Expected_t>& result)
+static bool IsNotOK(const Result<Expected_t, error>& result)
 {
 	return !result.has_value();
 }

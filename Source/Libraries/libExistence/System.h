@@ -11,6 +11,8 @@
 #define LIBEXISTENCE_SYSTEM_H_
 #pragma once
 
+#include <libMirror/IInspectableObject.h>
+
 OPEN_NAMESPACE(Elf);
 
 class Engine;
@@ -24,10 +26,12 @@ public:
 	virtual ~System();
 
 	inline void AddToEngine(SharedPtr<Engine>& engine);
-	inline bool Filter(SharedPtr<Entity>& entity) const;
+	inline bool Filter(const SharedPtr<Entity>& entity) const;
 
-	inline const WeakPtr<Engine>& GetEngine() const { return m_engine; }
-	inline const String&          GetName() const   { return m_name; }
+	inline const WeakPtr<Engine>& GetEngine() const;
+	inline const String&          GetName() const;
+
+	inline bool Contains(const SharedPtr<Entity>& entity) const;
 
 protected:
 	friend class Engine;
@@ -35,8 +39,9 @@ protected:
 	/**
 		\function OnEntityAdded
 
-		Called when, for whatever reason, an 
+		Called when, for whatever reason, an entity is added to the internal entity list.
 	 **/
+	virtual void OnEntityAdded(const SharedPtr<Entity>& /*entity*/) {}
 
 	/**
 		\function OnAddToEngine
@@ -67,7 +72,7 @@ protected:
 
 		\return true if this entity should be added and false if not.
 	 **/
-	virtual bool OnEntityFilter(SharedPtr<Entity>& entity) const { return false; }
+	virtual bool OnEntityFilter(const SharedPtr<Entity>& entity) const { return false; }
 
 	void DoUpdate(float deltaT);
 	bool AddEntity(SharedPtr<Entity>& entity);
@@ -77,9 +82,25 @@ protected:
 private:
 	// Reflected.
 	String m_name;
+	bool m_modified;
 	WeakPtr<Engine> m_engine;
-	Vector< WeakPtr<Entity> > m_entities;
+	Vector<WeakPtr<Entity> > m_entities;
 };
+
+const WeakPtr<Engine>& System::GetEngine() const
+{ 
+	return m_engine;
+}
+
+const String& System::GetName() const 
+{ 
+	return m_name;
+}
+
+bool System::Contains(const SharedPtr<Entity>& entity) const 
+{ 
+	return std::find(m_entities.begin(), m_entities.end(), m_entities) != m_entities.end(); 
+}
 
 CLOSE_NAMESPACE(Elf);
 #endif

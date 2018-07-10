@@ -50,6 +50,8 @@ public:
 
 	const String& GetName() const { return m_name; }
 
+	inline bool Contains(const WeakPtr<Entity>& entity);
+
 private:
 	void ManageSystems();
 	void ManageEntities();
@@ -69,6 +71,11 @@ private:
 	List< SharedPtr<System> > m_systemsToAdd;
 	List< SharedPtr<System> > m_systemsToRemove;
 };
+
+bool Engine::Contains(const WeakPtr<Entity>& entity)
+{
+	return std::find(m_entities.begin(), m_entities.end(), entity) != m_entities.end();
+}
 
 CLOSE_NAMESPACE(Elf);
 #endif

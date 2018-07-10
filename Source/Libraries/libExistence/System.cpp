@@ -20,6 +20,7 @@ RTTR_REGISTRATION
 }
 
 System::System()
+: m_modified(false)
 {
 }
 
@@ -37,13 +38,14 @@ void System::AddToEngine(SharedPtr<Engine>& engine)
 	}
 }
 
-bool System::Filter(SharedPtr<Entity>& entity) const
+bool System::Filter(const SharedPtr<Entity>& entity) const
 {
 	return OnEntityFilter(entity);
 }
 
 void System::DoUpdate(float deltaT)
 {
+	OnUpdate(deltaT, m_entities);
 }
 
 bool System::AddEntity(SharedPtr<Entity>& entity)
