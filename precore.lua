@@ -203,6 +203,7 @@ function unittest(testname, args)
 
     includedirs({ 
         libsrcpath,
+        libsrcpath.."/"..testname,
         "ThirdParty/rttr/src",
         "ThirdParty/rttr/build/src",
     })

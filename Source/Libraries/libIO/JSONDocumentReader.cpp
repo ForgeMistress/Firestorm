@@ -152,6 +152,7 @@ Result<void, Error> JSONDocumentReader::Section::SetPosFromRoot(const std::initi
 			}
 		}
 	}
+	return Result<void, Error>();
 }
 
 Result<void, Error> JSONDocumentReader::Section::MoveToChild(const String& toChild)
@@ -168,7 +169,8 @@ Result<void, Error> JSONDocumentReader::Section::MoveToChild(const String& toChi
 	{
 		m_cursor = &(*m_cursor)[toChild];
 	}
-
+	// TODO: Re-evaluate this.
+	return Result<void, Error>();
 }
 
 Result<void, Error> JSONDocumentReader::Section::MoveToParent()

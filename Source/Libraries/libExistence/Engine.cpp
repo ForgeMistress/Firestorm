@@ -15,7 +15,7 @@
 
 OPEN_NAMESPACE(Elf);
 
-RTTR_REGISTRATION
+MIRROR_REGISTRATION
 {
 	MIRROR_DEFINE(Elf::Engine);
 }
@@ -30,6 +30,26 @@ Engine::~Engine()
 {
 }
 
+void Engine::Pause()
+{
+	m_paused = true;
+}
+
+void Engine::Unpause()
+{
+	m_paused = false;
+}
+
+void Engine::TogglePause()
+{
+	m_paused = !m_paused;
+}
+
+void Engine::ShutDown()
+{
+	m_running = false;
+}
+
 void Engine::Update(double deltaT)
 {
 	if(m_running)
@@ -39,12 +59,36 @@ void Engine::Update(double deltaT)
 			ManageSystems();
 			ManageEntities();
 
-			
+			// iterate the systems backwards and call modification function if they've been modified.
+			for(size_t i = m_systems.size() - 1; i >= 0; --i)
+			{
+				auto system = m_systems[i];
+				if (system->m_active)
+				{
+					if(system->m_modified)
+					{
+						system->OnModified(deltaT);
+					}
+					// TODO: OnPreWrap?
+				}
+			}
+			// normal update
+			for(auto system : m_systems)
+			{
+				if(system->m_active)
+				{
+					// TODO: Time buffering and intervals.
+					system->OnUpdate(deltaT, system->m_entities);
+				}
+				system->m_modified = false;
+			}
+
+			// TODO: OnPostWrap?
 		}
 	}
 }
 
-bool Engine::AddSystem(SharedPtr<System>& system)
+bool Engine::AddSystem(const SharedPtr<System>& system)
 {
 	if(std::find(m_systemsToAdd.begin(), m_systemsToAdd.end(), system) == m_systemsToAdd.end())
 	{
@@ -54,7 +98,7 @@ bool Engine::AddSystem(SharedPtr<System>& system)
 	return false;
 }
 
-bool Engine::RemoveSystem(SharedPtr<System>& system)
+bool Engine::RemoveSystem(const SharedPtr<System>& system)
 {
 	if(std::find(m_systems.begin(), m_systems.end(), system) != m_systems.end())
 	{
@@ -64,7 +108,7 @@ bool Engine::RemoveSystem(SharedPtr<System>& system)
 	return false;
 }
 
-bool Engine::AddEntity(SharedPtr<Entity>& entity)
+bool Engine::AddEntity(const SharedPtr<Entity>& entity)
 {
 	if(std::find(m_entitiesToChange.begin(), m_entitiesToChange.end(), entity) == m_entitiesToChange.end())
 	{
@@ -74,7 +118,7 @@ bool Engine::AddEntity(SharedPtr<Entity>& entity)
 	return false;
 }
 
-bool Engine::RemoveEntity(SharedPtr<Entity>& entity)
+bool Engine::RemoveEntity(const SharedPtr<Entity>& entity)
 {
 	if(std::find(m_entities.begin(), m_entities.end(), entity) != m_entities.end())
 	{
@@ -84,6 +128,36 @@ bool Engine::RemoveEntity(SharedPtr<Entity>& entity)
 	return false;
 }
 
+void Engine::Refresh()
+{
+	ManageSystems();
+	ManageEntities();
+
+	for(size_t i = m_systems.size() - 1; i >= 0; --i)
+	{
+		auto system = m_systems[i];
+		if(system->m_active)
+		{
+			system->OnModified(0.0);
+		}
+	}
+}
+
+const String& Engine::GetName() const
+{ 
+	return m_name;
+}
+
+void Engine::SetName(const String& name)
+{
+	m_name = name;
+}
+
+bool Engine::Contains(const WeakPtr<Entity>& entity)
+{
+	return std::find(m_entities.begin(), m_entities.end(), entity.lock()) != m_entities.end();
+}
+
 void Engine::ManageSystems()
 {
 	if(m_systemsToAdd.empty() && m_systemsToRemove.empty())
@@ -91,14 +165,40 @@ void Engine::ManageSystems()
 		return;
 	}
 
+	// remove systems
 	for(auto system : m_systemsToRemove)
 	{
-		assert(system);
 		for(auto entity : system->m_entities)
 		{
 			system->OnEntityRemoved(entity);
 		}
+		system->OnRemoveFromEngine();
+		system->m_engine = nullptr;
 	}
+
+	//add systems
+	for(auto system : m_systemsToAdd)
+	{
+		system->OnBeforeAddToEngine();
+
+		system->m_modified = true;
+		system->m_active = true;
+		system->m_engine = this;
+
+		system->OnAddToEngine();
+
+		// add entities to the systems
+		for(auto entity : m_entities)
+		{
+			if(system->Filter(entity))
+			{
+				system->m_entities.push_back(entity);
+				system->OnEntityAdded(entity);
+			}
+		}
+	}
+	m_systemsToAdd.clear();
+	m_systemsToRemove.clear();
 }
 
 void Engine::ManageEntities()
@@ -119,19 +219,22 @@ void Engine::ManageEntities()
 
 		for(auto system : m_systems)
 		{
-			//bool contains = system->Contains(entity);
 			Vector<WeakPtr<Entity> >& entities = system->m_entities;
-			auto found = std::find(entities.begin(), entities.end(), entity);
-			if(system->Filter(entity))
+			// if the entity is already inside the 
+			auto found = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
+				return e.lock().get() == entity.get();
+			});
+			
+			if(found == entities.end())
 			{
-				if(found == entities.end())
+				if(system->Filter(entity))
 				{
 					system->m_modified = true;
 					entities.push_back(entity);
 					system->OnEntityAdded(entity);
 				}
 			}
-			else if(found != entities.end())
+			else
 			{
 				system->m_modified = true;
 				entities.erase(found);
@@ -149,8 +252,10 @@ void Engine::ManageEntities()
 			//m_entities.erase(entityItr);
 			for(auto system : m_systems)
 			{
-				Vector<WeakPtr<Entity> >& entities = system->m_entities;
-				auto systemContainsItr = std::find(entities.begin(), entities.end(), entity);
+				Vector<EntityWeakPtr>& entities = system->m_entities;
+				auto systemContainsItr = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
+					return e.lock().get() == entity.get();
+				});
 				if(systemContainsItr != entities.end())
 				{
 					system->m_modified = true;

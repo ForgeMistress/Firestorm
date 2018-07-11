@@ -17,6 +17,23 @@
 #define MIRROR_DEFINE(OBJ_TYPE) \
 	MIRROR_DEFINE_NAMED(OBJ_TYPE, #OBJ_TYPE)
 
+#define ELF_CAT_IMPL(a,b) a##b
+#define ELF_CAT(a,b) ELF_CAT_IMPL(a,b)
+#define MIRROR_REGISTRATION \
+static void elf_auto_register_reflection_function_();                               \
+namespace                                                                           \
+{                                                                                   \
+    struct elf__auto__register__                                                    \
+    {                                                                               \
+        elf__auto__register__()                                                     \
+        {                                                                           \
+            elf_auto_register_reflection_function_();                               \
+        }                                                                           \
+    };                                                                              \
+}                                                                                   \
+static const elf__auto__register__ ELF_CAT(auto_register__,__LINE__);               \
+static void elf_auto_register_reflection_function_()
+
 OPEN_NAMESPACE(Elf);
 OPEN_NAMESPACE(Mirror);
 
@@ -53,20 +70,26 @@ typedef rttr::registration Registration;
 			}; \
 		} \
 		using base_class_list = rttr::detail::type_list<__VA_ARGS__>; \
-		friend class rttr::registration::bind<detail::meth, objType, F, acc_level>; \
 	private:
 
 /**
-	\enum
+	\struct PropMeta
+
+	Holds the properties metadata enumeration.
  **/
 struct PropMeta
 {
-	enum Type
+	/**
+		\enum Type
+
+		Enumeration that 
+	 **/
+	enum Type : uint8_t
 	{
-		SAVE,
-		LOAD,
-		DEPRECATED, //< Mark a property as deprecated.
-		CLASS_REMAP  //< Use this to define another class name when renaming classes.
+		SAVE        = 0, //< Mark a property as needing to be loaded from data files.
+		LOAD        = 1, //< Mark a property as needing to be saved to data files.
+		DEPRECATED  = 2, //< Mark a property as deprecated.
+		CLASS_REMAP = 3  //< Use this to define another class name when renaming classes.
 	};
 };
 
@@ -74,26 +97,28 @@ struct PropMeta
 	\macro MIRROR_META_SAVE
 	Tells the serializer that this property should be used to write data to the serialized object's file.
 
-	Wrapper around rttr::metadata(PropMeta::kSave, true)
+	Convenience wrapper around rttr::metadata(PropMeta::SAVE, true)
  **/
-#define MIRROR_META_SAVE rttr::metadata(PropMeta::SAVE, true)
+#define MIRROR_META_SAVE rttr::metadata(Elf::Mirror::PropMeta::SAVE, true)
 
 /**
 	 \macro MIRROR_META_SAVE
+
 	 Tells the serializer that this property should be used to load data from the serialized object's file
 	 to the object instance we're constructing.
 
-	 Wrapper around rttr::metadata(PropMeta::kLoad, true)
+	 Convenience wrapper around rttr::metadata(PropMeta::LOAD, true)
  **/
-#define MIRROR_META_LOAD rttr::metadata(PropMeta::LOAD, true)
+#define MIRROR_META_LOAD rttr::metadata(Elf::Mirror::PropMeta::LOAD, true)
 
 /**
 	 \macro MIRROR_META_SAVELOAD
+
 	 Combination of \ref MIRROR_META_SAVE and \ref MIRROR_META_LOAD
  **/
 #define MIRROR_META_SAVELOAD \
-	rttr::metadata(PropMeta::SAVE, true), \
-	rttr::metadata(PropMeta::LOAD, true)
+	rttr::metadata(Elf::Mirror::PropMeta::SAVE, true), \
+	rttr::metadata(Elf::Mirror::PropMeta::LOAD, true)
 
 /**
 	 \macro MIRROR_META_DEPRECATED
@@ -102,8 +127,20 @@ struct PropMeta
 	 Wrapper around rttr::metadata(PropMeta::kDeprecated, true)
  **/
 #define MIRROR_META_DEPRECATED \
-	rttr::metadata(PropMeta::DEPRECATED, true)
+	rttr::metadata(Elf::Mirror::PropMeta::DEPRECATED, true)
 
+/**
+	\macro MIRROR_META_REMAP
+
+	Remap this class from another class. Useful if classes need to be renamed.
+
+	Convenience wrapper around rttr::metadata(PropMeta::CLASS_REMAP, NEW_CLASSNAME)
+	
+	\code{.cpp}
+
+	\endcode
+ **/
+#define MIRROR_META_REMAP( NEW_CLASSNAME ) rttr::metadata(Elf::Mirror::PropMeta::CLASS_REMAP, NEW_CLASSNAME)
 /**
 	\class Object
 	
@@ -111,11 +148,11 @@ struct PropMeta
  **/
 class Object
 {
-	MIRROR_DECLARE(Object);
+	MIRROR_DECLARE(Elf::Mirror::Object);
 public:
-    Object(){}
-    virtual ~Object(){}
+	virtual ~Object() = 0;
 };
+Object::~Object() {}
 
 /**
 	\macro DOINSPECT_SIMPLE
@@ -147,6 +184,8 @@ public:
 	class ISomeInterface
 	{
 		MIRROR_DECLARE(ISomeInterface);
+	public:
+		virtual void SomeMethod() = 0;
 	};
 	class SomeClass : public Mirror::Object,
                       public Mirror::IInspectableObject,
@@ -159,6 +198,11 @@ public:
 			DOINSPECT_SIMPLE(type);
 			DOINSPECT_INTERFACE(ISomeInterface, type);
 			return IInspectableObject::DoInspect(type);
+		}
+	private:
+		virtual void SomeMethod()
+		{
+			// do stuff
 		}
 	};
 	\endcode

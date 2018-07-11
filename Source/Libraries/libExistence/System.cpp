@@ -14,36 +14,40 @@
 
 OPEN_NAMESPACE(Elf);
 
-RTTR_REGISTRATION
+MIRROR_REGISTRATION
 {
-	MIRROR_DEFINE(Elf::System);
+	MIRROR_DEFINE(Elf::System)
+		.property("name", &System::GetName, &System::SetName)
+		(
+			MIRROR_META_SAVELOAD
+		)
+	;
 }
 
 System::System()
 : m_modified(false)
+, m_active(false)
+, m_paused(false)
 {
 }
 
+// protected
 System::~System()
 {
+	m_engine = nullptr;
+	m_entities.clear();
 }
 
-void System::AddToEngine(SharedPtr<Engine>& engine)
+bool System::Filter(const WeakPtr<Entity>& entity) const
 {
-	// assert(m_engine.get() == nullptr && "System is already part of an Engine instance.");
-	if(is_uninitialized(m_engine))
+	if(!entity.expired())
 	{
-		m_engine = engine;
-		OnAddToEngine();
+		return OnEntityFilter(entity);
 	}
+	return false;
 }
 
-bool System::Filter(const SharedPtr<Entity>& entity) const
-{
-	return OnEntityFilter(entity);
-}
-
-const WeakPtr<Engine>& System::GetEngine() const
+const Engine* System::GetEngine() const
 {
 	return m_engine;
 }
@@ -53,17 +57,36 @@ const String& System::GetName() const
 	return m_name;
 }
 
-bool System::Contains(const SharedPtr<Entity>& entity) const
+void System::SetName(const String& name)
 {
-	return std::find(m_entities.begin(), m_entities.end(), m_entities) != m_entities.end();
+	m_name = name;
 }
 
-bool System::AddEntity(SharedPtr<Entity>& entity)
+bool System::Contains(const WeakPtr<Entity>& entity) const
 {
-	if (OnEntityFilter(entity))
+	if(!entity.expired())
 	{
-		m_entities.push_back(entity);
-		return true;
+		return std::find_if(m_entities.begin(), m_entities.end(), [&entity](const WeakPtr<Entity>& e) {
+			return e.lock().get() == entity.lock().get();
+		}) != m_entities.end();
+	}
+	return false;
+}
+
+void System::Pause()
+{
+	m_paused = true;
+}
+
+bool System::AddEntity(WeakPtr<Entity>& entity)
+{
+	if(!entity.expired())
+	{
+		if (OnEntityFilter(entity))
+		{
+			m_entities.push_back(entity);
+			return true;
+		}
 	}
 	return false;
 }
@@ -72,6 +95,21 @@ void* System::DoInspect(Mirror::Type type)
 {
 	DOINSPECT_SIMPLE(type);
 	return IInspectableObject::DoInspect(type);
+}
+
+void System::AddToEngine(Engine* engine)
+{
+	if(m_engine == nullptr)
+	{
+		m_engine = engine;
+		OnAddToEngine();
+	}
+}
+
+void System::Reset()
+{
+	m_engine = nullptr;
+	m_entities.clear();
 }
 
 CLOSE_NAMESPACE(Elf);

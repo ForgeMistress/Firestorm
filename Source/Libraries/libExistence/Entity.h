@@ -15,7 +15,8 @@ OPEN_NAMESPACE(Elf);
 
 class Component;
 
-class Entity : public Mirror::IInspectableObject
+class Entity : public Mirror::Object,
+               public Mirror::IInspectableObject
 {
 public:
 	Entity();
@@ -34,6 +35,8 @@ private:
 	friend class Engine;
 	WeakPtr< Engine > m_owningEngine;
 };
+typedef SharedPtr<Entity> EntityPtr;
+typedef WeakPtr<Entity>   EntityWeakPtr;
 
 CLOSE_NAMESPACE(Elf);
 #endif
