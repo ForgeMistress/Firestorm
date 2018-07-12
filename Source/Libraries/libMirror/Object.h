@@ -54,22 +54,22 @@ typedef rttr::registration Registration;
 	static Is     - Checks the type against all common forms.
 	virtual GetType - Retrieve the type at the instance leve.
  **/
-#define MIRROR_DECLARE(objType, ...) \
-	private: \
-		typedef objType WhatIAm_t; \
-	public: \
-		static rttr::type MyType() { return rttr::type::get<WhatIAm_t>(); } \
-		static  bool       Is(rttr::type rttr_t)        { return WhatIAm_t::MyType() == rttr_t; } \
-		virtual RTTR_INLINE rttr::type GetType() const  { return WhatIAm_t::MyType(); } \
+#define MIRROR_DECLARE(OBJ_TYPE, ...)                                                                           \
+	private:                                                                                                    \
+		typedef OBJ_TYPE WhatIAm_t;                                                                             \
+	public:                                                                                                     \
+		static rttr::type  MyType() { return rttr::type::get<WhatIAm_t>(); }                                    \
+		static  bool       Is(rttr::type rttr_t)        { return WhatIAm_t::MyType() == rttr_t; }               \
+		virtual RTTR_INLINE rttr::type GetType() const  { return WhatIAm_t::MyType(); }                         \
 		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); }  \
-		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); } \
-		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() { \
-			return { \
-				reinterpret_cast<void*>(this), \
-				rttr::detail::get_type_from_instance(this) \
-			}; \
-		} \
-		using base_class_list = rttr::detail::type_list<__VA_ARGS__>; \
+		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); }               \
+		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() {                                     \
+			return {                                                                                            \
+				reinterpret_cast<void*>(this),                                                                  \
+				rttr::detail::get_type_from_instance(this)                                                      \
+			};                                                                                                  \
+		}                                                                                                       \
+		using base_class_list = rttr::detail::type_list<__VA_ARGS__>;                                           \
 	private:
 
 /**
@@ -95,6 +95,7 @@ struct PropMeta
 
 /**
 	\macro MIRROR_META_SAVE
+
 	Tells the serializer that this property should be used to write data to the serialized object's file.
 
 	Convenience wrapper around rttr::metadata(PropMeta::SAVE, true)
