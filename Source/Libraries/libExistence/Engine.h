@@ -27,7 +27,7 @@ class Entity;
  **/
 class Engine final : public Mirror::Object
 {
-	MIRROR_DECLARE(Engine, Mirror::Object);
+	ELF_MIRROR_DECLARE(Engine, Mirror::Object);
 public:
 	Engine();
 	virtual ~Engine();
@@ -51,6 +51,9 @@ public:
 	inline void SetName(const String& name);
 
 	inline bool Contains(const WeakPtr<Entity>& entity);
+
+	inline size_t GetNumSystems() const;
+	inline size_t GetNumEntities() const;
 
 private:
 	void ManageSystems();

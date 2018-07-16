@@ -11,7 +11,6 @@
 #define LIBCORE_RESULT_H_
 #pragma once
 
-#include <functional>
 #include "Expected.h"
 
 OPEN_NAMESPACE(Elf);
@@ -28,7 +27,8 @@ public:
 	explicit operator int() const { return Code; }
 
 	template<class Enum_t> 
-	Enum_t ToEnum() const { 
+	Enum_t ToEnum() const
+	{ 
 		return static_cast<Enum_t>(Code); 
 	}
 
@@ -39,52 +39,11 @@ public:
 	String  Message;
 };
 
-template<typename Ex_t>
-struct _ResultTemplate
-{
-	typedef typename std::remove_reference<Ex_t>::type  expected_type;
-	typedef typename tl::expected<expected_type, Error> result_type;
-};
+template <typename Expected_t, typename Unexpected_t> using Result =
+	tl::expected<Expected_t, Unexpected_t>;
 
-template <typename Ex_t, typename UEx_t> using Result =
-	tl::expected<Ex_t, UEx_t>;
-
-/*template <class Ex_t>
-static Result<Ex_t, Error> result(Ex_t&& e)
-{
-	return Result<Ex_t, Error>(e);
-}
-
-static Result<void, Error> void_result()
-{
-	return Result<void, Error>();
-}
-
-static Result<void, Error> void_error(int e, const String& msg)
-{
-	return Result<void, Error>(tl::unexpect, Error(e, msg));
-}
-
-template<typename Ex_t>
-static Result<Ex_t, Error> error(int e, const String& msg)
-{
-	return Result<void, Error>(tl::unexpect, Error(e, msg));
-}
-
-OPEN_NAMESPACE(Result);
-template<class Expected_t>
-static bool IsOK(const Result<Expected_t, Error>& result)
-{
-	return result.has_value();
-}
-
-template<class Expected_t>
-static bool IsNotOK(const Result<Expected_t, error>& result)
-{
-	return !result.has_value();
-}
-
-CLOSE_NAMESPACE(Result);*/
+#define ELF_ERROR( CODE, ERROR_STRING ) \
+	tl::make_unexpected(Error( CODE, ERROR_STRING ))
 
 CLOSE_NAMESPACE(Elf);
 #endif

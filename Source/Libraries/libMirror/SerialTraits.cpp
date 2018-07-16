@@ -22,7 +22,7 @@ Result<SharedPtr<IDocumentWriter>, Error > SerialTraits<TYPE>::Write(const char*
 { \
 	Result<IDocumentWriter*, Error> rc = writer -> Write##FUNCTYPE (key, input); \
 	if(!rc.has_value()) { \
-		return tl::make_unexpected<Error>(Error(SerialResults::WRITE_ERROR, rc.error().Message)); \
+		return ELF_ERROR( SerialResults::WRITE_ERROR, rc.error().Message ); \
 	} \
 	return Result<SharedPtr<IDocumentWriter>,Error>(writer); \
 } \
@@ -125,13 +125,14 @@ Result<SharedPtr<IDocumentWriter>, Error> SerialTraits<const Object*>::Write(con
 Result<const Object*,Error> SerialTraits<const Object*>::Read(const char* key, SharedPtr<IDocumentReader> reader, T& input)
 {
 	assert(false && "const Object* is Write-Only.");
-	return tl::make_unexpected<Error>(Error(SerialResults::INPUT_NOT_VALID, "input is not valid for this operation"));
+	return ELF_ERROR(SerialResults::INPUT_NOT_VALID, "input is not valid for this operation");
+	//tl::make_unexpected<Error>(Error(SerialResults::INPUT_NOT_VALID, "input is not valid for this operation"));
 }
 
 #define _onfailedreturn(tt, op) { \
 	ResultCode<IDocumentWriter*> rc = op ; \
 	if(!rc.has_value()) { \
-		return tl::make_unexpected(Error(SerialResults::WRITE_ERROR, rc.error())); \
+		return ELF_ERROR(SerialResults::WRITE_ERROR, rc.error()); \
 	} \
 }
 
@@ -241,7 +242,7 @@ Result<SharedPtr<Object>,Error> SerialTraits< SharedPtr<Object> >::
 Result<SharedPtr<IDocumentWriter>,Error> SerialTraits<rttr::variant>::Write(const char* key, SharedPtr<IDocumentWriter> writer, const rttr::variant& input)
 {
 	if(!input.is_valid()) { 
-		return tl::make_unexpected<Error>(Error(SerialResults::VARIANT_NOT_VALID, "variant "+String(key)+" is not valid"));
+		return ELF_ERROR(SerialResults::VARIANT_NOT_VALID, "variant " + String(key) + " is not valid");
 	}
 	/*_writeiftype(int8_t);
 	_writeiftype(uint8_t);

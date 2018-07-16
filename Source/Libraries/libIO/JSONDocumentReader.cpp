@@ -225,9 +225,10 @@ Result<void, Error> JSONDocumentReader::SetCursor(const char* section)
 			m_typeSection.cursorParents.pop_back();
 			return result();
 		}*/
-		return tl::make_unexpected<Error>(Error(ERROR, "failed to set cursor at " + String(section)));
+		return ELF_ERROR(ERROR, "failed to set cursor at " + String(section));
 	}
-	return tl::make_unexpected<Error>(Error(SUBSECTION_NOT_FOUND, "subsection '" + String(section) + "' was not found prior to calling"));
+	return ELF_ERROR(SUBSECTION_NOT_FOUND, "subsection '" + String(section) + "' was not found prior to calling");
+	//tl::make_unexpected<Error>(Error(SUBSECTION_NOT_FOUND, "subsection '" + String(section) + "' was not found prior to calling"));
 }
 
 /*private:

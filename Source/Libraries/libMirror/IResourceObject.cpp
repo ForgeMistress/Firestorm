@@ -14,7 +14,7 @@ OPEN_NAMESPACE(Elf);
 
 RTTR_REGISTRATION
 {
-	MIRROR_DEFINE(Elf::IResourceObject);
+	ELF_MIRROR_DEFINE(Elf::IResourceObject);
 }
 
 CLOSE_NAMESPACE(Elf);

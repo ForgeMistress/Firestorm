@@ -15,9 +15,9 @@
 
 OPEN_NAMESPACE(Elf);
 
-MIRROR_REGISTRATION
+ELF_MIRROR_REGISTRATION
 {
-	MIRROR_DEFINE(Elf::Engine);
+	ELF_MIRROR_DEFINE(Elf::Engine);
 }
 
 Engine::Engine()
@@ -156,6 +156,16 @@ void Engine::SetName(const String& name)
 bool Engine::Contains(const WeakPtr<Entity>& entity)
 {
 	return std::find(m_entities.begin(), m_entities.end(), entity.lock()) != m_entities.end();
+}
+
+size_t Engine::GetNumSystems() const
+{
+	return m_systems.size();
+}
+
+size_t Engine::GetNumEntities() const
+{
+	return m_entities.size();
 }
 
 void Engine::ManageSystems()

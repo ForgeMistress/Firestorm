@@ -26,7 +26,7 @@ class Entity;
 class Component : public Mirror::Object,
                   public Mirror::IInspectableObject
 {
-	MIRROR_DECLARE(Component, Mirror::Object, Mirror::IInspectableObject);
+	ELF_MIRROR_DECLARE(Component, Mirror::Object, Mirror::IInspectableObject);
 public:
 	Component();
 	virtual ~Component();

@@ -19,7 +19,7 @@ OPEN_NAMESPACE(Elf);
 
 class IResourceObject
 {
-	MIRROR_DECLARE(IResourceObject);
+	ELF_MIRROR_DECLARE(IResourceObject);
 public:
 	virtual ~IResourceObject() {}
 

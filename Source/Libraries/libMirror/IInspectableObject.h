@@ -25,7 +25,7 @@ the type, then it must return the pointer to the object static_casted to the apr
 **/
 class IInspectableObject
 {
-	MIRROR_DECLARE(IInspectableObject);
+	ELF_MIRROR_DECLARE(IInspectableObject);
 public:
 	/**
 	Inspect an object to see if it implements the type defined in the template.
@@ -34,13 +34,13 @@ public:
 	inline Interface_t* Inspect();
 
 	/**
-	Inspect an object to see if it implements the type defined in the template.
+		Inspect an object to see if it implements the type defined in the template.
 	**/
 	template <class Interface_t>
 	inline const Interface_t* Inspect() const;
 
 	/**
-	Inspect an object to see if it implements the provided type.
+		Inspect an object to see if it implements the provided type.
 	**/
 	inline void* Inspect(Type type);
 
@@ -51,6 +51,24 @@ protected:
 	IInspectableObject() {}
 	virtual ~IInspectableObject() {}
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Interface_t>
+inline Interface_t* IInspectableObject::Inspect()
+{
+	return static_cast<Interface_t*>(DoInspect(Interface_t::MyType()));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class Interface_t>
+inline const Interface_t* IInspectableObject::Inspect() const
+{
+	return reinterpret_cast<const Interface_t*>(DoInspect(Interface_t::MyType()));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CLOSE_NAMESPACE(Mirror);
 CLOSE_NAMESPACE(Elf);

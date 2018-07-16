@@ -14,7 +14,7 @@ OPEN_NAMESPACE(Elf);
 
 RTTR_REGISTRATION
 {
-	MIRROR_DEFINE(Elf::Component)
+	ELF_MIRROR_DEFINE(Elf::Component)
 		.property("name", &Component::GetName, &Component::SetName)
 	;
 }

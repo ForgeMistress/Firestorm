@@ -53,7 +53,7 @@ class ObjectPool
 				try {
 					(*poolPtr.get())->Return(ptr);
 				}
-				catch (...) {}
+				catch(...) {}
 			}
 		}
 		PoolWeakPtr_t m_pool;
@@ -125,7 +125,7 @@ private:
 	PoolSharedPtr_t  m_thisPtr;
 	uint32_t         m_poolSize;
 	Vector<Object_t> m_pool;
-	Vector<Object_t> m_inUse;
+	Vector<bool>     m_inUse;
 };
 
 template <class Object_t>
@@ -133,7 +133,7 @@ template <class... Args_t>
 Result<SharedPtr<Object_t>, Error> ObjectPool<Object_t>::Acquire(Args_t... args)
 {
 	Result<uint16_t, Error> unused = FindUnused();
-	if (unused.has_value())
+	if(unused.has_value())
 	{
 		Object_t* obj = Get(unused.value());
 		SetInUse(obj);
@@ -144,7 +144,8 @@ Result<SharedPtr<Object_t>, Error> ObjectPool<Object_t>::Acquire(Args_t... args)
 		catch (...) {}
 		return SharedPtr<Object_t>(obj, SharedPtrDeleter(m_thisPtr));
 	}
-	return tl::make_unexpected(unused.error());
+
+	return ELF_ERROR(unused.error().Code, unused.error().Message);
 }
 
 template <class Object_t>
@@ -174,10 +175,8 @@ ObjectPool<Object_t>::~ObjectPool()
 	}
 }
 
-template<
-	class    Object_t,
-	uint16_t PoolSize_v
-> void ObjectPool<Object_t, PoolSize_v>::Return(Object_t* obj)
+template <class Object_t>
+void ObjectPool<Object_t>::Return(Object_t* obj)
 {
 	SetAvailable(obj);
 }
@@ -196,13 +195,13 @@ Result<bool, Error> ObjectPool<Object_t>::IsInUse(Object_t* obj)
 template <class Object_t>
 uint32_t ObjectPool<Object_t>::GetObjectBlockSize()
 {
-	return sizeof(m_pool);
+	return m_poolSize * sizeof(Object_t);
 }
 
 template <class Object_t>
 uint32_t ObjectPool<Object_t>::GetFlagBlockSize()
 {
-	return sizeof(m_inUse);
+	return m_poolSize;
 }
 
 template <class Object_t>
@@ -215,13 +214,13 @@ Result<uint16_t, Error> ObjectPool<Object_t>::FindUnused()
 			return i;
 		}
 	}
-	return tl::make_unexpected(Error(Pool::POOL_EMPTY, "the pool does not contain any more unused objects"));
+	return ELF_ERROR(Pool::POOL_EMPTY, "the pool does not contain any more unused objects");
 }
 
 template <class Object_t>
 Object_t* ObjectPool<Object_t>::Get(uint16_t index)
 {
-	assert(index < PoolSize_v);
+	assert(index < m_poolSize);
 	return &m_pool[index];
 }
 
@@ -255,7 +254,8 @@ Result<uint16_t, Error> ObjectPool<Object_t>::Find(Object_t* obj)
 			return i;
 		}
 	}
-	return tl::make_unexpected(Error(Pool::OBJECT_NOT_FOUND, "object could not be found"));
+	return ELF_ERROR(Pool::OBJECT_NOT_FOUND, "object could not be found");
+	// tl::make_unexpected(Error(Pool::OBJECT_NOT_FOUND, "object could not be found"));
 }
 
 CLOSE_NAMESPACE(Elf);

@@ -20,7 +20,7 @@ OPEN_NAMESPACE(Elf);
  **/
 class ResourceReference : public Mirror::Object
 {
-	MIRROR_DECLARE(ResourceReference, Mirror::Object);
+	ELF_MIRROR_DECLARE(ResourceReference, Mirror::Object);
 public:
 	ResourceReference();
 	virtual ~ResourceReference();

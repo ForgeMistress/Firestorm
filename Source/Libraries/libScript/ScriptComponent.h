@@ -27,7 +27,7 @@ class Entity;
 **/
 class ScriptComponent : public Component
 {
-	MIRROR_DECLARE(ScriptComponent, Component);
+	ELF_MIRROR_DECLARE(ScriptComponent, Component);
 public:
 	ScriptComponent();
 	virtual ~ScriptComponent();

@@ -27,17 +27,17 @@ public:
 	virtual ~JSONDocumentReader();
 
 private:
-	virtual Result<char, Error> ReadChar(const char* key)            const;
+	virtual Result<char, Error> ReadChar(const char* key) const;
 	virtual Result<uchar, Error> ReadUChar(const char* key) const;
-	virtual Result<int8_t, Error> ReadInt8(const char* key)        const;
-	virtual Result<uint8_t, Error> ReadUInt8(const char* key)     const;
-	virtual Result<int16_t, Error> ReadInt16(const char* key)     const;
-	virtual Result<uint16_t, Error> ReadUInt16(const char* key)  const;
-	virtual Result<int32_t, Error> ReadInt32(const char* key)     const;
-	virtual Result<uint32_t, Error> ReadUInt32(const char* key)  const;
-	virtual Result<float, Error> ReadFloat(const char* key)         const;
-	virtual Result<double, Error> ReadDouble(const char* key)      const;
-	virtual Result<String, Error> ReadString(const char* key)      const;
+	virtual Result<int8_t, Error> ReadInt8(const char* key) const;
+	virtual Result<uint8_t, Error> ReadUInt8(const char* key) const;
+	virtual Result<int16_t, Error> ReadInt16(const char* key) const;
+	virtual Result<uint16_t, Error> ReadUInt16(const char* key) const;
+	virtual Result<int32_t, Error> ReadInt32(const char* key) const;
+	virtual Result<uint32_t, Error> ReadUInt32(const char* key) const;
+	virtual Result<float, Error> ReadFloat(const char* key) const;
+	virtual Result<double, Error> ReadDouble(const char* key) const;
+	virtual Result<String, Error> ReadString(const char* key) const;
 
 	virtual Result<Mirror::Type, Error> GetType(const char* key) const;
 

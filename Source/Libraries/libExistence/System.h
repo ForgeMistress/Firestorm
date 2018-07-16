@@ -21,7 +21,7 @@ class Entity;
 class System : public Mirror::Object,
                public Mirror::IInspectableObject
 {
-	MIRROR_DECLARE(System, Mirror::Object, Mirror::IInspectableObject);
+	ELF_MIRROR_DECLARE(System, Mirror::Object, Mirror::IInspectableObject);
 public:
 	System();
 

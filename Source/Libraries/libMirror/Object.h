@@ -11,15 +11,16 @@
 #define LIBMIRROR_OBJECT_H_
 #pragma once
 
-#define MIRROR_DEFINE_NAMED(OBJ_TYPE, NAME) \
+#define ELF_MIRROR_DEFINE_NAMED(OBJ_TYPE, NAME) \
 	rttr::registration::class_<OBJ_TYPE>( NAME )
 
-#define MIRROR_DEFINE(OBJ_TYPE) \
-	MIRROR_DEFINE_NAMED(OBJ_TYPE, #OBJ_TYPE)
+#define ELF_MIRROR_DEFINE(OBJ_TYPE) \
+	ELF_MIRROR_DEFINE_NAMED(OBJ_TYPE, #OBJ_TYPE)
 
 #define ELF_CAT_IMPL(a,b) a##b
 #define ELF_CAT(a,b) ELF_CAT_IMPL(a,b)
-#define MIRROR_REGISTRATION \
+
+#define ELF_MIRROR_REGISTRATION \
 static void elf_auto_register_reflection_function_();                               \
 namespace                                                                           \
 {                                                                                   \
@@ -54,7 +55,7 @@ typedef rttr::registration Registration;
 	static Is     - Checks the type against all common forms.
 	virtual GetType - Retrieve the type at the instance leve.
  **/
-#define MIRROR_DECLARE(OBJ_TYPE, ...)                                                                           \
+#define ELF_MIRROR_DECLARE(OBJ_TYPE, ...)                                                                           \
 	private:                                                                                                    \
 		typedef OBJ_TYPE WhatIAm_t;                                                                             \
 	public:                                                                                                     \
@@ -127,8 +128,7 @@ struct PropMeta
 	 Mark a property as deprecated.
 	 Wrapper around rttr::metadata(PropMeta::kDeprecated, true)
  **/
-#define MIRROR_META_DEPRECATED \
-	rttr::metadata(Elf::Mirror::PropMeta::DEPRECATED, true)
+#define MIRROR_META_DEPRECATED rttr::metadata(Elf::Mirror::PropMeta::DEPRECATED, true)
 
 /**
 	\macro MIRROR_META_REMAP
@@ -142,6 +142,7 @@ struct PropMeta
 	\endcode
  **/
 #define MIRROR_META_REMAP( NEW_CLASSNAME ) rttr::metadata(Elf::Mirror::PropMeta::CLASS_REMAP, NEW_CLASSNAME)
+
 /**
 	\class Object
 	
@@ -149,11 +150,10 @@ struct PropMeta
  **/
 class Object
 {
-	MIRROR_DECLARE(Elf::Mirror::Object);
+	ELF_MIRROR_DECLARE(Elf::Mirror::Object);
 public:
 	virtual ~Object() = 0;
 };
-Object::~Object() {}
 
 /**
 	\macro DOINSPECT_SIMPLE
