@@ -1,0 +1,5 @@
+# CMake generation dependency list for this directory.
+C:/Users/m_ryan/Stuff/ElflordPP.git/ThirdParty/rttr/src/rttr/CMakeLists.txt
+C:/Users/m_ryan/Stuff/ElflordPP.git/ThirdParty/rttr/src/rttr/rttr.cmake
+C:/Users/m_ryan/Stuff/ElflordPP.git/ThirdParty/rttr/src/rttr/detail/base/version.h.in
+C:/Users/m_ryan/Stuff/ElflordPP.git/ThirdParty/rttr/src/rttr/detail/base/version.rc.in

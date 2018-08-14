@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_86\src\examples\json_serialization\pch.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\examples\json_serialization\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\examples\json_serialization\to_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\examples\json_serialization\from_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\examples\json_serialization\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\examples\json_serialization\to_json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\examples\json_serialization\from_json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\examples\json_serialization\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_86\src\examples\json_serialization\version.rc">
+      <Filter>Generated Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2317602E-D106-35B1-9E3D-875EFAD46AD7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{99394FC9-C2D8-3B7E-9C0E-76A53866A1D0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{20EBF7E1-702C-3061-B0C9-D5465A152DA9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,580 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_86\src\rttr\pch.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\constructor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\destructor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\enumeration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\library.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\method.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\parameter_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\policy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\property.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\registration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\type.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\variant.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\variant_associative_view.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\variant_sequential_view.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_equal.cpp">
+      <Filter>detail\comparison</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_less.cpp">
+      <Filter>detail\comparison</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\standard_types.cpp">
+      <Filter>detail\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\conversion\std_conversion_functions.cpp">
+      <Filter>detail\conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\constructor\constructor_wrapper_base.cpp">
+      <Filter>detail\constructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\destructor\destructor_wrapper_base.cpp">
+      <Filter>detail\destructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\enumeration\enumeration_helper.cpp">
+      <Filter>detail\enumeration</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\enumeration\enumeration_wrapper_base.cpp">
+      <Filter>detail\enumeration</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\library\library_win.cpp">
+      <Filter>detail\library</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\library\library_unix.cpp">
+      <Filter>detail\library</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\method\method_wrapper_base.cpp">
+      <Filter>detail\method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\parameter_info\parameter_info_wrapper_base.cpp">
+      <Filter>detail\parameter_info</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\property\property_wrapper_base.cpp">
+      <Filter>detail\property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\registration_executer.cpp">
+      <Filter>detail\registration</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\registration_state_saver.cpp">
+      <Filter>detail\registration</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_data.cpp">
+      <Filter>detail\type</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_register.cpp">
+      <Filter>detail\type</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant\variant_compare.cpp">
+      <Filter>detail\variant</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\base\pch.h">
+      <Filter>detail\base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_86\src\rttr\detail\base\version.h">
+      <Filter>detail\base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\access_levels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\argument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\array_range.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\associative_mapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\constructor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\destructor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\enumeration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\enum_flags.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\filter_item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\instance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\library.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\method.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\policy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\property.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\parameter_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\registration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\registration_friend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\sequential_mapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\string_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\rttr_cast.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\rttr_enable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\variant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\variant_associative_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\variant_sequential_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\wrapper_mapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\base\core_prerequisites.h">
+      <Filter>detail\base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\comparable_types.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_array_less.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_array_less_impl.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_array_equal.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_array_equal_impl.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_equal.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_equal_impl.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_less.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\comparison\compare_less_impl.h">
+      <Filter>detail\comparison</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\constructor\constructor_invoker.h">
+      <Filter>detail\constructor</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\constructor\constructor_wrapper.h">
+      <Filter>detail\constructor</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\constructor\constructor_wrapper_defaults.h">
+      <Filter>detail\constructor</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\constructor\constructor_wrapper_base.h">
+      <Filter>detail\constructor</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\conversion\std_conversion_functions.h">
+      <Filter>detail\conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\conversion\number_conversion.h">
+      <Filter>detail\conversion</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\default_arguments\default_arguments.h">
+      <Filter>detail\default_arguments</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\default_arguments\invoke_with_defaults.h">
+      <Filter>detail\default_arguments</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\destructor\destructor_wrapper.h">
+      <Filter>detail\destructor</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\destructor\destructor_wrapper_base.h">
+      <Filter>detail\destructor</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\enumeration\enumeration_helper.h">
+      <Filter>detail\enumeration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\enumeration\enumeration_wrapper.h">
+      <Filter>detail\enumeration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\enumeration\enumeration_wrapper_base.h">
+      <Filter>detail\enumeration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\enumeration\enum_data.h">
+      <Filter>detail\enumeration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\filter\filter_item_funcs.h">
+      <Filter>detail\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\argument_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\array_range_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\associative_mapper_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\enum_flags_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\instance_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\rttr_cast_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\sequential_mapper_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\string_view_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\impl\wrapper_mapper_impl.h">
+      <Filter>detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\library\library_p.h">
+      <Filter>detail\library</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\metadata\metadata.h">
+      <Filter>detail\metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\metadata\metadata_handler.h">
+      <Filter>detail\metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\method\method_accessor.h">
+      <Filter>detail\method</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\method\method_invoker.h">
+      <Filter>detail\method</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\method\method_wrapper.h">
+      <Filter>detail\method</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\method\method_wrapper_base.h">
+      <Filter>detail\method</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\argument_wrapper.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\argument_extractor.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\class_item_mapper.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\data_address_container.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\flat_map.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\flat_multimap.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\function_traits.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\iterator_wrapper.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\misc_type_traits.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\register_wrapper_mapper_conversion.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\sequential_container_type_traits.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\std_type_traits.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\template_type_trait.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\template_type_trait_impl.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\misc\utility.h">
+      <Filter>detail\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\parameter_info\parameter_infos.h">
+      <Filter>detail\parameter_info</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\parameter_info\parameter_infos_compare.h">
+      <Filter>detail\parameter_info</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\parameter_info\parameter_names.h">
+      <Filter>detail\parameter_info</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\parameter_info\parameter_info_wrapper_base.h">
+      <Filter>detail\parameter_info</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\parameter_info\parameter_info_wrapper.h">
+      <Filter>detail\parameter_info</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\policies\prop_policies.h">
+      <Filter>detail\policies</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\policies\meth_policies.h">
+      <Filter>detail\policies</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\policies\ctor_policies.h">
+      <Filter>detail\policies</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\property\property_accessor.h">
+      <Filter>detail\property</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\property\property_wrapper.h">
+      <Filter>detail\property</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\property\property_wrapper_base.h">
+      <Filter>detail\property</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\property\property_wrapper_func.h">
+      <Filter>detail\property</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\property\property_wrapper_member_func.h">
+      <Filter>detail\property</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\property\property_wrapper_member_object.h">
+      <Filter>detail\property</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\property\property_wrapper_object.h">
+      <Filter>detail\property</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\bind_types.h">
+      <Filter>detail\registration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\bind_impl.h">
+      <Filter>detail\registration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\register_base_class_from_accessor.h">
+      <Filter>detail\registration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\registration_impl.h">
+      <Filter>detail\registration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\registration_executer.h">
+      <Filter>detail\registration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\registration_manager.h">
+      <Filter>detail\registration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\registration\registration_state_saver.h">
+      <Filter>detail\registration</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\accessor_type.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\base_classes.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\get_create_variant_func.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\get_derived_info_func.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_converter.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_comparator.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_data.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_register.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_impl.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_name.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_register_p.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\type\type_string_utils.h">
+      <Filter>detail\type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant\variant_compare.h">
+      <Filter>detail\variant</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant\variant_data.h">
+      <Filter>detail\variant</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant\variant_data_converter.h">
+      <Filter>detail\variant</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant\variant_data_policy.h">
+      <Filter>detail\variant</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant\variant_impl.h">
+      <Filter>detail\variant</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant_associative_view\variant_associative_view_private.h">
+      <Filter>detail\variant_associative_view</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant_associative_view\variant_associative_view_creator.h">
+      <Filter>detail\variant_associative_view</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant_associative_view\variant_associative_view_creator_impl.h">
+      <Filter>detail\variant_associative_view</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant_sequential_view\variant_sequential_view_private.h">
+      <Filter>detail\variant_sequential_view</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant_sequential_view\variant_sequential_view_creator_impl.h">
+      <Filter>detail\variant_sequential_view</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\detail\variant_sequential_view\variant_sequential_view_creator.h">
+      <Filter>detail\variant_sequential_view</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\registration" />
+    <None Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\registration_friend" />
+    <None Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\rttr\type" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_86\src\rttr\detail\base\version.rc">
+      <Filter>Generated Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2317602E-D106-35B1-9E3D-875EFAD46AD7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{99394FC9-C2D8-3B7E-9C0E-76A53866A1D0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail">
+      <UniqueIdentifier>{F140A1DB-51C6-3DFF-94AF-56651AD0DFC8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{20EBF7E1-702C-3061-B0C9-D5465A152DA9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\base">
+      <UniqueIdentifier>{37605369-EE12-3A63-83F3-71B02BEB7A99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\comparison">
+      <UniqueIdentifier>{F01DFF3F-DE76-34C2-ABCC-EF7E830E5813}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\constructor">
+      <UniqueIdentifier>{CE070DB7-A58E-300D-974A-E4F177F6AEAF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\conversion">
+      <UniqueIdentifier>{70042EFB-7649-35D0-836F-0742383F9EA5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\default_arguments">
+      <UniqueIdentifier>{BFF1E411-074D-3D73-B974-96CA9F81E7C6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\destructor">
+      <UniqueIdentifier>{397660C0-9DF4-3F91-886B-32AA90017AAC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\enumeration">
+      <UniqueIdentifier>{60856FFC-26DB-3F9D-8C87-DAF0FC322B4D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\filter">
+      <UniqueIdentifier>{21974A51-0A3F-3447-BFF5-6C46106CC674}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\impl">
+      <UniqueIdentifier>{27E2AC21-3F5C-3FF3-95C3-EE9E0E4BFE34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\library">
+      <UniqueIdentifier>{2B052FCC-CAFB-367D-8C00-9A712180690E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\metadata">
+      <UniqueIdentifier>{C92DCE09-DC65-3DE5-BD51-CE3193BFC5DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\method">
+      <UniqueIdentifier>{BCC22CF2-8020-36F5-8791-018F7DCDA4CF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\misc">
+      <UniqueIdentifier>{422505B5-ECA5-393B-857B-1DA3D5B18FB3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\parameter_info">
+      <UniqueIdentifier>{A4E62CE5-B25F-336F-AFAB-85207992DC57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\policies">
+      <UniqueIdentifier>{A20BDA1B-4354-3883-93A4-7026440E54DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\property">
+      <UniqueIdentifier>{28D70902-1F93-335E-B310-3004DF482573}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\registration">
+      <UniqueIdentifier>{6D798577-2930-3848-80D1-A51A39C4D584}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\type">
+      <UniqueIdentifier>{C83B6054-F22C-3A7E-ABA6-2C7671979423}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\variant">
+      <UniqueIdentifier>{91C4E797-C74E-3423-BFBF-CD6AEC7B791D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\variant_associative_view">
+      <UniqueIdentifier>{043CD14B-9915-32C1-BD0A-E5B5D0F04AD5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail\variant_sequential_view">
+      <UniqueIdentifier>{6D12715D-932E-3FC1-88C4-E129941AB2D8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
