@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\src\unit_tests\pch.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\misc\test_misc.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\misc\array_range_test.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\misc\string_view_test.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\misc\enum_flags_test.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\misc\library_test.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\property\property_access_level_test.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\property\property_misc_test.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\property\property_class_inheritance.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\property\property_class_invoke_wrapper.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\property\property_member_function.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\property\property_member_object.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\property\property_global_function.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\property\property_global_object.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\type\test_type.cpp">
+      <Filter>type</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\type\test_type_names.cpp">
+      <Filter>type</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\type\type_prop_meth_invoke.cpp">
+      <Filter>type</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\destructor\destructor_invoke_test.cpp">
+      <Filter>destructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\destructor\destructor_misc_test.cpp">
+      <Filter>destructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\constructor\constructor_access_level_test.cpp">
+      <Filter>constructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\constructor\constructor_default_arg_test.cpp">
+      <Filter>constructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\constructor\constructor_param_info_test.cpp">
+      <Filter>constructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\constructor\constructor_retrieve_test.cpp">
+      <Filter>constructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\constructor\constructor_invoke_test.cpp">
+      <Filter>constructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\constructor\constructor_misc_test.cpp">
+      <Filter>constructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\constructor\constructor_query_test.cpp">
+      <Filter>constructor</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\enumeration\enumeration_conversion.cpp">
+      <Filter>enumeration</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\enumeration\enumeration_misc.cpp">
+      <Filter>enumeration</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\instance\instance_test.cpp">
+      <Filter>instance</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\method_invoke_defaults_test.cpp">
+      <Filter>method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\method_access_level_test.cpp">
+      <Filter>method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\test_method_reflection.cpp">
+      <Filter>method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\method_default_arg_test.cpp">
+      <Filter>method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\method_misc_test.cpp">
+      <Filter>method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\method_invoke_test.cpp">
+      <Filter>method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\method_param_info_test.cpp">
+      <Filter>method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\method_query_test.cpp">
+      <Filter>method</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_assign_test.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_test.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_ctor_test.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_cmp_equal_test.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_cmp_less_test.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_cmp_greater_test.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_cmp_less_or_equal.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_cmp_greater_or_equal.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_misc_test.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_cast_test.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_bool.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_int8.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_int16.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_int32.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_int64.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_uint8.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_uint16.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_uint32.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_uint64.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_double.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_float.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_string.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\variant_conv_to_enum.cpp">
+      <Filter>variant</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant_associative_view\variant_associative_view_test.cpp">
+      <Filter>variant_associative_view</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant_sequential_view\variant_sequential_view_test.cpp">
+      <Filter>variant_sequential_view</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\test_classes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\method\test_method_reflection.h">
+      <Filter>method</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\type\test_type.h">
+      <Filter>type</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\variant\test_enums.h">
+      <Filter>variant</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\src\unit_tests\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\src\unit_tests\version.rc">
+      <Filter>Generated Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{E13C90EA-9386-365D-B42C-5B15CACAB96A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{B3BC9B12-CACA-397F-B83A-77879480A637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{7C175D9E-827D-3FC6-882F-8C914F478B19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="method">
+      <UniqueIdentifier>{4FF53C82-07AD-3458-805C-1DE59253E55F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="type">
+      <UniqueIdentifier>{7661E55C-DBAB-3D13-BD8B-35B39CC32D39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="variant">
+      <UniqueIdentifier>{66B69F0F-41E6-3B38-B17D-CE0B8D518F66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{E57301C0-FC8F-3F85-9B6B-D9FD283567CD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="property">
+      <UniqueIdentifier>{05AD2DBD-A8C8-3E63-883C-F7B96A963D8A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="destructor">
+      <UniqueIdentifier>{CF5EC7D7-569C-30EF-98D5-5EBF2BC9D109}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="constructor">
+      <UniqueIdentifier>{6F351A84-1F55-3DDD-8A5E-7A25B8E3C92E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="enumeration">
+      <UniqueIdentifier>{FF6E0E7A-D58A-3BCD-8E56-3394FA4D42F4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="instance">
+      <UniqueIdentifier>{3777129F-338E-39F3-80AD-CBF27BF01CA8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="variant_associative_view">
+      <UniqueIdentifier>{18CAEC02-E265-38A7-91CE-B78B7C745211}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="variant_sequential_view">
+      <UniqueIdentifier>{446DA5B5-DBE4-3517-B000-9637498C911C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

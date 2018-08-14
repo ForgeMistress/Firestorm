@@ -1,0 +1,104 @@
+Performing C++ SOURCE FILE Test HAS_NO_EXCEPT_TYPE_SIGNATURE_SUPPORT failed with the following output:
+Change Dir: C:/Users/m_ryan/Stuff/ElflordPP.git/ThirdParty/rttr/build_64/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_74f62.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Microsoft (R) Build Engine version 14.0.25420.1
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 8/14/2018 125222.
+Project "C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_74f62.dir\Debug\".
+  Creating directory "C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_74f62.dir\Debug\cmTC_74f62.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_74f62.dir\Debug\cmTC_74f62.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D HAS_NO_EXCEPT_TYPE_SIGNATURE_SUPPORT /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_74f62.dir\Debug\\" /Fd"cmTC_74f62.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D HAS_NO_EXCEPT_TYPE_SIGNATURE_SUPPORT /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_74f62.dir\Debug\\" /Fd"cmTC_74f62.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx
+  
+  src.cxx
+C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(4): error C2279: exception specification cannot appear in a typedef declaration [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj]
+C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(9): error C2039: 'type': is not a member of 'std::enable_if<false,int>' [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj]
+  C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(6): note: see declaration of 'std::enable_if<false,int>'
+C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(9): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj]
+C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(9): error C2146: syntax error: missing ';' before identifier 'i' [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj]
+Done Building Project "C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj" (default targets) -- FAILED.
+
+Build FAILED.
+
+"C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj" (default target) (1) ->
+(ClCompile target) -> 
+  C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(4): error C2279: exception specification cannot appear in a typedef declaration [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj]
+  C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(9): error C2039: 'type': is not a member of 'std::enable_if<false,int>' [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj]
+  C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(9): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj]
+  C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(9): error C2146: syntax error: missing ';' before identifier 'i' [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_74f62.vcxproj]
+
+    0 Warning(s)
+    4 Error(s)
+
+Time Elapsed 00:00:01.09
+
+Source file was:
+
+                              #include <type_traits>
+                              typedef void F();
+                              typedef void G() noexcept;
+                              
+                              std::enable_if<
+                                  !std::is_same<F, G>::value,
+                                  int
+                              >::type i = 42;
+                              
+                              int main() { return 0; }
+                              
+Performing C++ SOURCE FILE Test HAS_CXX_CONSTEXPR failed with the following output:
+Change Dir: C:/Users/m_ryan/Stuff/ElflordPP.git/ThirdParty/rttr/build_64/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/14.0/bin/MSBuild.exe" "cmTC_f000b.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=14.0"
+Microsoft (R) Build Engine version 14.0.25420.1
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 8/14/2018 125226.
+Project "C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_f000b.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_f000b.dir\Debug\".
+  Creating directory "C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_f000b.dir\Debug\cmTC_f000b.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_f000b.dir\Debug\cmTC_f000b.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D HAS_CXX_CONSTEXPR /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_f000b.dir\Debug\\" /Fd"cmTC_f000b.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D HAS_CXX_CONSTEXPR /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_f000b.dir\Debug\\" /Fd"cmTC_f000b.dir\Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:queue C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx
+  
+  src.cxx
+C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(4): error C3249: illegal statement or sub-expression for 'constexpr' function [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_f000b.vcxproj]
+Done Building Project "C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_f000b.vcxproj" (default targets) -- FAILED.
+
+Build FAILED.
+
+"C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_f000b.vcxproj" (default target) (1) ->
+(ClCompile target) -> 
+  C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\src.cxx(4): error C3249: illegal statement or sub-expression for 'constexpr' function [C:\Users\m_ryan\Stuff\ElflordPP.git\ThirdParty\rttr\build_64\CMakeFiles\CMakeTmp\cmTC_f000b.vcxproj]
+
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:00.71
+
+Source file was:
+
+                              constexpr int abs(int x)
+                              {
+                                  if(x < 0) x = -x;
+                                  return x;
+                              }
+                              
+                              int main() { }
+                              

@@ -22,6 +22,9 @@ CLOSE_NAMESPACE(Mirror);
 class IDocumentWriter
 {
 public:
+	enum Errors : int
+	{
+	};
 	virtual Result<IDocumentWriter*, Error> WriteChar(const char* key,   const char& inValue)          = 0;
 	virtual Result<IDocumentWriter*, Error> WriteUChar(const char* key,  const unsigned char& inValue) = 0;
 	virtual Result<IDocumentWriter*, Error> WriteInt8(const char* key,   const int8_t& inValue)        = 0;
