@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="E:\Projects\ElflordPP.git\ThirdParty\rttr\src\unit_tests\CMakeLists.txt" />
+    <CustomBuild Include="E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\de26f3ab68493b1e29eccbede443aa80\run_tests.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\src\unit_tests\CMakeFiles\run_tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{4D27A71D-A872-308F-AEFB-764649F41618}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

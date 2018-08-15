@@ -9,9 +9,5 @@
 
 #define LIB_MIRROR
 
-#include <libCore/libCore.h>
-
-#include <rttr/registration>
-#include <rttr/type>
 
 #endif

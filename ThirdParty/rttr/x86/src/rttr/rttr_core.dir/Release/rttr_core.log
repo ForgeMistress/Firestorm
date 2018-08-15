@@ -1,0 +1,36 @@
+﻿  constructor.cpp
+  destructor.cpp
+  enumeration.cpp
+  library.cpp
+  method.cpp
+  parameter_info.cpp
+  policy.cpp
+  property.cpp
+  registration.cpp
+  type.cpp
+  variant.cpp
+  variant_associative_view.cpp
+  variant_sequential_view.cpp
+  compare_equal.cpp
+  compare_less.cpp
+  standard_types.cpp
+  std_conversion_functions.cpp
+  constructor_wrapper_base.cpp
+  destructor_wrapper_base.cpp
+  enumeration_helper.cpp
+  Generating Code...
+  Compiling...
+  enumeration_wrapper_base.cpp
+  library_win.cpp
+  library_unix.cpp
+  method_wrapper_base.cpp
+  parameter_info_wrapper_base.cpp
+  property_wrapper_base.cpp
+  registration_executer.cpp
+  registration_state_saver.cpp
+  type_data.cpp
+  type_register.cpp
+  variant_compare.cpp
+  Generating Code...
+     Creating library E:/Projects/ElflordPP.git/ThirdParty/rttr/x86/lib/Release/rttr_core.lib and object E:/Projects/ElflordPP.git/ThirdParty/rttr/x86/lib/Release/rttr_core.exp
+  rttr_core.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x86\bin\Release\rttr_core.dll

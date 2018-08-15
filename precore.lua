@@ -10,6 +10,10 @@
 local function clearFilters()
     filter({})
 end
+
+local function replaceDelim(str, k, v)
+    return str:gsub('{'..k..'}', v)
+end
 local function processargs(args, stringReplacers)
     -- additional build configuration.
     if type(args) == 'table' then
@@ -23,6 +27,7 @@ local function processargs(args, stringReplacers)
                 local old = v
                 for k, vv in pairs(stringReplacers) do
                     args.IncludeDirectories[i] = args.IncludeDirectories[i]:gsub('{'..k..'}', vv)
+                    --args.IncludeDirectories[i] = replaceDelim(args.IncludeDirectories[i], k, vv)
                 end
             end
 
@@ -143,6 +148,20 @@ function staticlib(libname, args)
         "ThirdParty/rttr/src",
         "ThirdParty/rttr/build/src",
     })
+    filter("configurations:Debug32")
+        libdirs({ "ThirdParty/rttr/x86/lib/Debug" })
+        includedirs({ "ThirdParty/rttr/x86/src" })
+    filter("configurations:Release32 or Final32");
+        libdirs({ "ThirdParty/rttr/x86/lib/Release" })
+        includedirs({ "ThirdParty/rttr/x86/src" })
+
+    filter("configurations:Debug64")
+        libdirs({ "ThirdParty/rttr/x64/lib/Debug" })
+        includedirs({ "ThirdParty/rttr/x64/src" })
+        
+    filter("configurations:Release64 or Final64");
+        libdirs({ "ThirdParty/rttr/x64/lib/Release" })
+        includedirs({ "ThirdParty/rttr/x64/src" })
 
     --[[filter("action:vs*")
         pchheader("stdafx.h")
@@ -205,8 +224,25 @@ function unittest(testname, args)
         libsrcpath,
         libsrcpath.."/"..testname,
         "ThirdParty/rttr/src",
-        "ThirdParty/rttr/build/src",
+        --"thirdparty/rttr/build/src",
     })
+
+    filter("configurations:Debug32")
+        libdirs({ "ThirdParty/rttr/x86/lib/Debug" })
+        includedirs({ "ThirdParty/rttr/x86/src" })
+    filter("configurations:Release32 or Final32");
+        libdirs({ "ThirdParty/rttr/x86/lib/Release" })
+        includedirs({ "ThirdParty/rttr/x86/src" })
+
+    filter("configurations:Debug64")
+        libdirs({ "ThirdParty/rttr/x64/lib/Debug" })
+        includedirs({ "ThirdParty/rttr/x64/src" })
+        
+    filter("configurations:Release64 or Final64");
+        libdirs({ "ThirdParty/rttr/x64/lib/Release" })
+        includedirs({ "ThirdParty/rttr/x64/src" })
+
+    clearFilters()
 
     links({ 
         'libHarnessed', 
@@ -287,6 +323,21 @@ function application(appname, args)
     filter("action:not vs*")
         pchheader("stdafx.h")
 
+    filter("configurations:Debug32")
+        libdirs({ "ThirdParty/rttr/x86/lib/Debug" })
+        includedirs({ "ThirdParty/rttr/x86/src" })
+    filter("configurations:Release32 or Final32");
+        libdirs({ "ThirdParty/rttr/x86/lib/Release" })
+        includedirs({ "ThirdParty/rttr/x86/src" })
+
+    filter("configurations:Debug64")
+        libdirs({ "ThirdParty/rttr/x64/lib/Debug" })
+        includedirs({ "ThirdParty/rttr/x64/src" })
+        
+    filter("configurations:Release64 or Final64");
+        libdirs({ "ThirdParty/rttr/x64/lib/Release" })
+        includedirs({ "ThirdParty/rttr/x64/src" })
+
     clearFilters()
 
     args.UsePCH = false
@@ -317,7 +368,8 @@ location("Premake")
 includedirs({ "Source/Include" })
 
 --filter("configurations:*32"); architecture("x86")
-filter("configurations:*64"); architecture("x86_64")
+filter("configurations:*64")
+    architecture("x86_64")
 
 --filter(
 
@@ -328,13 +380,17 @@ filter("action:xcode*")
 defines({ "ELF_PLATFORM_OSX", "ELF_XCODE" })
 
 filter("action:gmake*")
-defines({ "ELF_PLATFORM_UNIX"    })
+defines({ "ELF_PLATFORM_UNIX" })
 --defines({ "ELF_PLATFORM_ANDROID" })
 --defines({ "ELF_PLATFORM_IOS"     })
 
-filter("configurations:Debug32");              libdirs({ "Bin/x86/Debug"   })
-filter("configurations:Release32 or Final32"); libdirs({ "Bin/x86/Release" })
+filter("configurations:Debug32");
+    --libdirs({ "Bin/x86/Debug" })
+filter("configurations:Release32 or Final32")
+    --libdirs({ "Bin/x86/Release" })
 
-filter("configurations:Debug64");              libdirs({ "Bin/x64/Debug"   })
-filter("configurations:Release64 or Final64"); libdirs({ "Bin/x64/Release" })
-
+filter("configurations:Debug64")
+    --libdirs({ "Bin/x64/Debug" })
+filter("configurations:Release64 or Final64");
+    --libdirs({ "Bin/x64/Release" })
+clearFilters()

@@ -11,6 +11,9 @@
 #define LIBMIRROR_OBJECT_H_
 #pragma once
 
+#include <rttr/type.h>
+#include <rttr/registration.h>
+
 #define ELF_MIRROR_DEFINE_NAMED(OBJ_TYPE, NAME) \
 	rttr::registration::class_<OBJ_TYPE>( NAME )
 
@@ -152,7 +155,7 @@ class Object
 {
 	ELF_MIRROR_DECLARE(Elf::Mirror::Object);
 public:
-	virtual ~Object() = 0;
+	virtual ~Object();
 };
 
 /**

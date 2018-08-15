@@ -9,9 +9,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "JSONDocument.h"
-#include "TypeAbbreviationTraits.h"
+#include "TypeTraits.h"
 #include <sstream>
 #include <json/reader.h>
+#include <istream>
 
 OPEN_NAMESPACE(Elf);
 
@@ -19,273 +20,336 @@ JSONDocument::JSONDocument(const char* data)
 {
 	if(data != nullptr)
 	{
-		Json::Reader reader;
-		bool ok = reader.parse(String(data), m_root, false);
+		Json::CharReaderBuilder rbuilder;
+		String errs;
+		String d(data);
+		std::istringstream stream(data);
+		bool ok = Json::parseFromStream(rbuilder, stream, &m_root, &errs);
 		if(!ok)
 		{
-			std::cerr << reader.getFormattedErrorMessages() << std::endl;
+			std::cerr << errs << std::endl;
 		}
 		else
 		{
-			m_data.Set(&m_root, "__ELF_DATA__");
-			m_schema.Set(&m_root, "__ELF_SCHEMA__");
+			m_data.Set(&m_root);
 		}
 	}
 	else
 	{
-		m_data.
-		m_data.SetChild("__ELF_DATA__", Json::Value(Json::objectValue));
-		m_schema.SetChild("__ELF_SCHEMA__", Json::Value(Json::objectValue));
+		m_root = Json::Value(Json::objectValue);
+		m_data.Set(&m_root);
 	}
 }
 
-JSONDocument::~JSONDocument()
+JSONDocument::JSONDocument(Json::Value data)
+: m_root(std::move(data))
 {
+	m_data.Set(&m_root);
+}
+
+bool JSONDocument::InitializeAsIfNew()
+{
+	m_data.MoveToChild();
+
+	m_root = Json::Value(Json::objectValue);
+	m_data.Set(&m_root);
+	return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // READ
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Result<bool, Error> JSONDocument::ReadBool(const char* key) const
+Result<void, Error> JSONDocument::ReadBool(const char* key, bool& outValue) const
 {
-	return Result<bool, Error>(false);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asBool();
+	}
+	return Result<void, Error>();
 }
 
-Result<char, Error> JSONDocument::ReadChar(const char* key) const
+Result<void, Error> JSONDocument::ReadChar(const char* key, char& outValue) const
 {
-	return Result<char, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asInt();
+	}
+	return Result<void, Error>();
 }
 
-Result<uchar, Error> JSONDocument::ReadUChar(const char* key) const
+Result<void, Error> JSONDocument::ReadUChar(const char* key, unsigned char& outValue) const
 {
-	return Result<uchar, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asInt();
+	}
+	return Result<void, Error>();
 }
 
-Result<int8_t, Error> JSONDocument::ReadInt8(const char* key) const
+Result<void, Error> JSONDocument::ReadInt8(const char* key, int8_t& outValue) const
 {
-	return Result<int8_t, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asInt();
+	}
+	return Result<void, Error>();
 }
 
-Result<uint8_t, Error> JSONDocument::ReadUInt8(const char* key) const
+Result<void, Error> JSONDocument::ReadUInt8(const char* key, uint8_t& outValue) const
 {
-	return Result<uint8_t, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asUInt();
+	}
+	return Result<void, Error>();
 }
 
-Result<int16_t, Error> JSONDocument::ReadInt16(const char* key) const
+Result<void, Error> JSONDocument::ReadInt16(const char* key, int16_t& outValue) const
 {
-	return Result<int16_t, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asInt();
+	}
+	return Result<void, Error>();
 }
 
-Result<uint16_t, Error> JSONDocument::ReadUInt16(const char* key) const
+Result<void, Error> JSONDocument::ReadUInt16(const char* key, uint16_t& outValue) const
 {
-	return Result<uint16_t, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asUInt();
+	}
+	return Result<void, Error>();
 }
 
-Result<int32_t, Error> JSONDocument::ReadInt32(const char* key) const
+Result<void, Error> JSONDocument::ReadInt32(const char* key, int32_t& outValue) const
 {
-	return Result<int32_t, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asInt();
+	}
+	return Result<void, Error>();
 }
 
-Result<uint32_t, Error> JSONDocument::ReadUInt32(const char* key) const
+Result<void, Error> JSONDocument::ReadUInt32(const char* key, uint32_t& outValue) const
 {
-	return Result<uint32_t, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asUInt();
+	}
+	return Result<void, Error>();
 }
 
-Result<int64_t, Error> JSONDocument::ReadInt64(const char* key) const
+Result<void, Error> JSONDocument::ReadInt64(const char* key, int64_t& outValue) const
 {
-	return Result<int64_t, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asInt64();
+	}
+	return Result<void, Error>();
 }
 
-Result<uint64_t, Error> JSONDocument::ReadUInt64(const char* key) const
+Result<void, Error> JSONDocument::ReadUInt64(const char* key, uint64_t& outValue) const
 {
-	return Result<uint64_t, Error>(0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asUInt64();
+	}
+	return Result<void, Error>();
 }
 
-Result<float, Error> JSONDocument::ReadFloat(const char* key) const
+Result<void, Error> JSONDocument::ReadFloat(const char* key, float& outValue) const
 {
-	return Result<float, Error>(0.0f);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asFloat();
+	}
+	return Result<void, Error>();
 }
 
-Result<double, Error> JSONDocument::ReadDouble(const char* key) const
+Result<void, Error> JSONDocument::ReadDouble(const char* key, double& outValue) const
 {
-	return Result<double, Error>(0.0);
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asDouble();
+	}
+	return Result<void, Error>();
 }
-Result<String, Error> JSONDocument::ReadString(const char* key) const
+Result<void, Error> JSONDocument::ReadString(const char* key, String& outValue) const
 {
-	return Result<String, Error>(String(""));
+	if(m_data.HasChild(key))
+	{
+		const Json::Value& val = m_data.GetValue(key);
+		outValue = val.asString();
+	}
+	return Result<void, Error>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WRITE
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Result<IDocument*, Error> JSONDocument::WriteBool(const char* key, const bool& inValue)
+Result<void, Error> JSONDocument::WriteBool(const char* key, const bool& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteChar(const char* key, const char& inValue)
+Result<void, Error> JSONDocument::WriteChar(const char* key, const char& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteUChar(const char* key, const unsigned char& inValue)
+Result<void, Error> JSONDocument::WriteUChar(const char* key, const unsigned char& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteInt8(const char* key, const int8_t& inValue)
+Result<void, Error> JSONDocument::WriteInt8(const char* key, const int8_t& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteUInt8(const char* key, const uint8_t& inValue)
+Result<void, Error> JSONDocument::WriteUInt8(const char* key, const uint8_t& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteInt16(const char* key, const int16_t& inValue)
+Result<void, Error> JSONDocument::WriteInt16(const char* key, const int16_t& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteUInt16(const char* key, const uint16_t& inValue)
+Result<void, Error> JSONDocument::WriteUInt16(const char* key, const uint16_t& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteInt32(const char* key, const int32_t& inValue)
+Result<void, Error> JSONDocument::WriteInt32(const char* key, const int32_t& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteUInt32(const char* key, const uint32_t& inValue)
+Result<void, Error> JSONDocument::WriteUInt32(const char* key, const uint32_t& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteInt64(const char* key, const int64_t& inValue)
+Result<void, Error> JSONDocument::WriteInt64(const char* key, const int64_t& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteUInt64(const char* key, const uint64_t& inValue)
+Result<void, Error> JSONDocument::WriteUInt64(const char* key, const uint64_t& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteFloat(const char* key, const float& inValue)
+Result<void, Error> JSONDocument::WriteFloat(const char* key, const float& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteDouble(const char* key, const double& inValue)
+Result<void, Error> JSONDocument::WriteDouble(const char* key, const double& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::WriteString(const char* key, const String& inValue)
+Result<void, Error> JSONDocument::WriteString(const char* key, const String& inValue)
 {
 	m_data.SetChild(key, Json::Value(inValue));
-	m_schema.SetChild(key, Json::Value(TypeAbbreviations::getStr(inValue)));
-	return nullptr;
+	return Result<void, Error>();
 }
 
 Result<Mirror::Type, Error> JSONDocument::GetType(const char* key) const
 {
-	/*Result<Json::Value*, Error> res = m_schema.GetChild(key);
-	if (res.has_value())
-	{
-		Json::Value* val = res.value();
-		assert(val != nullptr);
-		Json::ValueType valType = val->type();
-		switch (valType)
-		{
-		case Json::nullValue:
-		case Json::intValue:
-		case Json::uintValue:
-		case Json::realValue:
-		case Json::stringValue:
-		case Json::booleanValue:
-		case Json::arrayValue:
-		case Json::objectValue:
-			return TypeTraits<Mirror::Object>::GetMirrorType();
-		}
-	}
-	TypeTraits<int16_t>::WriteToDocument(const_cast<JSONDocumentWriter*>(this), key, 10);*/
 	return Result<Mirror::Type, Error>(rttr::detail::get_invalid_type());
 }
 
 
-Result<IDocument*, Error> JSONDocument::WriteSubsection(const char* key)
+Result<void, Error> JSONDocument::WriteSubsection(const char* key)
 {
-	return nullptr;
+	m_data.SetChild(key, Json::Value(Json::objectValue));
+	m_foundSubsection = key;
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::FindSubsection(const char* sectionName)
+Result<void, Error> JSONDocument::FindSubsection(const char* sectionName)
 {
-	/*assert(m_dataSection.cursor != nullptr && m_typeSection.cursor != nullptr);
-	if(m_dataSection.cursor->isMember(sectionName) && m_typeSection.cursor->isMember(sectionName))
+	if(m_data.HasChild(sectionName))
 	{
-	m_foundSubsection = sectionName;
-	return result(this);
+		Json::ValueType dType = m_data.GetJsonType(sectionName);
+		assert(dType == Json::objectValue);
+		m_foundSubsection = sectionName;
 	}
-	std::stringstream ss;
-	ss << "subsection " << sectionName << " was not found.";*/
-	return Result<IDocument*, Error>(nullptr); //error(FIND_SUBSECTION_FAILED, "");
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::EnterSubsection(const char* sectionName)
+Result<void, Error> JSONDocument::EnterSubsection()
 {
-	Result<IDocument*, Error> findss = FindSubsection(sectionName);
-	if (findss.has_value())
+	if(m_foundSubsection.empty())
 	{
-		auto setcursor = SetCursor(sectionName);
-		if (setcursor.has_value())
-		{
-			return Result<IDocument*, Error>(this);
-		}
-		return ELF_ERROR(ENTER_SUBSECTION_FAILED, "failed to enter subsection " + String(sectionName));
+		return ELF_ERROR(IDocument::ENTER_SUBSECTION_FAILED, "no subsection was found before attempting to enter");
 	}
-	return findss;
+	m_data.MoveToChild(m_foundSubsection);
+	m_foundSubsection.clear();
+	return Result<void, Error>();
 }
 
-Result<IDocument*, Error> JSONDocument::LeaveSubsection()
+Result<void, Error> JSONDocument::LeaveSubsection()
 {
-	return nullptr;
+	m_data.MoveToParent();
+	return Result<void, Error>();
+}
+
+void JSONDocument::WriteToData(Vector<char>& outData) const
+{
+	outData.clear();
+
+	//Json::StyledWriter writer;
+	Json::FastWriter writer;
+	String result(writer.write(m_root));
+	outData.reserve(result.size());
+	std::copy(result.c_str(), result.c_str() + result.length(), std::back_inserter(outData));
+	outData.shrink_to_fit();
+	//std::copy(result.begin(), result.end(), outData);
+}
+
+String JSONDocument::ToString() const
+{
+	Json::FastWriter writer;
+	return writer.write(m_root);
 }
 
 Result<void, Error> JSONDocument::SetCursor(const char* section)
 {
-	if(m_schema.HasChild(section) && m_data.HasChild(section))
+	if(m_data.HasChild(section))
 	{
-		m_schema.MoveToChild(section);
 		m_data.MoveToChild(section);
 	}
 	return Result<void, Error>();
@@ -294,28 +358,16 @@ Result<void, Error> JSONDocument::SetCursor(const char* section)
 
 JSONDocument::Section::Section()
 : m_docRoot(nullptr)
-, m_data(nullptr)
 , m_cursor(nullptr)
 {
 }
 
-void JSONDocument::Section::Set(Json::Value* root, const String& section)
+void JSONDocument::Section::Set(Json::Value* root)
 {
-	if (section != "")
-	{
-		m_cursorParents.clear();
+	m_cursorParents.clear();
 
-		m_docRoot = root;
-		assert(m_docRoot->isMember(section) && "Member does not exist.");
-		m_data = &(*m_docRoot)[section];
-		m_cursor = m_data;
-	}
-	else
-	{
-		m_docRoot = root;
-		m_data = m_docRoot;
-		m_cursor = m_data;
-	}
+	m_docRoot = root;
+	m_cursor = m_docRoot;
 }
 
 Result<void, Error> JSONDocument::Section::SetPosFromRoot(const std::initializer_list<String>& list)
@@ -325,40 +377,56 @@ Result<void, Error> JSONDocument::Section::SetPosFromRoot(const std::initializer
 
 bool JSONDocument::Section::HasChild(const String& childName) const
 {
+	assert(m_cursor != nullptr);
 	return m_cursor->isMember(childName);
 }
 
 Result<void, Error> JSONDocument::Section::MoveToChild(const String& toChild)
 {
+	assert(m_cursor != nullptr);
+	if(m_cursor->isMember(toChild))
+	{
+		m_cursorParents.push_back(m_cursor);
+		m_cursor = &(*m_cursor)[toChild];
+	}
 
 	return Result<void, Error>();
 }
 
 Result<void, Error> JSONDocument::Section::SetChild(const String& childName, Json::Value& jsonValue)
 {
+	assert(m_cursor != nullptr);
 	(*m_cursor)[childName] = jsonValue;
+	return Result<void, Error>();
 }
 
 Result<Json::Value*, Error> JSONDocument::Section::GetChild(const String& childName) const
 {
+	assert(m_cursor != nullptr);
 	if (m_cursor->isMember(childName))
 	{
 		return &(*m_cursor)[childName];
 	}
+	return Result<Json::Value*, Error>();
+}
+
+const Json::Value& JSONDocument::Section::GetValue(const String& name) const
+{
+	assert(m_cursor != nullptr);
+	return (*m_cursor)[name];
+}
+
+Json::ValueType JSONDocument::Section::GetJsonType(const String& name) const
+{
+	assert(m_cursor != nullptr);
+	return (*m_cursor)[name].type();
 }
 
 Result<void, Error> JSONDocument::Section::MoveToParent()
 {
-	return Result<void, Error>();
-}
-
-Result<void, Error> JSONDocument::Section::MoveToSibling(const String& toSibling)
-{
-	return Result<void, Error>();
-}
-
-Result<void, Error> JSONDocument::Section::ApplyToDocument()
-{
+	assert(!m_cursorParents.empty());
+	m_cursor = m_cursorParents.back();
+	m_cursorParents.pop_back();
 	return Result<void, Error>();
 }
 

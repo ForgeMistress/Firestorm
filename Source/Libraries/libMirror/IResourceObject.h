@@ -12,8 +12,7 @@
 #pragma once
 
 #include "Object.h"
-#include <libIO/IDocumentReader.h>
-#include <libIO/IDocumentWriter.h>
+#include <libIO/IDocument.h>
 
 OPEN_NAMESPACE(Elf);
 
@@ -23,8 +22,8 @@ class IResourceObject
 public:
 	virtual ~IResourceObject() {}
 
-	virtual Result<void, Error> Load(const SharedPtr<IDocumentReader>& reader) = 0;
-	virtual Result<void, Error> Save(SharedPtr<IDocumentWriter>& writer) const = 0;
+	virtual Result<void, Error> Load(const SharedPtr<IDocument>& reader) = 0;
+	virtual Result<void, Error> Save(SharedPtr<IDocument>& writer) const = 0;
 };
 
 CLOSE_NAMESPACE(Elf);

@@ -13,9 +13,10 @@
 OPEN_NAMESPACE(Elf);
 OPEN_NAMESPACE(Mirror);
 
-RTTR_REGISTRATION
+ELF_MIRROR_REGISTRATION
 {
 	ELF_MIRROR_DEFINE(Elf::Mirror::Object);
+	Elf::Mirror::Type::get<Elf::Mirror::Object>();
 }
 
 Object::~Object()

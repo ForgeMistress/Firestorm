@@ -1,0 +1,4 @@
+﻿  stdafx.cpp
+  TestCase.cpp
+  TestHarness.cpp
+  libHarnessed.vcxproj -> E:\Projects\ElflordPP.git\Source\lib\libHarnessed\..\..\..\Build\x64\libHarnessed.lib
