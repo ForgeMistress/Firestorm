@@ -31,6 +31,9 @@ public:
 		QUEUE_SYNC
 	};
 
+	typedef std::function<void(const FileIOMgr*, FileHandle, Result<void, Error>)> ReadErrorCallback_f;
+	typedef std::function<void(const FileIOMgr*, FileHandle, Result<void, Error>)> WriteErrorCallback_f;
+
 public:
 	FileIOMgr();
 
@@ -54,11 +57,28 @@ public:
 	Result<void, Error> QueueFileForWrite(FileHandle file, QueueType queueType);
 	bool CancelQueuedWrite(FileHandle file);
 
+
+	struct ReadCallbackReceipt_;
+	typedef SharedPtr<ReadCallbackReceipt_> ReadCallbackReceipt;
+	friend struct ReadCallbackReceipt_;
+
+	struct WriteCallbackReceipt_;
+	typedef SharedPtr<WriteCallbackReceipt_> WriteCallbackReceipt;
+	friend struct WriteCallbackReceipt_;
+
+	ReadCallbackReceipt RegisterReadErrorCallback(ReadErrorCallback_f readCallback);
+	WriteCallbackReceipt RegisterWriteErrorCallback(WriteErrorCallback_f readCallback);
+
 	/**
 		Retrieve the number of 
 	 **/
 
+
+
 private:
+	void UnregisterReadErrorCallback(const ReadErrorCallback_f& callback);
+	void UnregisterWriteErrorCallback(const WriteErrorCallback_f& callback);
+
 	struct QueueEntry
 	{
 		FileHandle file;
@@ -71,15 +91,18 @@ private:
 	QueueEntry PopFromFront(FileQueue& queue) const;
 
 	// pushes a handle in while avoiding duplicates in the list.
-	bool PushInBack(FileQueue& queue, FileHandle file);
+	bool PushInBack(FileQueue& queue, const QueueEntry& entry);
 
-	bool IsInQueue(FileQueue& queue, FileHandle file);
+	bool IsInQueue(FileQueue& queue, FileHandle file, QueueEntry& entry);
 
 	FileQueue m_fileReadQueue;
 	FileQueue m_fileWriteQueue;
 
 	FileList m_filesBeingRead;
 	FileList m_filesBeingWritten;
+
+	List<ReadErrorCallback_f> m_readErrorCallbacks;
+	List<WriteErrorCallback_f> m_writeErrorCallbacks;
 
 	// Cache of files who have had handles returned already.
 	mutable UnorderedMap<String, FileHandle> m_fileCache;

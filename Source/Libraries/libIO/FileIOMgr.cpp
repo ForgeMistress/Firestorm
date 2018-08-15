@@ -12,6 +12,24 @@
 
 OPEN_NAMESPACE(Elf);
 
+
+struct FileIOMgr::ReadCallbackReceipt_
+{
+	ReadCallbackReceipt_(FileIOMgr* mgr, FileIOMgr::ReadErrorCallback_f callback)
+	{
+
+	}
+
+	~ReadCallbackReceipt_()
+	{
+		if(m_mgr)
+			m_mgr->UnegisterReadErrorCallback(callback);
+	}
+	FileIOMgr* m_mgr;
+};
+
+
+
 FileIOMgr::FileIOMgr()
 {
 }
@@ -20,25 +38,15 @@ void FileIOMgr::ProcessQueues()
 {
 	if(!m_fileReadQueue.empty())
 	{
-
-	}
-}
-	/*if(m_filesBeingRead)
-	{
-		m_fileBeingRead = PopFromFront(m_fileReadQueue);
-		if(m_fileBeingRead)
+		auto entry = m_fileReadQueue.front();
+		m_fileReadQueue.pop_front();
+		if(entry.type == QUEUE_SYNC)
 		{
-			if(m_fileBeingRead->PerformDiskReadAsync())
-			{
+			Result<void, Error> result = entry.file->PerformDiskReadSync();
 
-			}
 		}
 	}
-	else
-	{
-
-	}
-}*/
+}
 
 FileIOMgr::FileHandle FileIOMgr::GetFile(const String& filename) const
 {
@@ -71,7 +79,7 @@ Result<void, Error> FileIOMgr::QueueFileForRead(FileHandle file, QueueType queue
 		}
 	}
 
-	if(!PushInBack(m_fileReadQueue, file))
+	if(!PushInBack(m_fileReadQueue, QueueEntry{ file, queueType }))
 	{
 		return ELF_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + filename + "' is already queued for read");
 	}
@@ -80,16 +88,80 @@ Result<void, Error> FileIOMgr::QueueFileForRead(FileHandle file, QueueType queue
 
 bool FileIOMgr::CancelQueuedRead(FileHandle file)
 {
-	return false;
+	bool removed = false;
+	m_fileReadQueue.remove_if([&file, &removed](const QueueEntry& entry) {
+		if(entry.file == file)
+		{
+			removed = true;
+			return true;
+		}
+		return false;
+	});
+	return removed;
 }
 
 Result<void, Error> FileIOMgr::QueueFileForWrite(FileHandle file, QueueType queueType)
 {
+	auto findFunction = [&file](const QueueEntry& entry) {
+		return entry.file == file;
+	};
+
+	auto foundRead = std::find_if(m_fileReadQueue.begin(), m_fileReadQueue.end(), findFunction);
+	if(foundRead != m_fileReadQueue.end())
+	{
+		return ELF_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + file->GetFilename() + "' already queued for read in call to QueueFileForWrite");
+	}
+
+	auto foundWrite = std::find_if(m_fileWriteQueue.begin(), m_fileWriteQueue.end(), findFunction);
+	if(foundWrite != m_fileWriteQueue.end())
+	{
+		return ELF_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + file->GetFilename() + "' already queued for write in call to QueueFileForWrite");
+	}
+
+	m_fileWriteQueue.push_back(QueueEntry{ file, queueType });
 	return ELF_RESULT(void);
 }
 
 bool FileIOMgr::CancelQueuedWrite(FileHandle file)
 {
+	bool removed = false;
+	m_fileWriteQueue.remove_if([&file, &removed](const QueueEntry& entry) {
+		if(entry.file == file)
+		{
+			removed = true;
+			return true;
+		}
+		return false;
+	});
+	return removed;
+}
+
+FileIOMgr::ReadCallbackReceipt FileIOMgr::RegisterReadErrorCallback(ReadErrorCallback_f callback)
+{
+	if(std::find(m_readErrorCallbacks.begin(), m_readErrorCallbacks.end(), callback) == m_readErrorCallbacks.end())
+	{
+		return std::make_shared<ReadCallbackReceipt_>(const_cast<FileIOMgr*>(this), callback);
+	}
+	return nullptr;
+}
+
+FileIOMgr::WriteCallbackReceipt FileIOMgr::RegisterWriteErrorCallback(WriteErrorCallback_f callback)
+{
+	if(std::find(m_writeErrorCallbacks.begin(), m_writeErrorCallbacks.end(), callback) == m_readErrorCallbacks.end())
+	{
+		return std::make_shared<WriteCallbackReceipt_>(const_cast<FileIOMgr*>(this), callback);
+	}
+	return nullptr;
+}
+
+void FileIOMgr::UnregisterReadErrorCallback(const ReadErrorCallback_f& callback)
+{
+	m_readErrorCallbacks.remove(callback);
+}
+
+void FileIOMgr::UnregisterWriteErrorCallback(const WriteErrorCallback_f& callback)
+{
+	m_writeErrorCallbacks.remove(callback);
 }
 
 FileIOMgr::QueueEntry FileIOMgr::PopFromFront(FileQueue& queue) const
@@ -103,23 +175,24 @@ FileIOMgr::QueueEntry FileIOMgr::PopFromFront(FileQueue& queue) const
 	return QueueEntry();
 }
 
-bool FileIOMgr::PushInBack(FileQueue& queue, FileHandle file)
+bool FileIOMgr::PushInBack(FileQueue& queue, const QueueEntry& entry)
 {
 	for(auto f : queue)
 	{
-		if(f == file)
+		if(f.file == entry.file)
 			return false;
 	}
-	m_fileReadQueue.push_back(file);
+	queue.push_back(entry);
 	return true;
 }
 
-bool FileIOMgr::IsInQueue(FileQueue& queue, FileHandle file)
+bool FileIOMgr::IsInQueue(FileQueue& queue, FileHandle file, QueueEntry& entry)
 {
 	for(auto f : queue)
 	{
-		if(f == file)
+		if(f.file == file)
 		{
+			entry = f;
 			return true;
 		}
 	}
