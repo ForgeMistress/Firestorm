@@ -11,7 +11,12 @@
 ------------------------------------------------------------------------------------------------------------------------
 --  GLOBAL SETUP
 ------------------------------------------------------------------------------------------------------------------------
+include("GlobalConfig")
 include("precore")
+
+
+include("RTTRBuild")
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --  WORKSPACE DEFINITION
@@ -24,13 +29,13 @@ workspace("ElflordPP")
 staticlib('libCore')
 
 staticlib('libMirror', {
-    Dependencies = { 
-        'libCore', 
+    Dependencies = {
+        'libCore',
         'libIO'
     };
     IncludeDirectories = {
         "ThirdParty/rttr/src",
-        "ThirdParty/rttr/build/src",
+        "ThirdParty/rttr/build/src"
     };
     PostArgProcessing = function()
         filter({ "configurations:Debug*" });   links({ "librttr_core_d" })
@@ -43,7 +48,7 @@ staticlib('libIO', {
         'libCore'
     };
     IncludeDirectories = {
-        "{LibSourcePath}/{Project}/json",
+        "{LibSourcePath}/{Project}/json"
     };
     UsePCH = false;
 })

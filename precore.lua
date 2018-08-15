@@ -93,6 +93,24 @@ local function printargs(args)
     end
 end
 
+local function configureLibraryDirectories()
+	filter("configurations:Debug32")
+        libdirs({ "ThirdParty/rttr/x86/lib/Debug" })
+        includedirs({ "ThirdParty/rttr/x86/src" })
+
+    filter("configurations:Release32 or Final32");
+        libdirs({ "ThirdParty/rttr/x86/lib/Release" })
+        includedirs({ "ThirdParty/rttr/x86/src" })
+
+    filter("configurations:Debug64")
+        libdirs({ "ThirdParty/rttr/x64/lib/Debug" })
+        includedirs({ "ThirdParty/rttr/x64/src" })
+        
+    filter("configurations:Release64 or Final64");
+        libdirs({ "ThirdParty/rttr/x64/lib/Release" })
+        includedirs({ "ThirdParty/rttr/x64/src" })
+end
+
 function staticlib(libname, args)
     print("------------------------------------------------------------------------------------------------------------------------")
     print("--", ("Defining Static Library %q"):format(libname))
@@ -163,13 +181,6 @@ function staticlib(libname, args)
         libdirs({ "ThirdParty/rttr/x64/lib/Release" })
         includedirs({ "ThirdParty/rttr/x64/src" })
 
-    --[[filter("action:vs*")
-        pchheader("stdafx.h")
-        pchsource(libsrcpath.."/"..libname.."/stdafx.cpp")
-
-    filter("action:not vs*")
-        pchheader("stdafx.h")]]
-
     clearFilters()
 
     processargs(args, {
@@ -223,24 +234,10 @@ function unittest(testname, args)
     includedirs({ 
         libsrcpath,
         libsrcpath.."/"..testname,
-        "ThirdParty/rttr/src",
-        --"thirdparty/rttr/build/src",
+        "ThirdParty/rttr/src"
     })
 
-    filter("configurations:Debug32")
-        libdirs({ "ThirdParty/rttr/x86/lib/Debug" })
-        includedirs({ "ThirdParty/rttr/x86/src" })
-    filter("configurations:Release32 or Final32");
-        libdirs({ "ThirdParty/rttr/x86/lib/Release" })
-        includedirs({ "ThirdParty/rttr/x86/src" })
-
-    filter("configurations:Debug64")
-        libdirs({ "ThirdParty/rttr/x64/lib/Debug" })
-        includedirs({ "ThirdParty/rttr/x64/src" })
-        
-    filter("configurations:Release64 or Final64");
-        libdirs({ "ThirdParty/rttr/x64/lib/Release" })
-        includedirs({ "ThirdParty/rttr/x64/src" })
+    configureLibraryDirectories()
 
     clearFilters()
 

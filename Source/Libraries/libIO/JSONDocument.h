@@ -64,8 +64,6 @@ private:
 	virtual Result<void, Error> EnterSubsection();
 	virtual Result<void, Error> LeaveSubsection();
 
-	//virtual Result<IDocument*, Error> WriteToDocument(SharedPtr<IDocument>& document);
-
 	virtual void WriteToData(Vector<char>& outData) const;
 	virtual String ToString() const;
 
