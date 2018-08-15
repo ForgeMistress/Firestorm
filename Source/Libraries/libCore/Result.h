@@ -44,6 +44,8 @@ template <typename Expected_t, typename Unexpected_t> using Result =
 
 #define ELF_ERROR( CODE, ERROR_STRING ) \
 	tl::make_unexpected(Error( CODE, ERROR_STRING ))
+#define ELF_RESULT( EXPECTED, ... ) \
+	Result< EXPECTED, Error >(__VA_ARGS__)
 
 CLOSE_NAMESPACE(Elf);
 #endif

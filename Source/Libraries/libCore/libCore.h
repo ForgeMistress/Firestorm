@@ -52,6 +52,8 @@ template<
 	class Alloc = std::allocator<Ty>
 > using Vector = std::vector<Ty, Alloc>;
 
+typedef Vector<char> DataBuffer;
+
 using String = std::string;
 
 template <

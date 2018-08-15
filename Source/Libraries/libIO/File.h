@@ -13,23 +13,44 @@
 
 OPEN_NAMESPACE(Elf);
 
+class FileIOMgr;
+
 class File final
 {
+	friend class FileIOMgr;
+
 public:
 	enum State
 	{
-		UNLOADED,
-		UNLOADING,
-		LOADING_FROM_DISK,
-		LOAD_ERROR,
-		LOADED_AND_READY
+		STATE_UNLOADED,          //< The File object default state. No data is loaded, but it knows the file on disk it's pointing to.
+		STATE_UNLOADING,         //< The File object is in the process of unloading the data.
+		STATE_QUEUED_FOR_READ,   //< The File object is queued to be read from disk.
+		STATE_QUEUED_FOR_WRITE,  //< The File object is in the queue to have its data written to disk.
+		STATE_READING_FROM_DISK, //< The File object is in the process of reading the data from disk.
+		STATE_WRITING_TO_DISK,   //< The File object is in the process of writing the data to disk.
+		STATE_LOADED             //< The File object has data loaded from disk.
+	};
+	enum Errors : int
+	{
+		ERROR_WRITE_IN_PROGRESS,
+		ERROR_READ_IN_PROGRESS,
+		ERROR_COULD_NOT_READ_DATA,
+		ERROR_COULD_NOT_WRITE_DATA,
+		ERROR_IMPROPER_STATE
 	};
 public:
-	typedef std::function<void(File*, const Result<void, Error>&)> AsyncCallback;
+	typedef Result<void, Error> WriteResult;
+	typedef Result<DataBuffer, Error> ReadResult;
+	typedef std::function<void(File*, const WriteResult&)> AsyncWriteCallback_f;
+	typedef std::function<void(File*, const ReadResult&)>  AsyncReadCallback_f;
+
+private:
+	/**
+		The constructor for a File object.
+	 **/
+	File(const FileIOMgr* fileIOMgr, const String& filename);
 
 public:
-	File(const String& filename);
-
 	/**
 		Check whether or not the file even exists.
 	 **/
@@ -53,7 +74,7 @@ public:
 	/**
 		Retrieve the absolute path on disk to this file.
 	 **/
-	const String& GetPath() const;
+	const String& GetAbsolutePath() const;
 
 	/**
 		Retrieve the file size as the OS reports it.
@@ -66,29 +87,19 @@ public:
 	size_t GetDataSize() const;
 
 	/**
-		Retrieve a pointer to the underlying data. Will return nullptr if the data is not loaded.
+		Retrieve whether or not the held data buffer is empty.
 	 **/
-	const char* GetData() const;
+	bool HasData() const;
 
 	/**
-		Synchronously write the data in memory to disk.
+		Retrieve the loaded data. return.empty() will be true if no data was loaded.
 	 **/
-	Result<void, Error> WriteToDiskSync() const;
+	const DataBuffer& GetData() const;
 
 	/**
-		Asynchronously write the data in memory to disk, calling AsyncCallback when complete.
-	 **/
-	Result<void, Error> WriteToDiskAsync(const AsyncCallback& callback) const;
-
-	/**
-		Synchronously read the data on disk to memory.
-	 **/
-	Result<void, Error> ReadFromDiskSync();
-
-	/**
-		Asynchronously read the data from disk, calling AsyncCallback when complete.
-	 **/
-	Result<void, Error> ReadFromDiskAsync(const AsyncCallback& callback);
+		Retrieve the loaded data. return.empty() will be true if no data was loaded. Non-const version.
+	**/
+	DataBuffer& GetData();
 
 	/**
 		Retrieve the loading state of the file. Guaranteed atomic operation, so can be safely called across threads.
@@ -96,8 +107,66 @@ public:
 	State GetState() const;
 
 private:
-	struct FileImpl;
-	std::unique_ptr<FileImpl> m_impl;
+	void SetState(State state);
+
+	void ClearDataBuffer();
+
+	Result<void, Error> InvokeWriteCallback(const WriteResult& result);
+	Result<void, Error> InvokeReadCallback(const ReadResult& result);
+
+	Result<void, Error> PerformDiskWriteSync();
+	Result<void, Error> PerformDiskWriteAsync();
+	Result<void, Error> PerformDiskReadSync();
+	Result<void, Error> PerformDiskReadAsync();
+
+private:
+	// reference to the FileIOMgr that created this object.
+	const FileIOMgr* m_mgr;
+
+	// the data that has been loaded from disk, if any.
+	DataBuffer m_data;
+
+	// filename that was passed to the file object.
+	String m_filename;
+
+	mutable State m_state;
+
+	mutable AsyncWriteCallback_f m_writeCallback;
+	mutable AsyncWriteCallback_f m_readCallback;
+
+	/**
+		The implementation of the IO logic for each platform. Implement the following for each platform.
+			* Constructor - Use implData for any platform specific data that is required.
+			* PerformDiskRead
+			* PerformDiskWrite
+	 **/
+	struct Impl
+	{
+		Impl();
+		~Impl()
+		{
+			if(m_data) delete m_data;
+		}
+
+		/**
+			Perform a synchronous disk read.
+		 **/
+		Result<DataBuffer, Error> PerformDiskReadSync(const String& filename);
+
+		/**
+			Perform a synchronous disk write.
+		 **/
+		Result<void, Error> PerformDiskWriteSync(const String& filename, const DataBuffer& data);
+
+		/**
+			Convenience function to cast the data to the platform specific type data.
+		 **/
+		template <class T>
+		T* GetData() { return static_cast<T*>(m_data); }
+
+		void* m_data;
+	};
+	std::unique_ptr<Impl> m_impl;
 };
 
 CLOSE_NAMESPACE(Elf);
