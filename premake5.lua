@@ -17,6 +17,12 @@ include("precore")
 
 include("RTTRBuild")
 
+local ElflordPPEnv = createEnvironment("ElflordPP")
+ElflordPPEnv:AddGlobalIncludeDirs({
+	"ThirdParty/rttr/src",
+	"ThirdParty/rttr/build/src"
+})
+
 
 ------------------------------------------------------------------------------------------------------------------------
 --  WORKSPACE DEFINITION

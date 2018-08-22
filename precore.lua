@@ -11,9 +11,6 @@ local function clearFilters()
     filter({})
 end
 
-local function replaceDelim(str, k, v)
-    return str:gsub('{'..k..'}', v)
-end
 local function processargs(args, stringReplacers)
     -- additional build configuration.
     if type(args) == 'table' then
@@ -255,6 +252,195 @@ function unittest(testname, args)
     print("------------------------------------------------------------------------------------------------------------------------")
     print()
 end
+
+local function init(self, key, value)
+	if type(self[key]) == 'nil' then
+		self[key] = value
+	end
+end
+
+local environment_mt = {
+	GetWorkspaceName = function(self)
+		return self.__workspaceName
+	end;
+
+	SetSourcePath = function(self, sourcePath)
+		self.__sourcePath = sourcePath
+	end;
+
+	AddConfigs = function(self, configs)
+		if not self.__configs then
+			self.__configs = {}
+		end
+
+		for _, config in pairs(configs) do
+			insertUnique(self.__configs, config)
+		end
+	end;
+
+	AddProject = function(self, projectName)
+		init(self, "__projects", {})
+		insertUnique(self.__projects, projectName)
+	end;
+
+	AddGlobalIncludeDirs = function(self, dirs)
+		if not self.__globalIncludes then
+			self.__globalIncludes = {}
+		end
+		for _, dir in pairs(dirs) do
+			if os.isdir(dir) then
+				insertUnique(self.__globalIncludes, dir)
+			end
+		end
+	end;
+
+	AddIncludeDirs = function(self, configs, dirs)
+		init(self, "__includesForConfigs", {})
+		init(self, "__configs", {})
+
+		for _, config in pairs(configs) do
+			if not valueExists(self.__configs, config) then
+				error("could not add include directories for unknown configuration", config)
+			end
+
+			init(self.__includesForConfigs, config, {})
+
+			for _, dir in pairs(dirs) do
+				if os.isdir(dir) then
+					insertUnique(self.__includesForConfigs[config], dir)
+				end
+			end
+		end
+	end;
+
+	AddGlobalLibDirs = function(self, libDirs)
+		init(self, "__globalLibDirs", {})
+
+		for _, libDir in pairs(libDirs) do
+			insertUnique(self.__globalLibDirs, libDir)
+		end
+	end;
+	
+	AddLibDirs = function(self, configs, libDirs)
+		init(self, "__libDirsForConfigs", {})
+		init(self, "__configs", {})
+		for _, config in pairs(configs) do
+			if not valueExists(self.__configs, config) then
+				error("could not add lib directory for unknown configuration", config)
+			end
+			init(self.__libDirsForConfigs, config, {})
+			for _, dir in pairs(libDirs) do
+				
+			end
+		end
+	end;
+
+	HasUnitTests = function(self)
+		self.__generateUnitTests = true
+	end;
+
+	Generate = function(self)
+		clearFilters()
+
+		workspace(self:GetWorkspaceName())
+		
+	end;
+}
+environment_mt.__index = environment_mt
+
+function createEnvironment(workspaceName)
+    local output = {
+        __workspaceName = workspaceName;
+        --[[StaticLibSourcePath = "Source/Libraries"; -- the directory where static lib code directories are held.
+        StaticLibProjects = {}; -- a list of the names of all of the static libraries being built.
+        StaticLibUnitTests = {}; -- a list of the static libs that have unit tests defined.
+        Configs = {}; -- The configs for this environment.
+        IncludeDirs = {};]]
+    }
+
+    -- gather the names of all of the first party static library projects.
+    local libraryPathFormatter = output.StaticLibSourcePath.."/{Project}"
+    local libraryDirectories = os.matchdirs(librarySourcePath.."/*")
+    for _, dirPath in pairs(libraryDirectories) do
+		local libname = path.getname(dirPath)
+        table.insert(output.StaticLibProjects, libname)
+		if os.isdir(dirPath.."/Tests") then
+			table.insert(output.StaticLibUnitTests, libname)
+		end
+    end
+
+    return setmetatable(output, environment_mt)
+end
+
+function addConfiguration(env, configs)
+    if type(configs) == "table" then
+        for _, v in ipairs(configs) do
+            env.Configs[v] = v
+        end
+    end
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- Adds a third party library to the build environment.
+function addThirdPartyLib(env, libName)
+    workspace(env.Workspace)
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- Creates the third party library projects.
+function configureThirdPartyLibraries(environment)
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- Creates the static library projects.
+function configureStaticLibraries(env)
+	
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- Configures the unit test project.
+function configureUnitTests(env)
+	print("------------------------------------------------------------------------------------------------------------------------")
+    print("--", "Defining Unit Test Application")
+
+    clearFilters()
+    -- Define the unit test application.
+    workspace(env.Workspace)
+    group("Unit Tests")
+    project("UnitTests")
+    language("C++")
+    cppdialect("C++17")
+    kind("Application")
+    targetdir("Build/Applications/%{cfg.buildcfg}")
+
+    -- Global variables for finding the locations of certain required files.
+    local libraryPathFormatter = env.StaticLibSourcePath.."/{Project}"
+    local unitTestPathFormatter = libraryPathFormatter.."/Tests"
+    local sourcePattern = "{SourceDir}/**.cpp"
+	local headerPattern = "{SourceDir}/**.h"
+
+    -- first, gather the names of all of the directories in the source path by their directory names.
+    for _, staticLibName in pairs(env.StaticLibUnitTests) do
+        local staticLibTestDirPath = formatString(unitTestPathFormatter, { Project = staticLibName })
+        if os.isdir(staticLibTestDirPath) then
+            files({
+                formatString(sourcePattern, {SourceDir = staticLibTestDirPath}),
+                formatString(sourcePattern, {SourceDir = staticLibTestDirPath})
+            })
+
+            -- required for precompiled headers.
+            includedirs({ 
+                formatString(libraryPathFormatter, {Project = staticLibName})
+            })
+			includedirs(env.GlobalIncludeDirs)
+        else
+            print("could not add unit test sources for static library", staticLibName, "in directory", staticLibTestDirPath)
+        end
+    end
+
+    -- first, enumerate the directories in the library source path.
+end
+
 
 function application(appname, args)
     print("------------------------------------------------------------------------------------------------------------------------")
