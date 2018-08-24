@@ -47,9 +47,30 @@ OPEN_NAMESPACE(Mirror);
 typedef rttr::type Type;
 
 /**
+	Typedef for rttr::variant. Use this instead of rttr::variant.
+ **/
+typedef rttr::variant Variant;
+
+/**
+	Typedef for rttr::constructor. Use instead of rttr::constructor.
+ **/
+typedef rttr::constructor Constructor;
+
+/**
 	Typedef for rttr::registration. Use this instead of rttr::registration.
  **/
 typedef rttr::registration Registration;
+
+/**
+	Alias for rttr::metadata function. Use this instead of rttr::metadata.
+ **/
+rttr::detail::metadata Property(Variant key, Variant value)
+{
+	return rttr::detail::metadata {
+		std::move(key),
+		std::move(value)
+	};
+}
 
 /**
 	Macro that provides more functions to a reflected object.
@@ -58,7 +79,7 @@ typedef rttr::registration Registration;
 	static Is     - Checks the type against all common forms.
 	virtual GetType - Retrieve the type at the instance leve.
  **/
-#define ELF_MIRROR_DECLARE(OBJ_TYPE, ...)                                                                           \
+#define ELF_MIRROR_DECLARE(OBJ_TYPE, ...)                                                                       \
 	private:                                                                                                    \
 		typedef OBJ_TYPE WhatIAm_t;                                                                             \
 	public:                                                                                                     \

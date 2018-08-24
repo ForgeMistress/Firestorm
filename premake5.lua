@@ -17,11 +17,11 @@ include("precore")
 
 include("RTTRBuild")
 
-local ElflordPPEnv = createEnvironment("ElflordPP")
+--[[local ElflordPPEnv = createEnvironment("ElflordPP")
 ElflordPPEnv:AddGlobalIncludeDirs({
 	"ThirdParty/rttr/src",
 	"ThirdParty/rttr/build/src"
-})
+})]]
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -51,10 +51,11 @@ staticlib('libMirror', {
 
 staticlib('libIO', {
     Dependencies = {
-        'libCore'
+        'libCore',
+		'libJson'
     };
     IncludeDirectories = {
-        "{LibSourcePath}/{Project}/json"
+        "{LibSourcePath}/libJson/json"
     };
     UsePCH = false;
 })
@@ -64,6 +65,25 @@ staticlib('libMath', {
         'libCore',
         'libMirror'
     };
+})
+
+staticlib('libJson', {
+	Dependencies = {
+		'libCore',
+		'libMirror'
+	};
+	UsePCH = false;
+})
+
+staticlib('libSerial', {
+	Dependencies = {
+		'libCore',
+		'libMirror',
+		'libMath',
+		'libJson',
+		'libExistence',
+		'libIO'
+	};
 })
 
 staticlib('libExistence', {

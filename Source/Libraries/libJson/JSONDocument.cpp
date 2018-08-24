@@ -9,21 +9,45 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "JSONDocument.h"
-#include "TypeTraits.h"
+#include <libIO/TypeTraits.h>
 #include <sstream>
 #include <json/reader.h>
 #include <istream>
 
 OPEN_NAMESPACE(Elf);
 
-JSONDocument::JSONDocument(const char* data)
+namespace {
+	SharedPtr<IDocument> MakeBlankJSON()
+	{
+		return std::make_shared<JSONDocument>();
+	}
+
+	SharedPtr<IDocument> MakeDataJSON(const Vector<char>& data)
+	{
+		return std::make_shared<JSONDocument>(data);
+	}
+}
+
+ELF_MIRROR_REGISTRATION
 {
-	if(data != nullptr)
+	ELF_MIRROR_DEFINE_NAMED(JSONDocument, "Elf::Document::JSON")
+		.method("MakeBlank", &MakeBlankJSON)
+		.method("MakeData", &MakeDataJSON)
+	;
+}
+
+JSONDocument::JSONDocument()
+{
+	InitializeAsIfNew();
+}
+
+JSONDocument::JSONDocument(const Vector<char>& data)
+{
+	if(!data.empty())
 	{
 		Json::CharReaderBuilder rbuilder;
 		String errs;
-		String d(data);
-		std::istringstream stream(data);
+		std::istringstream stream(&data[0]);
 		bool ok = Json::parseFromStream(rbuilder, stream, &m_root, &errs);
 		if(!ok)
 		{
@@ -39,12 +63,6 @@ JSONDocument::JSONDocument(const char* data)
 		m_root = Json::Value(Json::objectValue);
 		m_data.Set(&m_root);
 	}
-}
-
-JSONDocument::JSONDocument(Json::Value data)
-: m_root(std::move(data))
-{
-	m_data.Set(&m_root);
 }
 
 bool JSONDocument::InitializeAsIfNew()

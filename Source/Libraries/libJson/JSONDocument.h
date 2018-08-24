@@ -13,16 +13,18 @@
 
 #include <libCore/Result.h>
 
-#include "IDocument.h"
+#include <libIO/IDocument.h>
 #include <json/json.h>
+#include <rttr/registration.h>
 
 OPEN_NAMESPACE(Elf);
 
 class JSONDocument : public IDocument
 {
+	ELF_MIRROR_DECLARE(JSONDocument);
 public:
-	JSONDocument(const char* data = nullptr);
-	JSONDocument(Json::Value value);
+	JSONDocument();
+	explicit JSONDocument(const Vector<char>& data);
 
 private:
 	virtual bool InitializeAsIfNew();

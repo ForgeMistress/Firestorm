@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBIO_IDOCUMENT_H_
-#define LIBIO_IDOCUMENT_H_
+#ifndef LIBIO_IDOCUMENT_H__
+#define LIBIO_IDOCUMENT_H__
 #pragma once
 
 OPEN_NAMESPACE(Elf);
@@ -74,7 +74,28 @@ public:
 	virtual String ToString() const = 0;
 
 	virtual Result<Mirror::Type, Error> GetType(const char* key) const = 0;
+
+	enum Metadata : uint8_t
+	{
+		MAKER_FUNCTION_BLANK,
+		MAKER_FUNCTION_DATA
+	};
+	static rttr::detail::metadata MakerFunctionBlank() { return rttr::metadata(MAKER_FUNCTION_BLANK, true); }
+	static rttr::detail::metadata MakerFunctionData()  { return rttr::metadata(MAKER_FUNCTION_DATA, true); }
+
+protected:
+	IDocument() {}
+	explicit IDocument(const Vector<char>&) {}
+	virtual ~IDocument(){}
 };
+
+OPEN_NAMESPACE(Document);
+
+SharedPtr<IDocument> MakeBlank(const String& type);
+
+SharedPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data);
+
+CLOSE_NAMESPACE(Document);
 
 CLOSE_NAMESPACE(Elf);
 

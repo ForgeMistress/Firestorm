@@ -35,7 +35,7 @@ const char* TypeTraits<T>::GetTypeString()
 template <class T>
 const Mirror::Type TypeTraits<T>::GetMirrorType()
 {
-	return rttr::type::get<void>();
+	return rttr::type::get<T>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -49,10 +49,9 @@ struct TypeTraits
 	static const bool IsPointer = false;
 	static const bool IsArray = false;
 
-	static const char* GetAbbreviation();
-	static const char* GetTypeString();
-	static const Mirror::Type GetMirrorType();
-
+	static const char*         GetAbbreviation();
+	static const char*         GetTypeString();
+	static const Mirror::Type  GetMirrorType();
 	static Result<void, Error> ReadFromDocument(IDocument* reader, const String& key, T& outValue);
 	static Result<void, Error> WriteToDocument(IDocument* writer, const String& key, T value);
 };
@@ -93,6 +92,7 @@ struct TypeTraits<int8_t>
 	static const char*         GetAbbreviation();
 	static const char*         GetTypeString();
 	static const Mirror::Type  GetMirrorType();
+
 	static Result<void, Error> ReadFromDocument(IDocument* reader, const String& key, int8_t& outValue);
 	static Result<void, Error> WriteToDocument(IDocument* writer, const String& key, int8_t value);
 };

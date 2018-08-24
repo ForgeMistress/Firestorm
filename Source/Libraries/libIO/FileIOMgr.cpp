@@ -16,18 +16,37 @@ OPEN_NAMESPACE(Elf);
 struct FileIOMgr::ReadCallbackReceipt_
 {
 	ReadCallbackReceipt_(FileIOMgr* mgr, FileIOMgr::ReadErrorCallback_f callback)
+	: m_mgr(mgr)
+	, m_callback(callback)
 	{
 
 	}
 
 	~ReadCallbackReceipt_()
 	{
-		if(m_mgr)
-			m_mgr->UnegisterReadErrorCallback(callback);
+		if(auto mgr = m_mgr.lock())
+			mgr->UnregisterReadErrorCallback(m_callback);
 	}
-	FileIOMgr* m_mgr;
+	WeakPtr<FileIOMgr>             m_mgr;
+	FileIOMgr::ReadErrorCallback_f m_callback;
 };
 
+struct FileIOMgr::WriteCallbackReceipt_
+{
+	WriteCallbackReceipt_(FileIOMgr* mgr, FileIOMgr::WriteErrorCallback_f callback)
+	: m_mgr(mgr)
+	, m_callback(callback)
+	{
+	}
+
+	~WriteCallbackReceipt_()
+	{
+		if(auto mgr = m_mgr.lock())
+			mgr->UnregisterReadErrorCallback(m_callback);
+	}
+	WeakPtr<FileIOMgr>              m_mgr;
+	FileIOMgr::WriteErrorCallback_f m_callback;
+};
 
 
 FileIOMgr::FileIOMgr()
