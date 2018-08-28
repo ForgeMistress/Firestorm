@@ -16,6 +16,11 @@ ENGINE_APP_OUTPUT_DIR = "Build/Applications/%{cfg.architecture}/%{cfg.buildcfg}"
 
 ENGINE_LIBS = {}
 ENGINE_GAME_LIBS = {}
+
+local DIVIDER = 
+"------------------------------------------------------------------------------------------------------------------------"
+
+
 -- gather the names of all of the first party static library projects.
 do
     local libraryDirectories = os.matchdirs(ENGINE_LIB_SOURCE_DIR.."/*")
@@ -32,9 +37,9 @@ end
 function configureEngineLib(libName)
     clearFilters()
 
-    print("------------------------------------------------------------------------------------------------------------------------")
+    print(DIVIDER)
     print("--", "Generating project for "..libName..".")
-    print("------------------------------------------------------------------------------------------------------------------------")
+    print(DIVIDER)
 
     group("EngineLibs")
     project(libName)
@@ -46,7 +51,10 @@ function configureEngineLib(libName)
 
     includedirs({ 
         ENGINE_LIB_SOURCE_DIR,
+        "ThirdParty",
         "ThirdParty/rttr/src",
+        "ThirdParty/glfw.git/include",
+        "ThirdParty/angelscript/sdk/angelscript/include"
     })
     libdirs({ ENGINE_LIB_OUTPUT_DIR })
 
@@ -65,9 +73,9 @@ end
 function configureGame(gameName)
     clearFilters()
 
-    print("------------------------------------------------------------------------------------------------------------------------")
+    print(DIVIDER)
     print("--", "Generating project for Game: "..gameName..".")
-    print("------------------------------------------------------------------------------------------------------------------------")
+    print(DIVIDER)
 
     group("Games")
     project(gameName)
@@ -79,12 +87,15 @@ function configureGame(gameName)
 
     includedirs({ 
         ENGINE_APP_SOURCE_DIR,
+        "ThirdParty",
         "ThirdParty/rttr/src",
+        "ThirdParty/glfw.git/include",
+        "ThirdParty/angelscript/sdk/angelscript/include"
     })
-    libdirs({ ENGINE_LIB_OUTPUT_DIR })
+    libdirs({ ENGINE_APP_OUTPUT_DIR })
 
     pchheader("stdafx.h")
-    pchsource(ENGINE_LIB_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
+    pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
 
     addDependencies(ENGINE_GAME_LIBS)
 
@@ -131,8 +142,10 @@ function configureUnitTest(libName)
     includedirs({ 
         libsrcpath,
         libsrcpath.."/"..libName,
+        "ThirdParty",
         "ThirdParty/rttr/src",
-        "ThirdParty"
+        "ThirdParty/glfw.git/include",
+        "ThirdParty/angelscript/sdk/angelscript/include"
     })
 
     links({ 
@@ -225,7 +238,7 @@ do
 		{ "{foo}/{bar}/{foo}", testTable.foo.."/"..testTable.bar.."/"..testTable.foo },
 		{ "\"{foo}\"", "\""..testTable.foo.."\"" }
 	}
-	print("------------------------------------------------------------------------------------------------------------------------")
+	print(DIVIDER)
 	print("-- Testing lua string formatter...")
 	local numFailed = 0
 	for _, testItem in ipairs(testStrings) do

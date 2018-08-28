@@ -27,5 +27,6 @@ addDependencies({
 links({ 
     "rttr", 
     "jsoncpp", 
-    "angelscript"
+    "angelscript",
+    "GLFW"
 })

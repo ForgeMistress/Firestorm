@@ -25,30 +25,49 @@ configurations({
 
 location("Premake")
 
---filter("configurations:*32"); architecture("x86")
-filter("configurations:*64")
-    architecture("x86_64")
+filter("configurations:Debug32 or Release32 or Final32")
+    architecture("x86")
+clearFilters()
 
---filter(
+filter("configurations:Debug64 or Release64 or Final64")
+    architecture("x86_64")
+clearFilters()
 
 filter("action:vs*")
-defines({ "ELF_PLATFORM_WINDOWS", "ELF_VISUALSTUDIO" })
+    defines({ "ELF_VISUALSTUDIO" })
+clearFilters()
+
+
+if os.ishost("windows") then
+    defines({ "ELF_PLATFORM_WINDOWS" })
+end
 
 filter("action:xcode*")
-defines({ "ELF_PLATFORM_OSX", "ELF_XCODE" })
+    defines({ "ELF_XCODE" })
+clearFilters()
+
+if os.ishost("macosx") then
+    defines({ "ELF_PLATFORM_OSX" })
+end
 
 filter("action:gmake*")
-defines({ "ELF_PLATFORM_UNIX" })
---defines({ "ELF_PLATFORM_ANDROID" })
---defines({ "ELF_PLATFORM_IOS"     })
+    defines({ "ELF_GMAKE", "ELF_PLATFORM_UNIX" })
+clearFilters()
+if os.ishost("linux") then
+    defines({ "ELF_PLATFORM_UNIX" })
+end
 
-filter("configurations:Debug32");
+filter("configurations:Debug32")
     libdirs({ "Bin/x86/Debug" })
+clearFilters()
 filter("configurations:Release32 or Final32")
     libdirs({ "Bin/x86/Release" })
+clearFilters()
 
 filter("configurations:Debug64")
     libdirs({ "Bin/x64/Debug" })
+clearFilters()
+
 filter("configurations:Release64 or Final64");
     libdirs({ "Bin/x64/Release" })
 clearFilters()
@@ -65,6 +84,7 @@ workspace("ElflordPP")
 include("JsonCPP_Build")
 include("RTTR_Build")
 include("Angelscript_Build")
+include("GLFW_Build")
 
 ------------------------------------------------------------------------------------------------------------------------
 --  FIRST PARTY LIBRARIES

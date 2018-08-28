@@ -17,7 +17,7 @@ language("C++")
 cppdialect("C++17")
 kind("StaticLib")
 
-targetdir("Build/%{cfg.architecture}/%{cfg.buildconfig}")
+targetdir(ENGINE_LIB_OUTPUT_DIR)
 
 includedirs({
     "ThirdParty/rttr/src"

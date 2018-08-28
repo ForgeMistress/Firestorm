@@ -4,5 +4,5 @@
 
 void Elf::libJson::Initialize()
 {
-	//JSONDocument j;
+	JSONDocument j;
 }

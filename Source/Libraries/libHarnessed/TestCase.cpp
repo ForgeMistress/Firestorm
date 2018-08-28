@@ -11,6 +11,15 @@ void TestCase::Assert(bool assertion, const String& message)
 	}
 }
 
+template<class T>
+void TestCase::AssertNotNull(T ptr, const String& message)
+{
+	if(!ptr)
+	{
+		throw AssertionException(message);
+	}
+}
+
 size_t TestCase::GetFailureCount() const
 {
 	return m_failures.size();
