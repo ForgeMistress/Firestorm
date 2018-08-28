@@ -7,13 +7,13 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBIO_IDOCUMENT_H__
-#define LIBIO_IDOCUMENT_H__
+#ifndef LIBIO_IDOCUMENT_H_
+#define LIBIO_IDOCUMENT_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+#include <libCore/Result.h>
 
-class IDocument;
+OPEN_NAMESPACE(Elf);
 
 OPEN_NAMESPACE(Mirror);
 class Object;
@@ -21,7 +21,12 @@ CLOSE_NAMESPACE(Mirror);
 
 class IDocument
 {
+	ELF_MIRROR_DECLARE(IDocument);
 public:
+	/*IDocument() {}
+	explicit IDocument(const Vector<char>&) {}
+	virtual ~IDocument() {}*/
+
 	enum Codes : uint8_t
 	{
 		ERROR, // generic
@@ -82,20 +87,7 @@ public:
 	};
 	static rttr::detail::metadata MakerFunctionBlank() { return rttr::metadata(MAKER_FUNCTION_BLANK, true); }
 	static rttr::detail::metadata MakerFunctionData()  { return rttr::metadata(MAKER_FUNCTION_DATA, true); }
-
-protected:
-	IDocument() {}
-	explicit IDocument(const Vector<char>&) {}
-	virtual ~IDocument(){}
 };
-
-OPEN_NAMESPACE(Document);
-
-SharedPtr<IDocument> MakeBlank(const String& type);
-
-SharedPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data);
-
-CLOSE_NAMESPACE(Document);
 
 CLOSE_NAMESPACE(Elf);
 

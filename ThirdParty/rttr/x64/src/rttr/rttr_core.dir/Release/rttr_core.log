@@ -1,4 +1,6 @@
-﻿  constructor.cpp
+﻿  Building Custom Rule E:/Projects/ElflordPP.git/ThirdParty/rttr/src/rttr/CMakeLists.txt
+  CMake does not need to re-run because E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\src\rttr\CMakeFiles\generate.stamp is up-to-date.
+  constructor.cpp
   destructor.cpp
   enumeration.cpp
   library.cpp

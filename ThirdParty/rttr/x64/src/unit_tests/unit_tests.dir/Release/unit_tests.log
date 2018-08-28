@@ -1,4 +1,6 @@
-﻿  main.cpp
+﻿  Building Custom Rule E:/Projects/ElflordPP.git/ThirdParty/rttr/src/unit_tests/CMakeLists.txt
+  CMake does not need to re-run because E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\src\unit_tests\CMakeFiles\generate.stamp is up-to-date.
+  main.cpp
   test_misc.cpp
   array_range_test.cpp
   string_view_test.cpp

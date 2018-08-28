@@ -569,13 +569,14 @@ auto select_const(ReturnType (ClassType::*func)(Args...) const) -> decltype(func
     return func;
 }
 
-//#ifndef RTTR_NO_CXX17_NOEXCEPT_FUNC_TYPE
-/*!
+/*((MLR))
+#ifndef RTTR_NO_CXX17_NOEXCEPT_FUNC_TYPE
+/
  * \brief Overload with `noexcept` function type.
  *
  * \see select_const
- */
-/*template<typename ClassType, typename ReturnType, typename... Args>
+ /
+template<typename ClassType, typename ReturnType, typename... Args>
 auto select_const(ReturnType (ClassType::*func)(Args...) const noexcept) -> decltype(func)
 {
     return func;
@@ -624,14 +625,15 @@ auto select_non_const(ReturnType(ClassType::*func)(Args...)) -> decltype(func)
     return func;
 }
 
-//#ifndef RTTR_NO_CXX17_NOEXCEPT_FUNC_TYPE
+/* ((MLR))
+#ifndef RTTR_NO_CXX17_NOEXCEPT_FUNC_TYPE
 
-/*!
+/
  * \brief Overload with `noexcept` function type.
  *
  * \see select_const
- */
-/*template<typename ClassType, typename ReturnType, typename... Args>
+ /
+template<typename ClassType, typename ReturnType, typename... Args>
 auto select_non_const(ReturnType(ClassType::*func)(Args...) noexcept) -> decltype(func)
 {
     return func;

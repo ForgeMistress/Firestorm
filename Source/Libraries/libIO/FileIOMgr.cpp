@@ -15,11 +15,10 @@ OPEN_NAMESPACE(Elf);
 
 struct FileIOMgr::ReadCallbackReceipt_
 {
-	ReadCallbackReceipt_(FileIOMgr* mgr, FileIOMgr::ReadErrorCallback_f callback)
+	ReadCallbackReceipt_(const SharedPtr<FileIOMgr>& mgr, FileIOMgr::ReadErrorCallback_f callback)
 	: m_mgr(mgr)
 	, m_callback(callback)
 	{
-
 	}
 
 	~ReadCallbackReceipt_()
@@ -33,7 +32,7 @@ struct FileIOMgr::ReadCallbackReceipt_
 
 struct FileIOMgr::WriteCallbackReceipt_
 {
-	WriteCallbackReceipt_(FileIOMgr* mgr, FileIOMgr::WriteErrorCallback_f callback)
+	WriteCallbackReceipt_(const SharedPtr<FileIOMgr>& mgr, FileIOMgr::WriteErrorCallback_f callback)
 	: m_mgr(mgr)
 	, m_callback(callback)
 	{
@@ -157,30 +156,30 @@ bool FileIOMgr::CancelQueuedWrite(FileHandle file)
 
 FileIOMgr::ReadCallbackReceipt FileIOMgr::RegisterReadErrorCallback(ReadErrorCallback_f callback)
 {
-	if(std::find(m_readErrorCallbacks.begin(), m_readErrorCallbacks.end(), callback) == m_readErrorCallbacks.end())
+	/*if(std::find(m_readErrorCallbacks.begin(), m_readErrorCallbacks.end(), callback) == m_readErrorCallbacks.end())
 	{
-		return std::make_shared<ReadCallbackReceipt_>(const_cast<FileIOMgr*>(this), callback);
-	}
+		return std::make_shared<ReadCallbackReceipt_>(SharedPtr<FileIOMgr>(this), callback);
+	}*/
 	return nullptr;
 }
 
 FileIOMgr::WriteCallbackReceipt FileIOMgr::RegisterWriteErrorCallback(WriteErrorCallback_f callback)
 {
-	if(std::find(m_writeErrorCallbacks.begin(), m_writeErrorCallbacks.end(), callback) == m_readErrorCallbacks.end())
+	/*if(std::find(m_writeErrorCallbacks.begin(), m_writeErrorCallbacks.end(), callback) == m_readErrorCallbacks.end())
 	{
-		return std::make_shared<WriteCallbackReceipt_>(const_cast<FileIOMgr*>(this), callback);
-	}
+		return std::make_shared<WriteCallbackReceipt_>(SharedPtr<FileIOMgr>(this), callback);
+	}*/
 	return nullptr;
 }
 
 void FileIOMgr::UnregisterReadErrorCallback(const ReadErrorCallback_f& callback)
 {
-	m_readErrorCallbacks.remove(callback);
+	//m_readErrorCallbacks.remove(callback);
 }
 
 void FileIOMgr::UnregisterWriteErrorCallback(const WriteErrorCallback_f& callback)
 {
-	m_writeErrorCallbacks.remove(callback);
+	//m_writeErrorCallbacks.remove(callback);
 }
 
 FileIOMgr::QueueEntry FileIOMgr::PopFromFront(FileQueue& queue) const

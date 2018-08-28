@@ -33,9 +33,6 @@ Result<void, Error> SerialTraits<TYPE>::Read(const char* key, SharedPtr<IDocumen
 OPEN_NAMESPACE(Elf);
 OPEN_NAMESPACE(Mirror);
 
-/*const ResultCode SerialResults::RES_VARIANT_NOT_VALID = 
-	Result("Variant passed into SerialTraits<>::Write is not valid and stores no data.");*/
-
 template <class T>
 inline Result<SharedPtr<IDocument>, Error> SerialTraits<T>::Write(const char* key, SharedPtr<IDocument> writer, const T& input)
 {

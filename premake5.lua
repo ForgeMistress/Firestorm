@@ -14,14 +14,44 @@
 include("GlobalConfig")
 include("precore")
 
+-- GLOBAL BUILD CONFIGURATION
+workspace("*")
 
-include("RTTRBuild")
+-- All projects will have the following build targets available to them.
+configurations({
+    "Debug32", "Release32", "Final32",
+    "Debug64", "Release64", "Final64"
+})
 
---[[local ElflordPPEnv = createEnvironment("ElflordPP")
-ElflordPPEnv:AddGlobalIncludeDirs({
-	"ThirdParty/rttr/src",
-	"ThirdParty/rttr/build/src"
-})]]
+location("Premake")
+
+--filter("configurations:*32"); architecture("x86")
+filter("configurations:*64")
+    architecture("x86_64")
+
+--filter(
+
+filter("action:vs*")
+defines({ "ELF_PLATFORM_WINDOWS", "ELF_VISUALSTUDIO" })
+
+filter("action:xcode*")
+defines({ "ELF_PLATFORM_OSX", "ELF_XCODE" })
+
+filter("action:gmake*")
+defines({ "ELF_PLATFORM_UNIX" })
+--defines({ "ELF_PLATFORM_ANDROID" })
+--defines({ "ELF_PLATFORM_IOS"     })
+
+filter("configurations:Debug32");
+    libdirs({ "Bin/x86/Debug" })
+filter("configurations:Release32 or Final32")
+    libdirs({ "Bin/x86/Release" })
+
+filter("configurations:Debug64")
+    libdirs({ "Bin/x64/Debug" })
+filter("configurations:Release64 or Final64");
+    libdirs({ "Bin/x64/Release" })
+clearFilters()
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -30,127 +60,23 @@ ElflordPPEnv:AddGlobalIncludeDirs({
 workspace("ElflordPP")
 
 ------------------------------------------------------------------------------------------------------------------------
---  LIBRARIES
+--  THIRD PARTY LIBRARIES
 ------------------------------------------------------------------------------------------------------------------------
-staticlib('libCore')
-
-staticlib('libMirror', {
-    Dependencies = {
-        'libCore',
-        'libIO'
-    };
-    IncludeDirectories = {
-        "ThirdParty/rttr/src",
-        "ThirdParty/rttr/build/src"
-    };
-    PostArgProcessing = function()
-        filter({ "configurations:Debug*" });   links({ "librttr_core_d" })
-        filter({ "configurations:Release*" }); links({ "librttr_core" })
-    end;
-})
-
-staticlib('libIO', {
-    Dependencies = {
-        'libCore',
-		'libJson'
-    };
-    IncludeDirectories = {
-        "{LibSourcePath}/libJson/json"
-    };
-    UsePCH = false;
-})
-
-staticlib('libMath', {
-    Dependencies = {
-        'libCore',
-        'libMirror'
-    };
-})
-
-staticlib('libJson', {
-	Dependencies = {
-		'libCore',
-		'libMirror'
-	};
-	UsePCH = false;
-})
-
-staticlib('libSerial', {
-	Dependencies = {
-		'libCore',
-		'libMirror',
-		'libMath',
-		'libJson',
-		'libExistence',
-		'libIO'
-	};
-})
-
-staticlib('libExistence', {
-    Dependencies = {
-        'libCore',
-        'libMirror'
-    };
-})
-
-staticlib('libHarnessed', {
-    Dependencies = {
-        'libCore'
-    };
-})
-
-staticlib('libScript', {
-    Dependencies = {
-        'libCore',
-        'libMirror'
-    };
-
-    IncludeDirectories = {
-        "{LibSourcePath}/{Project}/angelscript/include",
-        "{LibSourcePath}/{Project}/angelscript/source"
-    };
-
-    UsePCH = false;
-})
-
-
-
+include("JsonCPP_Build")
+include("RTTR_Build")
+include("Angelscript_Build")
 
 ------------------------------------------------------------------------------------------------------------------------
---  UNIT TESTS
+--  FIRST PARTY LIBRARIES
 ------------------------------------------------------------------------------------------------------------------------
-unittest('libHarnessed')
-unittest('libExistence', {
-    Dependencies = { 
-        'libCore',
-        'libMirror'
-    };
-    UsePCH = false;
-})
+include("libCore_Build")
+include("libExistence_Build")
+include("libHarnessed_Build")
+include("libIO_Build")
+include("libJson_Build")
+include("libMath_Build")
+include("libMirror_Build")
+include("libScript_Build")
+include("libSerial_Build")
 
-unittest('libMirror', {
-    Dependencies = {
-        'libCore',
-        'libMirror',
-        'libIO'
-    };
-    UsePCH = false;
-})
-
-unittest('libIO', {
-    Dependencies = {
-        'libCore',
-        'libMirror',
-        'libIO'
-    };
-    UsePCH = false;
-})
-
---[[unittest('libScript', {
-    Dependencies = {
-        'libCore',
-        'libMirror'
-    };
-    UsePCH = false;
-})]]
-
+include("Game_Build")

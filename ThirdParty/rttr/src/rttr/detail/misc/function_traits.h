@@ -88,7 +88,8 @@ namespace detail
     template<typename R, typename... Args>
     struct is_functor<R (&)(Args...)> : std::true_type {};
 
-/*#ifndef RTTR_NO_CXX17_NOEXCEPT_FUNC_TYPE
+/* ((MLR))
+#ifndef RTTR_NO_CXX17_NOEXCEPT_FUNC_TYPE
     template<typename R, typename... Args>
     struct is_functor<R (*)(Args...) noexcept> : std::true_type {};
 
@@ -129,7 +130,8 @@ namespace detail
     template<typename R, typename C, typename... Args>
     struct function_traits<R (C::*)(Args...) const volatile> : function_traits<R (Args...)> {using class_type = C; };
 
-/*#ifndef RTTR_NO_CXX17_NOEXCEPT_FUNC_TYPE
+/* ((MLR))
+#ifndef RTTR_NO_CXX17_NOEXCEPT_FUNC_TYPE
     template<typename R, typename... Args>
     struct function_traits<R (*)(Args...) noexcept> : function_traits<R (Args...)> { };
 

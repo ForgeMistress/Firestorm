@@ -495,18 +495,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{E091F4C7-F628-3A29-846E-ED5793D5AB3E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{79374909-D7B3-3BF4-B8FF-EE33520A27BD}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="detail">
-      <UniqueIdentifier>{C5FB8B5D-80BA-3053-B079-4E6FA46F1CED}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Generated Files">
-      <UniqueIdentifier>{5A55E1B9-9C21-3379-8D6F-47E635540CEC}</UniqueIdentifier>
-    </Filter>
     <Filter Include="detail\base">
       <UniqueIdentifier>{CB5E73EA-2DC0-3324-A9A8-23CEB3BEB7EC}</UniqueIdentifier>
     </Filter>
@@ -569,6 +557,18 @@
     </Filter>
     <Filter Include="detail\variant_sequential_view">
       <UniqueIdentifier>{AAFAF26F-6FA7-3916-A8FC-FBC5C2812DD6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{E091F4C7-F628-3A29-846E-ED5793D5AB3E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{79374909-D7B3-3BF4-B8FF-EE33520A27BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="detail">
+      <UniqueIdentifier>{C5FB8B5D-80BA-3053-B079-4E6FA46F1CED}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{5A55E1B9-9C21-3379-8D6F-47E635540CEC}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

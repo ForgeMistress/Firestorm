@@ -8,6 +8,158 @@
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
 
+ENGINE_LIB_SOURCE_DIR  = "Source/Libraries"
+ENGINE_APP_SOURCE_DIR  = "Source/Applications"
+ENGINE_TST_SOURCE_DIR = "Source/Tests"
+ENGINE_LIB_OUTPUT_DIR  = "Build/Libraries/%{cfg.architecture}/%{cfg.buildcfg}"
+ENGINE_APP_OUTPUT_DIR = "Build/Applications/%{cfg.architecture}/%{cfg.buildcfg}"
+
+ENGINE_LIBS = {}
+ENGINE_GAME_LIBS = {}
+-- gather the names of all of the first party static library projects.
+do
+    local libraryDirectories = os.matchdirs(ENGINE_LIB_SOURCE_DIR.."/*")
+    for _, dirPath in pairs(libraryDirectories) do
+        local libname = path.getname(dirPath)
+        
+        if libname ~= "libHarnessed" then
+            table.insert(ENGINE_GAME_LIBS, libname)
+        end
+        table.insert(ENGINE_LIBS, libname)
+    end
+end
+
+function configureEngineLib(libName)
+    clearFilters()
+
+    print("------------------------------------------------------------------------------------------------------------------------")
+    print("--", "Generating project for "..libName..".")
+    print("------------------------------------------------------------------------------------------------------------------------")
+
+    group("EngineLibs")
+    project(libName)
+    language("C++")
+    cppdialect("C++17")
+    kind("StaticLib")
+
+    targetdir(ENGINE_LIB_OUTPUT_DIR)
+
+    includedirs({ 
+        ENGINE_LIB_SOURCE_DIR,
+        "ThirdParty/rttr/src",
+    })
+    libdirs({ ENGINE_LIB_OUTPUT_DIR })
+
+    pchheader("stdafx.h")
+    pchsource(ENGINE_LIB_SOURCE_DIR.."/"..libName.."/stdafx.cpp")
+
+    files({
+        ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.h",
+        ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.cpp"
+    })
+end
+
+function configureApplication(appname)
+end
+
+function configureGame(gameName)
+    clearFilters()
+
+    print("------------------------------------------------------------------------------------------------------------------------")
+    print("--", "Generating project for Game: "..gameName..".")
+    print("------------------------------------------------------------------------------------------------------------------------")
+
+    group("Games")
+    project(gameName)
+    language("C++")
+    cppdialect("C++17")
+    kind("StaticLib")
+
+    targetdir(ENGINE_APP_OUTPUT_DIR)
+
+    includedirs({ 
+        ENGINE_APP_SOURCE_DIR,
+        "ThirdParty/rttr/src",
+    })
+    libdirs({ ENGINE_LIB_OUTPUT_DIR })
+
+    pchheader("stdafx.h")
+    pchsource(ENGINE_LIB_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
+
+    addDependencies(ENGINE_GAME_LIBS)
+
+    files({
+        ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
+        ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
+    })
+end
+
+function configureUnitTest(libName)
+    clearFilters()
+
+    local tstsrcpath = ENGINE_TST_SOURCE_DIR.."/"..libName
+    local libsrcpath = ENGINE_LIB_SOURCE_DIR
+
+    local requiredDirectory = tstsrcpath
+    print("--", ("Checking for required directory %q"):format(requiredDirectory))
+    if not os.isdir(requiredDirectory) then
+        error(libName.." is not a valid test. There is no source directory named "..requiredDirectory)
+        return
+    end
+
+    local requiredFile = tstsrcpath.."/"..libName.."Tests.cpp"
+    print("--", ("Checking for required unit test file %q"):format(requiredFile))
+    if not os.isfile(requiredFile) then
+        error(("%q is not a valid test. Missing file %q"):format(libName, requiredFile))
+        return
+    end
+
+    group("UnitTests")
+    project(libName.."_Test")
+
+    language("C++")
+    cppdialect("C++17")
+    kind("ConsoleApp")
+
+    targetdir("Build/Tests/%{cfg.buildcfg}")
+
+    files({
+        tstsrcpath.."/**.h",
+        tstsrcpath.."/**.cpp"
+    })
+
+    includedirs({ 
+        libsrcpath,
+        libsrcpath.."/"..libName,
+        "ThirdParty/rttr/src",
+        "ThirdParty"
+    })
+
+    links({ 
+        'libHarnessed', 
+        'libCore',
+        libName
+    })
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- Calls filter({}) to go back to the default global filter. Wrapped so that the intent is more clear.
+function clearFilters()
+    filter({})
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- Marks another first party library as a dependency, adding the header search path as well as marking a link against
+-- the built library.
+function addDependencies(deps)
+    local includeDirs = {}
+    for _, dep in ipairs(deps) do
+        table.insert(includeDirs, ENGINE_LIB_SOURCE_DIR.."/"..dep)
+    end
+    includedirs(includeDirs)
+    links(deps)
+end
+
 ------------------------------------------------------------------------------------------------------------------------
 -- Replaces a {} delimited key with the associated value.
 -- EX: replaceDelim("{foo}", "foo", "a long and winding road") will return the string "a long and winding road.

@@ -7,9 +7,6 @@
 ------------------------------------------------------------------------------------------------------------------------
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
-local function clearFilters()
-    filter({})
-end
 
 local function processargs(args, stringReplacers)
     -- additional build configuration.
@@ -41,7 +38,6 @@ local function processargs(args, stringReplacers)
             })
             filter("action:vs*")
                 pchheader("stdafx.h")
-                --pchsource(libsrcpath.."/"..libname.."/stdafx.cpp")
                 pchsource(stringReplacers.SourcePath.."/stdafx.cpp")
 
             filter("action:not vs*")
@@ -106,6 +102,9 @@ local function configureLibraryDirectories()
     filter("configurations:Release64 or Final64");
         libdirs({ "ThirdParty/rttr/x64/lib/Release" })
         includedirs({ "ThirdParty/rttr/x64/src" })
+
+    clearFilters()
+    libdirs({"Build/%{cfg.architecture}/%{cfg.buildconfig}"})
 end
 
 function staticlib(libname, args)
@@ -359,7 +358,6 @@ function createEnvironment(workspaceName)
     }
 
     -- gather the names of all of the first party static library projects.
-    local libraryPathFormatter = output.StaticLibSourcePath.."/{Project}"
     local libraryDirectories = os.matchdirs(librarySourcePath.."/*")
     for _, dirPath in pairs(libraryDirectories) do
 		local libname = path.getname(dirPath)
@@ -533,47 +531,3 @@ function application(appname, args)
     print("------------------------------------------------------------------------------------------------------------------------")
     print()
 end
-
-
-
-
--- GLOBAL BUILD CONFIGURATION
-workspace("*")
-
--- All projects will have the following build targets available to them.
-configurations({
-    "Debug32", "Release32", "Final32",
-    "Debug64", "Release64", "Final64"
-})
-
-location("Premake")
-
-includedirs({ "Source/Include" })
-
---filter("configurations:*32"); architecture("x86")
-filter("configurations:*64")
-    architecture("x86_64")
-
---filter(
-
-filter("action:vs*")
-defines({ "ELF_PLATFORM_WINDOWS", "ELF_VISUALSTUDIO" })
-
-filter("action:xcode*")
-defines({ "ELF_PLATFORM_OSX", "ELF_XCODE" })
-
-filter("action:gmake*")
-defines({ "ELF_PLATFORM_UNIX" })
---defines({ "ELF_PLATFORM_ANDROID" })
---defines({ "ELF_PLATFORM_IOS"     })
-
-filter("configurations:Debug32");
-    --libdirs({ "Bin/x86/Debug" })
-filter("configurations:Release32 or Final32")
-    --libdirs({ "Bin/x86/Release" })
-
-filter("configurations:Debug64")
-    --libdirs({ "Bin/x64/Debug" })
-filter("configurations:Release64 or Final64");
-    --libdirs({ "Bin/x64/Release" })
-clearFilters()

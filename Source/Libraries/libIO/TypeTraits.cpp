@@ -13,7 +13,7 @@
 
 OPEN_NAMESPACE(Elf);
 
-const char* TraitsDocs::SCHEMA_KEY = "__ELF_SCHEMA__";
+/*const char* TraitsDocs::SCHEMA_KEY = "__ELF_SCHEMA__";
 const char* TraitsDocs::DATA_KEY = "__ELF_DATA__";
 const char* TraitsDocs::OBJECT_TYPE_KEY = "__ELF_OBJECT_TYPE__";
 const char* TraitsDocs::OBJECT_DATA_KEY = "__ELF_OBJECT_DATA__";
@@ -252,7 +252,7 @@ namespace {
 			else if (t == type::get<double>())
 				writer->WriteDouble(key.c_str(), var.to_double());
 			return true;
-		}
+		}*/
 		/*else if(t.is_enumeration())
 		{
 			bool ok = false;
@@ -263,7 +263,7 @@ namespace {
 			}
 			return true;
 		}*/
-		else if(t == type::get<String>())
+		/*else if(t == type::get<String>())
 		{
 			writer->WriteString(key.c_str(), var.to_string());
 			return true;
@@ -320,6 +320,6 @@ Result<void, Error> TypeTraits<Mirror::Object*>::WriteToDocument(IDocument* writ
 {
 	RecursiveWrite(writer, key, value);
 	return Result<void, Error>();
-}
+}*/
 
 CLOSE_NAMESPACE(Elf);

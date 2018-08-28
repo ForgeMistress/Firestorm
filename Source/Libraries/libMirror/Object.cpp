@@ -13,6 +13,16 @@
 OPEN_NAMESPACE(Elf);
 OPEN_NAMESPACE(Mirror);
 
+
+Metadata Property(Variant key, Variant value)
+{
+	return Metadata{
+		std::move(key),
+		std::move(value)
+	};
+}
+
+
 ELF_MIRROR_REGISTRATION
 {
 	ELF_MIRROR_DEFINE(Elf::Mirror::Object);

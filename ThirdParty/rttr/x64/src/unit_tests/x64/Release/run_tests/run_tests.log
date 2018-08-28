@@ -1,4 +1,6 @@
-﻿  Running unit_tests
+﻿  Building Custom Rule E:/Projects/ElflordPP.git/ThirdParty/rttr/src/unit_tests/CMakeLists.txt
+  CMake does not need to re-run because E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\src\unit_tests\CMakeFiles\generate.stamp is up-to-date.
+  Running unit_tests
   ===============================================================================
-  All tests passed (4921 assertions in 531 test cases)
+  All tests passed (4926 assertions in 532 test cases)
   

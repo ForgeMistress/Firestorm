@@ -11,11 +11,6 @@
 #define LIBSCRIPT_SCRIPTCOMPONENT_H_
 #pragma once
 
-#include <libCore/libCore.h>
-#include <libMirror/libMirror.h>
-#include <libMirror/Object.h>
-#include <libExistence/Component.h>
-
 OPEN_NAMESPACE(Elf);
 
 class Entity;

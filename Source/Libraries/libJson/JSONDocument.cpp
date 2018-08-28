@@ -9,9 +9,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "JSONDocument.h"
+
 #include <libIO/TypeTraits.h>
-#include <sstream>
+
 #include <json/reader.h>
+
+#include <sstream>
 #include <istream>
 
 OPEN_NAMESPACE(Elf);
@@ -28,11 +31,18 @@ namespace {
 	}
 }
 
+//ELF_MIRROR_DEFINE_NAMED_(JSONDocument, "Elf::Document::JSON")
 ELF_MIRROR_REGISTRATION
 {
 	ELF_MIRROR_DEFINE_NAMED(JSONDocument, "Elf::Document::JSON")
 		.method("MakeBlank", &MakeBlankJSON)
+		(
+			IDocument::MakerFunctionBlank()
+		)
 		.method("MakeData", &MakeDataJSON)
+		(
+			IDocument::MakerFunctionData()
+		)
 	;
 }
 
@@ -67,8 +77,6 @@ JSONDocument::JSONDocument(const Vector<char>& data)
 
 bool JSONDocument::InitializeAsIfNew()
 {
-	m_data.MoveToChild();
-
 	m_root = Json::Value(Json::objectValue);
 	m_data.Set(&m_root);
 	return true;

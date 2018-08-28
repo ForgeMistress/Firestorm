@@ -1,4 +1,6 @@
-﻿  test_container_plugin.cpp
+﻿  Building Custom Rule E:/Projects/ElflordPP.git/ThirdParty/rttr/src/unit_tests/plugin/CMakeLists.txt
+  CMake does not need to re-run because E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\src\unit_tests\plugin\CMakeFiles\generate.stamp is up-to-date.
+  test_container_plugin.cpp
   test_class_plugin.cpp
   Generating Code...
   unit_test_plugin.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\bin\Release\unit_test_plugin.dll

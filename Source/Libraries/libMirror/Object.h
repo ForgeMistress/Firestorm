@@ -13,6 +13,7 @@
 
 #include <rttr/type.h>
 #include <rttr/registration.h>
+#include <rttr/registration_friend.h>
 
 #define ELF_MIRROR_DEFINE_NAMED(OBJ_TYPE, NAME) \
 	rttr::registration::class_<OBJ_TYPE>( NAME )
@@ -38,6 +39,69 @@ namespace                                                                       
 static const elf__auto__register__ ELF_CAT(auto_register__,__LINE__);               \
 static void elf_auto_register_reflection_function_()
 
+#define ELF_MIRROR_DEFINE_(OBJ_TYPE) ELF_MIRROR_DEFINE_NAMED_(OBJ_TYPE, #OBJ_TYPE)
+#define ELF_MIRROR_DEFINE_NAMED_(OBJ_TYPE, OBJ_NAME) \
+OBJ_TYPE::ElfRegister OBJ_TYPE::StaticHolder::Registrar; \
+OBJ_TYPE::ElfRegister::ElfRegister() \
+{ \
+	Register(rttr::registration::class_<OBJ_TYPE>(OBJ_NAME)); \
+} \
+void OBJ_TYPE::ElfRegister::Register(rttr::registration::class_<OBJ_TYPE>& CLASS)
+
+#define ELF_MIRROR_DECLARE_(OBJ_TYPE, ...)                                                                      \
+	private:                                                                                                   \
+		typedef OBJ_TYPE WhatIAm_t;                                                                            \
+	public:                                                                                                    \
+		static rttr::type  MyType()                     { return rttr::type::get<WhatIAm_t>(); }               \
+		static  bool       Is(rttr::type rttrType)      { return WhatIAm_t::MyType() == rttrType; }            \
+		virtual RTTR_INLINE rttr::type GetType() const  { return WhatIAm_t::MyType(); }                        \
+		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); } \
+		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); }              \
+		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() {                                    \
+			return {                                                                                           \
+				reinterpret_cast<void*>(this),                                                                 \
+				rttr::detail::get_type_from_instance(this)                                                     \
+			};                                                                                                 \
+		}                                                                                                      \
+		using base_class_list = rttr::detail::type_list<__VA_ARGS__>;                                          \
+		RTTR_REGISTRATION_FRIEND;                                                                              \
+		struct ElfRegister																					   \
+		{																									   \
+			ElfRegister();																					   \
+			void Register(rttr::registration::class_<OBJ_TYPE>& CLASS);                                        \
+		};																									   \
+		struct StaticHolder																					   \
+		{																									   \
+			static ElfRegister Registrar;																	   \
+		};																									   \
+	private:
+
+/**
+	Macro that provides more functions to a reflected object.
+
+	static MyType   - Retrieves a consistent type.
+	static Is       - Checks the type against all common forms.
+	virtual GetType - Retrieve the type at the instance leve.
+**/
+#define ELF_MIRROR_DECLARE(OBJ_TYPE, ...)                                                                      \
+	private:                                                                                                   \
+		typedef OBJ_TYPE WhatIAm_t;                                                                            \
+	public:                                                                                                    \
+		static rttr::type  MyType()                     { return rttr::type::get<WhatIAm_t>(); }               \
+		static  bool       Is(rttr::type rttrType)      { return WhatIAm_t::MyType() == rttrType; }            \
+		virtual RTTR_INLINE rttr::type GetType() const  { return WhatIAm_t::MyType(); }                        \
+		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); } \
+		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); }              \
+		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() {                                    \
+			return {                                                                                           \
+				reinterpret_cast<void*>(this),                                                                 \
+				rttr::detail::get_type_from_instance(this)                                                     \
+			};                                                                                                 \
+		}                                                                                                      \
+		using base_class_list = rttr::detail::type_list<__VA_ARGS__>;                                          \
+		RTTR_REGISTRATION_FRIEND;                                                                              \
+	private:
+
 OPEN_NAMESPACE(Elf);
 OPEN_NAMESPACE(Mirror);
 
@@ -57,45 +121,24 @@ typedef rttr::variant Variant;
 typedef rttr::constructor Constructor;
 
 /**
+	Typedef for rttr::method. Use instead of rttr::method.
+**/
+typedef rttr::method Method;
+
+/**
 	Typedef for rttr::registration. Use this instead of rttr::registration.
  **/
 typedef rttr::registration Registration;
 
 /**
-	Alias for rttr::metadata function. Use this instead of rttr::metadata.
+	Typedef for rttr::detail::metadata. Use this instead of rttr::detail::metadata.
  **/
-rttr::detail::metadata Property(Variant key, Variant value)
-{
-	return rttr::detail::metadata {
-		std::move(key),
-		std::move(value)
-	};
-}
+typedef rttr::detail::metadata Metadata;
 
 /**
-	Macro that provides more functions to a reflected object.
-
-	static MyType - Retrieves a consistent type.
-	static Is     - Checks the type against all common forms.
-	virtual GetType - Retrieve the type at the instance leve.
+	Alias for rttr::metadata function. Use this instead of rttr::metadata.
  **/
-#define ELF_MIRROR_DECLARE(OBJ_TYPE, ...)                                                                       \
-	private:                                                                                                    \
-		typedef OBJ_TYPE WhatIAm_t;                                                                             \
-	public:                                                                                                     \
-		static rttr::type  MyType() { return rttr::type::get<WhatIAm_t>(); }                                    \
-		static  bool       Is(rttr::type rttr_t)        { return WhatIAm_t::MyType() == rttr_t; }               \
-		virtual RTTR_INLINE rttr::type GetType() const  { return WhatIAm_t::MyType(); }                         \
-		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); }  \
-		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); }               \
-		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() {                                     \
-			return {                                                                                            \
-				reinterpret_cast<void*>(this),                                                                  \
-				rttr::detail::get_type_from_instance(this)                                                      \
-			};                                                                                                  \
-		}                                                                                                       \
-		using base_class_list = rttr::detail::type_list<__VA_ARGS__>;                                           \
-	private:
+static Metadata Property(Variant key, Variant value);
 
 /**
 	\struct PropMeta
@@ -174,7 +217,25 @@ struct PropMeta
  **/
 class Object
 {
-	ELF_MIRROR_DECLARE(Elf::Mirror::Object);
+	//ELF_MIRROR_DECLARE(Elf::Mirror::Object);
+private:                                                                                                   \
+	typedef Object WhatIAm_t;                                                                            \
+public:                                                                                                    \
+	static rttr::type  MyType() { return rttr::type::get<WhatIAm_t>(); }               \
+	static  bool       Is(rttr::type rttrType) { return WhatIAm_t::MyType() == rttrType; }            \
+	virtual RTTR_INLINE rttr::type GetType() const { return WhatIAm_t::MyType(); }                        \
+	virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); } \
+	virtual RTTR_INLINE void* get_ptr() { return reinterpret_cast<void*>(this); }              \
+	virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() {
+	\
+		return { \
+		reinterpret_cast<void*>(this),                                                                 \
+		rttr::detail::get_type_from_instance(this)                                                     \
+	};                                                                                                 \
+}                                                                                                      \
+using base_class_list = rttr::detail::type_list<>;                                          \
+RTTR_REGISTRATION_FRIEND;                                                                              \
+private:
 public:
 	virtual ~Object();
 };

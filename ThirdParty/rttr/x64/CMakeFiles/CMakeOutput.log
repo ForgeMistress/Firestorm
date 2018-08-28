@@ -9,7 +9,7 @@ The output was:
 Microsoft (R) Build Engine version 15.4.8.50001 for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 08/14/2018 20:49:12.
+Build started 08/25/2018 18:00:49.
 Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\3.7.1\CompilerIdCXX\CompilerIdCXX.vcxproj" on node 1 (default targets).
 PrepareForBuild:
   Creating directory "Debug\".
@@ -35,7 +35,7 @@ Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.90
+Time Elapsed 00:00:00.88
 
 
 Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
@@ -47,77 +47,77 @@ The CXX compiler identification is MSVC, found in "E:/Projects/ElflordPP.git/Thi
 Determining if the CXX compiler works passed with the following output:
 Change Dir: E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_6afbc.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_235e5.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
 Microsoft (R) Build Engine version 15.4.8.50001 for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 08/14/2018 20:49:13.
-Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_6afbc.vcxproj" on node 1 (default targets).
+Build started 08/25/2018 18:00:50.
+Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_235e5.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_6afbc.dir\Debug\".
+  Creating directory "cmTC_235e5.dir\Debug\".
   Creating directory "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_6afbc.dir\Debug\cmTC_6afbc.tlog\".
+  Creating directory "cmTC_235e5.dir\Debug\cmTC_235e5.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_6afbc.dir\Debug\cmTC_6afbc.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_235e5.dir\Debug\cmTC_235e5.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_6afbc.dir\Debug\\" /Fd"cmTC_6afbc.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\testCXXCompiler.cxx
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_235e5.dir\Debug\\" /Fd"cmTC_235e5.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\testCXXCompiler.cxx
   Microsoft (R) C/C++ Optimizing Compiler Version 19.11.25547 for x64
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_6afbc.dir\Debug\\" /Fd"cmTC_6afbc.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\testCXXCompiler.cxx
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_235e5.dir\Debug\\" /Fd"cmTC_235e5.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\testCXXCompiler.cxx
   testCXXCompiler.cxx
   
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_6afbc.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_6afbc.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_6afbc.lib" /MACHINE:X64  /machine:x64 cmTC_6afbc.dir\Debug\testCXXCompiler.obj
-  cmTC_6afbc.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_6afbc.exe
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_235e5.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_235e5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_235e5.lib" /MACHINE:X64  /machine:x64 cmTC_235e5.dir\Debug\testCXXCompiler.obj
+  cmTC_235e5.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_235e5.exe
 FinalizeBuildStatus:
-  Deleting file "cmTC_6afbc.dir\Debug\cmTC_6afbc.tlog\unsuccessfulbuild".
-  Touching "cmTC_6afbc.dir\Debug\cmTC_6afbc.tlog\cmTC_6afbc.lastbuildstate".
-Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_6afbc.vcxproj" (default targets).
+  Deleting file "cmTC_235e5.dir\Debug\cmTC_235e5.tlog\unsuccessfulbuild".
+  Touching "cmTC_235e5.dir\Debug\cmTC_235e5.tlog\cmTC_235e5.lastbuildstate".
+Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_235e5.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.87
+Time Elapsed 00:00:00.63
 
 
 Detecting CXX compiler ABI info compiled with the following output:
 Change Dir: E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_8b3d4.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_dd388.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
 Microsoft (R) Build Engine version 15.4.8.50001 for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 08/14/2018 20:49:14.
-Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_8b3d4.vcxproj" on node 1 (default targets).
+Build started 08/25/2018 18:00:51.
+Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_dd388.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_8b3d4.dir\Debug\".
+  Creating directory "cmTC_dd388.dir\Debug\".
   Creating directory "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_8b3d4.dir\Debug\cmTC_8b3d4.tlog\".
+  Creating directory "cmTC_dd388.dir\Debug\cmTC_dd388.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_8b3d4.dir\Debug\cmTC_8b3d4.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_dd388.dir\Debug\cmTC_dd388.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_8b3d4.dir\Debug\\" /Fd"cmTC_8b3d4.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue "E:\Program Files\share\cmake-3.7\Modules\CMakeCXXCompilerABI.cpp"
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_dd388.dir\Debug\\" /Fd"cmTC_dd388.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue "E:\Program Files\share\cmake-3.7\Modules\CMakeCXXCompilerABI.cpp"
   Microsoft (R) C/C++ Optimizing Compiler Version 19.11.25547 for x64
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_8b3d4.dir\Debug\\" /Fd"cmTC_8b3d4.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue "E:\Program Files\share\cmake-3.7\Modules\CMakeCXXCompilerABI.cpp"
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_dd388.dir\Debug\\" /Fd"cmTC_dd388.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue "E:\Program Files\share\cmake-3.7\Modules\CMakeCXXCompilerABI.cpp"
   CMakeCXXCompilerABI.cpp
   
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_8b3d4.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_8b3d4.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_8b3d4.lib" /MACHINE:X64  /machine:x64 cmTC_8b3d4.dir\Debug\CMakeCXXCompilerABI.obj
-  cmTC_8b3d4.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_8b3d4.exe
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_dd388.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_dd388.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_dd388.lib" /MACHINE:X64  /machine:x64 cmTC_dd388.dir\Debug\CMakeCXXCompilerABI.obj
+  cmTC_dd388.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_dd388.exe
 FinalizeBuildStatus:
-  Deleting file "cmTC_8b3d4.dir\Debug\cmTC_8b3d4.tlog\unsuccessfulbuild".
-  Touching "cmTC_8b3d4.dir\Debug\cmTC_8b3d4.tlog\cmTC_8b3d4.lastbuildstate".
-Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_8b3d4.vcxproj" (default targets).
+  Deleting file "cmTC_dd388.dir\Debug\cmTC_dd388.tlog\unsuccessfulbuild".
+  Touching "cmTC_dd388.dir\Debug\cmTC_dd388.tlog\cmTC_dd388.lastbuildstate".
+Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_dd388.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.86
+Time Elapsed 00:00:00.64
 
 
 
@@ -125,39 +125,39 @@ Time Elapsed 00:00:00.86
 Detecting CXX [] compiler features compiled with the following output:
 Change Dir: E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_d4ffc.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_15b71.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
 Microsoft (R) Build Engine version 15.4.8.50001 for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 08/14/2018 20:49:15.
-Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_d4ffc.vcxproj" on node 1 (default targets).
+Build started 08/25/2018 18:00:52.
+Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_15b71.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_d4ffc.dir\Debug\".
+  Creating directory "cmTC_15b71.dir\Debug\".
   Creating directory "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_d4ffc.dir\Debug\cmTC_d4ffc.tlog\".
+  Creating directory "cmTC_15b71.dir\Debug\cmTC_15b71.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_d4ffc.dir\Debug\cmTC_d4ffc.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_15b71.dir\Debug\cmTC_15b71.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_d4ffc.dir\Debug\\" /Fd"cmTC_d4ffc.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\feature_tests.cxx
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_15b71.dir\Debug\\" /Fd"cmTC_15b71.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\feature_tests.cxx
   Microsoft (R) C/C++ Optimizing Compiler Version 19.11.25547 for x64
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_d4ffc.dir\Debug\\" /Fd"cmTC_d4ffc.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\feature_tests.cxx
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_15b71.dir\Debug\\" /Fd"cmTC_15b71.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\feature_tests.cxx
   feature_tests.cxx
   
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_d4ffc.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_d4ffc.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_d4ffc.lib" /MACHINE:X64  /machine:x64 cmTC_d4ffc.dir\Debug\feature_tests.obj
-  cmTC_d4ffc.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_d4ffc.exe
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_15b71.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_15b71.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_15b71.lib" /MACHINE:X64  /machine:x64 cmTC_15b71.dir\Debug\feature_tests.obj
+  cmTC_15b71.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_15b71.exe
 FinalizeBuildStatus:
-  Deleting file "cmTC_d4ffc.dir\Debug\cmTC_d4ffc.tlog\unsuccessfulbuild".
-  Touching "cmTC_d4ffc.dir\Debug\cmTC_d4ffc.tlog\cmTC_d4ffc.lastbuildstate".
-Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_d4ffc.vcxproj" (default targets).
+  Deleting file "cmTC_15b71.dir\Debug\cmTC_15b71.tlog\unsuccessfulbuild".
+  Touching "cmTC_15b71.dir\Debug\cmTC_15b71.tlog\cmTC_15b71.lastbuildstate".
+Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_15b71.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.85
+Time Elapsed 00:00:00.65
 
 
     Feature record: CXX_FEATURE:1cxx_aggregate_default_initializers
@@ -218,39 +218,39 @@ Time Elapsed 00:00:00.85
 Performing C++ SOURCE FILE Test HAS_STL_NO_EXCEPT_TYPE_SIGNATURE_SUPPORT succeeded with the following output:
 Change Dir: E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_5c61d.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_2488a.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
 Microsoft (R) Build Engine version 15.4.8.50001 for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 08/14/2018 20:49:17.
-Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_5c61d.vcxproj" on node 1 (default targets).
+Build started 08/25/2018 18:00:53.
+Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_2488a.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_5c61d.dir\Debug\".
+  Creating directory "cmTC_2488a.dir\Debug\".
   Creating directory "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_5c61d.dir\Debug\cmTC_5c61d.tlog\".
+  Creating directory "cmTC_2488a.dir\Debug\cmTC_2488a.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_5c61d.dir\Debug\cmTC_5c61d.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_2488a.dir\Debug\cmTC_2488a.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_STL_NO_EXCEPT_TYPE_SIGNATURE_SUPPORT /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_5c61d.dir\Debug\\" /Fd"cmTC_5c61d.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_STL_NO_EXCEPT_TYPE_SIGNATURE_SUPPORT /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_2488a.dir\Debug\\" /Fd"cmTC_2488a.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
   Microsoft (R) C/C++ Optimizing Compiler Version 19.11.25547 for x64
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_STL_NO_EXCEPT_TYPE_SIGNATURE_SUPPORT /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_5c61d.dir\Debug\\" /Fd"cmTC_5c61d.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_STL_NO_EXCEPT_TYPE_SIGNATURE_SUPPORT /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_2488a.dir\Debug\\" /Fd"cmTC_2488a.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
   src.cxx
   
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_5c61d.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_5c61d.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_5c61d.lib" /MACHINE:X64  /machine:x64 cmTC_5c61d.dir\Debug\src.obj
-  cmTC_5c61d.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_5c61d.exe
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_2488a.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_2488a.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_2488a.lib" /MACHINE:X64  /machine:x64 cmTC_2488a.dir\Debug\src.obj
+  cmTC_2488a.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_2488a.exe
 FinalizeBuildStatus:
-  Deleting file "cmTC_5c61d.dir\Debug\cmTC_5c61d.tlog\unsuccessfulbuild".
-  Touching "cmTC_5c61d.dir\Debug\cmTC_5c61d.tlog\cmTC_5c61d.lastbuildstate".
-Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_5c61d.vcxproj" (default targets).
+  Deleting file "cmTC_2488a.dir\Debug\cmTC_2488a.tlog\unsuccessfulbuild".
+  Touching "cmTC_2488a.dir\Debug\cmTC_2488a.tlog\cmTC_2488a.lastbuildstate".
+Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_2488a.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.93
+Time Elapsed 00:00:00.68
 
 Source file was:
 
@@ -266,39 +266,39 @@ Source file was:
 Performing C++ SOURCE FILE Test HAS_CXX_CONSTEXPR succeeded with the following output:
 Change Dir: E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_13224.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_349d8.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
 Microsoft (R) Build Engine version 15.4.8.50001 for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 08/14/2018 20:49:18.
-Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_13224.vcxproj" on node 1 (default targets).
+Build started 08/25/2018 18:00:54.
+Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_349d8.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_13224.dir\Debug\".
+  Creating directory "cmTC_349d8.dir\Debug\".
   Creating directory "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_13224.dir\Debug\cmTC_13224.tlog\".
+  Creating directory "cmTC_349d8.dir\Debug\cmTC_349d8.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_13224.dir\Debug\cmTC_13224.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_349d8.dir\Debug\cmTC_349d8.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_CXX_CONSTEXPR /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_13224.dir\Debug\\" /Fd"cmTC_13224.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_CXX_CONSTEXPR /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_349d8.dir\Debug\\" /Fd"cmTC_349d8.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
   Microsoft (R) C/C++ Optimizing Compiler Version 19.11.25547 for x64
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_CXX_CONSTEXPR /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_13224.dir\Debug\\" /Fd"cmTC_13224.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_CXX_CONSTEXPR /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_349d8.dir\Debug\\" /Fd"cmTC_349d8.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
   src.cxx
   
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_13224.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_13224.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_13224.lib" /MACHINE:X64  /machine:x64 cmTC_13224.dir\Debug\src.obj
-  cmTC_13224.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_13224.exe
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_349d8.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_349d8.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_349d8.lib" /MACHINE:X64  /machine:x64 cmTC_349d8.dir\Debug\src.obj
+  cmTC_349d8.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_349d8.exe
 FinalizeBuildStatus:
-  Deleting file "cmTC_13224.dir\Debug\cmTC_13224.tlog\unsuccessfulbuild".
-  Touching "cmTC_13224.dir\Debug\cmTC_13224.tlog\cmTC_13224.lastbuildstate".
-Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_13224.vcxproj" (default targets).
+  Deleting file "cmTC_349d8.dir\Debug\cmTC_349d8.tlog\unsuccessfulbuild".
+  Touching "cmTC_349d8.dir\Debug\cmTC_349d8.tlog\cmTC_349d8.lastbuildstate".
+Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_349d8.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.86
+Time Elapsed 00:00:00.64
 
 Source file was:
 
@@ -313,39 +313,39 @@ Source file was:
 Performing C++ SOURCE FILE Test HAS_PARTIAL_SPECIALIZATION_FOR_ARRAYS succeeded with the following output:
 Change Dir: E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp
 
-Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_c2f0e.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe" "cmTC_a6161.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=15.0"
 Microsoft (R) Build Engine version 15.4.8.50001 for .NET Framework
 Copyright (C) Microsoft Corporation. All rights reserved.
 
-Build started 08/14/2018 20:49:19.
-Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_c2f0e.vcxproj" on node 1 (default targets).
+Build started 08/25/2018 18:00:55.
+Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_a6161.vcxproj" on node 1 (default targets).
 PrepareForBuild:
-  Creating directory "cmTC_c2f0e.dir\Debug\".
+  Creating directory "cmTC_a6161.dir\Debug\".
   Creating directory "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\".
-  Creating directory "cmTC_c2f0e.dir\Debug\cmTC_c2f0e.tlog\".
+  Creating directory "cmTC_a6161.dir\Debug\cmTC_a6161.tlog\".
 InitializeBuildStatus:
-  Creating "cmTC_c2f0e.dir\Debug\cmTC_c2f0e.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Creating "cmTC_a6161.dir\Debug\cmTC_a6161.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
 ClCompile:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_PARTIAL_SPECIALIZATION_FOR_ARRAYS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_c2f0e.dir\Debug\\" /Fd"cmTC_c2f0e.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_PARTIAL_SPECIALIZATION_FOR_ARRAYS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_a6161.dir\Debug\\" /Fd"cmTC_a6161.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
   Microsoft (R) C/C++ Optimizing Compiler Version 19.11.25547 for x64
   Copyright (C) Microsoft Corporation.  All rights reserved.
   
-  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_PARTIAL_SPECIALIZATION_FOR_ARRAYS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_c2f0e.dir\Debug\\" /Fd"cmTC_c2f0e.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
+  cl /c /Zi /W3 /WX- /diagnostics:classic /Od /Ob0 /D WIN32 /D _WINDOWS /D HAS_PARTIAL_SPECIALIZATION_FOR_ARRAYS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_a6161.dir\Debug\\" /Fd"cmTC_a6161.dir\Debug\vc141.pdb" /Gd /TP /errorReport:queue E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\src.cxx
   src.cxx
   
 Link:
-  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_c2f0e.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_c2f0e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_c2f0e.lib" /MACHINE:X64  /machine:x64 cmTC_c2f0e.dir\Debug\src.obj
-  cmTC_c2f0e.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_c2f0e.exe
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_a6161.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_a6161.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:/Projects/ElflordPP.git/ThirdParty/rttr/x64/CMakeFiles/CMakeTmp/Debug/cmTC_a6161.lib" /MACHINE:X64  /machine:x64 cmTC_a6161.dir\Debug\src.obj
+  cmTC_a6161.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\Debug\cmTC_a6161.exe
 FinalizeBuildStatus:
-  Deleting file "cmTC_c2f0e.dir\Debug\cmTC_c2f0e.tlog\unsuccessfulbuild".
-  Touching "cmTC_c2f0e.dir\Debug\cmTC_c2f0e.tlog\cmTC_c2f0e.lastbuildstate".
-Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_c2f0e.vcxproj" (default targets).
+  Deleting file "cmTC_a6161.dir\Debug\cmTC_a6161.tlog\unsuccessfulbuild".
+  Touching "cmTC_a6161.dir\Debug\cmTC_a6161.tlog\cmTC_a6161.lastbuildstate".
+Done Building Project "E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\CMakeFiles\CMakeTmp\cmTC_a6161.vcxproj" (default targets).
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:00.93
+Time Elapsed 00:00:00.67
 
 Source file was:
 

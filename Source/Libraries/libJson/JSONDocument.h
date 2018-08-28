@@ -7,21 +7,19 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBIO_JSONDOCUMENT_H_
-#define LIBIO_JSONDOCUMENT_H_
+#ifndef LIBJSON_JSONDOCUMENT_H_
+#define LIBJSON_JSONDOCUMENT_H_
 #pragma once
 
-#include <libCore/Result.h>
-
 #include <libIO/IDocument.h>
-#include <json/json.h>
-#include <rttr/registration.h>
+#include <json/value.h>
 
 OPEN_NAMESPACE(Elf);
 
-class JSONDocument : public IDocument
+class JSONDocument : public Mirror::Object,
+                     public IDocument
 {
-	ELF_MIRROR_DECLARE(JSONDocument);
+	ELF_MIRROR_DECLARE_(JSONDocument, Mirror::Object, IDocument);
 public:
 	JSONDocument();
 	explicit JSONDocument(const Vector<char>& data);

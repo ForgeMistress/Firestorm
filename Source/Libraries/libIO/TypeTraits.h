@@ -11,11 +11,9 @@
 #define LIBIO_TYPETRAITS_H_
 #pragma once
 
-#include <rttr/type.h>
-
 OPEN_NAMESPACE(Elf);
 
-class IDocument;
+/*class IDocument;
 
 struct TraitsErrors
 {
@@ -213,7 +211,7 @@ struct TypeAbbreviations {
 		DEF_GET_TYPE(String, "str");
 		return rttr::detail::get_invalid_type();
 	}
-};
+};*/
 
 CLOSE_NAMESPACE(Elf);
 

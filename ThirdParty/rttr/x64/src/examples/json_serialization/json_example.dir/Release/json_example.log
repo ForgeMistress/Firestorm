@@ -1,4 +1,6 @@
-﻿  main.cpp
+﻿  Building Custom Rule E:/Projects/ElflordPP.git/ThirdParty/rttr/src/examples/json_serialization/CMakeLists.txt
+  CMake does not need to re-run because E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\src\examples\json_serialization\CMakeFiles\generate.stamp is up-to-date.
+  main.cpp
   to_json.cpp
   from_json.cpp
   Generating Code...

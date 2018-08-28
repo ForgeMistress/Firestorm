@@ -10,7 +10,15 @@
 #include <libCore/Result.h>
 #include <libCore/Expected.h>
 
-#include <libMirror/libMirror.h>
 #include <libMirror/Object.h>
+
+#include <libIO/IDocument.h>
+
+#include <json/json.h>
+#include <json/value.h>
+#include <json/writer.h>
+#include <json/reader.h>
+
+#include <rttr/registration.h>
 
 #endif
