@@ -6,4 +6,7 @@
 #define ELFLORD_STDAFX_H_
 #pragma once
 
+#include <libCore/libCore.h>
+#include <libIO/Logger.h>
+
 #endif

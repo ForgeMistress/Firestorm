@@ -35,6 +35,8 @@ if os.ishost("windows") then
 
         "ThirdParty/glfw.git/src/context.c",
         "ThirdParty/glfw.git/src/egl_context.c",
+        "ThirdParty/glfw.git/src/init.c",
+        "ThirdParty/glfw.git/src/input.c",
         "ThirdParty/glfw.git/src/monitor.c",
         "ThirdParty/glfw.git/src/osmesa_context.c",
         "ThirdParty/glfw.git/src/vulkan.c",

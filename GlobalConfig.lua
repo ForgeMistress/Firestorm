@@ -81,18 +81,19 @@ function configureGame(gameName)
     project(gameName)
     language("C++")
     cppdialect("C++17")
-    kind("StaticLib")
+    kind("ConsoleApp")
 
     targetdir(ENGINE_APP_OUTPUT_DIR)
 
     includedirs({ 
         ENGINE_APP_SOURCE_DIR,
+        ENGINE_LIB_SOURCE_DIR,
         "ThirdParty",
         "ThirdParty/rttr/src",
         "ThirdParty/glfw.git/include",
         "ThirdParty/angelscript/sdk/angelscript/include"
     })
-    libdirs({ ENGINE_APP_OUTPUT_DIR })
+    libdirs({ ENGINE_APP_OUTPUT_DIR, ENGINE_LIB_OUTPUT_DIR })
 
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")

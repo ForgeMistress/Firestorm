@@ -9,12 +9,6 @@
 ------------------------------------------------------------------------------------------------------------------------
 configureGame("Elflord")
 
-includedirs({
-    "ThirdParty",
-    "ThirdParty/rttr/src",
-    "ThirdParty/angelscript/sdk/angelscript/include"
-})
-
 addDependencies({
     "libCore",
     "libMirror",
