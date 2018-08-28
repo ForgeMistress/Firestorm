@@ -1,4 +1,0 @@
-﻿  Building Custom Rule E:/Projects/ElflordPP.git/ThirdParty/rttr/src/examples/library_loading/plugin_example/CMakeLists.txt
-  CMake does not need to re-run because E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\src\examples\library_loading\plugin_example\CMakeFiles\generate.stamp is up-to-date.
-  main.cpp
-  plugin_example.vcxproj -> E:\Projects\ElflordPP.git\ThirdParty\rttr\x64\bin\Release\plugin_example.dll
