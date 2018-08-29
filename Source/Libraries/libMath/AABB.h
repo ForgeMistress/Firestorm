@@ -7,26 +7,44 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBMIRROR_OBJECT_H_
-#define LIBMIRROR_OBJECT_H_
+#ifndef LIBMATH_AABB_H_
+#define LIBMATH_AABB_H_
 #pragma once
 
 OPEN_NAMESPACE(Elf);
 
-class AABB2f
+class AABB_2D
 {
 public:
-    AABB2f();
-    AABB2f(float minx, float miny, float maxx, float maxy);
+	AABB_2D();
+	AABB_2D(float top, float left, float bottom, float right);
 
-private:
-	float m_minx, 
-          m_miny,
-          m_maxx,
-          m_maxy;
+	float _top;
+	float _left;
+	float _bottom;
+	float _right;
 };
 
+class AABB_3D
+{
+public:
+	AABB_3D();
+	AABB_3D(float minx, float miny, float minz, float maxx, float maxy, float maxz);
 
+	float _minx;
+	float _miny;
+	float _minz;
+	float _maxx;
+	float _maxy;
+	float _maxz;
+};
+
+OPEN_NAMESPACE(Math);
+
+static bool Intersects(const AABB_2D& lhs, const AABB_2D& rhs);
+static bool Intersects(const AABB_3D& lhs, const AABB_3D& rhs);
+
+CLOSE_NAMESPACE(Math);
 CLOSE_NAMESPACE(Elf);
 
 #endif

@@ -9,6 +9,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include <GLFW/glfw3.h>
+#include <thread>
+#include <chrono>
 
 static void GLFW_ErrorCallback(int error, const char* description)
 {
@@ -23,6 +25,19 @@ static void GLFW_KeyCallback(GLFWwindow* window, int key, int scancode, int acti
 	}
 }
 
+static volatile bool running = true;
+
+static int ThreadMain()
+{
+	std::chrono::milliseconds sleepDuration(1);
+	while(running)
+	{
+		std::this_thread::sleep_for(sleepDuration);
+		glfwPostEmptyEvent();
+	}
+	return 0;
+}
+
 int main(int ac, char** av)
 {
 	ELF_LOG(DEBUG, "[MAIN] Starting!");
@@ -35,6 +50,7 @@ int main(int ac, char** av)
 		ELF_LOG_ERROR("[GLFW] Could not initialize GLFW.");
 		return 1;
 	}
+	std::thread postEmptyEventThread(ThreadMain);
 
 	window = glfwCreateWindow(800, 600, "Elflord", NULL, NULL);
 
@@ -45,10 +61,9 @@ int main(int ac, char** av)
 		return 1;
 	}
 
-	/*glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, GLFW_KeyCallback);
 
-	bool running = true;
 	while(running)
 	{
 		int width = 800;
@@ -63,6 +78,8 @@ int main(int ac, char** av)
 		}
 	}
 
-	ELF_LOG_DEBUG("[MAIN] Closing Elflord.");*/
+	postEmptyEventThread.join();
+
+	ELF_LOG_DEBUG("[MAIN] Closing Elflord.");
 	return 0;
 }

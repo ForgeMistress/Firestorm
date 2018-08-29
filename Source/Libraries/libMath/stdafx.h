@@ -7,6 +7,5 @@
 #pragma once
 
 #include <libCore/libCore.h>
-#include <libCore/Result.h>
 
 #endif
