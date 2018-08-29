@@ -2,7 +2,7 @@
 //
 //  Engine.h
 //
-//  An object that holds a number of Systems.
+//  An object that holds a number of Systems and Entities.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) Project Elflord 2018
@@ -47,13 +47,13 @@ public:
 
 	void Refresh();
 
-	inline const String& GetName() const;
-	inline void SetName(const String& name);
+	const String& GetName() const;
+	void SetName(const String& name);
 
-	inline bool Contains(const WeakPtr<Entity>& entity);
+	bool Contains(const WeakPtr<Entity>& entity);
 
-	inline size_t GetNumSystems() const;
-	inline size_t GetNumEntities() const;
+	size_t GetNumSystems() const;
+	size_t GetNumEntities() const;
 
 private:
 	void ManageSystems();

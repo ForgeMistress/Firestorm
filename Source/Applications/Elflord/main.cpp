@@ -11,6 +11,7 @@
 #include <GLFW/glfw3.h>
 #include <thread>
 #include <chrono>
+#include <functional>
 
 static void GLFW_ErrorCallback(int error, const char* description)
 {
@@ -38,8 +39,21 @@ static int ThreadMain()
 	return 0;
 }
 
+struct Base {};
+
+struct Test : public Base
+{
+	void Function()
+	{
+		ELF_LOG_DEBUG("Function was called!");
+	}
+};
+
 int main(int ac, char** av)
 {
+
+
+
 	ELF_LOG(DEBUG, "[MAIN] Starting!");
 	glfwSetErrorCallback(GLFW_ErrorCallback);
 	ELF_LOG(DEBUG, "[MAIN] Set GLFW callback.");

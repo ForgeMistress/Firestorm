@@ -37,9 +37,7 @@ end
 function configureEngineLib(libName)
     clearFilters()
 
-    print(DIVIDER)
     print("--", "Generating project for "..libName..".")
-    print(DIVIDER)
 
     group("EngineLibs")
     project(libName)
@@ -73,9 +71,7 @@ end
 function configureGame(gameName)
     clearFilters()
 
-    print(DIVIDER)
     print("--", "Generating project for Game: "..gameName..".")
-    print(DIVIDER)
 
     group("Games")
     project(gameName)
@@ -154,6 +150,7 @@ function configureUnitTest(libName)
         'libCore',
         libName
     })
+    defines({"ELF_UNIT_TEST"})
 end
 
 ------------------------------------------------------------------------------------------------------------------------
