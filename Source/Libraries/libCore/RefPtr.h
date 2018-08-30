@@ -64,7 +64,8 @@ public:
 	: _object(other._object)
 	, _counter(other._counter)
 	{
-		static_assert(std::is_base_of<T, Subclass_t>::value);
+		static_assert(std::is_base_of<T, Subclass_t>::value,
+			"the RefPtr passed to the casting constructor of RefPtr must hold a type that is a subclass of the held type");
 		++_counter->_strongCount;
 	}
 
@@ -211,7 +212,8 @@ public:
 	: _count(ptr._count)
 	{
 		assert(_count);
-		static_assert(std::is_base_of<T, Subclass_t>::value);
+		static_assert(std::is_base_of<T, Subclass_t>::value, 
+			"the pointer passed to the casting constructor must be a subclass of the type held by the WeakPtr");
 		++_count->_weakCount;
 	}
 
@@ -242,7 +244,8 @@ public:
 	template <class Subclass_t>
 	WeakPtr<T>& operator=(const RefPtr<Subclass_t>& ptr)
 	{
-		static_assert(std::is_base_of<T, Subclass_t>::value);
+		static_assert(std::is_base_of<T, Subclass_t>::value,
+			"the RefPtr passed to the casting constructor must hold an instance of a subclass of the type held by the WeakPtr");
 
 		// decrement the weak ref count of the current control block if we have it
 		// and then clean it up if we need to.
