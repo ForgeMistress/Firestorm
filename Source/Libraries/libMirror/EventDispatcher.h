@@ -11,7 +11,8 @@
 #define LIBMIRROR_EVENTDISPATCHER_H_
 #pragma once
 
-#pragma optimize("", off)
+#include <libCore/RefPtr.h>
+
 OPEN_NAMESPACE(Elf);
 
 OPEN_NAMESPACE(Mirror);
@@ -31,15 +32,12 @@ class EventDispatcher;
 class EDReceipt
 {
 	friend class EventDispatcher;
-	//template<class T, class... Args> friend std::shared_ptr<T> std::make_shared<T, Args...>(Args&&...);
+	template<class T> friend class RefPtr;
 private:
 	EDReceipt(EventDispatcher* dispatcher, IEvent* event);
 	~EDReceipt();
 
-	void DispatcherDeleted()
-	{
-		_hasDispatcher = false;
-	}
+	void DispatcherDeleted();
 
 private:
 	EventDispatcher* _dispatcher;
@@ -71,31 +69,64 @@ private:
 	Callback_f const _callback;
 };
 
+template <class Class_t, class Arg_t>
+std::function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&), Class_t* instance)
+{
+	return std::bind(funcPointer, instance, std::placeholders::_1);
+}
+
+template <class Class_t, class Arg_t>
+std::function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&), const Class_t* instance)
+{
+	return std::bind(funcPointer, const_cast<Class_t*>(instance), std::placeholders::_1);
+}
+
+template <class Class_t, class Arg_t>
+std::function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&) const, const Class_t* instance)
+{
+	return std::bind(funcPointer, const_cast<Class_t*>(instance), std::placeholders::_1);
+}
+
+template <class Arg_t>
+std::function<void(const Arg_t&)> WrapFn(void(*funcPointer)(const Arg_t&))
+{
+	return std::function<void(const Arg_t&)>(funcPointer);
+}
+
 class EventDispatcher
 {
 	friend class EDReceipt;
 public:
-	EventDispatcher()
-	: _numRegisteredEvents(0)
+	typedef RefPtr<EDReceipt> Receipt;
+	EventDispatcher();
+	~EventDispatcher();
+
+	template <class Class_t, class Arg_t>
+	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&), Class_t* instance)
 	{
+		return Register<Arg_t>(WrapFn(funcPointer, instance));
 	}
-	~EventDispatcher()
+
+	template <class Class_t, class Arg_t>
+	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&), const Class_t* instance)
 	{
-		for(auto r : _receipts)
-			r->DispatcherDeleted();
-		for(auto evtNames : _events)
-		{
-			for(auto event : evtNames.second)
-			{
-				delete event;
-			}
-		}
-		_receipts.clear();
-		_events.clear();
+		return Register<Arg_t>(WrapFn(funcPointer, instance));
+	}
+
+	template <class Class_t, class Arg_t>
+	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&) const, const Class_t* instance)
+	{
+		return Register<Arg_t>(WrapFn(funcPointer, instance));
 	}
 
 	template<class Arg_t>
-	EDReceipt Register(std::function<void(const Arg_t&)> callback)
+	Receipt Register(void(*funcPointer)(const Arg_t&))
+	{
+		return Register<Arg_t>(WrapFn(funcPointer));
+	}
+
+	template<class Arg_t>
+	Receipt Register(std::function<void(const Arg_t&)>& callback)
 	{
 		typedef Event<Arg_t> Event_t;
 		IEvent* event = new Event_t(Arg_t::EVENT_NAME, callback);
@@ -130,48 +161,16 @@ public:
 		}
 	}
 
-	int GetNumRegisteredEvents()
-	{
-		return _numRegisteredEvents;
-	}
-
-	int GetNumRegisteredReceipts()
-	{
-		return _receipts.size();
-	}
+	size_t GetNumRegisteredEvents();
+	size_t GetNumRegisteredReceipts();
 
 private:
-	void Unregister(IEvent* event)
-	{
-		if(event)
-		{
-			auto found = _events.find(event->GetName());
-			if(found != _events.end())
-			{
-				if(std::find(found->second.begin(), found->second.end(), event) != found->second.end())
-				{
-					found->second.remove(event);
-					_numRegisteredEvents--;
-				}
-			}
-			_receipts.remove_if([&event](EDReceipt* r){
-				return r->_event == event;
-			});
-		}
-		assert(_numRegisteredEvents == _receipts.size());
-	}
+	void Unregister(IEvent* event);
 
 	UnorderedMap<String, List<IEvent*>> _events;
-	int _numRegisteredEvents;
-	List<EDReceipt*> _receipts;
-	UnorderedSet<String> _eventTypes;
+	int                                 _numRegisteredEvents;
+	List<EDReceipt*>                    _receipts;
 };
-
-EDReceipt::~EDReceipt()
-{
-	if(_hasDispatcher)
-		_dispatcher->Unregister(_event);
-}
 
 CLOSE_NAMESPACE(Elf);
 #endif
