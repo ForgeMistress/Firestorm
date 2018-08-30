@@ -320,9 +320,8 @@ struct wrapper_mapper<Elf::RefPtr<T>>
 	{
 		if(auto p = rttr_cast<typename Elf::RefPtr<U>::element_type*>(source.Get()))
 		{
-			//ok = true;
-			//return Elf::RefPtr<U>(source, p);
-			return Elf::RefPtr<U>(nullptr);
+			ok = true;
+			return Elf::RefPtr<U>(p);
 		}
 		else
 		{
