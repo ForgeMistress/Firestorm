@@ -17,8 +17,8 @@ class IDocument;
 
 OPEN_NAMESPACE(Document);
 
-SharedPtr<IDocument> MakeBlank(const String& type);
-SharedPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data);
+RefPtr<IDocument> MakeBlank(const String& type);
+RefPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data);
 
 CLOSE_NAMESPACE(Document);
 

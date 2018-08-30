@@ -23,7 +23,7 @@ public:
 		ERROR_FILE_ALREADY_QUEUED, //< The file is already queued for load.
 		ERROR_FILE_ALREADY_LOADED  //< The file already has data and thus, is already loaded.
 	};
-	typedef SharedPtr<File> FileHandle;
+	typedef RefPtr<File> FileHandle;
 
 	enum QueueType
 	{
@@ -59,11 +59,11 @@ public:
 
 
 	struct ReadCallbackReceipt_;
-	typedef SharedPtr<ReadCallbackReceipt_> ReadCallbackReceipt;
+	typedef RefPtr<ReadCallbackReceipt_> ReadCallbackReceipt;
 	friend struct ReadCallbackReceipt_;
 
 	struct WriteCallbackReceipt_;
-	typedef SharedPtr<WriteCallbackReceipt_> WriteCallbackReceipt;
+	typedef RefPtr<WriteCallbackReceipt_> WriteCallbackReceipt;
 	friend struct WriteCallbackReceipt_;
 
 	ReadCallbackReceipt RegisterReadErrorCallback(ReadErrorCallback_f readCallback);

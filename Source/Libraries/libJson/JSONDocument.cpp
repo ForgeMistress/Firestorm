@@ -20,12 +20,12 @@
 OPEN_NAMESPACE(Elf);
 
 namespace {
-	SharedPtr<IDocument> MakeBlankJSON()
+	RefPtr<IDocument> MakeBlankJSON()
 	{
 		return std::make_shared<JSONDocument>();
 	}
 
-	SharedPtr<IDocument> MakeDataJSON(const Vector<char>& data)
+	RefPtr<IDocument> MakeDataJSON(const Vector<char>& data)
 	{
 		return std::make_shared<JSONDocument>(data);
 	}

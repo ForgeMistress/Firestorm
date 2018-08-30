@@ -75,9 +75,6 @@ template<class Kty,
 	class Alloc = std::allocator<Kty>
 > using UnorderedSet = std::unordered_set<Kty, Hasher, Keyeq, Alloc>;
 
-template <class T> using SharedPtr = std::shared_ptr<T>;
-template <class T> using WeakPtr   = std::weak_ptr<T>;
-
 static const String str_Default;
 
 typedef unsigned char uchar;

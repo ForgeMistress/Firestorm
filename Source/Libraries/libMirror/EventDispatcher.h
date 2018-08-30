@@ -129,6 +129,9 @@ public:
 	Receipt Register(std::function<void(const Arg_t&)>& callback)
 	{
 		typedef Event<Arg_t> Event_t;
+
+		// Eventually I'd like to replace Type::EVENT_NAME with the rttr type to use that as
+		// a string key, but this works for a proof of concept.
 		IEvent* event = new Event_t(Arg_t::EVENT_NAME, callback);
 
 		_events[Arg_t::EVENT_NAME].push_back(event);

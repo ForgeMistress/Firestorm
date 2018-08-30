@@ -11,6 +11,7 @@
 #define LIBEXISTENCE_ENGINE_H_
 #pragma once
 
+#include <libCore/RefPtr.h>
 #include <libMirror/Object.h>
 
 OPEN_NAMESPACE(Elf);
@@ -39,11 +40,11 @@ public:
 
 	void Update(double deltaT);
 
-	bool AddSystem(const SharedPtr<System>& system);
-	bool RemoveSystem(const SharedPtr<System>& system);
+	bool AddSystem(const RefPtr<System>& system);
+	bool RemoveSystem(const RefPtr<System>& system);
 
-	bool AddEntity(const SharedPtr<Entity>& entity);
-	bool RemoveEntity(const SharedPtr<Entity>& entity);
+	bool AddEntity(const RefPtr<Entity>& entity);
+	bool RemoveEntity(const RefPtr<Entity>& entity);
 
 	void Refresh();
 
@@ -59,8 +60,8 @@ private:
 	void ManageSystems();
 	void ManageEntities();
 
-	typedef Vector<SharedPtr<System> > SystemList;
-	typedef Vector<SharedPtr<Entity> > EntityList;
+	typedef Vector<RefPtr<System> > SystemList;
+	typedef Vector<RefPtr<Entity> > EntityList;
 
 	// Reflected
 	String     m_name;
@@ -71,10 +72,10 @@ private:
 	bool m_running;
 	bool m_paused;
 
-	List< SharedPtr<Entity> > m_entitiesToRemove;
-	List< SharedPtr<Entity> > m_entitiesToChange;
-	List< SharedPtr<System> > m_systemsToAdd;
-	List< SharedPtr<System> > m_systemsToRemove;
+	List< RefPtr<Entity> > m_entitiesToRemove;
+	List< RefPtr<Entity> > m_entitiesToChange;
+	List< RefPtr<System> > m_systemsToAdd;
+	List< RefPtr<System> > m_systemsToRemove;
 };
 
 typedef SharedPtr<Engine> EnginePtr;

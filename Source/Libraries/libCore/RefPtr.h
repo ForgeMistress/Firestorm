@@ -22,7 +22,7 @@ OPEN_NAMESPACE(Elf);
 class RefCount
 {
 	template <class T> friend class RefPtr;
-	template <class T> friend class WeakPtr_;
+	template <class T> friend class WeakPtr;
 public:
 	template <class T>
 	RefCount(T* object)
@@ -37,7 +37,7 @@ private:
 template<class T>
 class RefPtr
 {
-	template <class T> friend class WeakPtr_;
+	template <class T> friend class WeakPtr;
 public:
 	typedef T element_type;
 
@@ -58,6 +58,16 @@ public:
 		++_count->_strongCount;
 	}
 
+	// polymorphic support
+	template <class Subclass_t>
+	RefPtr(const RefPtr<Subclass_t>& other)
+	: _object(static_cast<T*>(other._object))
+	, _counter(other._counter)
+	{
+		static_assert(std::is_base_of<T, Subclass_t>::value);
+		++_counter->_strongCount;
+	}
+
 	RefPtr(RefPtr<T>&& other)
 	: _object(other._object)
 	, _count(other._count)
@@ -70,7 +80,7 @@ public:
 
 	virtual ~RefPtr()
 	{
-		if (_count)
+		if(_count)
 			--_count->_strongCount;
 		DoCleanup();
 	}
@@ -142,11 +152,11 @@ public:
 
 private:
 	RefPtr(RefCount* refCount)
-	: _object(refCount->_object)
+	: _object(static_cast<T*>(refCount->_object))
 	, _count(refCount)
 	{
 		assert(_count);
-		_count->AddRef();
+		++_count->_strongCount;
 	}
 
 	void DoCleanup()
@@ -175,27 +185,36 @@ private:
 };
 
 template <class T>
-class WeakPtr_
+class WeakPtr
 {
 public:
 	typedef T* T_ptr;
 
-	WeakPtr_() : _count(nullptr) {}
-	WeakPtr_(const RefPtr<T>& ptr)
+	WeakPtr() : _count(nullptr) {}
+	WeakPtr(const RefPtr<T>& ptr)
 	: _count(ptr._count)
 	{
 		assert(_count);
 		++_count->_weakCount;
 	}
 
-	WeakPtr_(const WeakPtr<T>& ptr)
+	WeakPtr(const WeakPtr<T>& ptr)
 	: _count(ptr._count)
 	{
 		assert(_count);
 		++_count->_weakCount;
 	}
 
-	~WeakPtr_()
+	template <class Subclass_t>
+	WeakPtr(const RefPtr<Subclass_t>& ptr)
+	: _count(ptr._count)
+	{
+		assert(_count);
+		static_assert(std::is_base_of<T, Subclass_t>::value);
+		++_count->_weakCount;
+	}
+
+	~WeakPtr()
 	{
 		if(_count)
 		{
@@ -209,10 +228,7 @@ public:
 		}
 	}
 
-	T* operator->() { return static_cast<T*>(_count->_object); }
-	T* operator->() const { return static_cast<T*>(_count->_object); }
-
-	bool operator==(WeakPtr_<T>& other)
+	bool operator==(WeakPtr<T>& other)
 	{
 		return other._count == _count;
 	}
@@ -223,13 +239,20 @@ public:
 	}
 
 	template <class Subclass_t>
-	WeakPtr_<T>& operator=(const RefPtr<Subclass_t>& ptr)
+	WeakPtr<T>& operator=(const RefPtr<Subclass_t>& ptr)
 	{
 		static_assert(std::is_base_of<T, Subclass_t>::value);
 
-		// decrement the weak ref count of the block if we have it.
-		if (_count)
-			--_count->_weakCount;
+		// decrement the weak ref count of the current control block if we have it
+		// and then clean it up if we need to.
+		if(_count)
+		{
+			if(--_count->_weakCount == 0 && !_count->_object)
+			{
+				delete _count;
+				_count = nullptr;
+			}
+		}
 
 		// increment the weak ref count of the new control block.
 		_count = ptr._count;
@@ -238,11 +261,18 @@ public:
 		return *this;
 	}
 
-	WeakPtr_<T>& operator=(const RefPtr<T>& obj)
+	WeakPtr<T>& operator=(const RefPtr<T>& obj)
 	{ 
-		// decrement the weak ref count of the block if we have it.
+		// decrement the weak ref count of the current control block if we have it
+		// and then clean it up if we need to.
 		if(_count)
-			--_count->_weakCount;
+		{
+			if(--_count->_weakCount == 0 && !_count->_object)
+			{
+				delete _count;
+				_count = nullptr;
+			}
+		}
 
 		// increment the weak ref count of the new control block.
 		_count = obj._count;

@@ -88,7 +88,7 @@ void Engine::Update(double deltaT)
 	}
 }
 
-bool Engine::AddSystem(const SharedPtr<System>& system)
+bool Engine::AddSystem(const RefPtr<System>& system)
 {
 	if(std::find(m_systemsToAdd.begin(), m_systemsToAdd.end(), system) == m_systemsToAdd.end())
 	{
@@ -98,7 +98,7 @@ bool Engine::AddSystem(const SharedPtr<System>& system)
 	return false;
 }
 
-bool Engine::RemoveSystem(const SharedPtr<System>& system)
+bool Engine::RemoveSystem(const RefPtr<System>& system)
 {
 	if(std::find(m_systems.begin(), m_systems.end(), system) != m_systems.end())
 	{
@@ -108,7 +108,7 @@ bool Engine::RemoveSystem(const SharedPtr<System>& system)
 	return false;
 }
 
-bool Engine::AddEntity(const SharedPtr<Entity>& entity)
+bool Engine::AddEntity(const RefPtr<Entity>& entity)
 {
 	if(std::find(m_entitiesToChange.begin(), m_entitiesToChange.end(), entity) == m_entitiesToChange.end())
 	{
@@ -118,7 +118,7 @@ bool Engine::AddEntity(const SharedPtr<Entity>& entity)
 	return false;
 }
 
-bool Engine::RemoveEntity(const SharedPtr<Entity>& entity)
+bool Engine::RemoveEntity(const RefPtr<Entity>& entity)
 {
 	if(std::find(m_entities.begin(), m_entities.end(), entity) != m_entities.end())
 	{
@@ -155,7 +155,7 @@ void Engine::SetName(const String& name)
 
 bool Engine::Contains(const WeakPtr<Entity>& entity)
 {
-	return std::find(m_entities.begin(), m_entities.end(), entity.lock()) != m_entities.end();
+	return std::find(m_entities.begin(), m_entities.end(), entity.Lock()) != m_entities.end();
 }
 
 size_t Engine::GetNumSystems() const
@@ -232,7 +232,7 @@ void Engine::ManageEntities()
 			Vector<WeakPtr<Entity> >& entities = system->m_entities;
 			// if the entity is already inside the 
 			auto found = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
-				return e.lock().get() == entity.get();
+				return e.Lock().Get() == entity.Get();
 			});
 			
 			if(found == entities.end())
@@ -264,7 +264,7 @@ void Engine::ManageEntities()
 			{
 				Vector<EntityWeakPtr>& entities = system->m_entities;
 				auto systemContainsItr = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
-					return e.lock().get() == entity.get();
+					return e.Lock().Get() == entity.Get();
 				});
 				if(systemContainsItr != entities.end())
 				{
