@@ -61,7 +61,7 @@ public:
 	// polymorphic support
 	template <class Subclass_t>
 	RefPtr(const RefPtr<Subclass_t>& other)
-	: _object(static_cast<T*>(other._object))
+	: _object(other._object)
 	, _counter(other._counter)
 	{
 		static_assert(std::is_base_of<T, Subclass_t>::value);
@@ -164,7 +164,8 @@ private:
 		// if there are no more strong references...
 		if(_count && _count->_strongCount == 0)
 		{
-			// then delete the object.	
+			// then delete the object.
+			// _object->~T(); // call the destructor so that we can delete it properly.
 			delete _object;
 			_object = nullptr;
 

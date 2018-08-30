@@ -8,4 +8,6 @@
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
 configureEngineLib("libCore")
+
+configureUnitTest("libCore")
 -- no other configuration needed at the moment.
