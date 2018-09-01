@@ -12,6 +12,7 @@
 #pragma once
 
 #include <libCore/Result.h>
+#include <libCore/RefPtr.h>
 
 OPEN_NAMESPACE(Elf);
 
@@ -137,7 +138,7 @@ Result<RefPtr<Object_t>, Error> ObjectPool<Object_t>::Acquire(Args_t... args)
 	{
 		Object_t* obj = Get(unused.value());
 		SetInUse(obj);
-		assert(obj);
+		ELF_ASSERT(obj);
 		try {
 			obj->Recycle(args...);
 		}

@@ -7,10 +7,8 @@ namespace Elf
 {
 	struct libScript
 	{
-		static void Initialize();
+		static void Initialize(int ac, char** av);
 	};
 }
-
-#include "ScriptComponent.h"
 
 #endif

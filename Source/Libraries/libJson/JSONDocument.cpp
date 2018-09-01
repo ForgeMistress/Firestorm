@@ -34,11 +34,6 @@ static RefPtr<IDocument> MakeDataJSON(const Vector<char>& data)
 
 ELF_MIRROR_DEFINE_NAMED(JSONDocument, "Elf::Document::JSON")
 {
-	ClassInfo
-	(
-		IDocument::MakerFunctionBlank()
-	);
-
 	Method("MakeBlank", &MakeBlankJSON)
 	(
 		IDocument::MakerFunctionBlank()
@@ -334,7 +329,7 @@ Result<void, Error> JSONDocument::FindSubsection(const char* sectionName)
 	if(m_data.HasChild(sectionName))
 	{
 		Json::ValueType dType = m_data.GetJsonType(sectionName);
-		assert(dType == Json::objectValue);
+		ELF_ASSERT(dType == Json::objectValue);
 		m_foundSubsection = sectionName;
 	}
 	return Result<void, Error>();

@@ -6,7 +6,7 @@ namespace Elf
 {
 	struct libJson
 	{
-		static void Initialize();
+		static void Initialize(int ac, char** av);
 	};
 }
 

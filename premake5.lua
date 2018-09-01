@@ -85,6 +85,7 @@ include("JsonCPP_Build")
 include("RTTR_Build")
 include("Angelscript_Build")
 include("GLFW_Build")
+include("physfs_Build")
 
 ------------------------------------------------------------------------------------------------------------------------
 --  FIRST PARTY LIBRARIES
@@ -97,6 +98,7 @@ include("libIO_Build")
 include("libJson_Build")
 include("libMath_Build")
 include("libMirror_Build")
+include("libScene_Build")
 include("libScript_Build")
 include("libSerial_Build")
 

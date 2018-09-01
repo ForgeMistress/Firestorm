@@ -24,6 +24,7 @@ class System : public Mirror::Object,
 	ELF_MIRROR_DECLARE(System, Mirror::Object, Mirror::IInspectableObject);
 public:
 	System();
+	virtual ~System();
 
 	/**
 		\function Filter
@@ -69,8 +70,6 @@ public:
 	inline void Pause();
 
 protected:
-	virtual ~System();
-
 	friend class Engine;
 
 	/**
@@ -162,8 +161,6 @@ private:
 	Engine*                 m_engine;
 	Vector<WeakPtr<Entity>> m_entities;
 };
-typedef RefPtr<System>  SystemPtr;
-typedef WeakPtr<System> SystemWeakPtr;
 
 CLOSE_NAMESPACE(Elf);
 #endif

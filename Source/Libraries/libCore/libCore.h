@@ -164,4 +164,6 @@ CLOSE_NAMESPACE(Elf);
  **/
 #define ELF_UNUSED_VARIABLE(var) ((void)var)
 
+#define ELF_ASSERT assert
+
 #endif

@@ -7,7 +7,7 @@ namespace Elf
 {
 	struct libIO
 	{
-		static void Initialize();
+		static void Initialize(int ac, char** av);
 	};
 }
 

@@ -36,8 +36,6 @@ private:
 	friend class Engine;
 	WeakPtr<Engine> _owningEngine;
 };
-typedef RefPtr<Entity> EntityPtr;
-typedef WeakPtr<Entity>   EntityWeakPtr;
 
 CLOSE_NAMESPACE(Elf);
 #endif
