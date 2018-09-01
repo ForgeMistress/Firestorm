@@ -11,9 +11,9 @@
 #define LIBIO_DOCUMENT_H
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+#include "IDocument.h"
 
-class IDocument;
+OPEN_NAMESPACE(Elf);
 
 OPEN_NAMESPACE(Document);
 

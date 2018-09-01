@@ -21,8 +21,8 @@ class IResourceObject
 public:
 	virtual ~IResourceObject() {}
 
-	virtual Result<void, Error> Load(const SharedPtr<IDocument>& reader) = 0;
-	virtual Result<void, Error> Save(SharedPtr<IDocument>& writer) const = 0;
+	virtual Result<void, Error> Load(const RefPtr<IDocument>& reader) = 0;
+	virtual Result<void, Error> Save(RefPtr<IDocument>& writer) const = 0;
 };
 
 CLOSE_NAMESPACE(Elf);

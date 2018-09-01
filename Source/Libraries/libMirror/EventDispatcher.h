@@ -49,7 +49,7 @@ template <class Arg_t>
 class Event : public IEvent
 {
 public:
-	using Callback_f = std::function<void(const Arg_t&)>;
+	using Callback_f = Function<void(const Arg_t&)>;
 
 	Event(const String& name, Callback_f callback)
 	: _name(name)
@@ -70,25 +70,25 @@ private:
 };
 
 template <class Class_t, class Arg_t>
-std::function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&), Class_t* instance)
+Function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&), Class_t* instance)
 {
 	return std::bind(funcPointer, instance, std::placeholders::_1);
 }
 
 template <class Class_t, class Arg_t>
-std::function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&), const Class_t* instance)
+Function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&), const Class_t* instance)
 {
 	return std::bind(funcPointer, const_cast<Class_t*>(instance), std::placeholders::_1);
 }
 
 template <class Class_t, class Arg_t>
-std::function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&) const, const Class_t* instance)
+Function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&) const, const Class_t* instance)
 {
 	return std::bind(funcPointer, const_cast<Class_t*>(instance), std::placeholders::_1);
 }
 
 template <class Arg_t>
-std::function<void(const Arg_t&)> WrapFn(void(*funcPointer)(const Arg_t&))
+Function<void(const Arg_t&)> WrapFn(void(*funcPointer)(const Arg_t&))
 {
 	return std::function<void(const Arg_t&)>(funcPointer);
 }
@@ -101,40 +101,38 @@ public:
 	EventDispatcher();
 	~EventDispatcher();
 
-	template <class Class_t, class Arg_t>
-	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&), Class_t* instance)
-	{
-		return Register<Arg_t>(WrapFn(funcPointer, instance));
-	}
-
-	template <class Class_t, class Arg_t>
-	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&), const Class_t* instance)
-	{
-		return Register<Arg_t>(WrapFn(funcPointer, instance));
-	}
-
-	template <class Class_t, class Arg_t>
-	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&) const, const Class_t* instance)
-	{
-		return Register<Arg_t>(WrapFn(funcPointer, instance));
-	}
-
-	template<class Arg_t>
+	template<class Arg_t, class Class_t = void>
 	Receipt Register(void(*funcPointer)(const Arg_t&))
 	{
 		return Register<Arg_t>(WrapFn(funcPointer));
 	}
 
-	template<class Arg_t>
+	template <class Arg_t, class Class_t>
+	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&), Class_t* instance)
+	{
+		return Register<Arg_t>(WrapFn(funcPointer, instance));
+	}
+
+	template <class Arg_t, class Class_t>
+	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&), const Class_t* instance)
+	{
+		return Register<Arg_t>(WrapFn(funcPointer, instance));
+	}
+
+	template <class Arg_t, class Class_t>
+	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&) const, const Class_t* instance)
+	{
+		return Register<Arg_t>(WrapFn(funcPointer, instance));
+	}
+
+	template<class Arg_t, class Class_t = void>
 	Receipt Register(std::function<void(const Arg_t&)>& callback)
 	{
 		typedef Event<Arg_t> Event_t;
 
-		// Eventually I'd like to replace Type::EVENT_NAME with the rttr type to use that as
-		// a string key, but this works for a proof of concept.
-		IEvent* event = new Event_t(Arg_t::EVENT_NAME, callback);
+		IEvent* event = new Event_t(Arg_t::MyType(), callback);
 
-		_events[Arg_t::EVENT_NAME].push_back(event);
+		_events[Arg_t::MyType()].push_back(event);
 
 		EDReceipt* r = new EDReceipt(const_cast<EventDispatcher*>(this), event);
 		_receipts.push_back(r);
@@ -149,7 +147,7 @@ public:
 	void Dispatch(const Arg_t& arg)
 	{
 		assert(_numRegisteredEvents == _receipts.size());
-		auto found = _events.find(Arg_t::EVENT_NAME);
+		auto found = _events.find(Arg_t::MyType());
 		if(found != _events.end())
 		{
 			for(IEvent* item : found->second)

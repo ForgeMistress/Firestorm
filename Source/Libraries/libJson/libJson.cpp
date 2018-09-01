@@ -4,5 +4,5 @@
 
 void Elf::libJson::Initialize()
 {
-	JSONDocument j;
+	ELF_MIRROR_REGISTER(JSONDocument);
 }

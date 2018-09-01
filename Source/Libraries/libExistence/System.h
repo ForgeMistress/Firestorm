@@ -162,8 +162,8 @@ private:
 	Engine*                  m_engine;
 	Vector<WeakPtr<Entity> > m_entities;
 };
-typedef SharedPtr<System> SystemPtr;
-typedef WeakPtr<System>   SystemWeakPtr;
+typedef RefPtr<System>  SystemPtr;
+typedef WeakPtr<System> SystemWeakPtr;
 
 CLOSE_NAMESPACE(Elf);
 #endif

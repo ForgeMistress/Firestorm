@@ -31,8 +31,8 @@ public:
 		QUEUE_SYNC
 	};
 
-	typedef std::function<void(const FileIOMgr*, FileHandle, Result<void, Error>)> ReadErrorCallback_f;
-	typedef std::function<void(const FileIOMgr*, FileHandle, Result<void, Error>)> WriteErrorCallback_f;
+	typedef Function<void(const FileIOMgr*, FileHandle, Result<void, Error>)> ReadErrorCallback_f;
+	typedef Function<void(const FileIOMgr*, FileHandle, Result<void, Error>)> WriteErrorCallback_f;
 
 public:
 	FileIOMgr();

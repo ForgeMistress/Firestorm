@@ -45,14 +45,17 @@ using std::cout;
 using std::endl;
 
 using std::function;
+template <class _Fty> using Function = std::function<_Fty>;
+
 using std::pair;
+template <class L, class R> using Pair = std::pair<L, R>;
 
 template<
 	class Ty,
 	class Alloc = std::allocator<Ty>
 > using Vector = std::vector<Ty, Alloc>;
 
-typedef Vector<char> DataBuffer;
+using DataBuffer = Vector<char>;
 
 using String = std::string;
 
@@ -77,7 +80,7 @@ template<class Kty,
 
 static const String str_Default;
 
-typedef unsigned char uchar;
+using uchar = unsigned char;
 
 // Aliases for type_trait structs in type_traits (C++11)
 OPEN_NAMESPACE(Traits);
@@ -155,5 +158,10 @@ template <class T> using AddPointer = std::add_pointer<T>;
 CLOSE_NAMESPACE(Traits);
 
 CLOSE_NAMESPACE(Elf);
+
+/**
+	Use this to flag a variable as unused in a function.
+ **/
+#define ELF_UNUSED_VARIABLE(var) ((void)var)
 
 #endif

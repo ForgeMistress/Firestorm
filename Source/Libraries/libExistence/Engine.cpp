@@ -15,9 +15,10 @@
 
 OPEN_NAMESPACE(Elf);
 
-ELF_MIRROR_REGISTRATION
+
+ELF_MIRROR_DEFINE(Elf::Engine)
 {
-	ELF_MIRROR_DEFINE(Elf::Engine);
+
 }
 
 Engine::Engine()

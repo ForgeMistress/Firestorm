@@ -14,14 +14,12 @@
 
 OPEN_NAMESPACE(Elf);
 
-ELF_MIRROR_REGISTRATION
+ELF_MIRROR_DEFINE(Elf::System)
 {
-	ELF_MIRROR_DEFINE(Elf::System)
-		.property("name", &System::GetName, &System::SetName)
-		(
-			MIRROR_META_SAVELOAD
-		)
-	;
+	Property("name", &System::GetName, &System::SetName)
+	(
+		MIRROR_META_SAVELOAD
+	);
 }
 
 System::System()
@@ -40,7 +38,7 @@ System::~System()
 
 bool System::Filter(const WeakPtr<Entity>& entity) const
 {
-	if(!entity.expired())
+	if(entity)
 	{
 		return OnEntityFilter(entity);
 	}
@@ -64,10 +62,10 @@ void System::SetName(const String& name)
 
 bool System::Contains(const WeakPtr<Entity>& entity) const
 {
-	if(!entity.expired())
+	if(entity)
 	{
 		return std::find_if(m_entities.begin(), m_entities.end(), [&entity](const WeakPtr<Entity>& e) {
-			return e.lock().get() == entity.lock().get();
+			return e.Lock().Get() == entity.Lock().Get();
 		}) != m_entities.end();
 	}
 	return false;
@@ -80,9 +78,9 @@ void System::Pause()
 
 bool System::AddEntity(WeakPtr<Entity>& entity)
 {
-	if(!entity.expired())
+	if(entity)
 	{
-		if (OnEntityFilter(entity))
+		if(OnEntityFilter(entity))
 		{
 			m_entities.push_back(entity);
 			return true;

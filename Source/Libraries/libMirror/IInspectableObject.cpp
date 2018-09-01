@@ -15,12 +15,16 @@ OPEN_NAMESPACE(Mirror);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RTTR_REGISTRATION
+ELF_MIRROR_DEFINE(Elf::Mirror::IInspectableObject)
 {
-	ELF_MIRROR_DEFINE(Elf::Mirror::IInspectableObject);
 }
 
 inline void* IInspectableObject::Inspect(Type type)
+{
+	return DoInspect(type);
+}
+
+inline void* IInspectableObject::Inspect(const Type& type)
 {
 	return DoInspect(type);
 }

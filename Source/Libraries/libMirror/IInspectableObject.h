@@ -43,6 +43,7 @@ public:
 		Inspect an object to see if it implements the provided type.
 	**/
 	inline void* Inspect(Type type);
+	inline void* Inspect(const Type& type);
 
 protected:
 	/** Override this in implementing classes to provide introspection to the type. **/

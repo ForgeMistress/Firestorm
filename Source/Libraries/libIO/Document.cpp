@@ -31,7 +31,7 @@ Mirror::Method GetMakerFunction(Mirror::Type docType, IDocument::Metadata meta)
 	return rttr::detail::create_invalid_item<rttr::method>();
 }
 
-SharedPtr<IDocument> MakeBlank(const String& type)
+RefPtr<IDocument> MakeBlank(const String& type)
 {
 	String finalName("Elf::Document::" + type);
 	Mirror::Type docType = Mirror::Type::get_by_name(finalName);
@@ -42,14 +42,14 @@ SharedPtr<IDocument> MakeBlank(const String& type)
 		{
 			Mirror::Variant document = method.invoke({});
 			if(document.is_valid())
-				if(document.can_convert<SharedPtr<IDocument>>())
-					return document.convert<SharedPtr<IDocument>>();
+				if(document.can_convert<RefPtr<IDocument>>())
+					return document.convert<RefPtr<IDocument>>();
 		}
 	}
-	return SharedPtr<IDocument>(nullptr);
+	return RefPtr<IDocument>(nullptr);
 }
 
-SharedPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data)
+RefPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data)
 {
 	String finalName("Elf::Document::" + type);
 	Mirror::Type docType = Mirror::Type::get_by_name(finalName);
@@ -60,11 +60,11 @@ SharedPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data)
 		{
 			Mirror::Variant document = method.invoke({}, data);
 			if(document.is_valid())
-				if(document.can_convert<SharedPtr<IDocument>>())
-					return document.convert<SharedPtr<IDocument>>();
+				if(document.can_convert<RefPtr<IDocument>>())
+					return document.convert<RefPtr<IDocument>>();
 		}
 	}
-	return SharedPtr<IDocument>(nullptr);
+	return RefPtr<IDocument>(nullptr);
 }
 
 CLOSE_NAMESPACE(Document);

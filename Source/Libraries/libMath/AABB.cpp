@@ -12,6 +12,14 @@
 
 OPEN_NAMESPACE(Elf);
 
+ELF_MIRROR_DEFINE(AABB_2D)
+{
+	Property("t", &AABB_2D::_top);
+	Property("l", &AABB_2D::_left);
+	Property("b", &AABB_2D::_bottom);
+	Property("r", &AABB_2D::_right);
+}
+
 AABB_2D::AABB_2D()
 : _top(0)
 , _left(0)

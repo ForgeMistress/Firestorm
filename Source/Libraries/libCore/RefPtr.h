@@ -34,14 +34,32 @@ private:
 	uint32_t _weakCount{ 0 };
 	void* _object;
 };
+
+// Dummy type that allows the program to compile when the static_assert hits in RefPtr.
+struct _RefPtr_DummyType { virtual ~_RefPtr_DummyType() {} };
+
 template<class T>
 class RefPtr
 {
 	template <class T> friend class WeakPtr;
+	static_assert(std::has_virtual_destructor<
+		std::conditional<std::is_polymorphic<T>::value, T, _RefPtr_DummyType>::type
+	>::value, "Objects used in a RefPtr must have a virtual destructor");
 public:
 	typedef T element_type;
 
-	RefPtr() {}
+	RefPtr()
+	: _object(nullptr)
+	, _count(nullptr)
+	{
+	}
+
+	RefPtr(std::nullptr_t)
+	: _object(nullptr)
+	, _count(nullptr) 
+	{
+	}
+
 	RefPtr(T* object)
 	: _object(object)
 	, _count(new RefCount(object))
@@ -132,6 +150,21 @@ public:
 	bool operator==(const RefPtr<T>& other) const
 	{
 		return _object == other._object;
+	}
+
+	bool operator==(std::nullptr_t) const
+	{
+		return _object == nullptr;
+	}
+
+	bool operator!=(const RefPtr<T>& other) const
+	{
+		return _object != other._object;
+	}
+
+	bool operator!=(std::nullptr_t) const
+	{
+		return _object != nullptr;
 	}
 
 	operator bool() const
@@ -239,6 +272,16 @@ public:
 	bool operator==(RefPtr<T>& other)
 	{
 		return other._count == _count;
+	}
+
+	bool operator==(std::nullptr_t) const
+	{
+		return _counter && _counter->_object == nullptr;
+	}
+
+	bool operator!=(std::nullptr_t) const
+	{
+		return _counter && _counter->_object != nullptr;
 	}
 
 	template <class Subclass_t>

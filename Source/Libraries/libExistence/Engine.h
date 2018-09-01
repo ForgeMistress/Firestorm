@@ -78,7 +78,7 @@ private:
 	List< RefPtr<System> > m_systemsToRemove;
 };
 
-typedef SharedPtr<Engine> EnginePtr;
+typedef RefPtr<Engine> EnginePtr;
 typedef WeakPtr<Engine>   EngineWeakPtr;
 
 CLOSE_NAMESPACE(Elf);

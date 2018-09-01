@@ -10,6 +10,9 @@
 #include "stdafx.h"
 #include "JSONDocument.h"
 
+#include <rttr/registration.h>
+#include <rttr/registration_friend.h>
+
 #include <libIO/TypeTraits.h>
 
 #include <json/reader.h>
@@ -19,31 +22,32 @@
 
 OPEN_NAMESPACE(Elf);
 
-namespace {
-	RefPtr<IDocument> MakeBlankJSON()
-	{
-		return std::make_shared<JSONDocument>();
-	}
-
-	RefPtr<IDocument> MakeDataJSON(const Vector<char>& data)
-	{
-		return std::make_shared<JSONDocument>(data);
-	}
+static RefPtr<IDocument> MakeBlankJSON()
+{
+	return new JSONDocument();
 }
 
-//ELF_MIRROR_DEFINE_NAMED_(JSONDocument, "Elf::Document::JSON")
-ELF_MIRROR_REGISTRATION
+static RefPtr<IDocument> MakeDataJSON(const Vector<char>& data)
 {
-	ELF_MIRROR_DEFINE_NAMED(JSONDocument, "Elf::Document::JSON")
-		.method("MakeBlank", &MakeBlankJSON)
-		(
-			IDocument::MakerFunctionBlank()
-		)
-		.method("MakeData", &MakeDataJSON)
-		(
-			IDocument::MakerFunctionData()
-		)
-	;
+	return new JSONDocument(data);
+}
+
+ELF_MIRROR_DEFINE_NAMED(JSONDocument, "Elf::Document::JSON")
+{
+	ClassInfo
+	(
+		IDocument::MakerFunctionBlank()
+	);
+
+	Method("MakeBlank", &MakeBlankJSON)
+	(
+		IDocument::MakerFunctionBlank()
+	);
+
+	Method("MakeData", &MakeDataJSON)
+	(
+		IDocument::MakerFunctionData()
+	);
 }
 
 JSONDocument::JSONDocument()

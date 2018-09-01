@@ -41,8 +41,8 @@ public:
 public:
 	typedef Result<void, Error> WriteResult;
 	typedef Result<DataBuffer, Error> ReadResult;
-	typedef std::function<void(File*, const WriteResult&)> AsyncWriteCallback_f;
-	typedef std::function<void(File*, const ReadResult&)>  AsyncReadCallback_f;
+	typedef Function<void(File*, const WriteResult&)> AsyncWriteCallback_f;
+	typedef Function<void(File*, const ReadResult&)>  AsyncReadCallback_f;
 
 private:
 	/**
