@@ -130,7 +130,7 @@ protected:
 		\arg \c DeltaT The delta time that has passed between calls.
 		\arg \c Entities A list of \ref Entities that the \ref System can act upon.
 	 **/
-	virtual void OnUpdate(double /*deltaT*/, const Vector< WeakPtr<Entity> >& /*entities*/) {}
+	virtual void OnUpdate(double /*deltaT*/, const Vector<WeakPtr<Entity>>& /*entities*/) {}
 
 	/**
 		\function OnEntityFilter
@@ -156,11 +156,11 @@ private:
 	String m_name;
 
 	// Runtime.
-	bool                     m_modified;
-	bool                     m_active;
-	bool                     m_paused;
-	Engine*                  m_engine;
-	Vector<WeakPtr<Entity> > m_entities;
+	bool                    m_modified;
+	bool                    m_active;
+	bool                    m_paused;
+	Engine*                 m_engine;
+	Vector<WeakPtr<Entity>> m_entities;
 };
 typedef RefPtr<System>  SystemPtr;
 typedef WeakPtr<System> SystemWeakPtr;
