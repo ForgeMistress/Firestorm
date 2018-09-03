@@ -37,3 +37,4 @@ Build/**/*.ilk
 *.vcxproj.user
 
 Premake/**
+Build/**
