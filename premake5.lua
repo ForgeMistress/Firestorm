@@ -86,6 +86,7 @@ include("RTTR_Build")
 include("Angelscript_Build")
 include("GLFW_Build")
 include("physfs_Build")
+include("LLGL_Build")
 
 ------------------------------------------------------------------------------------------------------------------------
 --  FIRST PARTY LIBRARIES
