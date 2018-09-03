@@ -11,9 +11,6 @@
 #include "IDocument.h"
 OPEN_NAMESPACE(Elf);
 
-ELF_MIRROR_REGISTRATION
-{
-	ELF_MIRROR_DEFINE_NAMED(IDocument, "Elf::IDocument");
-}
+ELF_MIRROR_DEFINE_NAMED(IDocument, "Elf::IDocument"){}
 
 CLOSE_NAMESPACE(Elf);

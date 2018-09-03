@@ -15,9 +15,10 @@
 
 OPEN_NAMESPACE(Elf);
 
-ELF_MIRROR_REGISTRATION
+
+ELF_MIRROR_DEFINE(Elf::Engine)
 {
-	ELF_MIRROR_DEFINE(Elf::Engine);
+
 }
 
 Engine::Engine()
@@ -262,7 +263,7 @@ void Engine::ManageEntities()
 			//m_entities.erase(entityItr);
 			for(auto system : m_systems)
 			{
-				Vector<EntityWeakPtr>& entities = system->m_entities;
+				Vector<RefPtr<Entity>>& entities = system->m_entities;
 				auto systemContainsItr = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
 					return e.Lock().Get() == entity.Get();
 				});

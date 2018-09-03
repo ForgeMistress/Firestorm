@@ -23,9 +23,7 @@ class IDocument
 {
 	ELF_MIRROR_DECLARE(IDocument);
 public:
-	/*IDocument() {}
-	explicit IDocument(const Vector<char>&) {}
-	virtual ~IDocument() {}*/
+	virtual ~IDocument() {}
 
 	enum Codes : uint8_t
 	{

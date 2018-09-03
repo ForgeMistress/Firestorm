@@ -21,7 +21,7 @@ TestHarness::TestHarness(const String& name, bool quietly)
 
 uint32_t TestHarness::Run()
 {
-	assert(m_cases.size() == m_caseNames.size());
+	ELF_ASSERT(m_cases.size() == m_caseNames.size());
 
 	uint32_t errors = 0;
 	TestCase testCase;
@@ -67,7 +67,7 @@ void TestHarness::It(const String& caseName, TestFunction_t testFunction)
 {
 	for(const auto& cn : m_caseNames)
 	{
-		assert(cn != caseName);
+		ELF_ASSERT(cn != caseName);
 	}
 	m_cases.push_back(testFunction);
 	m_caseNames.push_back(caseName);

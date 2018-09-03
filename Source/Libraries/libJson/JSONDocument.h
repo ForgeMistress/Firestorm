@@ -19,7 +19,7 @@ OPEN_NAMESPACE(Elf);
 class JSONDocument : public Mirror::Object,
                      public IDocument
 {
-	ELF_MIRROR_DECLARE_(JSONDocument, Mirror::Object, IDocument);
+	ELF_MIRROR_DECLARE(JSONDocument, Mirror::Object, IDocument);
 public:
 	JSONDocument();
 	explicit JSONDocument(const Vector<char>& data);

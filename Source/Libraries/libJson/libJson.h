@@ -4,10 +4,10 @@
 
 namespace Elf
 {
-	namespace libJson
+	struct libJson
 	{
-		extern void Initialize();
-	}
+		static void Initialize(int ac, char** av);
+	};
 }
 
 #endif

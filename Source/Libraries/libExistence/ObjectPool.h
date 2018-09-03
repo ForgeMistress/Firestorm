@@ -12,6 +12,7 @@
 #pragma once
 
 #include <libCore/Result.h>
+#include <libCore/RefPtr.h>
 
 OPEN_NAMESPACE(Elf);
 
@@ -36,8 +37,8 @@ struct Pool
 template <class Object_t>
 class ObjectPool
 {
-	typedef WeakPtr<ObjectPool<Object_t>* > PoolWeakPtr_t;
-	typedef SharedPtr<ObjectPool<Object_t>* > PoolSharedPtr_t;
+	typedef std::weak_ptr<ObjectPool<Object_t>* > PoolWeakPtr_t;
+	typedef std::shared_ptr<ObjectPool<Object_t>* > PoolRefPtr_t;
 
 	// deleter for a shared ptr to an object.
 	struct SharedPtrDeleter
@@ -48,7 +49,7 @@ class ObjectPool
 		}
 		void operator()(Object_t* ptr)
 		{
-			if(auto poolPtr = m_pool.lock())
+			if(auto poolPtr = m_pool.Lock())
 			{
 				try {
 					(*poolPtr.get())->Return(ptr);
@@ -64,9 +65,9 @@ public:
 	virtual ~ObjectPool();
 	
 	template<class... Args_t>
-	Result<SharedPtr<Object_t>, Error> Acquire(Args_t... args);
+	Result<RefPtr<Object_t>, Error> Acquire(Args_t... args);
 
-	void Return(const SharedPtr<Object_t>& obj)
+	void Return(const RefPtr<Object_t>& obj)
 	{
 		Return(obj.get());
 	}
@@ -85,7 +86,7 @@ public:
 		\arg \c Object a raw pointer to the object we're checking on.
 		\return \c Result return a result with the value being a bool.
 	**/
-	Result<bool, Error> IsInUse(const SharedPtr<Object_t>& obj)
+	Result<bool, Error> IsInUse(const RefPtr<Object_t>& obj)
 	{
 		return IsInUse(obj.get());
 	}
@@ -122,7 +123,7 @@ private:
 	void SetInUse(Object_t* obj);
 	void SetAvailable(Object_t* obj);
 
-	PoolSharedPtr_t  m_thisPtr;
+	PoolRefPtr_t     m_thisPtr;
 	uint32_t         m_poolSize;
 	Vector<Object_t> m_pool;
 	Vector<bool>     m_inUse;
@@ -130,19 +131,19 @@ private:
 
 template <class Object_t>
 template <class... Args_t>
-Result<SharedPtr<Object_t>, Error> ObjectPool<Object_t>::Acquire(Args_t... args)
+Result<RefPtr<Object_t>, Error> ObjectPool<Object_t>::Acquire(Args_t... args)
 {
 	Result<uint16_t, Error> unused = FindUnused();
 	if(unused.has_value())
 	{
 		Object_t* obj = Get(unused.value());
 		SetInUse(obj);
-		assert(obj);
+		ELF_ASSERT(obj);
 		try {
 			obj->Recycle(args...);
 		}
 		catch (...) {}
-		return SharedPtr<Object_t>(obj, SharedPtrDeleter(m_thisPtr));
+		return RefPtr<Object_t>(obj, SharedPtrDeleter());
 	}
 
 	return ELF_ERROR(unused.error().Code, unused.error().Message);

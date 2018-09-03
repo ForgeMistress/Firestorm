@@ -39,11 +39,12 @@ public:
 	String  Message;
 };
 
-template <typename Expected_t, typename Unexpected_t> using Result =
-	tl::expected<Expected_t, Unexpected_t>;
+template <typename Expected_t, typename Unexpected_t> 
+using Result = tl::expected<Expected_t, Unexpected_t>;
 
 #define ELF_ERROR( CODE, ERROR_STRING ) \
 	tl::make_unexpected(Error( CODE, ERROR_STRING ))
+
 #define ELF_RESULT( EXPECTED, ... ) \
 	Result< EXPECTED, Error >(__VA_ARGS__)
 

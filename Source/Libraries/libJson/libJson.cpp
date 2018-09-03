@@ -2,7 +2,7 @@
 #include "libJson.h"
 #include "JSONDocument.h"
 
-void Elf::libJson::Initialize()
+void Elf::libJson::Initialize(int ac, char** av)
 {
-	JSONDocument j;
+	ELF_MIRROR_REGISTER(JSONDocument);
 }

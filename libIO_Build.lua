@@ -14,6 +14,7 @@ addDependencies({
     "libMirror",
     "libJson"
 })
+links({"physfs"})
 
 configureUnitTest("libIO")
 addDependencies({
@@ -21,3 +22,4 @@ addDependencies({
     "libMirror",
     "libJson"
 })
+links({"physfs"})

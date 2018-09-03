@@ -15,6 +15,14 @@ OPEN_NAMESPACE(Elf);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+ELF_MIRROR_DEFINE(Elf::Entity)
+{
+	Property("name",       &Entity::_name);
+	Property("components", &Entity::_components);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Entity::Entity()
 {
 }
@@ -30,7 +38,7 @@ Entity::~Entity()
 void* Entity::DoInspect(Mirror::Type type)
 {
 	void* output = nullptr;
-	for(const auto& component : m_components)
+	for(auto component : _components)
 	{
 		output = component->Inspect(type);
 		if(output != nullptr)

@@ -34,14 +34,32 @@ private:
 	uint32_t _weakCount{ 0 };
 	void* _object;
 };
+
+// Dummy type that allows the program to compile when the static_assert hits in RefPtr.
+struct _RefPtr_DummyType { virtual ~_RefPtr_DummyType() {} };
+
 template<class T>
 class RefPtr
 {
 	template <class T> friend class WeakPtr;
+	/*static_assert(std::has_virtual_destructor<
+		std::conditional<std::is_polymorphic<T>::value, T, _RefPtr_DummyType>::type
+	>::value, "Objects used in a RefPtr must have a virtual destructor");*/
 public:
 	typedef T element_type;
 
-	RefPtr() {}
+	RefPtr()
+	: _object(nullptr)
+	, _count(nullptr)
+	{
+	}
+
+	RefPtr(std::nullptr_t)
+	: _object(nullptr)
+	, _count(nullptr) 
+	{
+	}
+
 	RefPtr(T* object)
 	: _object(object)
 	, _count(new RefCount(object))
@@ -134,6 +152,21 @@ public:
 		return _object == other._object;
 	}
 
+	bool operator==(std::nullptr_t) const
+	{
+		return _object == nullptr;
+	}
+
+	bool operator!=(const RefPtr<T>& other) const
+	{
+		return _object != other._object;
+	}
+
+	bool operator!=(std::nullptr_t) const
+	{
+		return _object != nullptr;
+	}
+
 	operator bool() const
 	{
 		return _object != nullptr;
@@ -141,13 +174,13 @@ public:
 
 	uint32_t GetCount() const
 	{
-		assert(_count);
+		ELF_ASSERT(_count);
 		return _count->_strongCount;
 	}
 
 	uint32_t GetWeakCount() const
 	{
-		assert(_count);
+		ELF_ASSERT(_count);
 		return _count->_weakCount;
 	}
 
@@ -156,7 +189,7 @@ private:
 	: _object(static_cast<T*>(refCount->_object))
 	, _count(refCount)
 	{
-		assert(_count);
+		ELF_ASSERT(_count);
 		++_count->_strongCount;
 	}
 
@@ -196,14 +229,14 @@ public:
 	WeakPtr(const RefPtr<T>& ptr)
 	: _count(ptr._count)
 	{
-		assert(_count);
+		ELF_ASSERT(_count);
 		++_count->_weakCount;
 	}
 
 	WeakPtr(const WeakPtr<T>& ptr)
 	: _count(ptr._count)
 	{
-		assert(_count);
+		ELF_ASSERT(_count);
 		++_count->_weakCount;
 	}
 
@@ -211,7 +244,7 @@ public:
 	WeakPtr(const RefPtr<Subclass_t>& ptr)
 	: _count(ptr._count)
 	{
-		assert(_count);
+		ELF_ASSERT(_count);
 		static_assert(std::is_base_of<T, Subclass_t>::value, 
 			"the pointer passed to the casting constructor must be a subclass of the type held by the WeakPtr");
 		++_count->_weakCount;
@@ -241,6 +274,16 @@ public:
 		return other._count == _count;
 	}
 
+	bool operator==(std::nullptr_t) const
+	{
+		return _counter && _counter->_object == nullptr;
+	}
+
+	bool operator!=(std::nullptr_t) const
+	{
+		return _counter && _counter->_object != nullptr;
+	}
+
 	template <class Subclass_t>
 	WeakPtr<T>& operator=(const RefPtr<Subclass_t>& ptr)
 	{
@@ -260,7 +303,7 @@ public:
 
 		// increment the weak ref count of the new control block.
 		_count = ptr._count;
-		assert(_count);
+		ELF_ASSERT(_count);
 		++_count->_weakCount;
 		return *this;
 	}
@@ -280,7 +323,7 @@ public:
 
 		// increment the weak ref count of the new control block.
 		_count = obj._count;
-		assert(_count);
+		ELF_ASSERT(_count);
 		++_count->_weakCount;
 		return *this; 
 	}

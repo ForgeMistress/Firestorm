@@ -18,7 +18,7 @@ class TestCase;
 class TestHarness
 {
 public:
-	typedef std::function<void (TestCase&)> TestFunction_t;
+	typedef Function<void (TestCase&)> TestFunction_t;
 
 	TestHarness(const String& name, bool quietly = false);
 	virtual ~TestHarness() {}

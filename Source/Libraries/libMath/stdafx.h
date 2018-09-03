@@ -7,5 +7,6 @@
 #pragma once
 
 #include <libCore/libCore.h>
+#include <libMirror/Object.h>
 
 #endif
