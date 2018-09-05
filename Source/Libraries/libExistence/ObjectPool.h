@@ -37,46 +37,18 @@ struct Pool
 template <class Object_t>
 class ObjectPool
 {
-	typedef std::weak_ptr<ObjectPool<Object_t>* > PoolWeakPtr_t;
-	typedef std::shared_ptr<ObjectPool<Object_t>* > PoolRefPtr_t;
-
-	// deleter for a shared ptr to an object.
-	struct SharedPtrDeleter
-	{
-		explicit SharedPtrDeleter(PoolWeakPtr_t pool)
-		: m_pool(pool)
-		{
-		}
-		void operator()(Object_t* ptr)
-		{
-			if(auto poolPtr = m_pool.Lock())
-			{
-				try {
-					(*poolPtr.get())->Return(ptr);
-				}
-				catch(...) {}
-			}
-		}
-		PoolWeakPtr_t m_pool;
-	};
-
 public:
+	using ObjectPtr_t = RefPtr<Object_t>;
+
 	ObjectPool(uint32_t poolSize);
 	virtual ~ObjectPool();
-	
+
 	template<class... Args_t>
-	Result<RefPtr<Object_t>, Error> Acquire(Args_t... args);
+	Result<ObjectPtr_t, Error> Acquire(Args_t... args);
 
-	void Return(const RefPtr<Object_t>& obj)
+	void Return(const ObjectPtr_t& obj)
 	{
-		Return(obj.get());
 	}
-
-	/**
-		\function Return
-
-	 **/
-	void Return(Object_t* obj);
 
 	/**
 		\function IsInUse
@@ -86,9 +58,14 @@ public:
 		\arg \c Object a raw pointer to the object we're checking on.
 		\return \c Result return a result with the value being a bool.
 	**/
-	Result<bool, Error> IsInUse(const RefPtr<Object_t>& obj)
+	Result<bool, Error> IsInUse(const ObjectPtr_t& obj)
 	{
-		return IsInUse(obj.get());
+		Result<uint16_t, Error> f = Find(obj);
+		if (f.has_value())
+		{
+			return m_inUse[f.value()];
+		}
+		return ELF_ERROR(f.error().Core, f.error().Message);
 	}
 
 	/**
@@ -99,7 +76,7 @@ public:
 		\arg \c Object a raw pointer to the object we're checking on.
 		\return \c Result return a result with the value being a bool.
 	 **/
-	Result<bool, Error> IsInUse(Object_t* obj);
+	Result<bool, Error> IsInUse(const ObjectPtr_t& obj) const;
 
 	/**
 		\function GetObjectBlockSize
@@ -117,9 +94,19 @@ public:
 
 private:
 	Result<uint16_t, Error> FindUnused();
-	Result<uint16_t, Error> Find(Object_t* obj);
+	Result<uint16_t, Error> Find(Object_t* obj)
+	{
+		for(uint32_t i = 0; i < m_poolSize; ++i)
+		{
+			if(Get(i) == obj)
+			{
+				return i;
+			}
+		}
+		return ELF_ERROR(Pool::OBJECT_NOT_FOUND, "object could not be found");
+	}
 
-	Object_t* Get(uint16_t index);
+	RefPtr<Object_t> Get(uint16_t index);
 	void SetInUse(Object_t* obj);
 	void SetAvailable(Object_t* obj);
 
@@ -136,14 +123,15 @@ Result<RefPtr<Object_t>, Error> ObjectPool<Object_t>::Acquire(Args_t... args)
 	Result<uint16_t, Error> unused = FindUnused();
 	if(unused.has_value())
 	{
-		Object_t* obj = Get(unused.value());
+		/*Object_t* obj = Get(unused.value());
 		SetInUse(obj);
 		ELF_ASSERT(obj);
 		try {
 			obj->Recycle(args...);
 		}
 		catch (...) {}
-		return RefPtr<Object_t>(obj, SharedPtrDeleter());
+		return RefPtr<Object_t>(obj, SharedPtrDeleter());*/
+		return nullptr;
 	}
 
 	return ELF_ERROR(unused.error().Code, unused.error().Message);
@@ -180,17 +168,6 @@ template <class Object_t>
 void ObjectPool<Object_t>::Return(Object_t* obj)
 {
 	SetAvailable(obj);
-}
-
-template <class Object_t>
-Result<bool, Error> ObjectPool<Object_t>::IsInUse(Object_t* obj)
-{
-	Result<uint16_t, Error> f = Find(obj);
-	if(f.has_value())
-	{
-		return m_inUse[f.value()];
-	}
-	return tl::make_unexpected(f.error());
 }
 
 template <class Object_t>
@@ -243,20 +220,6 @@ void ObjectPool<Object_t>::SetAvailable(Object_t* obj)
 	{
 		m_inUse[f.value()] = false;
 	}
-}
-
-template<class Object_t>
-Result<uint16_t, Error> ObjectPool<Object_t>::Find(Object_t* obj)
-{
-	for(uint32_t i = 0; i < m_poolSize; ++i)
-	{
-		if(Get(i) == obj)
-		{
-			return i;
-		}
-	}
-	return ELF_ERROR(Pool::OBJECT_NOT_FOUND, "object could not be found");
-	// tl::make_unexpected(Error(Pool::OBJECT_NOT_FOUND, "object could not be found"));
 }
 
 CLOSE_NAMESPACE(Elf);

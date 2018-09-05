@@ -15,7 +15,6 @@ OPEN_NAMESPACE(Elf);
 
 class AABB_2D
 {
-	ELF_MIRROR_DECLARE(AABB_2D);
 public:
 	AABB_2D();
 	AABB_2D(float top, float left, float bottom, float right);

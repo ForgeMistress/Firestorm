@@ -17,8 +17,8 @@ OPEN_NAMESPACE(Elf);
 
 ELF_MIRROR_DEFINE(Elf::Entity)
 {
-	Property("name",       &Entity::_name);
-	Property("components", &Entity::_components);
+	_class.property("name",       &Entity::_name);
+	_class.property("components", &Entity::_components);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

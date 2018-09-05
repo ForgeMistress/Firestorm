@@ -15,6 +15,8 @@
 
 #include <libIO/TypeTraits.h>
 
+#include <libMirror/Object.h>
+
 #include <json/reader.h>
 
 #include <sstream>
@@ -22,27 +24,31 @@
 
 OPEN_NAMESPACE(Elf);
 
-static RefPtr<IDocument> MakeBlankJSON()
-{
-	return new JSONDocument();
-}
+namespace {
+	static RefPtr<IDocument> MakeBlankJSON()
+	{
+		return new JSONDocument();
+	}
 
-static RefPtr<IDocument> MakeDataJSON(const Vector<char>& data)
-{
-	return new JSONDocument(data);
+	static RefPtr<IDocument> MakeDataJSON(const Vector<char>& data)
+	{
+		return new JSONDocument(data);
+	}
 }
 
 ELF_MIRROR_DEFINE_NAMED(JSONDocument, "Elf::Document::JSON")
 {
-	Method("MakeBlank", &MakeBlankJSON)
+	_class.method("MakeBlank", &MakeBlankJSON)
 	(
 		IDocument::MakerFunctionBlank()
 	);
 
-	Method("MakeData", &MakeDataJSON)
+	_class.method("MakeData", &MakeDataJSON)
 	(
 		IDocument::MakerFunctionData()
 	);
+
+	Method("InitializeAsIfNew", &JSONDocument::InitializeAsIfNew);
 }
 
 JSONDocument::JSONDocument()

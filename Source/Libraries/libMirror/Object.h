@@ -33,8 +33,7 @@
 #define ELF_MIRROR_DECLARE(ObjectType, ...)                                                                    \
 	public:                                                                                                    \
 		typedef ObjectType WhatIAm_t;                                                                          \
-		typedef rttr::registration::class_<ObjectType> Class_t;												   \
-		class Registrar : public Elf::Mirror::RegistrarBase<ObjectType>										   \
+		class Registrar : public ::Elf::Mirror::RegistrarBase<ObjectType>									   \
 		{																									   \
 		public:																								   \
 			Registrar();																					   \
@@ -85,16 +84,15 @@ template <class Class_Type>
 class RegistrarBase
 {
 public:
-	RegistrarBase(rttr::registration::class_<Class_Type>& klass)
+	explicit RegistrarBase(rttr::registration::class_<Class_Type>& klass)
 	: _class(klass)
 	{
 	}
 
-protected:
-	template<typename...Args>
+	template<typename... Args>
 	rttr::registration::class_<Class_Type>& operator()(Args&&...args) { return _class(args...); }
 
-	template<typename...Args>
+	template<typename... Args>
 	rttr::registration::class_<Class_Type>& ClassInfo(Args&&...args) { return _class(args...); }
 
 	template<
@@ -109,7 +107,7 @@ protected:
 	> rttr::registration::bind<rttr::detail::ctor, Class_Type, acc_level, Args...>
 		Constructor(acc_level level = acc_level())
 	{
-		return _class.constructor(level);
+		return _class.constructor<Args...,acc_level,Tp>(level);
 	}
 
 	template<
@@ -124,7 +122,7 @@ protected:
 	> rttr::registration::bind<rttr::detail::ctor_func, Class_Type, F, acc_level>
 		Constructor(F func, acc_level level = acc_level())
 	{
-		return _class.constructor(func, level);
+		return _class.constructor<F,acc_level,Tp>(func, level);
 	}
 
 	template<
@@ -139,7 +137,7 @@ protected:
 	> rttr::registration::bind<rttr::detail::prop, Class_Type, A, acc_level>
 		Property(rttr::string_view name, A acc, acc_level level = acc_level())
 	{
-		return _class.property(name, acc, level);
+		return _class.property<A,acc_level,Tp>(name, acc, level);
 	}
 
 	template<
@@ -154,7 +152,7 @@ protected:
 	> rttr::registration::bind<rttr::detail::prop_readonly, Class_Type, A, acc_level>
 		ReadOnlyProperty(rttr::string_view name, A acc, acc_level level = acc_level())
 	{
-		return _class.property_readonly(name, acc, level);
+		return _class.property_readonly<A,acc_level,Tp>(name, acc, level);
 	}
 
 	template<
@@ -170,25 +168,25 @@ protected:
 	>
 	rttr::registration::bind<rttr::detail::prop, Class_Type, A1, A2, acc_level> Property(rttr::string_view name, A1 getter, A2 setter, acc_level level = acc_level())
 	{
-		return _class.property(name, getter, setter, level);
+		return _class.property<A1,A2,Tp,acc_level>(name, getter, setter, level);
 	}
 
 	template<
 		typename F,
 		typename acc_level = rttr::detail::public_access
 	>
-		rttr::registration::bind<rttr::detail::meth, Class_Type, F, acc_level> Method(rttr::string_view name, F f, acc_level level = acc_level())
+	rttr::registration::bind<rttr::detail::meth, Class_Type, F, acc_level> Method(rttr::string_view name, F f, acc_level level = acc_level())
 	{
-		return _class.method(name, f, level);
+		return _class.method<F,acc_level>(name, f, level);
 	}
 
 	template<typename Enum_Type>
 	rttr::registration::bind<rttr::detail::enum_, Class_Type, Enum_Type> Enumeration(rttr::string_view name)
 	{
-		return _class.enumeration(name);
+		return _class.enumeration<Enum_Type>(name);
 	}
 
-private:
+protected:
 	rttr::registration::class_<Class_Type>& _class;
 };
 

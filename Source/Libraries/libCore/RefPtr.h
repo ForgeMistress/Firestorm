@@ -376,6 +376,7 @@ struct wrapper_mapper<Elf::RefPtr<T>>
 		}
 	}
 };
+
 CLOSE_NAMESPACE(rttr);
 
 #endif
