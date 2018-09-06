@@ -28,7 +28,7 @@ configureUnitTest("libMirror")
 
 includedirs({
     "ThirdParty",
-    "ThirdParty/rttr/src",
+    "ThirdParty/rttr/src"
 })
 
 addDependencies({
@@ -36,5 +36,5 @@ addDependencies({
     "libMath"
 })
 
-links({ "rttr" })
+links({ "rttr", "jsoncpp" })
 

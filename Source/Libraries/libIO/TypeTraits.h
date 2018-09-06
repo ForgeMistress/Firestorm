@@ -26,14 +26,6 @@ struct TraitsErrors
 	};
 };
 
-struct TraitsDocs
-{
-	static const char* SCHEMA_KEY;
-	static const char* DATA_KEY;
-	static const char* OBJECT_TYPE_KEY;
-	static const char* OBJECT_DATA_KEY;
-};
-
 template <class T>
 struct TypeTraits
 {

@@ -16,38 +16,119 @@
 #include <libIO/File.h>
 #include <libIO/IDocument.h>
 
-#define DEFINE_POD_SERIAL_TRAITS(TYPE, FUNCTYPE)                                                               \
-Result<void, Error> SerialTraits<TYPE>::Write(const char* key, RefPtr<IDocument> writer, const TYPE& input) \
+//#define DEFINE_POD_SERIAL_TRAITS(TYPE, FUNCTYPE)                                                               \
+Result<void, Error> SerialTraits<TYPE>::Write(const char* key, Json::Value& writer, const TYPE& input) \
 {																											   \
-	Result<void, Error> rc = writer->Write##FUNCTYPE(key, input);											   \
-	if (!rc.has_value()) {																					   \
-		return ELF_ERROR(SerialResults::WRITE_ERROR, rc.error().Message);									   \
-	}																										   \
+	writer[key] = input;\
 	return Result<void, Error>();																			   \
 }																											   \
-Result<void, Error> SerialTraits<TYPE>::Read(const char* key, RefPtr<IDocument> reader, TYPE& output)	   \
-{																											   \
-	return reader->Read##FUNCTYPE(key, output);																   \
+Result<void, Error> SerialTraits<TYPE>::Read(const char* key, const Json::Value& reader, TYPE& output)	   \
+{																											   \	
+	//rttr::type t = rttr::type::get<TYPE>();\
+	if(t.is_valid())\
+	{\
+		rttr::property\
+	}\
 }
 
 OPEN_NAMESPACE(Elf);
+
+
+/**
+	Convert a Json::Value to an rttr::variant.
+ **/
+rttr::variant Convert(const Json::Value& value)
+{
+	switch(value.type())
+	{
+	case Json::nullValue:
+		return rttr::variant();
+	case Json::intValue:
+		return rttr::variant(value.asInt());
+	case Json::uintValue:
+		return rttr::variant(value.asUInt());
+	case Json::realValue:
+		return rttr::variant(value.asDouble());
+	case Json::stringValue:
+		return rttr::variant(value.asString());
+	case Json::booleanValue:
+		return rttr::variant(value.asBool());
+	}
+	throw std::exception("could not convert Json::Value to rttr::variant");
+	return rttr::variant();
+}
+
+/**
+	Convert an rttr::variant to a Json::Value.
+ **/
+Json::Value Convert(const rttr::variant& var)
+{
+	using namespace rttr;
+	type t = var.get_type();
+	if(t.is_arithmetic())
+	{
+		if(t == type::get<bool>())
+			return Json::Value(var.to_bool());
+		else if(t == type::get<char>())
+			return Json::Value(var.to_bool());
+		else if(t == type::get<int8_t>())
+			return Json::Value(var.to_int8());
+		else if(t == type::get<int16_t>())
+			return Json::Value(var.to_int16());
+		else if(t == type::get<int32_t>())
+			return Json::Value(var.to_int32());
+		else if(t == type::get<int64_t>())
+			return Json::Value(var.to_int64());
+		else if(t == type::get<uint8_t>())
+			return Json::Value(var.to_uint8());
+		else if(t == type::get<uint16_t>())
+			return Json::Value(var.to_uint16());
+		else if(t == type::get<uint32_t>())
+			return Json::Value(var.to_uint32());
+		else if(t == type::get<uint64_t>())
+			return Json::Value(var.to_uint64());
+		else if(t == type::get<float>())
+			return Json::Value(var.to_double());
+		else if(t == type::get<double>())
+			return Json::Value(var.to_double());
+	}
+	else if(t == type::get<String>())
+	{
+		return Json::Value(var.to_string());
+	}
+	throw std::exception("could not convert rttr::variant to Json::Value");
+	return Json::Value::nullSingleton();
+}
+
+
 OPEN_NAMESPACE(Mirror);
 
 template <class T>
-inline Result<RefPtr<IDocument>, Error> SerialTraits<T>::Write(const char* key, RefPtr<IDocument> writer, const T& input)
+inline Result<void, Error> SerialTraits<T>::Write(const char* key, Json::Value& writer, const T& input)
 {
 	static_assert(false, "Default SerialTraits has not been implemented.");
-	return error(SerialResults::NOT_IMPLEMENTED, "Default SerialTraits has not been implemented.");
+	return ELF_ERROR(SerialResults::NOT_IMPLEMENTED, "Default SerialTraits has not been implemented.");
 }
 
 template <class T>
-inline Result<T, Error> SerialTraits<T>::Read(const char* key, RefPtr<IDocument> reader, T& output)
+inline Result<void, Error> SerialTraits<T>::Read(const char* key, const Json::Value& reader, T& output)
 {
 	static_assert(false, "Default SerialTraits has not been implemented.");
-	return error(SerialResults::NOT_IMPLEMENTED, "Default SerialTraits has not been implemented.");
+	return ELF_ERROR(SerialResults::NOT_IMPLEMENTED, "Default SerialTraits has not been implemented.");
 }
 
-DEFINE_POD_SERIAL_TRAITS(int8_t,   Int8);
+Result<void, Error> SerialTraits<int8_t>::Write(const char* key, Json::Value& output, const int8_t& input)
+{																										
+	output[key] = input;
+	return Result<void, Error>();																			
+}																										
+Result<void, Error> SerialTraits<int8_t>::Read(const char* key, const Json::Value& input, int8_t& output)
+{													
+	output = input[key].asInt();
+	return Result<void, Error>();
+}
+
+/*DEFINE_POD_SERIAL_TRAITS(int8_t,   Int8);
 DEFINE_POD_SERIAL_TRAITS(uint8_t,  UInt8);
 DEFINE_POD_SERIAL_TRAITS(int16_t,  Int16);
 DEFINE_POD_SERIAL_TRAITS(uint16_t, UInt16);
@@ -57,35 +138,21 @@ DEFINE_POD_SERIAL_TRAITS(float,    Float);
 DEFINE_POD_SERIAL_TRAITS(double,   Double);
 DEFINE_POD_SERIAL_TRAITS(String,   String);
 
-/*
-std::string testStringValue("testing value!");
-std::shared_ptr<TestObjectWithFields> test = std::make_shared<TestObjectWithFields>();
-test->testString = testStringValue;
-
-instance objInstance(test);
-Elf::Mirror::Type testType = test->GetType();
-
-property testStringProperty = testType.get_property("testString");
-variant extractedValueVariant = testStringProperty.get_value(objInstance);
-
-t.Assert(extractedValueVariant.get_value<std::string>() == testStringValue, "testStringValue != extractedValueVariant");
-*/
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits<Object*>
-Result<void, Error> SerialTraits<Object*>::Write(const char* key, RefPtr<IDocument> writer, const T& input)
+Result<void, Error> SerialTraits<Object*>::Write(const char* key, Json::Value& output, const T& input)
 {
-	return SerialTraits<const Object*>::Write(key, writer, input);
+	return SerialTraits<const Object*>::Write(key, output, input);
 }
 
-Result<void, Error> SerialTraits<Object*>::Read(const char* key, RefPtr<IDocument> reader, T& output)
+Result<void, Error> SerialTraits<Object*>::Read(const char* key, const Json::Value& input, T& output)
 {
 	return Result<void,Error>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits<const Object*>
-Result<void, Error> SerialTraits<const Object*>::Write(const char* key, RefPtr<IDocument> writer, const T& input)
+Result<void, Error> SerialTraits<const Object*>::Write(const char* key, Json::Value& output, const T& input)
 {
 	using namespace rttr;
 	//Mirror::Type objType = input->get_type();
@@ -115,8 +182,8 @@ Result<void, Error> SerialTraits<const Object*>::Write(const char* key, RefPtr<I
 	}
 	return Result::OK;
 }*/
-
-Result<void,Error> SerialTraits<const Object*>::Read(const char* key, RefPtr<IDocument> reader, T& input)
+/*
+Result<void,Error> SerialTraits<const Object*>::Read(const char* key, const Json::Value& output, T& input)
 {
 	assert(false && "const Object* is Write-Only.");
 	return ELF_ERROR(SerialResults::INPUT_NOT_VALID, "input is not valid for this operation");
@@ -135,19 +202,19 @@ Result<void,Error> SerialTraits<const Object*>::Read(const char* key, RefPtr<IDo
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits< SharedPtr<Object> >
-Result<void,Error> SerialTraits<RefPtr<Object>>::Write(const char* key, RefPtr<IDocument> writer, const RefPtr<Object>& input)
+Result<void,Error> SerialTraits<RefPtr<Object>>::Write(const char* key, Json::Value& output, const RefPtr<Object>& input)
 {
 	Mirror::Type objType = input->GetType();
 
 	assert(objType.is_valid());
-
+	*/
 	/*_onfailedreturn(SharedPtr<IDocumentWriter>, writer->WriteSubsection(key));
 	_onfailedreturn(SharedPtr<IDocumentWriter>, writer->EnterSubsection(key));
 	_onfailedreturn(SharedPtr<IDocumentWriter>, writer->WriteString(_classtypekey, objType.get_name().to_string()));
 	_onfailedreturn(SharedPtr<IDocumentWriter>, writer->WriteSubsection(_classdatakey));
 	_onfailedreturn(SharedPtr<IDocumentWriter>, writer->EnterSubsection(_classdatakey));*/
-	using namespace std::placeholders;
-	auto r = writer->WriteSubsection(key);
+//sing namespace std::placeholders;
+	//auto r = writer->WriteSubsection(key);
 		/*.and_then(std::bind(&IDocumentWriter::EnterSubsection, _1, key))
 			.map_error([=](const Error& err) {
 				throw std::exception(err.Message.c_str());
@@ -166,7 +233,7 @@ Result<void,Error> SerialTraits<RefPtr<Object>>::Write(const char* key, RefPtr<I
 			})
 		;*/
 
-	if(r.has_value())
+	/*if(r.has_value())
 	{
 		rttr::instance inputInstance(input);
 
@@ -188,19 +255,20 @@ Result<void,Error> SerialTraits<RefPtr<Object>>::Write(const char* key, RefPtr<I
 
 		writer->LeaveSubsection();
 		writer->LeaveSubsection();
-	}
+	}*/
 	//_onfailedreturn(writer->LeaveSubsection()); // _classdatakey
 	//_onfailedreturn(writer->LeaveSubsection()); // key
+	/*
 
 	return Result<void,Error>();
 }
 
-Result<void,Error> SerialTraits< RefPtr<Object> >::Read(const char* key, RefPtr<IDocument> reader, RefPtr<Object>& output)
+Result<void,Error> SerialTraits< RefPtr<Object> >::Read(const char* key, const Json::Value& reader, RefPtr<Object>& output)
 {
 	Mirror::Type objType = output->GetType();
 
 	assert(objType.is_valid());
-
+	*/
 	//String outputClassType;
 	/*_onfailedreturn(reader->FindSubsection(key));
 	_onfailedreturn(reader->EnterSubsection(key));
@@ -222,14 +290,14 @@ Result<void,Error> SerialTraits< RefPtr<Object> >::Read(const char* key, RefPtr<
 			
 		}
 	}*/
-
+/*
 	return Result<void,Error>();
 }
 
 #define _writeiftype(ty) if(input.is_type<ty>()) { return SerialTraits<ty>::Write(key, writer, input.get_value<ty>()); }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SerialTraits<rttr::variant>
-Result<void,Error> SerialTraits<rttr::variant>::Write(const char* key, RefPtr<IDocument> writer, const rttr::variant& input)
+Result<void,Error> SerialTraits<rttr::variant>::Write(const char* key, Json::Value& output, const rttr::variant& input)
 {
 	if(!input.is_valid()) { 
 		return ELF_ERROR(SerialResults::VARIANT_NOT_VALID, "variant " + String(key) + " is not valid");
@@ -245,14 +313,14 @@ Result<void,Error> SerialTraits<rttr::variant>::Write(const char* key, RefPtr<ID
 	_writeiftype(String);
 	_writeiftype(Object*);
 	_writeiftype(SharedPtr<Object>);*/
-	return Result<void, Error>();
+	/*return Result<void, Error>();
 }
 #undef _writeiftype
 
-Result<void, Error> SerialTraits<rttr::variant>::Read(const char* key, RefPtr<IDocument> reader, rttr::variant& output)
+Result<void, Error> SerialTraits<rttr::variant>::Read(const char* key, const Json::Value& input, rttr::variant& output)
 {
 	return Result<void,Error>();
-}
+}*/
 
 CLOSE_NAMESPACE(Mirror);
 CLOSE_NAMESPACE(Elf);

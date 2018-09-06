@@ -89,6 +89,25 @@ void Engine::Update(double deltaT)
 	}
 }
 
+bool Engine::AddSystem(const String& system)
+{
+	Mirror::Type systemType = Mirror::Type::get_by_name(system);
+	if(systemType.is_valid())
+	{
+		Mirror::Instance instance = systemType.create();
+		if(instance.is_valid())
+		{
+			return AddSystem(instance.try_convert<System>());
+		}
+	}
+	return false;
+}
+
+bool Engine::RemoveSystem(const String& system)
+{
+
+}
+
 bool Engine::AddSystem(const RefPtr<System>& system)
 {
 	if(std::find(m_systemsToAdd.begin(), m_systemsToAdd.end(), system) == m_systemsToAdd.end())

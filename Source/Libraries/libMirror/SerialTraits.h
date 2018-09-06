@@ -13,14 +13,15 @@
 #pragma once
 
 #include <libCore/Result.h>
+#include <json/value.h>
 
 #define DECLARE_POD_SERIAL_TRAITS(OBJ_T) \
 	template<> \
 	class SerialTraits<OBJ_T> \
 	{ \
 	public: \
-		static Result<void, Error> Write(const char* key, RefPtr<IDocument> writer, const OBJ_T& input); \
-		static Result<void, Error> Read(const char* key, RefPtr<IDocument> reader, OBJ_T& output); \
+		static Result<void, Error> Write(const char* key, Json::Value& output, const OBJ_T& input); \
+		static Result<void, Error> Read(const char* key, const Json::Value& input, OBJ_T& output); \
 	}
 
 #define DECLARE_OBJ_SERIAL_TRAITS(OBJ_T) \
@@ -28,13 +29,23 @@
 	struct SerialTraits< OBJ_T > \
 	{ \
 		typedef OBJ_T T; \
-		static Result<void, Error> Write(const char* key, RefPtr<IDocument> writer, const T& input); \
-		static Result<void, Error> Read(const char* key, RefPtr<IDocument> reader, T& output); \
+		static Result<void, Error> Write(const char* key, Json::Value& output, const T& input); \
+		static Result<void, Error> Read(const char* key, const Json::Value& input, T& output); \
 	}
 
 OPEN_NAMESPACE(Elf);
 
 class IDocument;
+
+/**
+	Convert a Json::Value to an rttr::variant.
+ **/
+extern rttr::variant Convert(const Json::Value& value);
+
+/**
+	Convert an rttr::variant to a Json::Value.
+ **/
+extern Json::Value Convert(const rttr::variant& value);
 
 OPEN_NAMESPACE(Mirror);
 
@@ -59,8 +70,8 @@ struct SerialResults
 template <class T>
 struct SerialTraits
 {
-	static Result<RefPtr<IDocument>, Error> Write(const char* key, RefPtr<IDocument> writer, const T& input);
-	static Result<T, Error> Read(const char* key, RefPtr<IDocument> reader, T& output);
+	static Result<void, Error> Write(const char* key, Json::Value& output, const T& input);
+	static Result<void, Error> Read(const char* key, const Json::Value& input, T& output);
 };
 
 DECLARE_POD_SERIAL_TRAITS(int8_t);

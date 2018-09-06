@@ -40,6 +40,9 @@ public:
 
 	void Update(double deltaT);
 
+	bool AddSystem(const String& system);
+	bool RemoveSystem(const String& system);
+
 	bool AddSystem(const RefPtr<System>& system);
 	bool RemoveSystem(const RefPtr<System>& system);
 

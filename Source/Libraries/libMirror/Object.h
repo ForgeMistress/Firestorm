@@ -196,6 +196,11 @@ protected:
 typedef rttr::type Type;
 
 /**
+	Typedef for rttr::instance. Use this instead of rttr::instance.
+ **/
+typedef rttr::instance Instance;
+
+/**
 	Typedef for rttr::variant. Use this instead of rttr::variant.
  **/
 typedef rttr::variant Variant;
