@@ -11,11 +11,11 @@
 #include "Entity.h"
 #include "Component.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ELF_MIRROR_DEFINE(Elf::Entity)
+FIRE_MIRROR_DEFINE(Firestorm::Entity)
 {
 	_class.property("name",       &Entity::_name);
 	_class.property("components", &Entity::_components);
@@ -51,4 +51,4 @@ void* Entity::DoInspect(Mirror::Type type)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

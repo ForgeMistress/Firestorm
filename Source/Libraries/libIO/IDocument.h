@@ -13,7 +13,7 @@
 
 #include <libCore/Result.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 OPEN_NAMESPACE(Mirror);
 class Object;
@@ -21,7 +21,7 @@ CLOSE_NAMESPACE(Mirror);
 
 class IDocument
 {
-	ELF_MIRROR_DECLARE(IDocument);
+	FIRE_MIRROR_DECLARE(IDocument);
 public:
 	virtual ~IDocument() {}
 
@@ -87,6 +87,6 @@ public:
 	static rttr::detail::metadata MakerFunctionData()  { return rttr::metadata(MAKER_FUNCTION_DATA, true); }
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

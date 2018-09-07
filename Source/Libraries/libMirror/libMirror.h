@@ -2,7 +2,7 @@
 #define LIBMIRROR_H_
 #pragma once
 
-namespace Elf
+namespace Firestorm
 {
 	struct libMirror
 	{

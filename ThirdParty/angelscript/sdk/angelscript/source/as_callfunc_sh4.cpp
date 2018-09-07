@@ -259,7 +259,7 @@ asDWORD GetReturnedFloat()
 	return f;
 }
 
-// sizeof(double) == 4 with sh-elf-gcc (3.4.0) -m4
+// sizeof(double) == 4 with sh-Firestorm-gcc (3.4.0) -m4
 // so this isn't really used...
 asQWORD GetReturnedDouble()
 {

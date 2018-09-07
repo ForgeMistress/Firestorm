@@ -9,8 +9,14 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "EventDispatcher.h"
+#include <cstdio>
+#include <iostream>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
+
+FIRE_MIRROR_DEFINE(IEvent)
+{
+}
 
 EDReceipt::EDReceipt(EventDispatcher* dispatcher, IEvent* event)
 : _dispatcher(dispatcher)
@@ -62,12 +68,12 @@ size_t EventDispatcher::GetNumRegisteredReceipts()
 
 void EventDispatcher::Unregister(IEvent* event)
 {
-	if (event)
+	if(event)
 	{
-		auto found = _events.find(event->GetName());
-		if (found != _events.end())
+		EventMap::iterator found = _events.find(event->GetEventType());
+		if(found != _events.end())
 		{
-			if (std::find(found->second.begin(), found->second.end(), event) != found->second.end())
+			if(std::find(found->second.begin(), found->second.end(), event) != found->second.end())
 			{
 				found->second.remove(event);
 				_numRegisteredEvents--;
@@ -77,7 +83,7 @@ void EventDispatcher::Unregister(IEvent* event)
 			return r->_event == event;
 		});
 	}
-	ELF_ASSERT(_numRegisteredEvents == _receipts.size());
+	FIRE_ASSERT(_numRegisteredEvents == _receipts.size() && "the number of registered events and known receipts do not match");
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

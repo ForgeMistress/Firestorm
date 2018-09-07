@@ -14,12 +14,12 @@
 #include <libIO/IDocument.h>
 #include <json/value.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class JSONDocument : public Mirror::Object,
                      public IDocument
 {
-	ELF_MIRROR_DECLARE(JSONDocument, Mirror::Object, IDocument);
+	FIRE_MIRROR_DECLARE(JSONDocument, Mirror::Object, IDocument);
 public:
 	JSONDocument();
 	explicit JSONDocument(const Vector<char>& data);
@@ -101,6 +101,6 @@ private:
 	String m_foundSubsection; // If FindSection is called, then this will be filled if it's found.
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

@@ -2,7 +2,7 @@
 #include "libJson.h"
 #include "JSONDocument.h"
 
-void Elf::libJson::Initialize(int ac, char** av)
+void Firestorm::libJson::Initialize(int ac, char** av)
 {
-	ELF_MIRROR_REGISTER(JSONDocument);
+	FIRE_MIRROR_REGISTER(JSONDocument);
 }

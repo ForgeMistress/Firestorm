@@ -12,5 +12,3 @@ configureEngineLib("libHarnessed")
 addDependencies({
     "libCore"
 })
-
-configureUnitTest("libHarnessed")

@@ -11,12 +11,12 @@
 #include "TypeTraits.h"
 #include "IDocument.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
-/*const char* TraitsDocs::SCHEMA_KEY = "__ELF_SCHEMA__";
-const char* TraitsDocs::DATA_KEY = "__ELF_DATA__";
-const char* TraitsDocs::OBJECT_TYPE_KEY = "__ELF_OBJECT_TYPE__";
-const char* TraitsDocs::OBJECT_DATA_KEY = "__ELF_OBJECT_DATA__";
+/*const char* TraitsDocs::SCHEMA_KEY = "__FIRE_SCHEMA__";
+const char* TraitsDocs::DATA_KEY = "__FIRE_DATA__";
+const char* TraitsDocs::OBJECT_TYPE_KEY = "__FIRE_OBJECT_TYPE__";
+const char* TraitsDocs::OBJECT_DATA_KEY = "__FIRE_OBJECT_DATA__";
 
 template <class T>
 const char* TypeTraits<T>::GetAbbreviation()
@@ -61,12 +61,12 @@ const Mirror::Type TypeTraits<void>::GetMirrorType()
 
 Result<void, Error> TypeTraits<void>::ReadFromDocument(IDocument*, const String&, void*)
 {
-	return ELF_ERROR(TraitsErrors::READ_ERROR, "could not read 'void' type from document.");
+	return FIRE_ERROR(TraitsErrors::READ_ERROR, "could not read 'void' type from document.");
 }
 
 Result<void, Error> TypeTraits<void>::WriteToDocument(IDocument*, const String&, void*)
 {
-	return ELF_ERROR(TraitsErrors::WRITE_ERROR, "could not write 'void' type to document.");
+	return FIRE_ERROR(TraitsErrors::WRITE_ERROR, "could not write 'void' type to document.");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ Result<void, Error> TypeTraits<TEMPLATE_TYPE>::ReadFromDocument(IDocument* reade
 	{																											               \
 		return Result<void, Error>();																			               \
 	}																											               \
-	return ELF_ERROR(TraitsErrors::READ_ERROR, "could not read int8_t from document with key '" + key + "'");	               \
+	return FIRE_ERROR(TraitsErrors::READ_ERROR, "could not read int8_t from document with key '" + key + "'");	               \
 }																												               \
 Result<void, Error> TypeTraits<TEMPLATE_TYPE>::WriteToDocument(IDocument* writer, const String& key, TEMPLATE_TYPE value)      \
 {																												               \
@@ -104,7 +104,7 @@ Result<void, Error> TypeTraits<TEMPLATE_TYPE>::WriteToDocument(IDocument* writer
 	{																											               \
 		return Result<void, Error>();																			               \
 	}																											               \
-	return ELF_ERROR(TraitsErrors::WRITE_ERROR, "could not write 'int8_t' to document with key '" + key + "'");	               \
+	return FIRE_ERROR(TraitsErrors::WRITE_ERROR, "could not write 'int8_t' to document with key '" + key + "'");	               \
 }
 
 TRAITS_IMPL(int8_t, "i8", Int8)
@@ -280,7 +280,7 @@ void TypeTraits<Mirror::Object*>::RecursiveWrite(IDocument* writer, const String
 
 	writer->WriteSubsection(key.c_str());
 	writer->EnterSubsection();
-	writer->WriteString("__ELF_OBJECT_TYPE__", value->MyType().get_name().to_string());
+	writer->WriteString("__FIRE_OBJECT_TYPE__", value->MyType().get_name().to_string());
 
 	Mirror::Type objType = value->MyType();
 	array_range<property> props =
@@ -322,4 +322,4 @@ Result<void, Error> TypeTraits<Mirror::Object*>::WriteToDocument(IDocument* writ
 	return Result<void, Error>();
 }*/
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

@@ -24,3 +24,8 @@ files({
     "ThirdParty/json/**.cpp"
 })
 
+filter("action:vs*")
+    disablewarnings({
+        "4005"
+    })
+clearFilters()

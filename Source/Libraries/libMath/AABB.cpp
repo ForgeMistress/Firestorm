@@ -10,9 +10,9 @@
 #include "stdafx.h"
 #include "AABB.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
-/*ELF_MIRROR_DEFINE(AABB_2D)
+/*FIRE_MIRROR_DEFINE(AABB_2D)
 {
 	Property("t", &AABB_2D::_top);
 	Property("l", &AABB_2D::_left);
@@ -74,4 +74,4 @@ bool Intersects(const AABB_3D& lhs, const AABB_3D& rhs)
 
 CLOSE_NAMESPACE(Math);
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

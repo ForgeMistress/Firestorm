@@ -11,7 +11,7 @@
 #define LIBIO_FILE_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class FileIOMgr;
 
@@ -169,6 +169,6 @@ private:
 	std::unique_ptr<Impl> m_impl;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

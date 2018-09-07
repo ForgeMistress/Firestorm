@@ -11,7 +11,7 @@
 #define LIBHARNESSED_TESTCASE_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class TestCase
 {
@@ -45,5 +45,5 @@ private:
 	Vector<String> m_failures;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

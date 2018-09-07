@@ -2,7 +2,7 @@
 #define LIBJSON_H_
 #pragma once
 
-namespace Elf
+namespace Firestorm
 {
 	struct libJson
 	{

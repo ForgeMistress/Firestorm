@@ -10,6 +10,6 @@
 #include "stdafx.h"
 #include "Result.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

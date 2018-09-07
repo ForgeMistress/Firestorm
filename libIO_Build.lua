@@ -15,11 +15,3 @@ addDependencies({
     "libJson"
 })
 links({"physfs"})
-
-configureUnitTest("libIO")
-addDependencies({
-    "libCore",
-    "libMirror",
-    "libJson"
-})
-links({"physfs"})

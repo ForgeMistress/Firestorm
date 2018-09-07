@@ -11,7 +11,7 @@
 #define LIBIO_TYPETRAITS_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 /*class IDocument;
 
@@ -205,6 +205,6 @@ struct TypeAbbreviations {
 	}
 };*/
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

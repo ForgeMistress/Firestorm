@@ -14,7 +14,7 @@
 #include <libCore/RefPtr.h>
 #include <libMirror/IInspectableObject.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class Entity;
 
@@ -27,7 +27,7 @@ class Entity;
 class Component : public Mirror::Object,
                   public Mirror::IInspectableObject
 {
-	ELF_MIRROR_DECLARE(Component, Mirror::Object, Mirror::IInspectableObject);
+	FIRE_MIRROR_DECLARE(Component, Mirror::Object, Mirror::IInspectableObject);
 public:
 	Component();
 	virtual ~Component();
@@ -58,5 +58,5 @@ private:
 	WeakPtr<Entity> m_entity;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

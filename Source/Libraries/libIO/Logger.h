@@ -13,7 +13,7 @@
 
 #include <iostream>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 
 class Logger
@@ -52,23 +52,23 @@ void Logger::DoWrite(T& arg, Args... args)
 	DoWrite(args...);
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
-#define ELF_LOG(OUTPUT, ...) ::Elf::Logger::##OUTPUT##_LOGGER.Write(__VA_ARGS__)
-
-/**
-	Log to the default std::cout ostream.
- **/
-#define ELF_LOG_DEBUG(...) ELF_LOG(DEBUG, __VA_ARGS__)
+#define FIRE_LOG(OUTPUT, ...) ::Firestorm::Logger::##OUTPUT##_LOGGER.Write(__VA_ARGS__)
 
 /**
 	Log to the default std::cout ostream.
  **/
-#define ELF_LOG_WARNING(...) ELF_LOG(WARNING, __VA_ARGS__)
+#define FIRE_LOG_DEBUG(...) FIRE_LOG(DEBUG, __VA_ARGS__)
+
+/**
+	Log to the default std::cout ostream.
+ **/
+#define FIRE_LOG_WARNING(...) FIRE_LOG(WARNING, __VA_ARGS__)
 
 /**
 	Log to the default std::cerr ostream.
  **/
-#define ELF_LOG_ERROR(...) ELF_LOG(ERROR, __VA_ARGS__)
+#define FIRE_LOG_ERROR(...) FIRE_LOG(ERROR, __VA_ARGS__)
 
 #endif

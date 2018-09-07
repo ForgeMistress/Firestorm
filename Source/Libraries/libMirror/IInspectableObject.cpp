@@ -10,12 +10,12 @@
 #include "stdafx.h"
 #include "IInspectableObject.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 OPEN_NAMESPACE(Mirror);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ELF_MIRROR_DEFINE(Elf::Mirror::IInspectableObject)
+FIRE_MIRROR_DEFINE(Firestorm::Mirror::IInspectableObject)
 {
 }
 
@@ -40,4 +40,4 @@ void* IInspectableObject::DoInspect(Type type)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CLOSE_NAMESPACE(Mirror);
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

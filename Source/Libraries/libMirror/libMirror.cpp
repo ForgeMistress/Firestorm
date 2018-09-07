@@ -2,7 +2,7 @@
 #include "libMirror.h"
 #include "Object.h"
 
-void Elf::libMirror::Initialize(int ac, char** av)
+void Firestorm::libMirror::Initialize(int ac, char** av)
 {
-	ELF_MIRROR_REGISTER(Elf::Mirror::Object);
+	FIRE_MIRROR_REGISTER(Firestorm::Mirror::Object);
 }

@@ -11,7 +11,7 @@
 #define LIBSCRIPT_SCRIPTCOMPONENT_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class Entity;
 
@@ -22,7 +22,7 @@ class Entity;
 **/
 class ScriptComponent : public Component
 {
-	ELF_MIRROR_DECLARE(ScriptComponent, Component);
+	FIRE_MIRROR_DECLARE(ScriptComponent, Component);
 public:
 	ScriptComponent();
 	virtual ~ScriptComponent();
@@ -33,5 +33,5 @@ protected:
 	virtual void* DoInspect(Mirror::Type type);
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

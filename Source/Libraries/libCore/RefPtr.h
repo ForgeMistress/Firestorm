@@ -17,7 +17,7 @@
 
 #include <rttr/wrapper_mapper.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class RefCount
 {
@@ -174,13 +174,13 @@ public:
 
 	uint32_t GetCount() const
 	{
-		ELF_ASSERT(_count);
+		FIRE_ASSERT(_count);
 		return _count->_strongCount;
 	}
 
 	uint32_t GetWeakCount() const
 	{
-		ELF_ASSERT(_count);
+		FIRE_ASSERT(_count);
 		return _count->_weakCount;
 	}
 
@@ -189,7 +189,7 @@ private:
 	: _object(static_cast<T*>(refCount->_object))
 	, _count(refCount)
 	{
-		ELF_ASSERT(_count);
+		FIRE_ASSERT(_count);
 		++_count->_strongCount;
 	}
 
@@ -229,14 +229,14 @@ public:
 	WeakPtr(const RefPtr<T>& ptr)
 	: _count(ptr._count)
 	{
-		ELF_ASSERT(_count);
+		FIRE_ASSERT(_count);
 		++_count->_weakCount;
 	}
 
 	WeakPtr(const WeakPtr<T>& ptr)
 	: _count(ptr._count)
 	{
-		ELF_ASSERT(_count);
+		FIRE_ASSERT(_count);
 		++_count->_weakCount;
 	}
 
@@ -244,7 +244,7 @@ public:
 	WeakPtr(const RefPtr<Subclass_t>& ptr)
 	: _count(ptr._count)
 	{
-		ELF_ASSERT(_count);
+		FIRE_ASSERT(_count);
 		static_assert(std::is_base_of<T, Subclass_t>::value, 
 			"the pointer passed to the casting constructor must be a subclass of the type held by the WeakPtr");
 		++_count->_weakCount;
@@ -303,7 +303,7 @@ public:
 
 		// increment the weak ref count of the new control block.
 		_count = ptr._count;
-		ELF_ASSERT(_count);
+		FIRE_ASSERT(_count);
 		++_count->_weakCount;
 		return *this;
 	}
@@ -323,7 +323,7 @@ public:
 
 		// increment the weak ref count of the new control block.
 		_count = obj._count;
-		ELF_ASSERT(_count);
+		FIRE_ASSERT(_count);
 		++_count->_weakCount;
 		return *this; 
 	}
@@ -341,15 +341,15 @@ private:
 	RefCount* _count;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 OPEN_NAMESPACE(rttr);
 
 template<typename T>
-struct wrapper_mapper<Elf::RefPtr<T>>
+struct wrapper_mapper<Firestorm::RefPtr<T>>
 {
-	using wrapped_type = decltype(Elf::RefPtr<T>().Get());
-	using type = Elf::RefPtr<T>;
+	using wrapped_type = decltype(Firestorm::RefPtr<T>().Get());
+	using type = Firestorm::RefPtr<T>;
 
 	static RTTR_INLINE wrapped_type get(const type& obj)
 	{
@@ -362,17 +362,17 @@ struct wrapper_mapper<Elf::RefPtr<T>>
 	}
 
 	template<typename U>
-	static Elf::RefPtr<U> convert(const type& source, bool& ok)
+	static Firestorm::RefPtr<U> convert(const type& source, bool& ok)
 	{
-		if(auto p = rttr_cast<typename Elf::RefPtr<U>::element_type*>(source.Get()))
+		if(auto p = rttr_cast<typename Firestorm::RefPtr<U>::element_type*>(source.Get()))
 		{
 			ok = true;
-			return Elf::RefPtr<U>(p);
+			return Firestorm::RefPtr<U>(p);
 		}
 		else
 		{
 			ok = false;
-			return Elf::RefPtr<U>(nullptr);
+			return Firestorm::RefPtr<U>(nullptr);
 		}
 	}
 };

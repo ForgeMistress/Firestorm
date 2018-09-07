@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "Vector.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 Vector_2D::Vector_2D(float x, float y)
 : x(x)
@@ -42,4 +42,4 @@ OPEN_NAMESPACE(Math);
 
 CLOSE_NAMESPACE(Math);
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

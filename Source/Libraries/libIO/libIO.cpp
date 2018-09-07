@@ -3,7 +3,7 @@
 
 #include <physfs/physfs.h>
 
-void Elf::libIO::Initialize(int ac, char** av)
+void Firestorm::libIO::Initialize(int ac, char** av)
 {
 	PHYSFS_init(av[0]);
 }

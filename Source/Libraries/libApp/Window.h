@@ -13,7 +13,7 @@
 
 #include <libMath/Vector.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class Window final
 {
@@ -82,6 +82,6 @@ private:
 	std::unique_ptr<Impl> _impl;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

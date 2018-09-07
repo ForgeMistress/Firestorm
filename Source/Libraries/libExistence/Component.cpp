@@ -10,9 +10,9 @@
 #include "stdafx.h"
 #include "Component.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
-ELF_MIRROR_DEFINE(Elf::Component)
+FIRE_MIRROR_DEFINE(Firestorm::Component)
 {
 	Property("name", &Component::GetName, &Component::SetName);
 }
@@ -52,4 +52,4 @@ void* Component::DoInspect(Mirror::Type type)
 }
 
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

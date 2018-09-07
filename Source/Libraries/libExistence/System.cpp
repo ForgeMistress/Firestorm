@@ -9,12 +9,32 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "System.h"
+#include "Engine.h"
 
 #include <libMirror/Object.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
-ELF_MIRROR_DEFINE(Elf::System)
+FIRE_MIRROR_DEFINE(SystemEvent)
+{
+}
+
+SystemEvent::SystemEvent(SystemEvent::Type type, WeakPtr<Engine> engine)
+: type(type)
+, engine(engine)
+, entity(nullptr)
+{
+
+}
+SystemEvent::SystemEvent(Type type, WeakPtr<Entity> entity)
+: type(type)
+, engine(nullptr)
+, entity(entity)
+{
+
+}
+
+FIRE_MIRROR_DEFINE(Firestorm::System)
 {
 	Property("name", &System::GetName, &System::SetName)
 	(
@@ -23,17 +43,17 @@ ELF_MIRROR_DEFINE(Elf::System)
 }
 
 System::System()
-: m_modified(false)
-, m_active(false)
-, m_paused(false)
+: _modified(false)
+, _active(false)
+, _paused(false)
 {
 }
 
 // protected
 System::~System()
 {
-	m_engine = nullptr;
-	m_entities.clear();
+	_engine = nullptr;
+	_entities.clear();
 }
 
 bool System::Filter(const WeakPtr<Entity>& entity) const
@@ -47,33 +67,33 @@ bool System::Filter(const WeakPtr<Entity>& entity) const
 
 const Engine* System::GetEngine() const
 {
-	return m_engine;
+	return _engine;
 }
 
 const String& System::GetName() const
 {
-	return m_name;
+	return _name;
 }
 
 void System::SetName(const String& name)
 {
-	m_name = name;
+	_name = name;
 }
 
 bool System::Contains(const WeakPtr<Entity>& entity) const
 {
 	if(entity)
 	{
-		return std::find_if(m_entities.begin(), m_entities.end(), [&entity](const WeakPtr<Entity>& e) {
+		return std::find_if(_entities.begin(), _entities.end(), [&entity](const WeakPtr<Entity>& e) {
 			return e.Lock().Get() == entity.Lock().Get();
-		}) != m_entities.end();
+		}) != _entities.end();
 	}
 	return false;
 }
 
 void System::Pause()
 {
-	m_paused = true;
+	_paused = true;
 }
 
 bool System::AddEntity(WeakPtr<Entity>& entity)
@@ -82,7 +102,7 @@ bool System::AddEntity(WeakPtr<Entity>& entity)
 	{
 		if(OnEntityFilter(entity))
 		{
-			m_entities.push_back(entity);
+			_entities.push_back(entity);
 			return true;
 		}
 	}
@@ -97,17 +117,21 @@ void* System::DoInspect(Mirror::Type type)
 
 void System::AddToEngine(Engine* engine)
 {
-	if(m_engine == nullptr)
+	if(_engine == nullptr)
 	{
-		m_engine = engine;
+		_engine = engine;
+		Dispatcher.Dispatch(SystemEvent {
+			SystemEvent::kEvent_OnAddedToEngine,
+			WeakPtr<Engine>(engine)
+		});
 		OnAddToEngine();
 	}
 }
 
 void System::Reset()
 {
-	m_engine = nullptr;
-	m_entities.clear();
+	_engine = nullptr;
+	_entities.clear();
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

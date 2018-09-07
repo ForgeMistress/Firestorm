@@ -10,8 +10,8 @@
 #include "stdafx.h"
 #include "IResourceObject.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
-ELF_MIRROR_DEFINE(Elf::IResourceObject) {}
+FIRE_MIRROR_DEFINE(Firestorm::IResourceObject) {}
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

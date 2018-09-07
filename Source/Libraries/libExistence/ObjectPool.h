@@ -14,7 +14,7 @@
 #include <libCore/Result.h>
 #include <libCore/RefPtr.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 struct Pool
 {
@@ -39,5 +39,5 @@ class ObjectPool
 {
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

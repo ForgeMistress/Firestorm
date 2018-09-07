@@ -3,7 +3,7 @@
 #define LIBSCENE_H_
 #pragma once
 
-namespace Elf
+namespace Firestorm
 {
 	struct libScene
 	{

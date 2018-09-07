@@ -11,7 +11,7 @@
 #include "Document.h"
 #include "IDocument.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 OPEN_NAMESPACE(Document);
 
@@ -33,7 +33,7 @@ Mirror::Method GetMakerFunction(Mirror::Type docType, IDocument::Metadata meta)
 
 RefPtr<IDocument> MakeBlank(const String& type)
 {
-	String finalName("Elf::Document::" + type);
+	String finalName("Firestorm::Document::" + type);
 	Mirror::Type docType = Mirror::Type::get_by_name(finalName);
 	if(docType.is_valid())
 	{
@@ -51,7 +51,7 @@ RefPtr<IDocument> MakeBlank(const String& type)
 
 RefPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data)
 {
-	String finalName("Elf::Document::" + type);
+	String finalName("Firestorm::Document::" + type);
 	Mirror::Type docType = Mirror::Type::get_by_name(finalName);
 	if(docType.is_valid())
 	{
@@ -69,4 +69,4 @@ RefPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data)
 
 CLOSE_NAMESPACE(Document);
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

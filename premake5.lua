@@ -12,7 +12,7 @@
 --  GLOBAL SETUP
 ------------------------------------------------------------------------------------------------------------------------
 include("GlobalConfig")
-include("precore")
+include("Platform")
 
 -- GLOBAL BUILD CONFIGURATION
 workspace("*")
@@ -39,26 +39,6 @@ filter("action:vs*")
     defines({ "ELF_VISUALSTUDIO" })
 clearFilters()
 
-
-if os.ishost("windows") then
-    defines({ "ELF_PLATFORM_WINDOWS" })
-end
-
-filter("action:xcode*")
-    defines({ "ELF_XCODE" })
-clearFilters()
-
-if os.ishost("macosx") then
-    defines({ "ELF_PLATFORM_OSX" })
-end
-
-filter("action:gmake*")
-    defines({ "ELF_GMAKE", "ELF_PLATFORM_UNIX" })
-clearFilters()
-if os.ishost("linux") then
-    defines({ "ELF_PLATFORM_UNIX" })
-end
-
 filter("configurations:Debug32")
     libdirs({ "Bin/x86/Debug" })
 clearFilters()
@@ -74,35 +54,42 @@ filter("configurations:Release64 or Final64");
     libdirs({ "Bin/x64/Release" })
 clearFilters()
 
+function build(lib)
+    include(lib.."_Build")
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 --  WORKSPACE DEFINITION
 ------------------------------------------------------------------------------------------------------------------------
-workspace("ElflordPP")
+workspace("Firestorm")
 
 ------------------------------------------------------------------------------------------------------------------------
 --  THIRD PARTY LIBRARIES
 ------------------------------------------------------------------------------------------------------------------------
-include("JsonCPP_Build")
-include("RTTR_Build")
-include("Angelscript_Build")
-include("GLFW_Build")
-include("physfs_Build")
-include("LLGL_Build")
+build("JsonCPP")
+build("RTTR")
+build("Angelscript")
+build("GLFW")
+build("physfs")
+build("LLGL")
+build("imgui")
 
 ------------------------------------------------------------------------------------------------------------------------
 --  FIRST PARTY LIBRARIES
 ------------------------------------------------------------------------------------------------------------------------
-include("libApp_Build")
-include("libCore_Build")
-include("libExistence_Build")
-include("libHarnessed_Build")
-include("libIO_Build")
-include("libJson_Build")
-include("libMath_Build")
-include("libMirror_Build")
-include("libScene_Build")
-include("libScript_Build")
-include("libSerial_Build")
+build("libApp")
+build("libCore")
+build("libExistence")
+build("libHarnessed")
+build("libIO")
+build("libJson")
+build("libMath")
+build("libMirror")
+build("libScene")
+build("libScript")
+build("libSerial")
+build("libUI")
 
-include("Game_Build")
+build("Game")
+
+configureUnitTestApplication()

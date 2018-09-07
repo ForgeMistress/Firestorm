@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "ResourceReference.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 ResourceReference::ResourceReference()
 {
@@ -20,4 +20,4 @@ ResourceReference::~ResourceReference()
 {
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

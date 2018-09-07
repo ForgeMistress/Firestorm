@@ -8,6 +8,8 @@
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
 
+include("UnitTestMainTemplate")
+
 ENGINE_LIB_SOURCE_DIR  = "Source/Libraries"
 ENGINE_APP_SOURCE_DIR  = "Source/Applications"
 ENGINE_TST_SOURCE_DIR = "Source/Tests"
@@ -17,8 +19,10 @@ ENGINE_APP_OUTPUT_DIR = "Build/Applications/%{cfg.architecture}/%{cfg.buildcfg}"
 ENGINE_LIBS = {}
 ENGINE_GAME_LIBS = {}
 
-local DIVIDER = 
+local DIVIDER =
 "------------------------------------------------------------------------------------------------------------------------"
+
+local WINDOWS_SDK_VERSION = "10.0.171340"
 
 
 -- gather the names of all of the first party static library projects.
@@ -26,7 +30,7 @@ do
     local libraryDirectories = os.matchdirs(ENGINE_LIB_SOURCE_DIR.."/*")
     for _, dirPath in pairs(libraryDirectories) do
         local libname = path.getname(dirPath)
-        
+
         if libname ~= "libHarnessed" then
             table.insert(ENGINE_GAME_LIBS, libname)
         end
@@ -47,11 +51,11 @@ function configureEngineLib(libName)
 
     targetdir(ENGINE_LIB_OUTPUT_DIR)
 
-    includedirs({ 
+    includedirs({
         ENGINE_LIB_SOURCE_DIR,
         "ThirdParty",
         "ThirdParty/rttr/src",
-        "ThirdParty/glfw.git/include",
+        "ThirdParty/glfw/include",
         "ThirdParty/angelscript/sdk/angelscript/include"
     })
     libdirs({ ENGINE_LIB_OUTPUT_DIR })
@@ -63,6 +67,7 @@ function configureEngineLib(libName)
         ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.h",
         ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.cpp"
     })
+    links({"rttr"})
 end
 
 function configureApplication(appname)
@@ -81,12 +86,14 @@ function configureGame(gameName)
 
     targetdir(ENGINE_APP_OUTPUT_DIR)
 
-    includedirs({ 
+    includedirs({
         ENGINE_APP_SOURCE_DIR,
         ENGINE_LIB_SOURCE_DIR,
         "ThirdParty",
         "ThirdParty/rttr/src",
-        "ThirdParty/glfw.git/include",
+        "ThirdParty/glfw/deps",
+        "ThirdParty/glfw/include",
+        "ThirdParty/LLGL/include",
         "ThirdParty/angelscript/sdk/angelscript/include"
     })
     libdirs({ ENGINE_APP_OUTPUT_DIR, ENGINE_LIB_OUTPUT_DIR })
@@ -102,28 +109,48 @@ function configureGame(gameName)
     })
 end
 
-function configureUnitTest(libName)
+function configureUnitTestApplication()
+    local function hasUnitTest(libName)
+        return os.isfile(ENGINE_TST_SOURCE_DIR.."/"..libName.."Tests.cpp")
+    end
+    -- if the engine lib has a unit test associated with it, we should
+    -- pull those sources in as well.
     clearFilters()
 
-    local tstsrcpath = ENGINE_TST_SOURCE_DIR.."/"..libName
-    local libsrcpath = ENGINE_LIB_SOURCE_DIR
+    local FWD_DECLARES = {}
+    local TEST_FUNCTIONS = {}
+    local LIB_INITIALIZATIONS = {}
+    local INCLUDES = {}
 
-    local requiredDirectory = tstsrcpath
-    print("--", ("Checking for required directory %q"):format(requiredDirectory))
-    if not os.isdir(requiredDirectory) then
-        error(libName.." is not a valid test. There is no source directory named "..requiredDirectory)
-        return
+    for _, libName in ipairs(ENGINE_LIBS) do
+        if hasUnitTest(libName) then
+            local nameStr = libName.."PrepareHarness"
+            table.insert(INCLUDES, "#include <"..libName.."/"..libName..".h>")
+            table.insert(FWD_DECLARES, "RefPtr<TestHarness> "..nameStr.."(int ac, char** av);")
+            table.insert(TEST_FUNCTIONS, "        "..nameStr.."(ac, av)")
+            table.insert(LIB_INITIALIZATIONS, "    "..libName.."::Initialize(ac,av);")
+        end
     end
 
-    local requiredFile = tstsrcpath.."/"..libName.."Tests.cpp"
-    print("--", ("Checking for required unit test file %q"):format(requiredFile))
-    if not os.isfile(requiredFile) then
-        error(("%q is not a valid test. Missing file %q"):format(libName, requiredFile))
-        return
-    end
+    local mainCPP = UNIT_TEST_MAIN
 
+    local includes = table.concat(INCLUDES, "\n")
+    local fwdDeclareStrings = table.concat(FWD_DECLARES, "\n")
+    local testFunctionStrings = table.concat(TEST_FUNCTIONS, ",\n")
+    local libInitializations = table.concat(LIB_INITIALIZATIONS, "\n")
+
+    mainCPP = formatString(mainCPP, {
+        INCLUDES = includes,
+        FWD_DECLARES = fwdDeclareStrings,
+        TEST_FUNCTIONS = testFunctionStrings,
+        LIB_INITIALIZATIONS = libInitializations
+    })
+
+    io.writefile("Source/Tests/main.cpp", mainCPP)
+
+    -- Now generate the unit test project.
     group("UnitTests")
-    project(libName.."_Test")
+    project("UnitTest")
 
     language("C++")
     cppdialect("C++17")
@@ -131,27 +158,32 @@ function configureUnitTest(libName)
 
     targetdir("Build/Tests/%{cfg.buildcfg}")
 
-    files({
-        tstsrcpath.."/**.h",
-        tstsrcpath.."/**.cpp"
-    })
-
-    includedirs({ 
-        libsrcpath,
-        libsrcpath.."/"..libName,
+    includedirs({
+        ENGINE_LIB_SOURCE_DIR,
         "ThirdParty",
         "ThirdParty/rttr/src",
-        "ThirdParty/glfw.git/include",
+        "ThirdParty/glfw/include",
+        "ThirdParty/glfw/deps",
+        "ThirdParty/LLGL/include",
         "ThirdParty/angelscript/sdk/angelscript/include"
     })
 
-    links({ 
-        'libHarnessed', 
-        'libCore',
-        libName
+    files({
+        ENGINE_TST_SOURCE_DIR.."/**.h",
+        ENGINE_TST_SOURCE_DIR.."/**.cpp"
     })
-    defines({"ELF_UNIT_TEST"})
+    links(ENGINE_LIBS)
+    links({
+        "angelscript",
+        "glfw",
+        "imgui",
+        "jsoncpp",
+        "LLGL",
+        "physfs",
+        "rttr"
+    })
 end
+
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Calls filter({}) to go back to the default global filter. Wrapped so that the intent is more clear.
@@ -175,7 +207,7 @@ end
 -- Replaces a {} delimited key with the associated value.
 -- EX: replaceDelim("{foo}", "foo", "a long and winding road") will return the string "a long and winding road.
 function replaceDelim(str, k, v)
-    return str:gsub('{'..k..'}', v)
+    return str:gsub('{'..k..'}', tostring(v))
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -248,7 +280,7 @@ do
 			numFailed = numFailed + 1
 		end
 	end
-	
+
 	-- ensure that replaceDelim leaves the original string alone.
 	local testString = "{key}"
 	local modifiedString = replaceDelim(testString, "key", "brown foxes and all that")
@@ -256,13 +288,13 @@ do
 		printErr("brown foxes and all that", modifiedString)
 		numFailed = numFailed + 1
 	end
-	
+
 	if testString ~= "{key}" then
 		printErr("{key}", testString)
 		numFailed = numFailed + 1
 	end
 
-	if numFailed > 0 then
+    if numFailed > 0 then
 		error("one or more string formatting tests failed...")
 	else
 		print("    all tests passed")

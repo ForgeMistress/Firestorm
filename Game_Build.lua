@@ -1,13 +1,13 @@
 ------------------------------------------------------------------------------------------------------------------------
 --
---  ElflordPP/libSerial_Build.lua
+--  Game_Build.lua
 --
---  Running the build process for libSerial.
+--  Running the build process for Game.
 --
 ------------------------------------------------------------------------------------------------------------------------
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
-configureGame("Firestorm")
+configureGame("Game")
 
 addDependencies({
     "libCore",
@@ -22,5 +22,6 @@ links({
     "rttr",
     "jsoncpp",
     "angelscript",
-    "GLFW"
+    "GLFW",
+    "LLGL"
 })

@@ -22,16 +22,3 @@ addDependencies({
 })
 
 links({ "rttr", "jsoncpp" })
-
-------------------------------------------------------------------------------------------------------------------------
---  UNIT TESTS
-configureUnitTest("libExistence")
-
-addDependencies({
-    "libCore",
-    "libMirror",
-    "libIO",
-    "libJson"
-})
-
-links({ "rttr", "jsoncpp" })

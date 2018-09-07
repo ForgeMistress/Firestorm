@@ -9,8 +9,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "IDocument.h"
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
-ELF_MIRROR_DEFINE_NAMED(IDocument, "Elf::IDocument"){}
+FIRE_MIRROR_DEFINE_NAMED(IDocument, "Firestorm::IDocument"){}
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

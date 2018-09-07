@@ -13,7 +13,7 @@
 
 #include "Object.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 OPEN_NAMESPACE(Mirror);
 
 /**
@@ -25,7 +25,7 @@ the type, then it must return the pointer to the object static_casted to the apr
 **/
 class IInspectableObject
 {
-	ELF_MIRROR_DECLARE(IInspectableObject);
+	FIRE_MIRROR_DECLARE(IInspectableObject);
 public:
 	/**
 	Inspect an object to see if it implements the type defined in the template.
@@ -72,6 +72,6 @@ inline const Interface_t* IInspectableObject::Inspect() const
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CLOSE_NAMESPACE(Mirror);
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

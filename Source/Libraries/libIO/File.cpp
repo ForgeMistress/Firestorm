@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "File.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 File::File(const FileIOMgr* fileIOMgr, const String& filename)
 : m_mgr(fileIOMgr)
@@ -87,18 +87,18 @@ Result<void, Error> File::InvokeWriteCallback(const WriteResult& result)
 {
 	if(m_state == STATE_WRITING_TO_DISK)
 	{
-		return ELF_RESULT(void);
+		return FIRE_RESULT(void);
 	}
-	return ELF_ERROR(ERROR_IMPROPER_STATE, "could not invoke write callback. '" + m_filename + "' is not queued for write");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not invoke write callback. '" + m_filename + "' is not queued for write");
 }
 
 Result<void, Error> File::InvokeReadCallback(const ReadResult& result)
 {
 	if(m_state == STATE_READING_FROM_DISK)
 	{
-		return ELF_RESULT(void);
+		return FIRE_RESULT(void);
 	}
-	return ELF_ERROR(ERROR_IMPROPER_STATE, "could not invoke read callback. '" + m_filename + "' is not queued for read");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not invoke read callback. '" + m_filename + "' is not queued for read");
 }
 
 Result<void, Error> File::PerformDiskWriteSync()
@@ -107,7 +107,7 @@ Result<void, Error> File::PerformDiskWriteSync()
 	{
 		m_state = STATE_WRITING_TO_DISK;
 	}
-	return ELF_ERROR(ERROR_IMPROPER_STATE, "could not write data to disk. '" + m_filename + "' is not queued for write");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not write data to disk. '" + m_filename + "' is not queued for write");
 }
 
 Result<void, Error> File::PerformDiskWriteAsync()
@@ -116,7 +116,7 @@ Result<void, Error> File::PerformDiskWriteAsync()
 	{
 		m_state = STATE_WRITING_TO_DISK;
 	}
-	return ELF_ERROR(ERROR_IMPROPER_STATE, "could not write data to disk. '" + m_filename + "' is not queued for write");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not write data to disk. '" + m_filename + "' is not queued for write");
 }
 
 Result<void, Error> File::PerformDiskReadSync()
@@ -129,15 +129,15 @@ Result<void, Error> File::PerformDiskReadSync()
 		{
 			m_data = std::move(result.value());
 			m_state = STATE_LOADED;
-			return ELF_RESULT(void);
+			return FIRE_RESULT(void);
 		}
 		else
 		{
 			m_state = STATE_UNLOADED;
-			return ELF_ERROR(ERROR_COULD_NOT_READ_DATA, "error reading '" + m_filename + "' from disk : " + result.error().Message);
+			return FIRE_ERROR(ERROR_COULD_NOT_READ_DATA, "error reading '" + m_filename + "' from disk : " + result.error().Message);
 		}
 	}
-	return ELF_ERROR(ERROR_IMPROPER_STATE, "could not read data from disk. '" + m_filename + "' is not queued for load");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not read data from disk. '" + m_filename + "' is not queued for load");
 }
 
 Result<void, Error> File::PerformDiskReadAsync()
@@ -146,8 +146,8 @@ Result<void, Error> File::PerformDiskReadAsync()
 	{
 		m_state = STATE_READING_FROM_DISK;
 	}
-	return ELF_ERROR(ERROR_IMPROPER_STATE, "could not read data from disk. '" + m_filename + "' is not queued for load");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not read data from disk. '" + m_filename + "' is not queued for load");
 }
 
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "TestCase.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 void TestCase::Assert(bool assertion, const String& message)
 {
@@ -25,4 +25,4 @@ size_t TestCase::GetFailureCount() const
 	return m_failures.size();
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

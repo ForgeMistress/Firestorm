@@ -12,16 +12,39 @@
 #pragma once
 
 #include <libMirror/IInspectableObject.h>
+#include <libMirror/EventDispatcher.h>
 
-OPEN_NAMESPACE(Elf);
+#include "Entity.h"
+
+OPEN_NAMESPACE(Firestorm);
 
 class Engine;
-class Entity;
+
+class SystemEvent
+{
+	FIRE_MIRROR_DECLARE(SystemEvent);
+public:
+	enum Type : char
+	{
+		kEvent_Modified,
+		kEvent_EntityAdded,
+		kEvent_EntityRemoved,
+		kEvent_BeforeAddedToEngine,
+		kEvent_OnAddedToEngine,
+		kEvent_OnRemovedFromEngine
+	};
+	SystemEvent(Type type, WeakPtr<Engine> engine);
+	SystemEvent(Type type, WeakPtr<Entity> entity);
+
+	Type type;
+	WeakPtr<Engine> engine;
+	WeakPtr<Entity> entity;
+};
 
 class System : public Mirror::Object,
                public Mirror::IInspectableObject
 {
-	ELF_MIRROR_DECLARE(System, Mirror::Object, Mirror::IInspectableObject);
+	FIRE_MIRROR_DECLARE(System, Mirror::Object, Mirror::IInspectableObject);
 public:
 	System();
 	virtual ~System();
@@ -145,6 +168,8 @@ protected:
 
 	virtual void* DoInspect(Mirror::Type type);
 
+	EventDispatcher Dispatcher;
+
 private:
 	/* /!\ INTERNAL ONLY /!\ */
 	void AddToEngine(Engine* engine);
@@ -152,15 +177,15 @@ private:
 	bool AddEntity(WeakPtr<Entity>& entity);
 
 	// Reflected.
-	String m_name;
+	String _name;
 
 	// Runtime.
-	bool                    m_modified;
-	bool                    m_active;
-	bool                    m_paused;
-	Engine*                 m_engine;
-	Vector<WeakPtr<Entity>> m_entities;
+	bool                    _modified;
+	bool                    _active;
+	bool                    _paused;
+	Engine*                 _engine;
+	Vector<WeakPtr<Entity>> _entities;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

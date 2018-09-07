@@ -13,7 +13,7 @@
 
 #include "File.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class FileIOMgr final
 {
@@ -108,5 +108,5 @@ private:
 	mutable UnorderedMap<String, FileHandle> m_fileCache;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

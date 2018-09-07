@@ -12,8 +12,9 @@
 #pragma once
 
 #include <libCore/RefPtr.h>
+#include "Object.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 OPEN_NAMESPACE(Mirror);
 
@@ -23,8 +24,9 @@ CLOSE_NAMESPACE(Mirror);
 
 class IEvent
 {
+	FIRE_MIRROR_DECLARE(IEvent);
 public:
-	virtual const String& GetName() const = 0;
+	virtual const Mirror::Type& GetEventType() const = 0;
 };
 
 class EventDispatcher;
@@ -51,8 +53,8 @@ class Event : public IEvent
 public:
 	using Callback_f = Function<void(const Arg_t&)>;
 
-	Event(const String& name, Callback_f callback)
-	: _name(name)
+	Event(Mirror::Type type, Callback_f callback)
+	: _type(type)
 	, _callback(callback)
 	{
 	}
@@ -62,10 +64,13 @@ public:
 		_callback(arg);
 	}
 
-	virtual const String& GetName() const override { return _name; }
+	virtual const Mirror::Type& GetEventType() const override
+	{
+		return _type;
+	}
 
 private:
-	String _name;
+	Mirror::Type _type;
 	Callback_f const _callback;
 };
 
@@ -97,7 +102,11 @@ class EventDispatcher
 {
 	friend class EDReceipt;
 public:
-	typedef RefPtr<EDReceipt> Receipt;
+	using EventList = List<IEvent*>;
+	using EventMap = UnorderedMap<Mirror::Type, EventList>;
+	using Receipt = RefPtr<EDReceipt>;
+	using ReceiptPtrList = List<EDReceipt*>;
+
 	EventDispatcher();
 	~EventDispatcher();
 
@@ -130,9 +139,10 @@ public:
 	{
 		typedef Event<Arg_t> Event_t;
 
-		IEvent* event = new Event_t(Arg_t::MyType(), callback);
+		Mirror::Type argType = Arg_t::MyType();
+		IEvent* event = new Event_t(argType, callback);
 
-		_events[Arg_t::MyType()].push_back(event);
+		_events[argType].push_back(event);
 
 		EDReceipt* r = new EDReceipt(const_cast<EventDispatcher*>(this), event);
 		_receipts.push_back(r);
@@ -147,7 +157,7 @@ public:
 	void Dispatch(const Arg_t& arg)
 	{
 		assert(_numRegisteredEvents == _receipts.size());
-		auto found = _events.find(Arg_t::MyType());
+		EventMap::iterator found = _events.find(Arg_t::MyType());
 		if(found != _events.end())
 		{
 			for(IEvent* item : found->second)
@@ -168,10 +178,10 @@ public:
 private:
 	void Unregister(IEvent* event);
 
-	UnorderedMap<String, List<IEvent*>> _events;
-	int                                 _numRegisteredEvents;
-	List<EDReceipt*>                    _receipts;
+	EventMap       _events;
+	int            _numRegisteredEvents;
+	ReceiptPtrList _receipts;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

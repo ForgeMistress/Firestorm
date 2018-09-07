@@ -11,7 +11,7 @@
 #define LIBMATH_VECTOR_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class Vector_2D;
 class Vector_3D;
@@ -41,6 +41,6 @@ OPEN_NAMESPACE(Math);
 
 CLOSE_NAMESPACE(Math);
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

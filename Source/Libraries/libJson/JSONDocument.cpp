@@ -22,7 +22,7 @@
 #include <sstream>
 #include <istream>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 namespace {
 	static RefPtr<IDocument> MakeBlankJSON()
@@ -36,7 +36,7 @@ namespace {
 	}
 }
 
-ELF_MIRROR_DEFINE_NAMED(JSONDocument, "Elf::Document::JSON")
+FIRE_MIRROR_DEFINE_NAMED(JSONDocument, "Firestorm::Document::JSON")
 {
 	_class.method("MakeBlank", &MakeBlankJSON)
 	(
@@ -335,7 +335,7 @@ Result<void, Error> JSONDocument::FindSubsection(const char* sectionName)
 	if(m_data.HasChild(sectionName))
 	{
 		Json::ValueType dType = m_data.GetJsonType(sectionName);
-		ELF_ASSERT(dType == Json::objectValue);
+		FIRE_ASSERT(dType == Json::objectValue);
 		m_foundSubsection = sectionName;
 	}
 	return Result<void, Error>();
@@ -345,7 +345,7 @@ Result<void, Error> JSONDocument::EnterSubsection()
 {
 	if(m_foundSubsection.empty())
 	{
-		return ELF_ERROR(IDocument::ENTER_SUBSECTION_FAILED, "no subsection was found before attempting to enter");
+		return FIRE_ERROR(IDocument::ENTER_SUBSECTION_FAILED, "no subsection was found before attempting to enter");
 	}
 	m_data.MoveToChild(m_foundSubsection);
 	m_foundSubsection.clear();
@@ -461,4 +461,4 @@ Result<void, Error> JSONDocument::Section::MoveToParent()
 	return Result<void, Error>();
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

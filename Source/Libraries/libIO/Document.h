@@ -13,7 +13,7 @@
 
 #include "IDocument.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 OPEN_NAMESPACE(Document);
 
@@ -22,6 +22,6 @@ RefPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data);
 
 CLOSE_NAMESPACE(Document);
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

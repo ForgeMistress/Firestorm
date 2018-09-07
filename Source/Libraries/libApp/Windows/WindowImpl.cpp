@@ -9,12 +9,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
-#ifdef ELF_PLATFORM_WINDOWS
+#ifdef FIRE_PLATFORM_WINDOWS
 #include "../Window.h"
 #include <GLFW/include/GLFW/glfw3.h>
 #include <thread>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 static void GLFW_PumpEmptyEvent();
 
@@ -137,6 +137,6 @@ void Window::Impl::Close()
 	data->WindowIsHidden();
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

@@ -14,7 +14,7 @@
 #include <libIO/libIO.h>
 #include <libJson/libJson.h>
 
-using namespace Elf;
+using namespace Firestorm;
 
 int FirestormMain(int ac, char** av);
 

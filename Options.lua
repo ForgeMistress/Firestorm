@@ -22,3 +22,13 @@ newoption({
     },
     default = "OpenGL"
 })
+
+newoption({
+    trigger = "targetPlatform",
+    value = "PLATFORM",
+    description = "Choose which platform you wish to target.",
+    allowed = {
+        {"windows", "Target Windows."}
+    },
+    default = "windows"
+})

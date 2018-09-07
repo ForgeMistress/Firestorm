@@ -11,7 +11,7 @@
 #define LIBMATH_AABB_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class AABB_2D
 {
@@ -45,6 +45,6 @@ static bool Intersects(const AABB_2D& lhs, const AABB_2D& rhs);
 static bool Intersects(const AABB_3D& lhs, const AABB_3D& rhs);
 
 CLOSE_NAMESPACE(Math);
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

@@ -27,7 +27,7 @@
 
 #include "Expected.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 template<
 	typename Expected_t, 
@@ -150,13 +150,13 @@ template <class T> using AddPointer = std::add_pointer<T>;
 
 CLOSE_NAMESPACE(Traits);
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 /**
 	Use this to flag a variable as unused in a function.
  **/
-#define ELF_UNUSED_VARIABLE(var) ((void)var)
+#define FIRE_UNUSED_VARIABLE(var) ((void)var)
 
-#define ELF_ASSERT assert
+#define FIRE_ASSERT assert
 
 #endif

@@ -11,13 +11,13 @@
 #define LIBIO_RESOURCEOBJECT_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class IDocument;
 
 class IResourceObject
 {
-	ELF_MIRROR_DECLARE(IResourceObject);
+	FIRE_MIRROR_DECLARE(IResourceObject);
 public:
 	virtual ~IResourceObject() {}
 
@@ -25,5 +25,5 @@ public:
 	virtual Result<void, Error> Save(RefPtr<IDocument>& writer) const = 0;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

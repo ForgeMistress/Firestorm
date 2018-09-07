@@ -11,7 +11,7 @@
 #define HARNESSED_TESTHARNESS_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class TestCase;
 
@@ -35,6 +35,8 @@ public:
 	// Example: It("should do this thing properly without errors", ...);
 	void It(const String& name, TestFunction_t testFunction);
 
+    const String& GetName() const { return m_name; }
+
 private:
 	String m_name;
 	bool m_quietly;
@@ -42,6 +44,6 @@ private:
 	Vector<TestFunction_t> m_cases;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

@@ -11,7 +11,7 @@
 #define LIBIO_RESOURCEREFERENCE_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 /**
 	\class ResourceReference
@@ -20,15 +20,14 @@ OPEN_NAMESPACE(Elf);
  **/
 class ResourceReference : public Mirror::Object
 {
-	ELF_MIRROR_DECLARE(ResourceReference, Mirror::Object);
+	FIRE_MIRROR_DECLARE(ResourceReference, Mirror::Object);
 public:
 	ResourceReference();
 	virtual ~ResourceReference();
-
-protected:
 private:
+	String _resourcePath;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

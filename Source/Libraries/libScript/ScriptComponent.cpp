@@ -12,7 +12,7 @@
 
 #include <libMirror/Object.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 ScriptComponent::ScriptComponent()
 {
@@ -29,4 +29,4 @@ void* ScriptComponent::DoInspect(Mirror::Type type)
 	return Component::DoInspect(type);
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

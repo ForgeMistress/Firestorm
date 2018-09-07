@@ -1,10 +1,10 @@
 #include "stdafx.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 int FirestormRun()
 {
 	return 0;
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

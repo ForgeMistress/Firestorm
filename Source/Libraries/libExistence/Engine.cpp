@@ -13,10 +13,10 @@
 #include "System.h"
 #include "Entity.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 
-ELF_MIRROR_DEFINE(Elf::Engine)
+FIRE_MIRROR_DEFINE(Firestorm::Engine)
 {
 
 }
@@ -64,9 +64,9 @@ void Engine::Update(double deltaT)
 			for(size_t i = m_systems.size() - 1; i >= 0; --i)
 			{
 				auto system = m_systems[i];
-				if (system->m_active)
+				if (system->_active)
 				{
-					if(system->m_modified)
+					if(system->_modified)
 					{
 						system->OnModified(deltaT);
 					}
@@ -76,12 +76,12 @@ void Engine::Update(double deltaT)
 			// normal update
 			for(auto system : m_systems)
 			{
-				if(system->m_active)
+				if(system->_active)
 				{
 					// TODO: Time buffering and intervals.
-					system->OnUpdate(deltaT, system->m_entities);
+					system->OnUpdate(deltaT, system->_entities);
 				}
-				system->m_modified = false;
+				system->_modified = false;
 			}
 
 			// TODO: OnPostWrap?
@@ -156,7 +156,7 @@ void Engine::Refresh()
 	for(size_t i = m_systems.size() - 1; i >= 0; --i)
 	{
 		auto system = m_systems[i];
-		if(system->m_active)
+		if(system->_active)
 		{
 			system->OnModified(0.0);
 		}
@@ -198,12 +198,12 @@ void Engine::ManageSystems()
 	// remove systems
 	for(auto system : m_systemsToRemove)
 	{
-		for(auto entity : system->m_entities)
+		for(auto entity : system->_entities)
 		{
 			system->OnEntityRemoved(entity);
 		}
 		system->OnRemoveFromEngine();
-		system->m_engine = nullptr;
+		system->_engine = nullptr;
 	}
 
 	//add systems
@@ -211,9 +211,9 @@ void Engine::ManageSystems()
 	{
 		system->OnBeforeAddToEngine();
 
-		system->m_modified = true;
-		system->m_active = true;
-		system->m_engine = this;
+		system->_modified = true;
+		system->_active = true;
+		system->_engine = this;
 
 		system->OnAddToEngine();
 
@@ -222,7 +222,7 @@ void Engine::ManageSystems()
 		{
 			if(system->Filter(entity))
 			{
-				system->m_entities.push_back(entity);
+				system->_entities.push_back(entity);
 				system->OnEntityAdded(entity);
 			}
 		}
@@ -249,7 +249,7 @@ void Engine::ManageEntities()
 
 		for(auto system : m_systems)
 		{
-			Vector<WeakPtr<Entity> >& entities = system->m_entities;
+			Vector<WeakPtr<Entity> >& entities = system->_entities;
 			// if the entity is already inside the 
 			auto found = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
 				return e.Lock().Get() == entity.Get();
@@ -259,14 +259,14 @@ void Engine::ManageEntities()
 			{
 				if(system->Filter(entity))
 				{
-					system->m_modified = true;
+					system->_modified = true;
 					entities.push_back(entity);
 					system->OnEntityAdded(entity);
 				}
 			}
 			else
 			{
-				system->m_modified = true;
+				system->_modified = true;
 				entities.erase(found);
 				system->OnEntityRemoved(entity);
 			}
@@ -282,13 +282,13 @@ void Engine::ManageEntities()
 			//m_entities.erase(entityItr);
 			for(auto system : m_systems)
 			{
-				Vector<WeakPtr<Entity>>& entities = system->m_entities;
+				Vector<WeakPtr<Entity>>& entities = system->_entities;
 				auto systemContainsItr = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
 					return e.Lock().Get() == entity.Get();
 				});
 				if(systemContainsItr != entities.end())
 				{
-					system->m_modified = true;
+					system->_modified = true;
 					entities.erase(systemContainsItr);
 					system->OnEntityRemoved(entity);
 				}
@@ -300,4 +300,4 @@ void Engine::ManageEntities()
 	m_entitiesToChange.clear();
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

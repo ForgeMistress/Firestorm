@@ -3,7 +3,7 @@
 #define LIB_EXISTENCE_H_
 #pragma once
 
-namespace Elf
+namespace Firestorm
 {
 	struct libExistence
 	{

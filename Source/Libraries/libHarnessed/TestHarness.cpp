@@ -11,7 +11,7 @@
 #include "TestHarness.h"
 #include "TestCase.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 TestHarness::TestHarness(const String& name, bool quietly)
 : m_name(name)
@@ -21,14 +21,13 @@ TestHarness::TestHarness(const String& name, bool quietly)
 
 uint32_t TestHarness::Run()
 {
-	ELF_ASSERT(m_cases.size() == m_caseNames.size());
+	FIRE_ASSERT(m_cases.size() == m_caseNames.size());
 
 	uint32_t errors = 0;
 	TestCase testCase;
 	if(!m_quietly)
 	{
-		cout
-			<< "Test: " << m_name << endl;
+		cout << "Test: " << m_name << endl << endl;
 	}
 
 	for(size_t i=0;i<m_cases.size(); ++i)
@@ -36,28 +35,37 @@ uint32_t TestHarness::Run()
 		const TestFunction_t& test = m_cases[i];
 		const String& testName = m_caseNames[i];
 
-		if(!m_quietly)
-		{
-			cout << "    " << testName;
-		}
+		String testResult;
+		String errorStr;
 
+		bool passed = false;
 		try
 		{
 			test(testCase);
-			if(!m_quietly)
-			{
-				cout << " [PASSED]" << endl;
-			}
+			testResult = "[PASSED]";
+			passed = true;
 		}
 		catch(const TestCase::AssertionException& ex)
 		{
-			if(!m_quietly)
-			{
-				cout
-					<< " [FAILED]" << endl
-					<< "        Error: " << ex.GetMessage() << endl;
-			}
+			testResult = "[FAILED]";
+			errorStr = String("        Error: ") + ex.GetMessage();
 			++errors;
+		}
+		catch(std::exception& e)
+		{
+			testResult = "[FAILED]";
+			errorStr = String("        Error: ") + e.what();
+			++errors;
+		}
+
+		if(!m_quietly)
+		{
+			cout << testResult << " " << testName << endl;
+
+			if(!passed)
+			{
+				cout << errorStr << endl;
+			}
 		}
 	}
 	return errors;
@@ -67,10 +75,10 @@ void TestHarness::It(const String& caseName, TestFunction_t testFunction)
 {
 	for(const auto& cn : m_caseNames)
 	{
-		ELF_ASSERT(cn != caseName);
+		FIRE_ASSERT(cn != caseName);
 	}
 	m_cases.push_back(testFunction);
 	m_caseNames.push_back(caseName);
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

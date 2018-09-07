@@ -14,7 +14,7 @@
 #include <libCore/RefPtr.h>
 #include <libMirror/Object.h>
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class System;
 class Entity;
@@ -28,7 +28,7 @@ class Entity;
  **/
 class Engine final : public Mirror::Object
 {
-	ELF_MIRROR_DECLARE(Engine, Mirror::Object);
+	FIRE_MIRROR_DECLARE(Engine, Mirror::Object);
 public:
 	Engine();
 	virtual ~Engine();
@@ -84,5 +84,5 @@ private:
 typedef RefPtr<Engine> EnginePtr;
 typedef WeakPtr<Engine>   EngineWeakPtr;
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif

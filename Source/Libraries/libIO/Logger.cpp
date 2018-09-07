@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "Logger.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 Logger Logger::DEBUG_LOGGER(std::cout);
 Logger Logger::WARNING_LOGGER(std::cout);
@@ -26,4 +26,4 @@ void Logger::DoWrite()
 	m_ostream << std::endl;
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

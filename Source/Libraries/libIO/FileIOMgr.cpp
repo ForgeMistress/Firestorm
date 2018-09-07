@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "FileIOMgr.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 
 struct FileIOMgr::ReadCallbackReceipt_
@@ -92,16 +92,16 @@ Result<void, Error> FileIOMgr::QueueFileForRead(FileHandle file, QueueType queue
 			if(m_fileCache[filename]->GetState() == File::STATE_LOADED)
 			{
 				// It's already loaded.
-				return ELF_ERROR(ERROR_FILE_ALREADY_LOADED, "file with name '" + filename + "' is already loaded");
+				return FIRE_ERROR(ERROR_FILE_ALREADY_LOADED, "file with name '" + filename + "' is already loaded");
 			}
 		}
 	}
 
 	if(!PushInBack(m_fileReadQueue, QueueEntry{ file, queueType }))
 	{
-		return ELF_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + filename + "' is already queued for read");
+		return FIRE_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + filename + "' is already queued for read");
 	}
-	return ELF_RESULT(void);
+	return FIRE_RESULT(void);
 }
 
 bool FileIOMgr::CancelQueuedRead(FileHandle file)
@@ -127,17 +127,17 @@ Result<void, Error> FileIOMgr::QueueFileForWrite(FileHandle file, QueueType queu
 	auto foundRead = std::find_if(m_fileReadQueue.begin(), m_fileReadQueue.end(), findFunction);
 	if(foundRead != m_fileReadQueue.end())
 	{
-		return ELF_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + file->GetFilename() + "' already queued for read in call to QueueFileForWrite");
+		return FIRE_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + file->GetFilename() + "' already queued for read in call to QueueFileForWrite");
 	}
 
 	auto foundWrite = std::find_if(m_fileWriteQueue.begin(), m_fileWriteQueue.end(), findFunction);
 	if(foundWrite != m_fileWriteQueue.end())
 	{
-		return ELF_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + file->GetFilename() + "' already queued for write in call to QueueFileForWrite");
+		return FIRE_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + file->GetFilename() + "' already queued for write in call to QueueFileForWrite");
 	}
 
 	m_fileWriteQueue.push_back(QueueEntry{ file, queueType });
-	return ELF_RESULT(void);
+	return FIRE_RESULT(void);
 }
 
 bool FileIOMgr::CancelQueuedWrite(FileHandle file)
@@ -217,4 +217,4 @@ bool FileIOMgr::IsInQueue(FileQueue& queue, FileHandle file, QueueEntry& entry)
 	return false;
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

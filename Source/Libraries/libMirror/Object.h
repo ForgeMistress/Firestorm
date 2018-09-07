@@ -30,10 +30,10 @@
 	static Is       - Checks the type against all common forms.
 	virtual GetType - Retrieve the type at the instance leve.
 **/
-#define ELF_MIRROR_DECLARE(ObjectType, ...)                                                                    \
+#define FIRE_MIRROR_DECLARE(ObjectType, ...)                                                                    \
 	public:                                                                                                    \
 		typedef ObjectType WhatIAm_t;                                                                          \
-		class Registrar : public ::Elf::Mirror::RegistrarBase<ObjectType>									   \
+		class Registrar : public ::Firestorm::Mirror::RegistrarBase<ObjectType>									   \
 		{																									   \
 		public:																								   \
 			Registrar();																					   \
@@ -58,26 +58,26 @@
 /**
 	Define a class for the reflection system.
  **/
-#define ELF_MIRROR_DEFINE(ObjectType) ELF_MIRROR_DEFINE_NAMED(ObjectType, #ObjectType)
+#define FIRE_MIRROR_DEFINE(ObjectType) FIRE_MIRROR_DEFINE_NAMED(ObjectType, #ObjectType)
 
 /**
 	Define the specifics of the class declaration while keying it to a specific name.
  **/
-#define ELF_MIRROR_DEFINE_NAMED(ObjectType, ObjectName)			                   \
+#define FIRE_MIRROR_DEFINE_NAMED(ObjectType, ObjectName)			                   \
 	ObjectType::Registrar::Registrar()											   \
 	: RegistrarBase<ObjectType>(rttr::registration::class_<ObjectType>(ObjectName))
 
 /**
 	Register the class type to the reflection system. You will see this called in the lib*::Initialize functions.
  **/
-#define ELF_MIRROR_REGISTER(ObjectType) ObjectType::Registrar()
+#define FIRE_MIRROR_REGISTER(ObjectType) ObjectType::Registrar()
 
 /**
-	Define the class level metadata while in an ELF_MIRROR_DEFINE* block.
+	Define the class level metadata while in an FIRE_MIRROR_DEFINE* block.
  **/
-#define ELF_CLASS_METADATA(...) ( __VA_ARGS__ )
+#define FIRE_CLASS_METADATA(...) ( __VA_ARGS__ )
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 OPEN_NAMESPACE(Mirror);
 
 template <class Class_Type>
@@ -137,7 +137,7 @@ public:
 	> rttr::registration::bind<rttr::detail::prop, Class_Type, A, acc_level>
 		Property(rttr::string_view name, A acc, acc_level level = acc_level())
 	{
-		return _class.property<A,acc_level,Tp>(name, acc, level);
+		return _class.property(name, acc, level);
 	}
 
 	template<
@@ -260,7 +260,7 @@ struct PropMeta
 
 	Convenience wrapper around rttr::metadata(PropMeta::SAVE, true)
  **/
-#define MIRROR_META_SAVE rttr::metadata(Elf::Mirror::PropMeta::SAVE, true)
+#define MIRROR_META_SAVE rttr::metadata(Firestorm::Mirror::PropMeta::SAVE, true)
 
 /**
 	 \macro MIRROR_META_SAVE
@@ -270,7 +270,7 @@ struct PropMeta
 
 	 Convenience wrapper around rttr::metadata(PropMeta::LOAD, true)
  **/
-#define MIRROR_META_LOAD rttr::metadata(Elf::Mirror::PropMeta::LOAD, true)
+#define MIRROR_META_LOAD rttr::metadata(Firestorm::Mirror::PropMeta::LOAD, true)
 
 /**
 	 \macro MIRROR_META_SAVELOAD
@@ -278,8 +278,8 @@ struct PropMeta
 	 Combination of \ref MIRROR_META_SAVE and \ref MIRROR_META_LOAD
  **/
 #define MIRROR_META_SAVELOAD \
-	rttr::metadata(Elf::Mirror::PropMeta::SAVE, true), \
-	rttr::metadata(Elf::Mirror::PropMeta::LOAD, true)
+	rttr::metadata(Firestorm::Mirror::PropMeta::SAVE, true), \
+	rttr::metadata(Firestorm::Mirror::PropMeta::LOAD, true)
 
 /**
 	 \macro MIRROR_META_DEPRECATED
@@ -287,7 +287,7 @@ struct PropMeta
 	 Mark a property as deprecated.
 	 Wrapper around rttr::metadata(PropMeta::kDeprecated, true)
  **/
-#define MIRROR_META_DEPRECATED rttr::metadata(Elf::Mirror::PropMeta::DEPRECATED, true)
+#define MIRROR_META_DEPRECATED rttr::metadata(Firestorm::Mirror::PropMeta::DEPRECATED, true)
 
 /**
 	\macro MIRROR_META_REMAP
@@ -300,7 +300,7 @@ struct PropMeta
 
 	\endcode
  **/
-#define MIRROR_META_REMAP( NEW_CLASSNAME ) rttr::metadata(Elf::Mirror::PropMeta::CLASS_REMAP, NEW_CLASSNAME)
+#define MIRROR_META_REMAP( NEW_CLASSNAME ) rttr::metadata(Firestorm::Mirror::PropMeta::CLASS_REMAP, NEW_CLASSNAME)
 
 /**
 	\class Object
@@ -309,7 +309,7 @@ struct PropMeta
  **/
 class Object
 {
-	ELF_MIRROR_DECLARE(Elf::Mirror::Object);
+	FIRE_MIRROR_DECLARE(Firestorm::Mirror::Object);
 public:
 	virtual ~Object();
 };
@@ -374,6 +374,6 @@ public:
 	}
 
 CLOSE_NAMESPACE(Mirror);
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

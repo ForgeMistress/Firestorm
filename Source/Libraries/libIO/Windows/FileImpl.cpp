@@ -9,10 +9,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
-#ifdef ELF_PLATFORM_WINDOWS
+#ifdef FIRE_PLATFORM_WINDOWS
 #include "../File.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 struct ImplData
 {
@@ -25,14 +25,14 @@ File::Impl::Impl()
 
 Result<DataBuffer, Error> File::Impl::PerformDiskReadSync(const String& filename)
 {
-	return ELF_RESULT(DataBuffer, DataBuffer());
+	return FIRE_RESULT(DataBuffer, DataBuffer());
 }
 
 Result<void, Error> File::Impl::PerformDiskWriteSync(const String& filename, const DataBuffer& data)
 {
-	return ELF_RESULT(void);
+	return FIRE_RESULT(void);
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

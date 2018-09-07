@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "Window.h"
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 Window::Window()
 : _impl(new Impl(this))
@@ -56,4 +56,4 @@ void Window::Close()
 	_impl->Close();
 }
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);

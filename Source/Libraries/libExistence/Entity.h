@@ -11,14 +11,14 @@
 #define LIBEXISTENCE_ENTITY_H_
 #pragma once
 
-OPEN_NAMESPACE(Elf);
+OPEN_NAMESPACE(Firestorm);
 
 class Component;
 
 class Entity : public Mirror::Object,
                public Mirror::IInspectableObject
 {
-	ELF_MIRROR_DECLARE(Elf::Entity, Elf::Mirror::Object, Elf::Mirror::IInspectableObject);
+	FIRE_MIRROR_DECLARE(Firestorm::Entity, Firestorm::Mirror::Object, Firestorm::Mirror::IInspectableObject);
 public:
 	Entity();
 	virtual ~Entity();
@@ -37,5 +37,5 @@ private:
 	WeakPtr<Engine> _owningEngine;
 };
 
-CLOSE_NAMESPACE(Elf);
+CLOSE_NAMESPACE(Firestorm);
 #endif
