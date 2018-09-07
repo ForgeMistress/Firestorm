@@ -39,11 +39,12 @@ public:
 	virtual void SetDesc(const LLGL::WindowDescriptor& desc);
 	virtual LLGL::WindowDescriptor GetDesc() const;
 
+	void HandleFilesDropped(int numDropped, const char** filenames);
 protected:
 	virtual void OnProcessEvents();
 
 private:
-	bool _isVisible{ true };
+	bool _isShowing{ true };
 	LLGL::WindowDescriptor _descriptor;
 	GLFWwindow* _windowHandle;
 };

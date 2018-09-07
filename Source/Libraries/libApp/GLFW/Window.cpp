@@ -50,19 +50,30 @@ void Window::SetTitle(const std::wstring& title)
 
 std::wstring Window::GetTitle() const
 {
-
+	return std::wstring();
 }
 
 void Window::Show(bool show)
 {
-
+	_isShowing = show;
+	if (show)
+		glfwShowWindow(_windowHandle);
+	else
+		glfwHideWindow(_windowHandle);
 }
 
 bool Window::IsShown() const
 {
-
+	return _isShowing;
 }
 
+namespace {
+	void GLFW_DropFunc(GLFWwindow* windowHandle, int numDropped, const char** filenames)
+	{
+		Firestorm::Window* win = (Firestorm::Window*)glfwGetWindowUserPointer(windowHandle);
+		win->HandleFilesDropped(numDropped, filenames);
+	}
+}
 /*
 std::wstring    title;
 Offset2D        position;
@@ -89,20 +100,23 @@ void Window::SetDesc(const LLGL::WindowDescriptor& desc)
 		if(!desc.visible) { glfwHideWindow(_windowHandle); }
 		else { glfwShowWindow(_windowHandle); }
 
-		// TODO: Implement this!
-		/*if(desc.borderless)
-		{
-			const 
-			const GLFWvidmode* mode = glfwGetVideoMode()
-		}*/
 		glfwSetWindowAttrib(_windowHandle, GLFW_DECORATED, desc.borderless ? GLFW_FALSE : GLFW_TRUE);
 		glfwSetWindowAttrib(_windowHandle, GLFW_RESIZABLE, desc.resizable ? GLFW_TRUE : GLFW_FALSE);
+		if(desc.acceptDropFiles) { glfwSetDropCallback(_windowHandle, GLFW_DropFunc); }
+		else { glfwSetDropCallback(_windowHandle, nullptr); }
+		// centered needs implementation
+		// windowContext needs to be dealt with
 	}
 
 }
 
 LLGL::WindowDescriptor Window::GetDesc() const
 {
+}
+
+void Window::HandleFilesDropped(int numDropped, const char** filenames)
+{
+
 }
 
 void Window::OnProcessEvents()
