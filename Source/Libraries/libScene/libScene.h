@@ -7,7 +7,7 @@ namespace Elf
 {
 	struct libScene
 	{
-		static void Initialize();
+		static void Initialize(int ac, char** av);
 	};
 }
 

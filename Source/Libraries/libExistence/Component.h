@@ -11,6 +11,7 @@
 #define LIBEXISTENCE_COMPONENT_H_
 #pragma once
 
+#include <libCore/RefPtr.h>
 #include <libMirror/IInspectableObject.h>
 
 OPEN_NAMESPACE(Elf);

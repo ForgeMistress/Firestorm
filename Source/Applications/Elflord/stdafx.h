@@ -1,12 +1,8 @@
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
-//
-#ifndef ELFLORD_STDAFX_H_
-#define ELFLORD_STDAFX_H_
-#pragma once
+#ifndef FIRESTORM_STDAFX_H_
+#define FIRESTORM_STDAFX_H_
 
 #include <libCore/libCore.h>
-#include <libIO/Logger.h>
+#include <libExistence/libExistence.h>
+#include <libIO/libIO.h>
 
 #endif

@@ -11,7 +11,7 @@
 
 #ifdef ELF_PLATFORM_WINDOWS
 #include "../Window.h"
-#include <GLFW/glfw3.h>
+#include <GLFW/include/GLFW/glfw3.h>
 #include <thread>
 
 OPEN_NAMESPACE(Elf);

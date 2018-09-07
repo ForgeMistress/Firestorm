@@ -37,7 +37,7 @@ Entity::~Entity()
 
 void* Entity::DoInspect(Mirror::Type type)
 {
-	void* output = nullptr;
+	/*void* output = nullptr;
 	for(auto component : _components)
 	{
 		output = component->Inspect(type);
@@ -45,7 +45,7 @@ void* Entity::DoInspect(Mirror::Type type)
 		{
 			return output;
 		}
-	}
+	}*/
 	return IInspectableObject::DoInspect(type);
 }
 

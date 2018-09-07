@@ -105,7 +105,7 @@ bool Engine::AddSystem(const String& system)
 
 bool Engine::RemoveSystem(const String& system)
 {
-
+	return false;
 }
 
 bool Engine::AddSystem(const RefPtr<System>& system)
@@ -282,7 +282,7 @@ void Engine::ManageEntities()
 			//m_entities.erase(entityItr);
 			for(auto system : m_systems)
 			{
-				Vector<RefPtr<Entity>>& entities = system->m_entities;
+				Vector<WeakPtr<Entity>>& entities = system->m_entities;
 				auto systemContainsItr = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
 					return e.Lock().Get() == entity.Get();
 				});
