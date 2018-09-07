@@ -7,7 +7,7 @@
 ------------------------------------------------------------------------------------------------------------------------
 --  Copyright (c) 2018 Miki Ryan
 ------------------------------------------------------------------------------------------------------------------------
-configureGame("Elflord")
+configureGame("Firestorm")
 
 addDependencies({
     "libCore",
@@ -18,9 +18,9 @@ addDependencies({
     "libExistence"
 })
 
-links({ 
-    "rttr", 
-    "jsoncpp", 
+links({
+    "rttr",
+    "jsoncpp",
     "angelscript",
     "GLFW"
 })

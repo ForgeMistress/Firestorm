@@ -77,7 +77,7 @@ void EventDispatcher::Unregister(IEvent* event)
 			return r->_event == event;
 		});
 	}
-	assert(_numRegisteredEvents == _receipts.size());
+	ELF_ASSERT(_numRegisteredEvents == _receipts.size());
 }
 
 CLOSE_NAMESPACE(Elf);

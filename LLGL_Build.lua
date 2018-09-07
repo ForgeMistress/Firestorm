@@ -9,21 +9,6 @@
 ------------------------------------------------------------------------------------------------------------------------
 print("--", "Generating project for llgl.")
 
--- For LLGL_Build
-newoption({
-    trigger = "gfxapi",
-    value = "BACKEND",
-    description = "Choose which graphical backend you want to use.",
-    allowed = {
-        {"OpenGL",    "Use OpenGL."},
-        {"Direct3D11", "Use Direct3D11 (windows only)"},
-        {"Direct3D12", "Use Direct3D12 (windows only, EXPERIMENTAL)"},
-        {"Vulkan",    "Use Vulkan (HIGHLY EXPERIMENTAL/BROKEN)"},
-        {"Metal",     "Why do you hate yourself?"}
-    },
-    default = "OpenGL"
-})
-
 newoption({
     trigger="enable-debug-layer",
     value = "BOOLEAN",

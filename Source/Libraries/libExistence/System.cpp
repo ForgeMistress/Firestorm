@@ -16,7 +16,7 @@ OPEN_NAMESPACE(Elf);
 
 ELF_MIRROR_DEFINE(Elf::System)
 {
-	_class.property("name", &System::GetName, &System::SetName)
+	Property("name", &System::GetName, &System::SetName)
 	(
 		MIRROR_META_SAVELOAD
 	);

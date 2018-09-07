@@ -32,42 +32,42 @@ public:
 		Run the filtering routine to determine whether or not the \ref Entity will be able
 		to be added to this system.
 	 **/
-	inline bool Filter(const WeakPtr<Entity>& entity) const;
+	bool Filter(const WeakPtr<Entity>& entity) const;
 
 	/**
 		\function GetEngine
 
 		Retrieve a \ref WeakPtr to the \ref Engine that holds this system.
 	 **/
-	inline const Engine* GetEngine() const;
+	const Engine* GetEngine() const;
 
 	/**
 		\function GetName
 
 		Retrieve the name of this system.
 	 **/
-	inline const String& GetName() const;
+	const String& GetName() const;
 
 	/**
 		\function SetName
 
 		Set the name of this system.
 	**/
-	inline void SetName(const String& name);
+	void SetName(const String& name);
 
 	/**
 		\function Contains
 
 		Check whether or not this system contains the entity.
 	 **/
-	inline bool Contains(const WeakPtr<Entity>& entity) const;
+	bool Contains(const WeakPtr<Entity>& entity) const;
 
 	/**
 		\function Pause
 
 		Pause the execution of this system temporarily.
 	 **/
-	inline void Pause();
+	void Pause();
 
 protected:
 	friend class Engine;

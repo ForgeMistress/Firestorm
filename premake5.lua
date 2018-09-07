@@ -17,6 +17,8 @@ include("precore")
 -- GLOBAL BUILD CONFIGURATION
 workspace("*")
 
+include("Options")
+
 -- All projects will have the following build targets available to them.
 configurations({
     "Debug32", "Release32", "Final32",

@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <functional>
 #include <stdint.h>
 #include <type_traits>
@@ -33,13 +33,6 @@ template<
 	typename Expected_t, 
 	typename Unexpected_t
 > using Expected = tl::expected<Expected_t, Unexpected_t>;
-
-template <typename T>
-bool is_uninitialized(std::weak_ptr<T> const& weak)
-{
-	using wt = std::weak_ptr<T>;
-	return !weak.owner_before(wt{}) && !wt{}.owner_before(weak);
-}
 
 using std::cout;
 using std::endl;
