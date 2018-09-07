@@ -10,10 +10,16 @@
 configureEngineLib("libApp")
 
 includedirs({
+    "ThirdParty",
+    "ThirdParty/rttr/src",
+    "ThirdParty/LLGL/include"
 })
 
-addDependencies({
-    "libMath"
-})
+addDependencies(ENGINE_GAME_LIBS)
 
---links("glfw")
+links({
+    "LLGL"
+})
+if _OPTIONS["gfxapi"] == "OpenGL" then
+    links({"glfw", "OpenGL32"})
+end

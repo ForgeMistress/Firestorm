@@ -36,7 +36,7 @@ filter("configurations:Debug64 or Release64 or Final64")
 clearFilters()
 
 filter("action:vs*")
-    defines({ "ELF_VISUALSTUDIO" })
+    defines({ "FIRE_VISUALSTUDIO" })
 clearFilters()
 
 filter("configurations:Debug32")

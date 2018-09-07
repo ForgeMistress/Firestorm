@@ -12,74 +12,40 @@
 #pragma once
 
 #include <libMath/Vector.h>
+#include <LLGL/Window.h>
+#include <GLFW/glfw3.h>
 
 OPEN_NAMESPACE(Firestorm);
 
-class Window final
+class Window final : public LLGL::Window
 {
 public:
-	Window();
-	~Window();
+	Window(const LLGL::WindowDescriptor& desc);
+	virtual ~Window();
 
-	/**
-		Initialize the window.
-	 **/
-	bool Initialize(const String& title = "Elflord Application",
-                    Vector_2D size = Vector_2D(800, 600));
+	// LLGL implementations.
+	virtual void SetPosition(const LLGL::Offset2D& position);
+	virtual LLGL::Offset2D GetPosition() const;
 
-	/**
-		Retrieve the title of the window.
-	 **/
-	const String& GetTitle() const;
+	virtual void SetSize(const LLGL::Extent2D& size, bool useClientArea = true);
+	virtual LLGL::Extent2D GetSize(bool useClientArea = true) const;
 
-	/**
-		Set the title of the window.
-	 **/
-	void SetTitle(const String& title);
+	virtual void SetTitle(const std::wstring& title);
+	virtual std::wstring GetTitle() const;
 
-	/**
-		Retieve the dimensions of the window.
-	 **/
-	Vector_2D GetDimensions() const;
+	virtual void Show(bool show = true);
+	virtual bool IsShown() const;
 
-	/**
-		Set the dimensions of the window.
-	 **/
-	void SetDimensions(const Vector_2D& vec);
+	virtual void SetDesc(const LLGL::WindowDescriptor& desc);
+	virtual LLGL::WindowDescriptor GetDesc() const;
 
-	/**
-		Update the window so that it refreshes.
-	 **/
-	void Update();
+protected:
+	virtual void OnProcessEvents();
 
-	/**
-		Close the window.
-	 **/
-	void Close();
-
-	struct Impl final
-	{
-		struct ImplData;
-		Impl(Window* window);
-		~Impl();
-
-		bool Initialize(const String& title, Vector_2D size = Vector_2D(800,600));
-
-		const String& GetTitle() const;
-		void SetTitle(const String& title);
-
-		Vector_2D GetDimensions() const;
-		void SetDimensions(const Vector_2D& vec);
-
-		void Update();
-
-		void Close();
-
-		Window* window;
-		std::unique_ptr<ImplData> data;
-	};
 private:
-	std::unique_ptr<Impl> _impl;
+	bool _isVisible{ true };
+	LLGL::WindowDescriptor _descriptor;
+	GLFWwindow* _windowHandle;
 };
 
 CLOSE_NAMESPACE(Firestorm);

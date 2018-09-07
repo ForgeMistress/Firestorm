@@ -35,21 +35,25 @@ clearFilters()
 
 
 if os.ishost("windows") then
-    defines({ "ELF_PLATFORM_WINDOWS" })
+    defines({ "FIRE_PLATFORM_WINDOWS" })
 end
 
 filter("action:xcode*")
-    defines({ "ELF_XCODE" })
+    defines({ "FIRE_XCODE" })
 clearFilters()
 
 if os.ishost("macosx") then
-    defines({ "ELF_PLATFORM_OSX" })
+    defines({ "FIRE_PLATFORM_OSX" })
 end
 
 filter("action:gmake*")
-    defines({ "ELF_GMAKE" })
+    defines({ "FIRE_GMAKE" })
 clearFilters()
 
 if os.ishost("linux") then
-    defines({ "ELF_PLATFORM_UNIX" })
+    defines({ "FIRE_PLATFORM_UNIX" })
+end
+
+if _OPTIONS["gfxapi"] == "OpenGL" then
+    defines({"FIRE_GFX_OPENGL3"})
 end

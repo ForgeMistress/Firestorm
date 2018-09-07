@@ -20,13 +20,20 @@ RefPtr<TestHarness> libIOPrepareHarness(int ac, char** av);
 RefPtr<TestHarness> libMirrorPrepareHarness(int ac, char** av);
 RefPtr<TestHarness> libScriptPrepareHarness(int ac, char** av);
 
+uint32_t RunTest(RefPtr<TestHarness>& harness)
+{
+    FIRE_LOG_DEBUG("Running TestHarness", harness->GetName());
+    return harness->Run();
+}
+
 int main(int ac, char** av)
 {
+    libCore::Initialize(ac,av);
     libExistence::Initialize(ac,av);
+    libHarnessed::Initialize(ac,av);
     libIO::Initialize(ac,av);
     libMirror::Initialize(ac,av);
     libScript::Initialize(ac,av);
-
     Vector<RefPtr<TestHarness>> TESTS = {
         libCorePrepareHarness(ac, av),
         libExistencePrepareHarness(ac, av),
