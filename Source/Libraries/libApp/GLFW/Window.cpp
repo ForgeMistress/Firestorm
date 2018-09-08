@@ -25,27 +25,34 @@ Window::~Window()
 // LLGL implementations.
 void Window::SetPosition(const LLGL::Offset2D& position)
 {
-
+	if(_windowHandle)
+		glfwSetWindowPos(_windowHandle, position.x, position.y);
 }
 
 LLGL::Offset2D Window::GetPosition() const
 {
-
+	LLGL::Offset2D offset;
+	if(_windowHandle)
+		glfwGetWindowPos(_windowHandle, &offset.x, &offset.y);
+	return offset;
 }
 
 void Window::SetSize(const LLGL::Extent2D& size, bool useClientArea)
 {
-
+	if(_windowHandle)
+		glfwSetWindowSize(_windowHandle, size.width, size.height);
 }
 
 LLGL::Extent2D Window::GetSize(bool useClientArea) const
 {
-
+	int width, height;
+	if(_windowHandle)
+		glfwGetWindowSize(_windowHandle, &width, &height);
+	return LLGL::Extent2D(width, height);
 }
 
 void Window::SetTitle(const std::wstring& title)
 {
-
 }
 
 std::wstring Window::GetTitle() const
