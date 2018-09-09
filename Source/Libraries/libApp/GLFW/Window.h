@@ -43,10 +43,11 @@ public:
 protected:
 	virtual void OnProcessEvents();
 
+	void InitializeWindowHandle(const LLGL::WindowDescriptor& desc);
+
 private:
-	bool _isShowing{ true };
-	LLGL::WindowDescriptor _descriptor;
-	GLFWwindow* _windowHandle;
+	mutable LLGL::WindowDescriptor _descriptor;
+	GLFWwindow* _windowHandle{ nullptr };
 };
 
 CLOSE_NAMESPACE(Firestorm);

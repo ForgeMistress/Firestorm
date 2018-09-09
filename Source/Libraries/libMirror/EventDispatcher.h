@@ -172,6 +172,12 @@ public:
 		}
 	}
 
+	template <class Arg_t>
+	bool HasRegisteredEvents()
+	{
+		return _events.find(Arg_t::MyType()) != _events.end();
+	}
+
 	size_t GetNumRegisteredEvents();
 	size_t GetNumRegisteredReceipts();
 

@@ -11,6 +11,7 @@ configureEngineLib("libApp")
 
 includedirs({
     "ThirdParty",
+    "ThirdParty/glfw/include",
     "ThirdParty/rttr/src",
     "ThirdParty/LLGL/include"
 })

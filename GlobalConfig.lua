@@ -12,9 +12,9 @@ include("UnitTestMainTemplate")
 
 ENGINE_LIB_SOURCE_DIR  = "Source/Libraries"
 ENGINE_APP_SOURCE_DIR  = "Source/Applications"
-ENGINE_TST_SOURCE_DIR = "Source/Tests"
+ENGINE_TST_SOURCE_DIR  = "Source/Tests"
 ENGINE_LIB_OUTPUT_DIR  = "Build/Libraries/%{cfg.architecture}/%{cfg.buildcfg}"
-ENGINE_APP_OUTPUT_DIR = "Build/Applications/%{cfg.architecture}/%{cfg.buildcfg}"
+ENGINE_APP_OUTPUT_DIR  = "Build/Applications/%{cfg.architecture}/%{cfg.buildcfg}"
 
 ENGINE_LIBS = {}
 ENGINE_GAME_LIBS = {}
@@ -70,13 +70,49 @@ function configureEngineLib(libName)
     links({"rttr"})
 end
 
-function configureApplication(appname)
+function configureToolsApplication(appName, gameName)
+    clearFilters()
+
+    print("--", "Generating projects for tools application: "..appName..".")
+
+    group("Tools")
+    project(appName)
+    language("C++")
+    cppdialect("C++17")
+    kind("ConsoleApp")
+
+    targetdir(ENGINE_APP_OUTPUT_DIR)
+
+    includedirs({
+        ENGINE_APP_SOURCE_DIR,
+        ENGINE_LIB_SOURCE_DIR,
+        "ThirdParty",
+        "ThirdParty/rttr/src",
+        "ThirdParty/glfw/deps",
+        "ThirdParty/glfw/include",
+        "ThirdParty/LLGL/include",
+        "ThirdParty/angelscript/sdk/angelscript/include"
+    })
+    libdirs({ ENGINE_APP_OUTPUT_DIR, ENGINE_LIB_OUTPUT_DIR })
+
+    pchheader("stdafx.h")
+    pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
+
+    addDependencies(ENGINE_GAME_LIBS)
+    links({
+        "lib"..gameName
+    })
+
+    files({
+        ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
+        ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
+    })
 end
 
 function configureGame(gameName)
     clearFilters()
 
-    print("--", "Generating project for Game: "..gameName..".")
+    print("--", "Generating projects for Game: "..gameName..".")
 
     group("Games")
     project(gameName)
@@ -102,10 +138,52 @@ function configureGame(gameName)
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
 
     addDependencies(ENGINE_GAME_LIBS)
+    links({
+        "lib"..gameName
+    })
 
     files({
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
+    })
+end
+
+function configureGameLib(gameName)
+    clearFilters()
+
+    print("--", "Generating projects for Game library: lib"..gameName..".")
+
+    group("Games")
+    project("lib"..gameName)
+    language("C++")
+    cppdialect("C++17")
+    kind("ConsoleApp")
+
+    targetdir(ENGINE_APP_OUTPUT_DIR)
+
+    includedirs({
+        ENGINE_APP_SOURCE_DIR,
+        ENGINE_LIB_SOURCE_DIR,
+        "ThirdParty",
+        "ThirdParty/rttr/src",
+        "ThirdParty/glfw/deps",
+        "ThirdParty/glfw/include",
+        "ThirdParty/LLGL/include",
+        "ThirdParty/angelscript/sdk/angelscript/include"
+    })
+    libdirs({
+        ENGINE_APP_OUTPUT_DIR,
+        ENGINE_LIB_OUTPUT_DIR
+    })
+
+    pchheader("stdafx.h")
+    pchsource(ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/stdafx.cpp")
+
+    addDependencies(ENGINE_GAME_LIBS)
+
+    files({
+        ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/**.h",
+        ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/**.cpp"
     })
 end
 

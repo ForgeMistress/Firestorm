@@ -1,5 +1,3 @@
-
-
 #ifndef LIBCORE_H_
 #define LIBCORE_H_
 #pragma once
@@ -149,6 +147,11 @@ template <class T> using RemovePointer = std::remove_pointer<T>;
 template <class T> using AddPointer = std::add_pointer<T>;
 
 CLOSE_NAMESPACE(Traits);
+
+struct libCore
+{
+	static void Initialize(int ac, char** av);
+};
 
 CLOSE_NAMESPACE(Firestorm);
 
