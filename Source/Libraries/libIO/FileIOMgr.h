@@ -7,13 +7,18 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBMIRROR_FILEIOMGR_H_
-#define LIBMIRROR_FILEIOMGR_H_
+#ifndef LIBIO_FILEIOMGR_H_
+#define LIBIO_FILEIOMGR_H_
 #pragma once
 
-#include "File.h"
+#include <libCore/Expected.h>
+#include <libCore/Result.h>
+
+#include <libMirror/EventDispatcher.h>
 
 OPEN_NAMESPACE(Firestorm);
+
+typedef RefPtr<class File> FileHandle;
 
 class FileIOMgr final
 {
@@ -23,19 +28,40 @@ public:
 		ERROR_FILE_ALREADY_QUEUED, //< The file is already queued for load.
 		ERROR_FILE_ALREADY_LOADED  //< The file already has data and thus, is already loaded.
 	};
-	typedef RefPtr<File> FileHandle;
-
-	enum QueueType
-	{
-		QUEUE_ASYNC,
-		QUEUE_SYNC
-	};
 
 	typedef Function<void(const FileIOMgr*, FileHandle, Result<void, Error>)> ReadErrorCallback_f;
-	typedef Function<void(const FileIOMgr*, FileHandle, Result<void, Error>)> WriteErrorCallback_f;
+	struct QueueEntry
+	{
+		FileHandle file;
+	};
+	typedef List<QueueEntry> FileQueue;
+	typedef List<QueueEntry> FileList;
 
+	struct ThreadInfo
+	{
+		ThreadInfo(FileIOMgr* mgr);
+
+		FileIOMgr* _mgr;
+		Mutex _fileAsyncReadQueueMutex;
+		FileQueue _fileAsyncReadQueue;
+
+		Atomic<bool> _isProcessing;
+
+		Mutex _fileCacheMutex;
+		UnorderedMap<String, FileHandle> _fileCache;
+	};
+
+	struct ReadEvent
+	{
+		FIRE_MIRROR_DECLARE(ReadEvent);
+	public:
+		ReadEvent(FileHandle file, Result<Vector<char>, Error> result);
+		FileHandle File;
+		Result<Vector<char>, Error> Result;
+	};
 public:
 	FileIOMgr();
+	~FileIOMgr();
 
 	/**
 		Process the files that have been queued for read and write.
@@ -51,41 +77,22 @@ public:
 		Queue a file returned by \ref GetFile to be read from disk.
 		\return result the result of the operation. Error can have 
 	 **/
-	Result<void, Error> QueueFileForRead(FileHandle file, QueueType queueType, bool overwrite = false);
-	bool CancelQueuedRead(FileHandle file);
-
-	Result<void, Error> QueueFileForWrite(FileHandle file, QueueType queueType);
-	bool CancelQueuedWrite(FileHandle file);
-
-
-	struct ReadCallbackReceipt_;
-	typedef RefPtr<ReadCallbackReceipt_> ReadCallbackReceipt;
-	friend struct ReadCallbackReceipt_;
-
-	struct WriteCallbackReceipt_;
-	typedef RefPtr<WriteCallbackReceipt_> WriteCallbackReceipt;
-	friend struct WriteCallbackReceipt_;
-
-	ReadCallbackReceipt RegisterReadErrorCallback(ReadErrorCallback_f readCallback);
-	WriteCallbackReceipt RegisterWriteErrorCallback(WriteErrorCallback_f readCallback);
+	Result<void, Error> QueueFileForSyncRead(FileHandle file, bool overwrite = false);
+	Result<void, Error> QueueFileForAsyncRead(FileHandle file, bool overwrite = false);
+	bool CancelQueuedSyncRead(FileHandle file);
 
 	/**
 		Retrieve the number of 
 	 **/
 
+	bool IsProcessing() const;
 
+	void Shutdown();
+
+	EventDispatcher Dispatcher;
 
 private:
-	void UnregisterReadErrorCallback(const ReadErrorCallback_f& callback);
-	void UnregisterWriteErrorCallback(const WriteErrorCallback_f& callback);
-
-	struct QueueEntry
-	{
-		FileHandle file;
-		QueueType  type;
-	};
-	typedef List<QueueEntry> FileQueue;
-	typedef List<QueueEntry> FileList;
+	void Initialize();
 
 	// pops out the first item in the list.
 	QueueEntry PopFromFront(FileQueue& queue) const;
@@ -95,17 +102,11 @@ private:
 
 	bool IsInQueue(FileQueue& queue, FileHandle file, QueueEntry& entry);
 
-	FileQueue m_fileReadQueue;
-	FileQueue m_fileWriteQueue;
+	ThreadInfo* _threadInfo;
 
-	FileList m_filesBeingRead;
-	FileList m_filesBeingWritten;
+	FileQueue _fileSyncReadQueue;
 
-	List<ReadErrorCallback_f> m_readErrorCallbacks;
-	List<WriteErrorCallback_f> m_writeErrorCallbacks;
-
-	// Cache of files who have had handles returned already.
-	mutable UnorderedMap<String, FileHandle> m_fileCache;
+	Thread _asyncReadThread;
 };
 
 CLOSE_NAMESPACE(Firestorm);

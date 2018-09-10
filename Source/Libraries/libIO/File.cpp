@@ -2,12 +2,13 @@
 #include "stdafx.h"
 #include "File.h"
 
+#include <physfs/physfs.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 File::File(const FileIOMgr* fileIOMgr, const String& filename)
-: m_mgr(fileIOMgr)
-, m_impl(new Impl())
-, m_state(STATE_UNLOADED)
+: _mgr(fileIOMgr)
+, _state(STATE_UNLOADED)
 {
 }
 
@@ -18,7 +19,7 @@ bool File::Exists() const
 
 const String& File::GetFilename() const
 {
-	return m_filename;
+	return _filename;
 }
 
 const String& File::GetFileExtension() const
@@ -43,27 +44,27 @@ uint16_t File::GetFileSize() const
 
 size_t File::GetDataSize() const
 {
-	return m_data.size();
+	return _data.size();
 }
 
 bool File::HasData() const
 {
-	return m_data.empty();
+	return _data.empty();
 }
 
 const DataBuffer& File::GetData() const
 {
-	return m_data;
+	return _data;
 }
 
 DataBuffer& File::GetData()
 {
-	return m_data;
+	return _data;
 }
 
 File::State File::GetState() const
 {
-	return m_state;
+	return _state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,82 +72,88 @@ File::State File::GetState() const
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void File::SetState(State state)
 {
-	m_state = state;
+	_state = state;
 }
 
 void File::ClearDataBuffer()
 {
-	if(m_state == STATE_LOADED || m_state == STATE_UNLOADED)
+	if(_state == STATE_LOADED || _state == STATE_UNLOADED)
 	{
-		m_data.clear();
-		m_state = STATE_UNLOADED;
+		_data.clear();
+		_state = STATE_UNLOADED;
 	}
 }
 
 Result<void, Error> File::InvokeWriteCallback(const WriteResult& result)
 {
-	if(m_state == STATE_WRITING_TO_DISK)
+	if(_state == STATE_WRITING_TO_DISK)
 	{
 		return FIRE_RESULT(void);
 	}
-	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not invoke write callback. '" + m_filename + "' is not queued for write");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not invoke write callback. '" + _filename + "' is not queued for write");
 }
 
 Result<void, Error> File::InvokeReadCallback(const ReadResult& result)
 {
-	if(m_state == STATE_READING_FROM_DISK)
+	if(_state == STATE_READING_FROM_DISK)
 	{
 		return FIRE_RESULT(void);
 	}
-	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not invoke read callback. '" + m_filename + "' is not queued for read");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not invoke read callback. '" + _filename + "' is not queued for read");
 }
 
 Result<void, Error> File::PerformDiskWriteSync()
 {
-	if(m_state == STATE_QUEUED_FOR_WRITE)
+	if(_state == STATE_QUEUED_FOR_WRITE)
 	{
-		m_state = STATE_WRITING_TO_DISK;
+		_state = STATE_WRITING_TO_DISK;
 	}
-	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not write data to disk. '" + m_filename + "' is not queued for write");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not write data to disk. '" + _filename + "' is not queued for write");
 }
 
 Result<void, Error> File::PerformDiskWriteAsync()
 {
-	if(m_state == STATE_QUEUED_FOR_WRITE)
+	if(_state == STATE_QUEUED_FOR_WRITE)
 	{
-		m_state = STATE_WRITING_TO_DISK;
+		_state = STATE_WRITING_TO_DISK;
 	}
-	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not write data to disk. '" + m_filename + "' is not queued for write");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not write data to disk. '" + _filename + "' is not queued for write");
 }
 
 Result<void, Error> File::PerformDiskReadSync()
 {
-	if(m_state == STATE_QUEUED_FOR_READ)
+	if(_state == STATE_QUEUED_FOR_READ)
 	{
-		m_state = STATE_READING_FROM_DISK;
-		Result<DataBuffer, Error> result = m_impl->PerformDiskReadSync(m_filename);
-		if(result.has_value())
+		_state = STATE_READING_FROM_DISK;
+		PHYSFS_File* file = PHYSFS_openRead(_filename.c_str());
+		if(file)
 		{
-			m_data = std::move(result.value());
-			m_state = STATE_LOADED;
+			size_t len = PHYSFS_fileLength(file);
+			_data.clear();
+			_data.reserve(len);
+
+			PHYSFS_readBytes(file, &_data[0], len);
+			PHYSFS_close(file);
+			_state = STATE_LOADED;
+
 			return FIRE_RESULT(void);
 		}
 		else
 		{
-			m_state = STATE_UNLOADED;
-			return FIRE_ERROR(ERROR_COULD_NOT_READ_DATA, "error reading '" + m_filename + "' from disk : " + result.error().Message);
+			_state = STATE_UNLOADED;
+			return FIRE_ERROR(ERROR_COULD_NOT_READ_DATA, String(PHYSFS_getLastError()));
 		}
 	}
-	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not read data from disk. '" + m_filename + "' is not queued for load");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not read data from disk. '" + _filename + "' is not queued for load");
 }
 
 Result<void, Error> File::PerformDiskReadAsync()
 {
-	if(m_state == STATE_QUEUED_FOR_READ)
+	if(_state == STATE_QUEUED_FOR_READ)
 	{
-		m_state = STATE_READING_FROM_DISK;
+		_state = STATE_READING_FROM_DISK;
 	}
-	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not read data from disk. '" + m_filename + "' is not queued for load");
+	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not read data from disk. '" + _filename + "' is not queued for load");
 }
 
 

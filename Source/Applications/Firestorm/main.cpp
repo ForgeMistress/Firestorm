@@ -1,9 +1,20 @@
 #include "stdafx.h"
 
-#include <libIO/libIO.h>
-#include <libIO/Logger.h>
-
 #include <libApp/libApp.h>
+#include <libCore/libCore.h>
+#include <libExistence/libExistence.h>
+#include <libIO/libIO.h>
+#include <libJson/libJson.h>
+#include <libMath/libMath.h>
+#include <libMirror/libMirror.h>
+#include <libScene/libScene.h>
+#include <libScript/libScript.h>
+#include <libSerial/libSerial.h>
+#include <libUI/libUI.h>
+
+#include <libIO/Logger.h>
+#include <libIO/FileIOMgr.h>
+
 #include <libApp/Application.h>
 
 using namespace Firestorm;
@@ -17,7 +28,9 @@ public:
 	virtual int  OnShutdown();
 
 	void HandleApplicationWantsToClose(const ApplicationWantsToCloseEvent& event);
+
 private:
+	FileIOMgr _fileIOMgr;
 };
 
 void FirestormApp::OnInitialize(int ac, char** av)
@@ -27,10 +40,12 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 void FirestormApp::OnUpdate(double deltaT)
 {
+	_fileIOMgr.ProcessQueues();
 }
 
 void FirestormApp::OnClose()
 {
+	_fileIOMgr.Shutdown();
 }
 
 int FirestormApp::OnShutdown()

@@ -49,8 +49,8 @@ private:
 		The constructor for a File object.
 	 **/
 	File(const FileIOMgr* fileIOMgr, const String& filename);
-
 public:
+	virtual ~File() {}
 	/**
 		Check whether or not the file even exists.
 	 **/
@@ -106,7 +106,7 @@ public:
 	 **/
 	State GetState() const;
 
-private:
+public:
 	void SetState(State state);
 
 	void ClearDataBuffer();
@@ -121,52 +121,15 @@ private:
 
 private:
 	// reference to the FileIOMgr that created this object.
-	const FileIOMgr* m_mgr;
+	const FileIOMgr* _mgr;
 
 	// the data that has been loaded from disk, if any.
-	DataBuffer m_data;
+	DataBuffer _data;
 
 	// filename that was passed to the file object.
-	String m_filename;
+	String _filename;
 
-	mutable State m_state;
-
-	mutable AsyncWriteCallback_f m_writeCallback;
-	mutable AsyncWriteCallback_f m_readCallback;
-
-	/**
-		The implementation of the IO logic for each platform. Implement the following for each platform.
-			* Constructor - Use implData for any platform specific data that is required.
-			* PerformDiskRead
-			* PerformDiskWrite
-	 **/
-	struct Impl
-	{
-		Impl();
-		~Impl()
-		{
-			if(m_data) delete m_data;
-		}
-
-		/**
-			Perform a synchronous disk read.
-		 **/
-		Result<DataBuffer, Error> PerformDiskReadSync(const String& filename);
-
-		/**
-			Perform a synchronous disk write.
-		 **/
-		Result<void, Error> PerformDiskWriteSync(const String& filename, const DataBuffer& data);
-
-		/**
-			Convenience function to cast the data to the platform specific type data.
-		 **/
-		template <class T>
-		T* GetData() { return static_cast<T*>(m_data); }
-
-		void* m_data;
-	};
-	std::unique_ptr<Impl> m_impl;
+	mutable Atomic<State> _state;
 };
 
 CLOSE_NAMESPACE(Firestorm);

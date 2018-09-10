@@ -16,7 +16,12 @@ includedirs({
     "ThirdParty/LLGL/include"
 })
 
-addDependencies(ENGINE_GAME_LIBS)
+for _,v in ipairs(ENGINE_GAME_LIBS) do
+    if v ~= "libApp" then
+        addDependencies({v})
+    end
+end
+-- addDependencies(ENGINE_GAME_LIBS)
 
 links({
     "LLGL"

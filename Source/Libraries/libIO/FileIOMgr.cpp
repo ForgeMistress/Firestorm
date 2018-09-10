@@ -10,73 +10,103 @@
 #include "stdafx.h"
 #include "FileIOMgr.h"
 
+#include "File.h"
+
+#include <physfs/physfs.h>
+
 OPEN_NAMESPACE(Firestorm);
 
-
-struct FileIOMgr::ReadCallbackReceipt_
-{
-	ReadCallbackReceipt_(const RefPtr<FileIOMgr>& mgr, FileIOMgr::ReadErrorCallback_f callback)
-	: m_mgr(mgr)
-	, m_callback(callback)
+namespace {
+	static void FileIOMgr_AsyncThread(FileIOMgr::ThreadInfo* info)
 	{
-	}
-
-	~ReadCallbackReceipt_()
-	{
-		if(auto mgr = m_mgr.Lock())
-			mgr->UnregisterReadErrorCallback(m_callback);
-	}
-	WeakPtr<FileIOMgr>             m_mgr;
-	FileIOMgr::ReadErrorCallback_f m_callback;
-};
-
-struct FileIOMgr::WriteCallbackReceipt_
-{
-	WriteCallbackReceipt_(const RefPtr<FileIOMgr>& mgr, FileIOMgr::WriteErrorCallback_f callback)
-	: m_mgr(mgr)
-	, m_callback(callback)
-	{
-	}
-
-	~WriteCallbackReceipt_()
-	{
-		if(auto mgr = m_mgr.Lock())
-			mgr->UnregisterReadErrorCallback(m_callback);
-	}
-	WeakPtr<FileIOMgr>              m_mgr;
-	FileIOMgr::WriteErrorCallback_f m_callback;
-};
-
-
-FileIOMgr::FileIOMgr()
-{
-}
-
-void FileIOMgr::ProcessQueues()
-{
-	if(!m_fileReadQueue.empty())
-	{
-		auto entry = m_fileReadQueue.front();
-		m_fileReadQueue.pop_front();
-		if(entry.type == QUEUE_SYNC)
+		while(info->_isProcessing)
 		{
-			Result<void, Error> result = entry.file->PerformDiskReadSync();
+			info->_fileAsyncReadQueueMutex.lock();
+			if(!info->_fileAsyncReadQueue.empty())
+			{
+				FileIOMgr::QueueEntry entry(info->_fileAsyncReadQueue.back());
+				info->_fileAsyncReadQueue.pop_back();
+				info->_fileAsyncReadQueueMutex.unlock();
 
+				// load the file
+				Result<void,Error> result = entry.file->PerformDiskReadSync();
+				if(result.has_value())
+				{
+					info->_mgr->Dispatcher.Dispatch(FileIOMgr::ReadEvent{ 
+						entry.file,
+						FIRE_RESULT(Vector<char>, entry.file->GetData())
+					});
+				}
+				else
+				{
+					info->_mgr->Dispatcher.Dispatch(FileIOMgr::ReadEvent{
+						entry.file,
+						FIRE_ERROR(result.error().Code, result.error().Message)
+					});
+				}
+			}
+			else
+			{
+				info->_fileAsyncReadQueueMutex.unlock();
+			}
 		}
 	}
 }
 
-FileIOMgr::FileHandle FileIOMgr::GetFile(const String& filename) const
+FileIOMgr::ThreadInfo::ThreadInfo(FileIOMgr* mgr)
+: _mgr(mgr)
+, _isProcessing(true)
 {
-	if(m_fileCache.find(filename) == m_fileCache.end())
-	{
-		FileHandle file(new File(this, filename));
-		m_fileCache[filename] = file;
-	}
-	return m_fileCache[filename];
 }
 
-Result<void, Error> FileIOMgr::QueueFileForRead(FileHandle file, QueueType queueType, bool overwrite)
+FileIOMgr::ReadEvent::ReadEvent(FileHandle file, Firestorm::Result<Vector<char>, Error> result)
+: File(file)
+, Result(result)
+{
+}
+
+FileIOMgr::FileIOMgr()
+: _threadInfo(new ThreadInfo(this))
+, _asyncReadThread(FileIOMgr_AsyncThread, _threadInfo)
+{
+	Initialize();
+}
+
+FileIOMgr::~FileIOMgr()
+{
+	Shutdown();
+	delete _threadInfo;
+}
+
+void FileIOMgr::ProcessQueues()
+{
+	if(_threadInfo->_isProcessing)
+	{
+		if(!_fileSyncReadQueue.empty())
+		{
+			auto entry = _fileSyncReadQueue.front();
+			_fileSyncReadQueue.pop_front();
+			Result<void, Error> result = entry.file->PerformDiskReadSync();
+			if (result.has_value())
+			{
+				entry.file->SetState(File::STATE_LOADED);
+			}
+		}
+	}
+}
+
+FileHandle FileIOMgr::GetFile(const String& filename) const
+{
+	std::scoped_lock lock(_threadInfo->_fileCacheMutex);
+	if(_threadInfo->_fileCache.find(filename) == _threadInfo->_fileCache.end())
+	{
+		FileHandle file(new File(this, filename));
+		_threadInfo->_fileCache[filename] = file;
+	}
+	return _threadInfo->_fileCache[filename];
+}
+
+Result<void, Error> FileIOMgr::QueueFileForSyncRead(FileHandle file, bool overwrite)
 {
 	const String& filename = file->GetFilename();
 
@@ -87,9 +117,10 @@ Result<void, Error> FileIOMgr::QueueFileForRead(FileHandle file, QueueType queue
 	}
 	else
 	{
-		if(m_fileCache.find(filename) != m_fileCache.end())
+		std::scoped_lock lock(_threadInfo->_fileCacheMutex);
+		if(_threadInfo->_fileCache.find(filename) != _threadInfo->_fileCache.end())
 		{
-			if(m_fileCache[filename]->GetState() == File::STATE_LOADED)
+			if(_threadInfo->_fileCache[filename]->GetState() == File::STATE_LOADED)
 			{
 				// It's already loaded.
 				return FIRE_ERROR(ERROR_FILE_ALREADY_LOADED, "file with name '" + filename + "' is already loaded");
@@ -97,53 +128,47 @@ Result<void, Error> FileIOMgr::QueueFileForRead(FileHandle file, QueueType queue
 		}
 	}
 
-	if(!PushInBack(m_fileReadQueue, QueueEntry{ file, queueType }))
+	if(!PushInBack(_fileSyncReadQueue, QueueEntry{ file }))
 	{
 		return FIRE_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + filename + "' is already queued for read");
 	}
 	return FIRE_RESULT(void);
 }
 
-bool FileIOMgr::CancelQueuedRead(FileHandle file)
+Result<void, Error> FileIOMgr::QueueFileForAsyncRead(FileHandle file, bool overwrite)
 {
-	bool removed = false;
-	m_fileReadQueue.remove_if([&file, &removed](const QueueEntry& entry) {
-		if(entry.file == file)
+	const String& filename = file->GetFilename();
+
+	// If we're allowing overwrites, then clear the internal data buffer.
+	if(overwrite)
+	{
+		file->ClearDataBuffer();
+	}
+	else
+	{
+		std::scoped_lock lock(_threadInfo->_fileCacheMutex);
+		if(_threadInfo->_fileCache.find(filename) != _threadInfo->_fileCache.end())
 		{
-			removed = true;
-			return true;
+			if(_threadInfo->_fileCache[filename]->GetState() == File::STATE_LOADED)
+			{
+				// It's already loaded.
+				return FIRE_ERROR(ERROR_FILE_ALREADY_LOADED, "file with name '" + filename + "' is already loaded");
+			}
 		}
-		return false;
-	});
-	return removed;
-}
-
-Result<void, Error> FileIOMgr::QueueFileForWrite(FileHandle file, QueueType queueType)
-{
-	auto findFunction = [&file](const QueueEntry& entry) {
-		return entry.file == file;
-	};
-
-	auto foundRead = std::find_if(m_fileReadQueue.begin(), m_fileReadQueue.end(), findFunction);
-	if(foundRead != m_fileReadQueue.end())
-	{
-		return FIRE_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + file->GetFilename() + "' already queued for read in call to QueueFileForWrite");
 	}
 
-	auto foundWrite = std::find_if(m_fileWriteQueue.begin(), m_fileWriteQueue.end(), findFunction);
-	if(foundWrite != m_fileWriteQueue.end())
+	std::scoped_lock lock(_threadInfo->_fileAsyncReadQueueMutex);
+	if(!PushInBack(_threadInfo->_fileAsyncReadQueue, QueueEntry{ file }))
 	{
-		return FIRE_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + file->GetFilename() + "' already queued for write in call to QueueFileForWrite");
+		return FIRE_ERROR(ERROR_FILE_ALREADY_QUEUED, "file with name '" + filename + "' is already queued for read");
 	}
-
-	m_fileWriteQueue.push_back(QueueEntry{ file, queueType });
 	return FIRE_RESULT(void);
 }
 
-bool FileIOMgr::CancelQueuedWrite(FileHandle file)
+bool FileIOMgr::CancelQueuedSyncRead(FileHandle file)
 {
 	bool removed = false;
-	m_fileWriteQueue.remove_if([&file, &removed](const QueueEntry& entry) {
+	_fileSyncReadQueue.remove_if([&file, &removed](const QueueEntry& entry) {
 		if(entry.file == file)
 		{
 			removed = true;
@@ -154,32 +179,21 @@ bool FileIOMgr::CancelQueuedWrite(FileHandle file)
 	return removed;
 }
 
-FileIOMgr::ReadCallbackReceipt FileIOMgr::RegisterReadErrorCallback(ReadErrorCallback_f callback)
+bool FileIOMgr::IsProcessing() const
 {
-	/*if(std::find(m_readErrorCallbacks.begin(), m_readErrorCallbacks.end(), callback) == m_readErrorCallbacks.end())
-	{
-		return std::make_shared<ReadCallbackReceipt_>(SharedPtr<FileIOMgr>(this), callback);
-	}*/
-	return nullptr;
+	return _threadInfo->_isProcessing;
 }
 
-FileIOMgr::WriteCallbackReceipt FileIOMgr::RegisterWriteErrorCallback(WriteErrorCallback_f callback)
+void FileIOMgr::Shutdown()
 {
-	/*if(std::find(m_writeErrorCallbacks.begin(), m_writeErrorCallbacks.end(), callback) == m_readErrorCallbacks.end())
-	{
-		return std::make_shared<WriteCallbackReceipt_>(SharedPtr<FileIOMgr>(this), callback);
-	}*/
-	return nullptr;
+	_threadInfo->_isProcessing = false;
+	_asyncReadThread.join();
+	_fileSyncReadQueue.clear();
 }
 
-void FileIOMgr::UnregisterReadErrorCallback(const ReadErrorCallback_f& callback)
+void FileIOMgr::Initialize()
 {
-	//m_readErrorCallbacks.remove(callback);
-}
-
-void FileIOMgr::UnregisterWriteErrorCallback(const WriteErrorCallback_f& callback)
-{
-	//m_writeErrorCallbacks.remove(callback);
+	_threadInfo->_isProcessing = true;
 }
 
 FileIOMgr::QueueEntry FileIOMgr::PopFromFront(FileQueue& queue) const

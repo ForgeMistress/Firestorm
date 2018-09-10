@@ -9,9 +9,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Surface.h"
-#include "Application.h"
+#include "../Application.h"
 
+#include <libCore/libCore.h>
 #include <glfw/glfw3native.h>
+#include <LLGL/LLGL.h>
+#include <LLGL/Platform/NativeHandle.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -121,10 +124,13 @@ Surface::Surface(class Application* app, const LLGL::Extent2D& size, const Strin
 
 Surface::~Surface()
 {
-	glfwDestroyWindow(_window);
+	if(_window)
+	{
+		glfwDestroyWindow(_window);
 
-	// TODO: Temporary! Must abstract this.
-	glfwTerminate();
+		// TODO: Temporary! Must abstract this.
+		glfwTerminate();
+	}
 }
 
 void Surface::GetNativeHandle(void* nativeHandle) const
@@ -198,23 +204,21 @@ void Surface::SetJoystickUserData(int jid, void* userData)
 
 GLFWwindow* Surface::CreateGLFWWindow()
 {
-	if(!glfwInit())
+	if(glfwInit() == GLFW_FALSE)
 	{
 		throw std::runtime_error("could not initialize GLFW");
 	}
-
 	auto wnd = glfwCreateWindow(_size.width, _size.height, _title.c_str(), nullptr, nullptr);
 	if(!wnd)
 		throw std::runtime_error(String(String("could not create GLFW window titled ") + _title).c_str());
-	
+
 	glfwSetWindowUserPointer(wnd, this);
-	glfwSetCharCallback(_window, GLFW_CharCallback);
-	glfwSetCharModsCallback(_window, GLFW_CharModsCallback);
-	glfwSetMouseButtonCallback(_window, GLFW_MouseButtonCallback);
-	glfwSetCursorPosCallback(_window, GLFW_CursorPosCallback);
-	glfwSetKeyCallback(_window, GLFW_KeyCallback);
-	glfwSetScrollCallback(_window, GLFW_ScrollCallback);
-	// glfwSetJoystickCallback(GLFW_JoystickCallback);
+	glfwSetCharCallback(wnd, GLFW_CharCallback);
+	glfwSetCharModsCallback(wnd, GLFW_CharModsCallback);
+	glfwSetMouseButtonCallback(wnd, GLFW_MouseButtonCallback);
+	glfwSetCursorPosCallback(wnd, GLFW_CursorPosCallback);
+	glfwSetKeyCallback(wnd, GLFW_KeyCallback);
+	glfwSetScrollCallback(wnd, GLFW_ScrollCallback);
 
 	return wnd;
 }

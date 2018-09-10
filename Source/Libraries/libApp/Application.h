@@ -93,7 +93,19 @@ CLOSE_NAMESPACE(Firestorm);
 #define FIRE_RUN_APPLICATION(CLASS_NAME) \
 	int main(int ac, char** av) \
 	{ \
-		Firestorm::Application* app = new CLASS_NAME(); \
+		::Firestorm :: libApp :: Initialize(ac,av);\
+		::Firestorm :: libCore :: Initialize(ac,av);\
+		::Firestorm :: libExistence :: Initialize(ac,av);\
+		::Firestorm :: libIO :: Initialize(ac,av);\
+		::Firestorm :: libJson :: Initialize(ac,av);\
+		::Firestorm :: libMath :: Initialize(ac,av);\
+		::Firestorm :: libMirror :: Initialize(ac,av); \
+		::Firestorm :: libScene :: Initialize(ac,av);\
+		::Firestorm :: libScript :: Initialize(ac,av);\
+		::Firestorm :: libSerial :: Initialize(ac,av);\
+		::Firestorm :: libUI :: Initialize(ac,av);\
+\
+		::Firestorm::Application* app = new CLASS_NAME(); \
 		FIRE_ASSERT(app && "application could not be initialized"); \
 		app->Initialize(ac, av); \
 		int result = app->Run(); \

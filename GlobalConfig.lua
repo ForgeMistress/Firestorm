@@ -146,6 +146,7 @@ function configureGame(gameName)
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
     })
+    debugdir(".")
 end
 
 function configureGameLib(gameName)
@@ -157,7 +158,7 @@ function configureGameLib(gameName)
     project("lib"..gameName)
     language("C++")
     cppdialect("C++17")
-    kind("ConsoleApp")
+    kind("StaticLib")
 
     targetdir(ENGINE_APP_OUTPUT_DIR)
 
@@ -260,6 +261,7 @@ function configureUnitTestApplication()
         "physfs",
         "rttr"
     })
+    debugdir(".")
 end
 
 

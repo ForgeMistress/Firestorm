@@ -12,6 +12,8 @@
 
 #include "InputEvents.h"
 
+#include <libCore/libCore.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 Application* Application::g_theApp = nullptr;
@@ -42,6 +44,7 @@ Application::~Application()
 void Application::Initialize(int ac, char** av)
 {
 	_surface = new Surface(this, LLGL::Extent2D{ 640,480 }, "Firestorm Window");
+
 	_surface->SetInputListener(this);
 	_surface->SetJoystickCallback([](int jid, int event) -> void {
 		if(event == GLFW_CONNECTED)

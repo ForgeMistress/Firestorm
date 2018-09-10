@@ -142,11 +142,13 @@ public:
 		Mirror::Type argType = Arg_t::MyType();
 		IEvent* event = new Event_t(argType, callback);
 
+		_mutex.lock();
 		_events[argType].push_back(event);
 
 		EDReceipt* r = new EDReceipt(const_cast<EventDispatcher*>(this), event);
 		_receipts.push_back(r);
 		_numRegisteredEvents++;
+		_mutex.unlock();
 
 		assert(_numRegisteredEvents == _receipts.size());
 
@@ -157,6 +159,7 @@ public:
 	void Dispatch(const Arg_t& arg)
 	{
 		assert(_numRegisteredEvents == _receipts.size());
+		std::scoped_lock lock(_mutex);
 		EventMap::iterator found = _events.find(Arg_t::MyType());
 		if(found != _events.end())
 		{
@@ -175,6 +178,7 @@ public:
 	template <class Arg_t>
 	bool HasRegisteredEvents()
 	{
+		std::scoped_lock lock(_mutex);
 		return _events.find(Arg_t::MyType()) != _events.end();
 	}
 
@@ -184,6 +188,7 @@ public:
 private:
 	void Unregister(IEvent* event);
 
+	Mutex          _mutex;
 	EventMap       _events;
 	int            _numRegisteredEvents;
 	ReceiptPtrList _receipts;

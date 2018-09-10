@@ -22,6 +22,10 @@
 #include <functional>
 #include <stdint.h>
 #include <type_traits>
+#include <atomic>
+#include <thread>
+#include <mutex>
+#include <shared_mutex>
 
 #include "Expected.h"
 
@@ -72,6 +76,14 @@ template<class Kty,
 static const String str_Default;
 
 using uchar = unsigned char;
+
+template<class T> using Atomic = std::atomic<T>;
+
+using Thread = std::thread;
+
+using Mutex = std::mutex;
+
+using SharedMutex = std::shared_mutex;
 
 // Aliases for type_trait structs in type_traits (C++11)
 OPEN_NAMESPACE(Traits);
