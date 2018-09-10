@@ -12,4 +12,12 @@
 #include "TestHarness.h"
 #include "TestCase.h"
 
+namespace Firestorm
+{
+	struct libHarnessed
+	{
+		static void Initialize(int ac, char** av);
+	};
+}
+
 #endif

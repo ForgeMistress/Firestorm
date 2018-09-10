@@ -145,7 +145,7 @@ function configureGame(gameName)
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
     })
-    debugdir(".")
+    debugdir("Run")
 end
 
 function configureGameLib(gameName)
@@ -183,6 +183,12 @@ function configureGameLib(gameName)
     files({
         ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/**.cpp"
+    })
+    local p = path.getabsolute("Assets")
+    print("Path To Assets:", p)
+    debugargs({
+        "--WorkingDir="..p,
+        "--AppName="..gameName
     })
 end
 
@@ -233,7 +239,7 @@ function configureUnitTestApplication()
     cppdialect("C++17")
     kind("ConsoleApp")
 
-    targetdir("Build/Tests/%{cfg.buildcfg}")
+    targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_LIB_SOURCE_DIR,
@@ -259,7 +265,12 @@ function configureUnitTestApplication()
         "physfs",
         "rttr"
     })
-    debugdir(".")
+    local p = path.getabsolute("Assets")
+    print("Path To Assets:", p)
+    debugargs({
+        "--WorkingDir="..p,
+        "--AppName=UnitTest"
+    })
 end
 
 

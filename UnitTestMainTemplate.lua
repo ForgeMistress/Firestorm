@@ -20,15 +20,10 @@ using namespace Firestorm;
 
 {FWD_DECLARES}
 
-uint32_t RunTest(RefPtr<TestHarness>& harness)
-{
-    FIRE_LOG_DEBUG("Running TestHarness", harness->GetName());
-    return harness->Run();
-}
-
 int main(int ac, char** av)
 {
 {LIB_INITIALIZATIONS}
+
     Vector<RefPtr<TestHarness>> TESTS = {
 {TEST_FUNCTIONS}
     };
