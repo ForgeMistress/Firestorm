@@ -43,7 +43,7 @@ language("C++")
 cppdialect("C++11")
 kind("SharedLib")
 
-targetdir(ENGINE_LIB_OUTPUT_DIR)
+targetdir(ENGINE_BIN_OUTPUT_DIR)
 
 includedirs({
     "ThirdParty",

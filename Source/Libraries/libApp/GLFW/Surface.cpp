@@ -112,6 +112,16 @@ namespace {
 			listener->OnMouseScroll(surface, Vector_2D{ (float)xOffset, (float)yOffset });
 		}
 	}
+
+	/*static bool s_runThread = true;
+
+	static void GLFW_Thread()
+	{
+		while(s_runThread)
+		{
+
+		}
+	}*/
 }
 
 Surface::Surface(class Application* app, const LLGL::Extent2D& size, const String& title)
@@ -119,6 +129,7 @@ Surface::Surface(class Application* app, const LLGL::Extent2D& size, const Strin
 , _size(size)
 , _title(title)
 , _window(CreateGLFWWindow())
+//, _pumpBlankEventThread(GLFW_Thread)
 {
 }
 
@@ -157,6 +168,11 @@ void Surface::ResetPixelFormat()
 	FIRE_ASSERT(_window != nullptr);
 	glfwDestroyWindow(_window);
 	_window = CreateGLFWWindow();
+}
+
+void Surface::SwapBuffers()
+{
+	glfwSwapBuffers(_window);
 }
 
 bool Surface::PollEvents()
@@ -219,6 +235,8 @@ GLFWwindow* Surface::CreateGLFWWindow()
 	glfwSetCursorPosCallback(wnd, GLFW_CursorPosCallback);
 	glfwSetKeyCallback(wnd, GLFW_KeyCallback);
 	glfwSetScrollCallback(wnd, GLFW_ScrollCallback);
+	glfwMakeContextCurrent(wnd);
+	glfwSwapInterval(1);
 
 	return wnd;
 }

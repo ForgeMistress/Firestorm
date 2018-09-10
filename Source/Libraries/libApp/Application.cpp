@@ -64,30 +64,32 @@ int Application::Run()
 	bool windowWantsToClose{ false };
 	double deltaT{ 0.0 };
 	bool isRunning{ true };
-	
+	bool eventDispatched{ false };
 	while(isRunning)
 	{
 		OnUpdate(deltaT);
+		_surface->SwapBuffers();
+		windowWantsToClose = !_surface->PollEvents();
+		bool hasCloseRegistered = Dispatcher.HasRegisteredEvents<ApplicationWantsToCloseEvent>();
 
-		if(!_waitingForCloseResponse)
+		if(windowWantsToClose)
 		{
-			windowWantsToClose = _surface->PollEvents();
-			if(windowWantsToClose)
+			if(hasCloseRegistered)
 			{
-				if(Dispatcher.HasRegisteredEvents<ApplicationWantsToCloseEvent>())
+				_waitingForCloseResponse = true;
+				if(!eventDispatched)
 				{
-					_waitingForCloseResponse = true;
 					Dispatcher.Dispatch(ApplicationWantsToCloseEvent(this));
 				}
-				else
-				{
-					_waitingForCloseResponse = false;
-					_closeAllowed = true;
-					isRunning = false;
-				}
+			}
+			else
+			{
+				_closeAllowed = true;
+				isRunning = false;
 			}
 		}
 	}
+	_surface->Close();
 
 	return OnShutdown();
 }

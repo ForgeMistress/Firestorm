@@ -109,7 +109,6 @@ CLOSE_NAMESPACE(Firestorm);
 		FIRE_ASSERT(app && "application could not be initialized"); \
 		app->Initialize(ac, av); \
 		int result = app->Run(); \
-		app->Close(); \
 		delete app; \
 		return result; \
 	}

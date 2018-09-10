@@ -15,7 +15,7 @@ language("C++")
 cppdialect("C++17")
 kind("StaticLib")
 
-targetdir(ENGINE_LIB_OUTPUT_DIR)
+targetdir(ENGINE_BIN_OUTPUT_DIR)
 
 includedirs({
     "ThirdParty/imgui/src"

@@ -179,7 +179,9 @@ public:
 	bool HasRegisteredEvents()
 	{
 		std::scoped_lock lock(_mutex);
-		return _events.find(Arg_t::MyType()) != _events.end();
+		if(_events.find(Arg_t::MyType()) != _events.end())
+			return !_events[Arg_t::MyType()].empty();
+		return true;
 	}
 
 	size_t GetNumRegisteredEvents();

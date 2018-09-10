@@ -13,8 +13,7 @@ include("UnitTestMainTemplate")
 ENGINE_LIB_SOURCE_DIR  = "Source/Libraries"
 ENGINE_APP_SOURCE_DIR  = "Source/Applications"
 ENGINE_TST_SOURCE_DIR  = "Source/Tests"
-ENGINE_LIB_OUTPUT_DIR  = "Build/Libraries/%{cfg.architecture}/%{cfg.buildcfg}"
-ENGINE_APP_OUTPUT_DIR  = "Build/Applications/%{cfg.architecture}/%{cfg.buildcfg}"
+ENGINE_BIN_OUTPUT_DIR  = "Build/%{cfg.architecture}/%{cfg.buildcfg}"
 
 ENGINE_LIBS = {}
 ENGINE_GAME_LIBS = {}
@@ -49,7 +48,7 @@ function configureEngineLib(libName)
     cppdialect("C++17")
     kind("StaticLib")
 
-    targetdir(ENGINE_LIB_OUTPUT_DIR)
+    targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_LIB_SOURCE_DIR,
@@ -58,7 +57,7 @@ function configureEngineLib(libName)
         "ThirdParty/glfw/include",
         "ThirdParty/angelscript/sdk/angelscript/include"
     })
-    libdirs({ ENGINE_LIB_OUTPUT_DIR })
+    libdirs({ ENGINE_BIN_OUTPUT_DIR })
 
     pchheader("stdafx.h")
     pchsource(ENGINE_LIB_SOURCE_DIR.."/"..libName.."/stdafx.cpp")
@@ -81,7 +80,7 @@ function configureToolsApplication(appName, gameName)
     cppdialect("C++17")
     kind("ConsoleApp")
 
-    targetdir(ENGINE_APP_OUTPUT_DIR)
+    targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_APP_SOURCE_DIR,
@@ -93,7 +92,7 @@ function configureToolsApplication(appName, gameName)
         "ThirdParty/LLGL/include",
         "ThirdParty/angelscript/sdk/angelscript/include"
     })
-    libdirs({ ENGINE_APP_OUTPUT_DIR, ENGINE_LIB_OUTPUT_DIR })
+    libdirs({ ENGINE_BIN_OUTPUT_DIR })
 
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
@@ -120,7 +119,7 @@ function configureGame(gameName)
     cppdialect("C++17")
     kind("ConsoleApp")
 
-    targetdir(ENGINE_APP_OUTPUT_DIR)
+    targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_APP_SOURCE_DIR,
@@ -132,7 +131,7 @@ function configureGame(gameName)
         "ThirdParty/LLGL/include",
         "ThirdParty/angelscript/sdk/angelscript/include"
     })
-    libdirs({ ENGINE_APP_OUTPUT_DIR, ENGINE_LIB_OUTPUT_DIR })
+    libdirs({ ENGINE_BIN_OUTPUT_DIR })
 
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
@@ -160,7 +159,7 @@ function configureGameLib(gameName)
     cppdialect("C++17")
     kind("StaticLib")
 
-    targetdir(ENGINE_APP_OUTPUT_DIR)
+    targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_APP_SOURCE_DIR,
@@ -173,8 +172,7 @@ function configureGameLib(gameName)
         "ThirdParty/angelscript/sdk/angelscript/include"
     })
     libdirs({
-        ENGINE_APP_OUTPUT_DIR,
-        ENGINE_LIB_OUTPUT_DIR
+        ENGINE_BIN_OUTPUT_DIR
     })
 
     pchheader("stdafx.h")

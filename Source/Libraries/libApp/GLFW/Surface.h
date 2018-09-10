@@ -58,6 +58,7 @@ public:
 	bool AdaptForVideoMode(LLGL::VideoModeDescriptor& videoModeDesc) override;
 	void ResetPixelFormat() override;
 
+	void SwapBuffers();
 	bool PollEvents();
 	void SetWindowShouldClose(bool value);
 	void Close();
@@ -77,6 +78,7 @@ private:
 	LLGL::Extent2D _size;
 	GLFWwindow* _window{ nullptr };
 	IInputEventListener* _listener{ nullptr };
+	// Thread _pumpBlankEventThread;
 };
 
 CLOSE_NAMESPACE(Firestorm);
