@@ -1,14 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Application
+//  ArgParser
 //
-//  The base application class.
+//  Parses command line arguments.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "ArgParser.h"
+#include "libCore.h"
+
 #include <istream>
 #include <sstream>
 
@@ -20,7 +22,7 @@ ArgParser::ArgParser(int ac, char** av)
 	for(int i = 0; i < ac; ++i)
 	{
 		String arg(av[i]);
-		Vector<String> splitString(Split(av[i], '='));
+		Vector<String> splitString(SplitString(av[i], '='));
 		if(splitString.size() == 1)
 		{
 			_args[splitString[0]] = "__FIRESTORM_TRUE_VALUE__";
@@ -59,18 +61,6 @@ String ArgParser::Get(const String& key, const char* def)
 bool ArgParser::Has(const String& key) const
 {
 	return _args.find(key) != _args.end();
-}
-
-Vector<String> ArgParser::Split(const String& s, char delimeter) const
-{
-	Vector<String> tokens;
-	String token;
-	std::istringstream tokenStream(s);
-	while(std::getline(tokenStream, token, delimeter))
-	{
-		tokens.push_back(token);
-	}
-	return tokens;
 }
 
 CLOSE_NAMESPACE(Firestorm);

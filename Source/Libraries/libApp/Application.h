@@ -50,8 +50,8 @@ public:
 	virtual void OnCharMods(Surface* surface, unsigned int codepoint, int mods);
 	virtual void OnMouseButtonDown(Surface* surface, int mouseButton, int mods);
 	virtual void OnMouseButtonUp(Surface* surface, int mouseButton, int mods);
-	virtual void OnMouseMoved(Surface* surface, const Vector_2D& mousePos);
-	virtual void OnMouseScroll(Surface* surface, const Vector_2D& wheelOffset);
+	virtual void OnMouseMoved(Surface* surface, const Vector2& mousePos);
+	virtual void OnMouseScroll(Surface* surface, const Vector2& wheelOffset);
 	virtual void OnKeyDown(Surface* surface, int key, int scancode, int mods);
 	virtual void OnKeyUp(Surface* surface, int key, int scancode, int mods);
 	virtual void OnKeyRepeat(Surface* surface, int key, int scancode, int mods);
@@ -82,8 +82,8 @@ private:
 	bool _waitingForCloseResponse{ false };
 	bool _closeAllowed{ false };
 
-	Vector_2D _previousMousePos;
-	Vector_2D _currentMousePos;
+	Vector2 _previousMousePos;
+	Vector2 _currentMousePos;
 
 	RefPtr<Surface> _surface{ nullptr };
 };

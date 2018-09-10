@@ -28,14 +28,14 @@ FIRE_MIRROR_DEFINE(MouseMoveEvent)
 {
 }
 
-MouseMoveEvent::MouseMoveEvent(Application* app, const Vector_2D& previousPos, const Vector_2D& currentPos)
+MouseMoveEvent::MouseMoveEvent(Application* app, const Vector2& previousPos, const Vector2& currentPos)
 : App(app)
 , PreviousPos(previousPos)
 , CurrentPos(currentPos)
 {
 }
 
-Vector_2D MouseMoveEvent::GetDelta() const
+Vector2 MouseMoveEvent::GetDelta() const
 {
 	return {
 		PreviousPos.x - CurrentPos.x,
@@ -43,7 +43,7 @@ Vector_2D MouseMoveEvent::GetDelta() const
 	};
 }
 
-ScrollWheelEvent::ScrollWheelEvent(Application* app, const Vector_2D& offset)
+ScrollWheelEvent::ScrollWheelEvent(Application* app, const Vector2& offset)
 : App(app)
 , Offset(offset)
 {
