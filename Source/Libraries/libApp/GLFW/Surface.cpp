@@ -76,7 +76,7 @@ namespace {
 		GetItems(window, surface, listener);
 		if (listener)
 		{
-			listener->OnMouseMoved(surface, Vector_2D{ (float)mouseX, (float)mouseY });
+			listener->OnMouseMoved(surface, Vector2{ (float)mouseX, (float)mouseY });
 		}
 	}
 
@@ -109,7 +109,7 @@ namespace {
 		GetItems(window, surface, listener);
 		if (listener)
 		{
-			listener->OnMouseScroll(surface, Vector_2D{ (float)xOffset, (float)yOffset });
+			listener->OnMouseScroll(surface, Vector2{ (float)xOffset, (float)yOffset });
 		}
 	}
 

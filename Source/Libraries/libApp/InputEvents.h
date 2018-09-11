@@ -33,23 +33,23 @@ struct MouseMoveEvent
 {
 	FIRE_MIRROR_DECLARE(MouseMoveEvent);
 public:
-	MouseMoveEvent(Application* app, const Vector_2D& previousPos, const Vector_2D& currentPos);
+	MouseMoveEvent(Application* app, const Vector2& previousPos, const Vector2& currentPos);
 
-	Vector_2D GetDelta() const;
+	Vector2 GetDelta() const;
 
 	Application* App;
-	Vector_2D PreviousPos;
-	Vector_2D CurrentPos;
+	Vector2 PreviousPos;
+	Vector2 CurrentPos;
 };
 
 struct ScrollWheelEvent
 {
 	FIRE_MIRROR_DECLARE(ScrollWheelEvent);
 public:
-	ScrollWheelEvent(Application* app, const Vector_2D& offset);
+	ScrollWheelEvent(Application* app, const Vector2& offset);
 
 	Application* App;
-	Vector_2D Offset;
+	Vector2 Offset;
 };
 
 struct CharEvent

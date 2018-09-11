@@ -37,9 +37,9 @@ MouseMoveEvent::MouseMoveEvent(Application* app, const Vector2& previousPos, con
 
 Vector2 MouseMoveEvent::GetDelta() const
 {
-	return {
-		PreviousPos.x - CurrentPos.x,
-		PreviousPos.y - CurrentPos.y
+	return Vector2 {
+		PreviousPos.x() - CurrentPos.x(),
+		PreviousPos.y() - CurrentPos.y()
 	};
 }
 

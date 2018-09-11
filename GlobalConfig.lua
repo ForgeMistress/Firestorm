@@ -145,7 +145,6 @@ function configureGame(gameName)
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
     })
-    debugdir("Run")
 end
 
 function configureGameLib(gameName)
@@ -187,7 +186,7 @@ function configureGameLib(gameName)
     local p = path.getabsolute("Assets")
     print("Path To Assets:", p)
     debugargs({
-        "--WorkingDir="..p,
+        "--AssetsDir="..p,
         "--AppName="..gameName
     })
 end
@@ -268,7 +267,7 @@ function configureUnitTestApplication()
     local p = path.getabsolute("Assets")
     print("Path To Assets:", p)
     debugargs({
-        "--WorkingDir="..p,
+        "--AssetsDir="..p,
         "--AppName=UnitTest"
     })
 end

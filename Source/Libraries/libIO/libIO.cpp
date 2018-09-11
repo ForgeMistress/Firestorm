@@ -39,7 +39,7 @@ void Firestorm::libIO::Initialize(int ac, char** av)
 
 	FIRE_ASSERT(parser.Has("--AppName") && "Application must have --AppName defined as an argument");
 
-	String workingDir(parser.Get("--WorkingDir", av[0]));
+	String workingDir(parser.Get("--AssetsDir", av[0]));
 
 	FIRE_LOG_DEBUG("Working Directory Is -> ", workingDir);
 	if(PHYSFS_init(workingDir.c_str()) != 0)
@@ -53,7 +53,7 @@ void Firestorm::libIO::Initialize(int ac, char** av)
 		LogLastPhysfsError("'"+appName+"' directory does not exist");
 	}
 
-	if(!Mount(appName.c_str(), "/"))
+	if(!Mount(appName.c_str(), appName.c_str()))
 		LogLastPhysfsError("Error when mounting 'Assets' directory");
 
 	String prefDir(PHYSFS_getPrefDir("com.org.firestorm", appName.c_str()));

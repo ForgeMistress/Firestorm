@@ -135,14 +135,14 @@ void Application::OnMouseButtonUp(Surface* surface, int mouseButton, int mods)
 	Dispatcher.Dispatch(MouseButtonEvent{ this, mouseButton, false, mods });
 }
 
-void Application::OnMouseMoved(Surface* surface, const Vector_2D& mousePos)
+void Application::OnMouseMoved(Surface* surface, const Vector2& mousePos)
 {
 	_previousMousePos = _currentMousePos;
 	_currentMousePos = mousePos;
 	Dispatcher.Dispatch(MouseMoveEvent{ this, _previousMousePos,_currentMousePos });
 }
 
-void Application::OnMouseScroll(Surface* surface, const Vector_2D& wheelOffset)
+void Application::OnMouseScroll(Surface* surface, const Vector2& wheelOffset)
 {
 	Dispatcher.Dispatch(ScrollWheelEvent{ this, wheelOffset });
 }

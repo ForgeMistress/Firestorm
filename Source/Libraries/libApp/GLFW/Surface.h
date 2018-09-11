@@ -33,8 +33,8 @@ public:
 	virtual void OnCharMods(Surface* surface, unsigned int codepoint, int mods) = 0;
 	virtual void OnMouseButtonDown(Surface* surface, int mouseButton, int mods) = 0;
 	virtual void OnMouseButtonUp(Surface* surface, int mouseButton, int mods) = 0;
-	virtual void OnMouseMoved(Surface* surface, const Vector_2D& mousePos) = 0;
-	virtual void OnMouseScroll(Surface* surface, const Vector_2D& wheelOffset) = 0;
+	virtual void OnMouseMoved(Surface* surface, const Vector2& mousePos) = 0;
+	virtual void OnMouseScroll(Surface* surface, const Vector2& wheelOffset) = 0;
 	virtual void OnKeyDown(Surface* surface, int key, int scancode, int mods) = 0;
 	virtual void OnKeyUp(Surface* surface, int key, int scancode, int mods) = 0;
 	virtual void OnKeyRepeat(Surface* surface, int key, int scancode, int mods) = 0;

@@ -165,7 +165,7 @@ struct libCore
 	static void Initialize(int ac, char** av);
 };
 
-static Vector<String> SplitString(const String& str, char delim);
+extern Vector<String> SplitString(const String& str, char delim);
 
 CLOSE_NAMESPACE(Firestorm);
 
