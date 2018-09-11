@@ -26,3 +26,7 @@ links({
     "GLFW",
     "LLGL"
 })
+
+if _OPTIONS["gfxapi"] == "OpenGL" then
+    dependson("LLGL_OpenGL")
+end

@@ -5,4 +5,7 @@
 #include <libExistence/libExistence.h>
 #include <libIO/libIO.h>
 
+#include <libApp/libApp.h>
+#include <libApp/Application.h>
+
 #endif

@@ -5,14 +5,17 @@
 #include <libMirror/EventDispatcher.h>
 #include <libMirror/Object.h>
 
+#include <libCore/ArgParser.h>
+
 #include "Surface.h"
 
-namespace Firestorm
+OPEN_NAMESPACE(Firestorm);
+
+struct libApp
 {
-	struct libApp
-	{
-		static void Initialize(int ac, char** av);
-	};
-}
+	static void Initialize(int ac, char** av);
+};
+
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

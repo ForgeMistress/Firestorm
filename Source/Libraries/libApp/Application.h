@@ -14,6 +14,7 @@
 #include "Surface.h"
 
 #include <libMirror/EventDispatcher.h>
+#include <libCore/ArgParser.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -38,6 +39,13 @@ public:
 
 	void AllowClose();
 	void DisallowClose();
+
+	const ArgParser& Args() const;
+
+	Vector2 GetResolution() const;
+
+	LLGL::RenderSystem* GetRenderer() const;
+	LLGL::RenderContext* GetRenderContext() const;
 
 	virtual void OnInitialize(int ac, char** av) = 0;
 	virtual void OnUpdate(double deltaT) = 0;
@@ -79,6 +87,8 @@ private:
 
 	static Application* g_theApp;
 
+	ArgParser* _args;
+
 	bool _waitingForCloseResponse{ false };
 	bool _closeAllowed{ false };
 
@@ -86,6 +96,9 @@ private:
 	Vector2 _currentMousePos;
 
 	RefPtr<Surface> _surface{ nullptr };
+
+	std::unique_ptr<LLGL::RenderSystem> _renderSystem{ nullptr };
+	LLGL::RenderContext* _renderContext{ nullptr };
 };
 
 CLOSE_NAMESPACE(Firestorm);

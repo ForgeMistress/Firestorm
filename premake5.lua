@@ -54,6 +54,12 @@ filter("configurations:Release64 or Final64");
     libdirs({ "Bin/x64/Release" })
 clearFilters()
 
+filter("configurations:Debug*")
+    runtime("Debug")
+filter("configurations:Release* or Final*")
+    runtime("Release")
+clearFilters()
+
 function build(lib)
     include(lib.."_Build")
 end

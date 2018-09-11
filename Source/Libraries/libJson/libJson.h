@@ -2,12 +2,15 @@
 #define LIBJSON_H_
 #pragma once
 
-namespace Firestorm
+#include <json/value.h>
+
+OPEN_NAMESPACE(Firestorm);
+
+struct libJson
 {
-	struct libJson
-	{
-		static void Initialize(int ac, char** av);
-	};
-}
+	static void Initialize(int ac, char** av);
+};
+
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

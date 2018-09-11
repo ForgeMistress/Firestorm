@@ -24,13 +24,7 @@ public:
 	explicit Vector2(const Vector3& v);
 	explicit Vector2(const Vector4& v);
 
-	float x() const { return f[0]; }
-	void x(float v) { f[0] = v; }
-
-	float y() const { return f[1]; }
-	void y(float v) { f[1] = v; }
-
-	float f[2];
+	float x, y;
 };
 
 class Vector3
@@ -40,16 +34,7 @@ public:
 	Vector3(const Vector2& v2d, float z = 0.0f);
 	explicit Vector3(const Vector4& v2d);
 
-	float x() const { return f[0]; }
-	void x(float v) { f[0] = v; }
-
-	float y() const { return f[1]; }
-	void y(float v) { f[1] = v; }
-
-	float z() const { return f[2]; }
-	void z(float v) { f[2] = v; }
-
-	float f[3];
+	float x, y, z;
 };
 
 class Vector4
@@ -59,19 +44,7 @@ public:
 	Vector4(const Vector2& v, float z = 0.0f, float w = 0.0f);
 	Vector4(const Vector3& v, float w = 0.0f);
 
-	float x() const { return f[0]; }
-	void x(float v) { f[0] = v; }
-
-	float y() const { return f[1]; }
-	void y(float v) { f[1] = v; }
-
-	float z() const { return f[2]; }
-	void z(float v) { f[2] = v; }
-
-	float w() const { return f[3]; }
-	void w(float v) { f[3] = v; }
-
-	float f[3];
+	float x, y, z, w;
 };
 
 OPEN_NAMESPACE(Math);

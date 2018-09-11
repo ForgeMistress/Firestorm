@@ -106,6 +106,13 @@ function configureToolsApplication(appName, gameName)
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
     })
+    local p = path.getabsolute("Assets")
+    print("Path To Assets:", p)
+    debugargs({
+        "--AssetsDir="..p,
+        "--AppName="..gameName
+    })
+    debugdir(ENGINE_BIN_OUTPUT_DIR)
 end
 
 function configureGame(gameName)
@@ -145,6 +152,14 @@ function configureGame(gameName)
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
     })
+
+    local p = path.getabsolute("Assets")
+    print("Path To Assets:", p)
+    debugargs({
+        "--AssetsDir="..p,
+        "--AppName="..gameName
+    })
+    debugdir(ENGINE_BIN_OUTPUT_DIR)
 end
 
 function configureGameLib(gameName)
@@ -182,12 +197,6 @@ function configureGameLib(gameName)
     files({
         ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/**.cpp"
-    })
-    local p = path.getabsolute("Assets")
-    print("Path To Assets:", p)
-    debugargs({
-        "--AssetsDir="..p,
-        "--AppName="..gameName
     })
 end
 
@@ -260,16 +269,25 @@ function configureUnitTestApplication()
         "glfw",
         "imgui",
         "jsoncpp",
-        "LLGL",
         "physfs",
         "rttr"
     })
+
+    filter("configurations:Debug64")
+        libdirs({"ThirdParty/LLGL/build/build/Debug"})
+        links({ "LLGLD" })
+
+    filter("configurations:Release64")
+        libdirs({"ThirdParty/LLGL/build/build/Release"})
+        links({ "LLGL" })
+
     local p = path.getabsolute("Assets")
     print("Path To Assets:", p)
     debugargs({
         "--AssetsDir="..p,
         "--AppName=UnitTest"
     })
+    debugdir(ENGINE_BIN_OUTPUT_DIR)
 end
 
 

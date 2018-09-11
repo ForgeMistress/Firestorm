@@ -17,45 +17,8 @@
 
 #include <libApp/Application.h>
 
+#include "FirestormApp.h"
+
 using namespace Firestorm;
-
-class FirestormApp : public Application
-{
-public:
-	virtual void OnInitialize(int ac, char** av);
-	virtual void OnUpdate(double deltaT);
-	virtual void OnClose();
-	virtual int  OnShutdown();
-
-	void HandleApplicationWantsToClose(const ApplicationWantsToCloseEvent& event);
-
-private:
-	FileIOMgr _fileIOMgr;
-};
-
-void FirestormApp::OnInitialize(int ac, char** av)
-{
-	Dispatcher.Register(&FirestormApp::HandleApplicationWantsToClose, this);
-}
-
-void FirestormApp::OnUpdate(double deltaT)
-{
-	_fileIOMgr.ProcessQueues();
-}
-
-void FirestormApp::OnClose()
-{
-	_fileIOMgr.Shutdown();
-}
-
-int FirestormApp::OnShutdown()
-{
-	return 0;
-}
-
-void FirestormApp::HandleApplicationWantsToClose(const ApplicationWantsToCloseEvent& event)
-{
-	event.App->AllowClose();
-}
 
 FIRE_RUN_APPLICATION(FirestormApp);

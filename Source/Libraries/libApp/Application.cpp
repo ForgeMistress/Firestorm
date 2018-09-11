@@ -13,6 +13,9 @@
 #include "InputEvents.h"
 
 #include <libCore/libCore.h>
+#include <libCore/ArgParser.h>
+
+#include <libIO/Logger.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -43,20 +46,54 @@ Application::~Application()
 
 void Application::Initialize(int ac, char** av)
 {
-	_surface = new Surface(this, LLGL::Extent2D{ 640,480 }, "Firestorm Window");
+	_args = new ArgParser(ac, av);
 
-	_surface->SetInputListener(this);
-	_surface->SetJoystickCallback([](int jid, int event) -> void {
-		if(event == GLFW_CONNECTED)
+	try
+	{
+		// Initialize the rendering context.
+		_renderSystem = LLGL::RenderSystem::Load("OpenGL");
+
+		LLGL::RenderContextDescriptor contextDesc;
 		{
-			Application::TheApp()->Dispatcher.Dispatch(JoystickConnectedEvent{ Application::TheApp(), jid });
+			contextDesc.videoMode.resolution = { 800,600 };
+			contextDesc.vsync.enabled = true;
+			contextDesc.profileOpenGL.contextProfile = LLGL::OpenGLContextProfile::CoreProfile;
 		}
-		else if(event == GLFW_DISCONNECTED)
-		{
-			Application::TheApp()->Dispatcher.Dispatch(JoystickDisconnectedEvent{ Application::TheApp(), jid });
-		}
-	});
-	OnInitialize(ac, av);
+		_renderContext = _renderSystem->CreateRenderContext(contextDesc);
+
+		// Print renderer information
+		const auto& info = _renderSystem->GetRendererInfo();
+
+		std::cout << "Renderer:         " << info.rendererName << std::endl;
+		std::cout << "Device:           " << info.deviceName << std::endl;
+		std::cout << "Vendor:           " << info.vendorName << std::endl;
+		std::cout << "Shading Language: " << info.shadingLanguageName << std::endl;
+
+		/*LLGL::Extent2D size(800, 600);
+		_surface = new Surface(this, size, "Firestorm Window");
+
+		_surface->SetInputListener(this);
+		_surface->SetJoystickCallback([](int jid, int event) -> void {
+			if (event == GLFW_CONNECTED)
+			{
+				Application::TheApp()->Dispatcher.Dispatch(JoystickConnectedEvent{ Application::TheApp(), jid });
+			}
+			else if (event == GLFW_DISCONNECTED)
+			{
+				Application::TheApp()->Dispatcher.Dispatch(JoystickDisconnectedEvent{ Application::TheApp(), jid });
+			}
+		});*/
+
+		auto& window = static_cast<LLGL::Window&>(_renderContext->GetSurface());
+		window.SetTitle(L"Fuck");
+		window.Show();
+
+		OnInitialize(ac, av);
+	}
+	catch(std::exception& e)
+	{
+		FIRE_LOG_ERROR("Error Loading RenderSystem: ", e.what());
+	}
 }
 
 int Application::Run()
@@ -65,13 +102,27 @@ int Application::Run()
 	double deltaT{ 0.0 };
 	bool isRunning{ true };
 	bool eventDispatched{ false };
-	while(isRunning)
-	{
-		OnUpdate(deltaT);
-		_surface->SwapBuffers();
-		windowWantsToClose = !_surface->PollEvents();
-		bool hasCloseRegistered = Dispatcher.HasRegisteredEvents<ApplicationWantsToCloseEvent>();
 
+	auto timer = LLGL::Timer::Create();
+	auto start = std::chrono::system_clock::now();
+
+	while(static_cast<LLGL::Window&>(_renderContext->GetSurface()).ProcessEvents())
+	{
+		timer->MeasureTime();
+		auto end = std::chrono::system_clock::now();
+		if(std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > 0)
+		{
+			std::cout << "Rendertime: " << timer->GetDeltaTime() << ", FPS: " << 1.0 / timer->GetDeltaTime() << '\n';
+			start = end;
+		}
+
+		OnUpdate(deltaT);
+
+		//_surface->SwapBuffers();
+
+		//windowWantsToClose = !_surface->PollEvents();
+
+		/*bool hasCloseRegistered = Dispatcher.HasRegisteredEvents<ApplicationWantsToCloseEvent>();
 		if(windowWantsToClose)
 		{
 			if(hasCloseRegistered)
@@ -87,16 +138,17 @@ int Application::Run()
 				_closeAllowed = true;
 				isRunning = false;
 			}
-		}
+		}*/
+		_renderContext->Present();
 	}
-	_surface->Close();
+	//_surface->Close();
 
 	return OnShutdown();
 }
 
 void Application::Close()
 {
-	_surface->SetWindowShouldClose(true);
+	//_surface->SetWindowShouldClose(true);
 	_closeAllowed = true;
 	OnClose();
 }
@@ -113,6 +165,28 @@ void Application::DisallowClose()
 	FIRE_ASSERT(_waitingForCloseResponse == true && "Can not call AllowClose while not waiting for a close response");
 	_waitingForCloseResponse = false;
 	_closeAllowed = false;
+}
+
+const ArgParser& Application::Args() const
+{
+	return *_args;
+}
+
+Vector2 Application::GetResolution() const
+{
+	//LLGL::Extent2D res(_surface->GetContentSize());
+	//return { static_cast<float>(res.width), static_cast<float>(res.height) };
+	return { 800,600 };
+}
+
+LLGL::RenderSystem* Application::GetRenderer() const
+{
+	return _renderSystem.get();
+}
+
+LLGL::RenderContext* Application::GetRenderContext() const
+{
+	return _renderContext;
 }
 
 void Application::OnChar(Surface* surface, unsigned int c)
@@ -164,12 +238,13 @@ void Application::OnKeyRepeat(Surface* surface, int key, int scancode, int mods)
 
 void Application::DoSetJoystickUserData(void* userData, int jid)
 {
-	_surface->SetJoystickUserData(jid, userData);
+	//_surface->SetJoystickUserData(jid, userData);
 }
 
 void* Application::DoGetJoystickUserData(int jid)
 {
-	return _surface->GetJoystickUserData(jid);
+	//return _surface->GetJoystickUserData(jid);
+	return nullptr;
 }
 
 Application* Application::TheApp()

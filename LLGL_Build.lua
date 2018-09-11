@@ -37,6 +37,7 @@ if not os.ishost("windows") then
     end
 end
 
+-- Base LLGL SharedLib
 group("ThirdParty")
 project("LLGL")
 language("C++")
@@ -62,72 +63,174 @@ filter({"action:vs*"})
         "_CRT_SECURE_NO_WARNINGS",
         "_SCL_SECURE_NO_WARNINGS"
     })
+
 filter({"configurations:Debug*"})
-    defines({"LLGL_DEBUG", "LLGL_DEBUG_LAYER"})
-    targetname("LLGL_"..gfxapi.."D")
+    defines({"_DEBUG", "LLGL_DEBUG", "LLGL_DEBUG_LAYER"})
+    targetname("LLGLD")
+    runtime("Debug")
 filter({"configurations:Release*"})
-    targetname("LLGL_"..gfxapi.."D")
+    targetname("LLGL")
+    runtime("Release")
 filter({})
 
+
+local host = "Win32"
+
+if os.ishost("osx") then
+end
+
+
 if _OPTIONS["enable-debug-layer"] then
+    group("Renderer/DebugLayer")
     files({
         "ThirdParty/LLGL/sources/Renderer/DebugLayer/**.*"
     })
 end
 
+group("Include")
 files({
-    "ThirdParty/LLGL/Core/*.h",
+    "ThirdParty/LLGL/*.h"
+})
+
+group("Sources/Core")
+files({
+    "ThirdParty/LLGL/sources/Core/*.h",
     "ThirdParty/LLGL/sources/Core/*.cpp",
+})
 
+group("Sources/Platform")
+files({
     "ThirdParty/LLGL/sources/Platform/*.h",
-    "ThirdParty/LLGL/sources/Platform/*.cpp"
+    "ThirdParty/LLGL/sources/Platform/*.cpp",
+    "ThirdParty/LLGL/sources/Platform/"..host.."/*.h",
+    "ThirdParty/LLGL/sources/Platform/"..host.."/*.cpp",
 })
-
-local host = "Win32"
 
 files({
-    "ThirdParty/LLGL/sources/Platform/"..host.."/**.h",
-    "ThirdParty/LLGL/sources/Platform/"..host.."/**.cpp",
-})
-if os.ishost("osx") then
-end
-
-local gpath = "ThirdParty/LLGL/sources/Renderer/"..gfxapi
-local cpath = "ThirdParty/LLGL/sources/Renderer"
-files({
-    gpath.."/*.h",
-    cpath.."/*.cpp"
+    "ThirdParty/LLGL/sources/Renderer/*.h",
+    "ThirdParty/LLGL/sources/Renderer/*.cpp"
 })
 
-if gfxapi == "Direct3D11" or gfxapi == "Direct3D12" then
-    cpath = cpath.."/DXCommon"
-    files({
-        gpath.."/**.h",
-        gpath.."/**.cpp",
-    })
-end
 
+-- LLGL OpenGL Shared Lib Module
 if gfxapi == "OpenGL" then
+    --[[filter("configurations:Debug*")
+        links({ "LLGL_OpenGLD" })
+    filter("configurations:Release* or Final*")
+        links({ "LLGL_OpenGL" })]]
+
+    group("ThirdParty")
+    project("LLGL_OpenGL")
+    language("C++")
+    cppdialect("C++11")
+    kind("SharedLib")
+
+    targetdir(ENGINE_BIN_OUTPUT_DIR)
+    libdirs({ENGINE_BIN_OUTPUT_DIR})
+
+    includedirs({
+        "ThirdParty",
+        "ThirdParty/LLGL/include",
+        "ThirdParty/glfw/deps"
+    })
+
+    filter({"action:vs*"})
+        disablewarnings({
+            "4250",
+            "4251",
+            "4290",
+            "4103"
+        })
+        defines({
+            "_CRT_SECURE_NO_WARNINGS",
+            "_SCL_SECURE_NO_WARNINGS",
+            "LLGL_GL_ENABLE_EXT_PLACEHOLDERS",
+            "LLGL_GL_ENABLE_VENDOR_EXT",
+            "LLGL_GL_ENABLE_DSA_EXT"
+        })
+
+    filter({"configurations:Debug*"})
+        targetname("LLGL_"..gfxapi.."D")
+        defines({"_DEBUG","LLGL_DEBUG"})
+        links({"LLGLD"})
+        runtime("Debug")
+
+    filter({"configurations:Release* or Final*"})
+        targetname("LLGL_"..gfxapi)
+        links({"LLGL"})
+    filter({})
+
     if os.ishost("windows") then
-        links({"OpenGL32"})
+        links({
+            "kernel32",
+            "user32",
+            "gdi32",
+            "winspool",
+            "shell32",
+            "ole32",
+            "oleaut32",
+            "uuid",
+            "comdlg32",
+            "advapi32",
+            "glu32",
+            "opengl32",
+            "odbc32",
+            "odbccp32"
+        })
     end
-    cpath = cpath.."/GLCommon"
+
+    group("GLCommon")
     files({
-        cpath.."/**.h",
-        cpath.."/**.cpp",
-        gpath.."/Buffer/**.h",
-        gpath.."/Buffer/**.cpp",
-        gpath.."/Ext/**.h",
-        gpath.."/Ext/**.cpp",
-        gpath.."/Platform/*.h",
-        gpath.."/Platform/*.cpp",
-        gpath.."/Platform/"..host.."/**.h",
-        gpath.."/Platform/"..host.."/**.cpp",
-        gpath.."/RenderState/**.h",
-        gpath.."/RenderState/**.cpp",
-        gpath.."/Shader/**.h",
-        gpath.."/Shader/**.cpp",
-        gpath.."/Texture/**.h",
-        gpath.."/Texture/**.cpp",
+        "ThirdParty/LLGL/sources/Renderer/GLCommon/*.h",
+        "ThirdParty/LLGL/sources/Renderer/GLCommon/*.cpp",
+    })
+    
+    group("GLCommon/Texture")
+    files({
+        "ThirdParty/LLGL/sources/Renderer/GLCommon/Texture/*.h",
+        "ThirdParty/LLGL/sources/Renderer/GLCommon/Texture/*.cpp"
+    })
+    
+    group("OpenGL")
+    files({
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/*.h",
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/*.cpp"
+    })
+    group("OpenGL/Buffer")
+    files({
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Buffer/*.h",
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Buffer/*.cpp"
+    })
+    group("OpenGL/Ext")
+    files({
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Ext/*.h",
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Ext/*.cpp"
+    })
+    group("OpenGL/Platform")
+    files({
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Platform/GLContext.h",
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Platform/GLContext.cpp"
+    })
+    if host == "Win32" then
+        files({
+            "ThirdParty/LLGL/sources/Renderer/OpenGL/Platform/Win32/Win32GLContext.h",
+            "ThirdParty/LLGL/sources/Renderer/OpenGL/Platform/Win32/Win32GLContext.cpp"
+        })
+    end
+    -- TODO: Implement other hosts.
+    group("OpenGL/RenderState")
+    files({
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/RenderState/*.h",
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/RenderState/*.cpp"
+    })
+    group("OpenGL/Shader")
+    files({
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Shader/*.h",
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Shader/*.cpp"
+    })
+    group("OpenGL/Texture")
+    files({
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Texture/*.h",
+        "ThirdParty/LLGL/sources/Renderer/OpenGL/Texture/*.cpp"
     })
 end
