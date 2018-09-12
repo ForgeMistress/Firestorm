@@ -13,90 +13,29 @@ print("-------------------------------------------------------------------------
 
 group("ThirdParty/Bullet")
 
+local function configure(name, wildcard)
+    project(name)
+    language("C++")
+    cppdialect("C++17")
+    kind("StaticLib")
+    if os.ishost("Linux") then
+        buildoptions{"-fPIC"}
+    end
+    targetdir(ENGINE_LIB_OUTPUT_DIR)
+    includedirs({
+        THIRD_PARTY_SRC_DIR,
+        THIRD_PARTY_SRC_DIR.."/bullet3/src"
+    })
 
-
-------------------------------------------------------------------------------------------------------------------------
--- Bullet3Collision
-project("Bullet3Collision")
-language("C++")
-cppdialect("C++17")
-kind("StaticLib")
-if os.ishost("Linux") then
-    buildoptions{"-fPIC"}
+    files({
+        THIRD_PARTY_SRC_DIR.."/bullet3/src/"..name.."/"..wildcard..".h",
+        THIRD_PARTY_SRC_DIR.."/bullet3/src/"..name.."/"..wildcard..".cpp"
+    })
 end
-targetdir(ENGINE_LIB_OUTPUT_DIR)
-includedirs({ THIRD_PARTY_SRC_DIR })
 
-files({
-    THIRD_PARTY_SRC_DIR.."/Bullet3Collision/**.h",
-    THIRD_PARTY_SRC_DIR.."/Bullet3Collision/**.cpp"
-})
-
-------------------------------------------------------------------------------------------------------------------------
--- Bullet3Common
-project("Bullet3Common")
-language("C++")
-cppdialect("C++17")
-kind("StaticLib")
-if os.ishost("Linux") then
-    buildoptions{"-fPIC"}
-end
-targetdir(ENGINE_LIB_OUTPUT_DIR)
-includedirs({ THIRD_PARTY_SRC_DIR })
-
-files({
-    THIRD_PARTY_SRC_DIR.."/Bullet3Common/*.h",
-    THIRD_PARTY_SRC_DIR.."/Bullet3Common/*.cpp"
-})
-
-
-------------------------------------------------------------------------------------------------------------------------
--- Bullet3Dynamics
-project("Bullet3Dynamics")
-language("C++")
-cppdialect("C++17")
-kind("StaticLib")
-if os.ishost("Linux") then
-    buildoptions{"-fPIC"}
-end
-targetdir(ENGINE_LIB_OUTPUT_DIR)
-includedirs({ THIRD_PARTY_SRC_DIR })
-
-files({
-    THIRD_PARTY_SRC_DIR.."/Bullet3Dynamics/*.h",
-    THIRD_PARTY_SRC_DIR.."/Bullet3Dynamics/*.cpp"
-})
-
-------------------------------------------------------------------------------------------------------------------------
--- Bullet3Geometry
-project("Bullet3Geometry")
-language("C++")
-cppdialect("C++17")
-kind("StaticLib")
-if os.ishost("Linux") then
-    buildoptions{"-fPIC"}
-end
-targetdir(ENGINE_LIB_OUTPUT_DIR)
-includedirs({ THIRD_PARTY_SRC_DIR })
-
-files({
-    THIRD_PARTY_SRC_DIR.."/Bullet3Geometry/**.h",
-    THIRD_PARTY_SRC_DIR.."/Bullet3Geometry/**.cpp"
-})
-
-------------------------------------------------------------------------------------------------------------------------
--- Bullet3Dynamics
-project("Bullet3Dynamics")
-language("C++")
-cppdialect("C++17")
-kind("StaticLib")
-if os.ishost("Linux") then
-    buildoptions{"-fPIC"}
-end
-targetdir(ENGINE_LIB_OUTPUT_DIR)
-includedirs({ THIRD_PARTY_SRC_DIR })
-
-files({
-    THIRD_PARTY_SRC_DIR.."/Bullet3Dynamics/*.h",
-    THIRD_PARTY_SRC_DIR.."/Bullet3Dynamics/*.cpp"
-})
+configure("Bullet3Collision", "**")
+configure("Bullet3Common",    "*")
+configure("Bullet3Dynamics",  "*")
+configure("Bullet3Geometry",  "**")
+configure("Bullet3Dynamics",  "*")
+configure()
