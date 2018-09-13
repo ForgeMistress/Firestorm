@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "Entity.h"
 #include "Component.h"
+#include "Engine.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -35,17 +36,103 @@ Entity::~Entity()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool Entity::AddComponent(const RefPtr<Component>& component)
+{
+	for(auto com : _components)
+	{
+		if(com == component)
+			return false;
+
+		if(com->GetType() == component->GetType())
+			return false;
+	}
+	_modified = true;
+
+	if(_owningEngine)
+		_owningEngine->ModifyEntity(this);
+
+	_components.push_back(component);
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Entity::RemoveComponent(const RefPtr<Component>& component)
+{
+	auto found = std::find(_components.begin(), _components.end(), component);
+	if(found != _components.end())
+	{
+		_modified = true;
+
+		_components.erase(found);
+
+		if(_owningEngine)
+			_owningEngine->ModifyEntity(this);
+
+		return true;
+	}
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Entity::RemoveComponent(const String& componentName)
+{
+	auto findFunction = [&componentName](const RefPtr<Component>& c) {
+		return c->GetName() == componentName;
+	};
+	auto found = std::find_if(_components.begin(), _components.end(), findFunction);
+	if(found != _components.end())
+	{
+		_components.erase(found);
+
+		if(_owningEngine)
+			_owningEngine->ModifyEntity(this);
+
+		return true;
+	}
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Entity::RemoveComponent(Mirror::Type ofType)
+{
+	auto findFunction = [&ofType](const RefPtr<Component>& c) {
+		return c->GetType() == ofType;
+	};
+	auto found = std::find_if(_components.begin(), _components.end(), findFunction);
+	if(found != _components.end())
+	{
+		_components.erase(found);
+
+		if(_owningEngine)
+			_owningEngine->ModifyEntity(this);
+
+		return true;
+	}
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+size_t Entity::GetNumComponents() const
+{
+	return _components.size();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void* Entity::DoInspect(Mirror::Type type)
 {
-	/*void* output = nullptr;
 	for(auto component : _components)
 	{
-		output = component->Inspect(type);
+		void* output = component->Inspect(type);
 		if(output != nullptr)
 		{
 			return output;
 		}
-	}*/
+	}
 	return IInspectableObject::DoInspect(type);
 }
 

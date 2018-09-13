@@ -25,6 +25,14 @@ public:
 
 	inline const String& GetName() const { return _name; }
 
+	bool AddComponent(const RefPtr<Component>& component);
+
+	bool RemoveComponent(const RefPtr<Component>& component);
+	bool RemoveComponent(const String& componentName);
+	bool RemoveComponent(Mirror::Type ofType);
+
+	size_t GetNumComponents() const;
+
 private:
 	virtual void* DoInspect(Mirror::Type type);
 
@@ -34,7 +42,8 @@ private:
 
 	// Not reflected.
 	friend class Engine;
-	WeakPtr<Engine> _owningEngine;
+	bool _modified{ false };
+	Engine* _owningEngine{ nullptr };
 };
 
 CLOSE_NAMESPACE(Firestorm);

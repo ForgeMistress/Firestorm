@@ -33,12 +33,12 @@ public:
 		kEvent_OnAddedToEngine,
 		kEvent_OnRemovedFromEngine
 	};
-	SystemEvent(Type type, WeakPtr<Engine> engine);
-	SystemEvent(Type type, WeakPtr<Entity> entity);
+	SystemEvent(Type type, Engine* engine);
+	SystemEvent(Type type, Entity* entity);
 
 	Type type;
-	WeakPtr<Engine> engine;
-	WeakPtr<Entity> entity;
+	Engine* engine;
+	Entity* entity;
 };
 
 class System : public Mirror::Object,
@@ -145,14 +145,14 @@ protected:
 	virtual void OnRemoveFromEngine() {}
 
 	/**
-		\function OnUpdate
+		\function OnTick
 
 		Callback function called by its holding \ref Engine when it needs to be updated.
 
 		\arg \c DeltaT The delta time that has passed between calls.
 		\arg \c Entities A list of \ref Entities that the \ref System can act upon.
 	 **/
-	virtual void OnUpdate(double /*deltaT*/, const Vector<WeakPtr<Entity>>& /*entities*/) {}
+	virtual void OnTick(double /*deltaT*/, const Vector<WeakPtr<Entity>>& /*entities*/) {}
 
 	/**
 		\function OnEntityFilter

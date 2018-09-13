@@ -31,19 +31,18 @@ public:
 	Inspect an object to see if it implements the type defined in the template.
 	**/
 	template <class Interface_t>
-	inline Interface_t* Inspect();
+	Interface_t* Inspect();
 
 	/**
 		Inspect an object to see if it implements the type defined in the template.
 	**/
 	template <class Interface_t>
-	inline const Interface_t* Inspect() const;
+	const Interface_t* Inspect() const;
 
 	/**
 		Inspect an object to see if it implements the provided type.
 	**/
-	inline void* Inspect(Type type);
-	inline void* Inspect(const Type& type);
+	void* Inspect(Type type);
 
 protected:
 	/** Override this in implementing classes to provide introspection to the type. **/
@@ -56,7 +55,7 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Interface_t>
-inline Interface_t* IInspectableObject::Inspect()
+Interface_t* IInspectableObject::Inspect()
 {
 	return static_cast<Interface_t*>(DoInspect(Interface_t::MyType()));
 }
@@ -64,7 +63,7 @@ inline Interface_t* IInspectableObject::Inspect()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Interface_t>
-inline const Interface_t* IInspectableObject::Inspect() const
+const Interface_t* IInspectableObject::Inspect() const
 {
 	return reinterpret_cast<const Interface_t*>(DoInspect(Interface_t::MyType()));
 }

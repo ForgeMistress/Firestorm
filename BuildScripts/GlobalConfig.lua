@@ -110,6 +110,7 @@ function configureToolsApplication(appName, gameName)
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
     })
+    clearFilters()
     local p = path.getabsolute(ASSETS_DIR)
     print("Path To Assets:", p)
     debugargs({
@@ -156,6 +157,7 @@ function configureGame(gameName)
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.cpp"
     })
+    clearFilters()
 
     local p = path.getabsolute(ASSETS_DIR)
     print("Path To Assets:", p)
@@ -277,6 +279,13 @@ function configureUnitTestApplication()
         "rttr"
     })
 
+    local p = path.getabsolute(ASSETS_DIR)
+    print("Path To Assets:", p)
+    debugargs({
+        "--AssetsDir="..p,
+        "--AppName=UnitTest"
+    })
+
     filter("configurations:Debug64")
         libdirs({
             THIRD_PARTY_SRC_DIR.."/LLGL/build/build/Debug"
@@ -288,13 +297,8 @@ function configureUnitTestApplication()
             THIRD_PARTY_SRC_DIR.."/LLGL/build/build/Release"
         })
         links({ "LLGL" })
+    clearFilters()
 
-    local p = path.getabsolute(ASSETS_DIR)
-    print("Path To Assets:", p)
-    debugargs({
-        "--AssetsDir="..p,
-        "--AppName=UnitTest"
-    })
     debugdir(ENGINE_BIN_OUTPUT_DIR)
 end
 

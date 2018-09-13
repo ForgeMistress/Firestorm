@@ -44,7 +44,13 @@ public:
 	bool RemoveSystem(const String& system);
 
 	bool AddSystem(const RefPtr<System>& system);
-	bool RemoveSystem(const RefPtr<System>& system);
+
+	template <class T>
+	bool RemoveSystem()
+	{
+		return RemoveSystem(T::MyType());
+	}
+	bool RemoveSystem(Mirror::Type type);
 
 	bool AddEntity(const RefPtr<Entity>& entity);
 	bool RemoveEntity(const RefPtr<Entity>& entity);
@@ -60,29 +66,33 @@ public:
 	size_t GetNumEntities() const;
 
 private:
+	friend class Entity;
+	void ModifyEntity(Entity* entity);
+
 	void ManageSystems();
 	void ManageEntities();
 
-	typedef Vector<RefPtr<System> > SystemList;
-	typedef Vector<RefPtr<Entity> > EntityList;
+	typedef Vector<RefPtr<System>> SystemList;
+	typedef Vector<RefPtr<Entity>> EntityList;
 
 	// Reflected
-	String     m_name;
-	SystemList m_systems;
-	EntityList m_entities;
+	String     _name;
+	SystemList _systems;
+	EntityList _entities;
 
 	// Runtime
-	bool m_running;
-	bool m_paused;
+	bool _running;
+	bool _paused;
 
-	List< RefPtr<Entity> > m_entitiesToRemove;
-	List< RefPtr<Entity> > m_entitiesToChange;
-	List< RefPtr<System> > m_systemsToAdd;
-	List< RefPtr<System> > m_systemsToRemove;
+	List<RefPtr<Entity>> _entitiesToAdd;
+	List<RefPtr<Entity>> _entitiesToModify;
+	List<RefPtr<Entity>> _entitiesToRemove;
+	List<RefPtr<System>> _systemsToAdd;
+	List<RefPtr<System>> _systemsToRemove;
 };
 
-typedef RefPtr<Engine> EnginePtr;
-typedef WeakPtr<Engine>   EngineWeakPtr;
+typedef RefPtr<Engine>  EnginePtr;
+typedef WeakPtr<Engine> EngineWeakPtr;
 
 CLOSE_NAMESPACE(Firestorm);
 #endif

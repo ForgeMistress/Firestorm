@@ -50,13 +50,11 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	LLGL::RenderSystem* renderer = renderMgr.System.get();
 	_vertexBuffer = renderer->CreateBuffer(vertexBufferDesc, vertices);
 
-	String vertShaderSource = libIO::LoadFileString("Firestorm/Shaders/Triangle.vert");
+	String vertShaderSource = libIO::LoadFileString("/Shaders/Triangle.vert");
 	FIRE_ASSERT(!vertShaderSource.empty());
-	FIRE_LOG_DEBUG(vertShaderSource);
 
-	String fragShaderSource = libIO::LoadFileString("Firestorm/Shaders/Triangle.frag");
+	String fragShaderSource = libIO::LoadFileString("/Shaders/Triangle.frag");
 	FIRE_ASSERT(!fragShaderSource.empty());
-	FIRE_LOG_DEBUG(fragShaderSource);
 
 	LLGL::ShaderDescriptor vertShaderDesc;
 	{
@@ -74,7 +72,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	}
 	_fragmentShader = renderer->CreateShader(fragShaderDesc);
 
-	for (auto shader : { _vertexShader,_fragmentShader })
+	for (auto shader : { _vertexShader, _fragmentShader })
 	{
 		if (shader != nullptr)
 		{

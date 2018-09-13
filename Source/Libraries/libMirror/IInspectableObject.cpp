@@ -19,12 +19,9 @@ FIRE_MIRROR_DEFINE(Firestorm::Mirror::IInspectableObject)
 {
 }
 
-inline void* IInspectableObject::Inspect(Type type)
-{
-	return DoInspect(type);
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline void* IInspectableObject::Inspect(const Type& type)
+void* IInspectableObject::Inspect(Type type)
 {
 	return DoInspect(type);
 }

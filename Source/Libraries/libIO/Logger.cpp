@@ -23,7 +23,7 @@ Logger::Logger(std::ostream& ostream)
 
 void Logger::DoWrite()
 {
-	m_ostream << std::endl;
+	m_ostream << std::endl << std::flush;
 }
 
 CLOSE_NAMESPACE(Firestorm);

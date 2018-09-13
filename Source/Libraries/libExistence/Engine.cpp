@@ -22,8 +22,8 @@ FIRE_MIRROR_DEFINE(Firestorm::Engine)
 }
 
 Engine::Engine()
-: m_running(true)
-, m_paused(false)
+: _running(true)
+, _paused(false)
 {
 }
 
@@ -33,53 +33,55 @@ Engine::~Engine()
 
 void Engine::Pause()
 {
-	m_paused = true;
+	_paused = true;
 }
 
 void Engine::Unpause()
 {
-	m_paused = false;
+	_paused = false;
 }
 
 void Engine::TogglePause()
 {
-	m_paused = !m_paused;
+	_paused = !_paused;
 }
 
 void Engine::ShutDown()
 {
-	m_running = false;
+	_running = false;
 }
 
 void Engine::Update(double deltaT)
 {
-	if(m_running)
+	if(_running)
 	{
-		if(!m_paused)
+		if(!_paused)
 		{
 			ManageSystems();
 			ManageEntities();
 
-			// iterate the systems backwards and call modification function if they've been modified.
-			for(size_t i = m_systems.size() - 1; i >= 0; --i)
+			// iterate the and call modification function if they've been modified.
+			if(!_systems.empty())
 			{
-				auto system = m_systems[i];
-				if (system->_active)
+				for(auto system : _systems)
 				{
-					if(system->_modified)
+					if(system->_active)
 					{
-						system->OnModified(deltaT);
+						if(system->_modified)
+						{
+							system->OnModified(deltaT);
+						}
+						// TODO: OnPreWrap?
 					}
-					// TODO: OnPreWrap?
 				}
 			}
 			// normal update
-			for(auto system : m_systems)
+			for(auto system : _systems)
 			{
 				if(system->_active)
 				{
 					// TODO: Time buffering and intervals.
-					system->OnUpdate(deltaT, system->_entities);
+					system->OnTick(deltaT, system->_entities);
 				}
 				system->_modified = false;
 			}
@@ -110,19 +112,23 @@ bool Engine::RemoveSystem(const String& system)
 
 bool Engine::AddSystem(const RefPtr<System>& system)
 {
-	if(std::find(m_systemsToAdd.begin(), m_systemsToAdd.end(), system) == m_systemsToAdd.end())
+	if(std::find(_systemsToAdd.begin(), _systemsToAdd.end(), system) == _systemsToAdd.end())
 	{
-		m_systemsToAdd.push_back(system);
+		_systemsToAdd.push_back(system);
 		return true;
 	}
 	return false;
 }
 
-bool Engine::RemoveSystem(const RefPtr<System>& system)
+bool Engine::RemoveSystem(Mirror::Type systemType)
 {
-	if(std::find(m_systems.begin(), m_systems.end(), system) != m_systems.end())
+	auto findFunction = [&systemType](const RefPtr<System>& system) {
+		return system->GetType() == systemType;
+	};
+	auto found = std::find_if(_systems.begin(), _systems.end(), findFunction);
+	if(found != _systems.end())
 	{
-		m_systemsToRemove.push_back(system);
+		_systemsToRemove.push_back((*found));
 		return true;
 	}
 	return false;
@@ -130,9 +136,9 @@ bool Engine::RemoveSystem(const RefPtr<System>& system)
 
 bool Engine::AddEntity(const RefPtr<Entity>& entity)
 {
-	if(std::find(m_entitiesToChange.begin(), m_entitiesToChange.end(), entity) == m_entitiesToChange.end())
+	if(std::find(_entitiesToAdd.begin(), _entitiesToAdd.end(), entity) == _entitiesToAdd.end())
 	{
-		m_entitiesToChange.push_back(entity);
+		_entitiesToAdd.push_back(entity);
 		return true;
 	}
 	return false;
@@ -140,9 +146,9 @@ bool Engine::AddEntity(const RefPtr<Entity>& entity)
 
 bool Engine::RemoveEntity(const RefPtr<Entity>& entity)
 {
-	if(std::find(m_entities.begin(), m_entities.end(), entity) != m_entities.end())
+	if(std::find(_entities.begin(), _entities.end(), entity) != _entities.end())
 	{
-		m_entitiesToRemove.push_back(entity);
+		_entitiesToRemove.push_back(entity);
 		return true;
 	}
 	return false;
@@ -153,50 +159,71 @@ void Engine::Refresh()
 	ManageSystems();
 	ManageEntities();
 
-	for(size_t i = m_systems.size() - 1; i >= 0; --i)
+	if(!_systems.empty())
 	{
-		auto system = m_systems[i];
-		if(system->_active)
+		for(size_t i = _systems.size() - 1; i >= 0; --i)
 		{
-			system->OnModified(0.0);
+			auto system = _systems[i];
+			if(system->_active)
+			{
+				system->OnModified(0.0);
+			}
 		}
 	}
 }
 
 const String& Engine::GetName() const
 { 
-	return m_name;
+	return _name;
 }
 
 void Engine::SetName(const String& name)
 {
-	m_name = name;
+	_name = name;
 }
 
 bool Engine::Contains(const WeakPtr<Entity>& entity)
 {
-	return std::find(m_entities.begin(), m_entities.end(), entity.Lock()) != m_entities.end();
+	return std::find(_entities.begin(), _entities.end(), entity.Lock()) != _entities.end();
 }
 
 size_t Engine::GetNumSystems() const
 {
-	return m_systems.size();
+	return _systems.size();
 }
 
 size_t Engine::GetNumEntities() const
 {
-	return m_entities.size();
+	return _entities.size();
+}
+
+void Engine::ModifyEntity(Entity* entity)
+{
+	auto findFunction = [&entity](const RefPtr<Entity>& e) {
+		return e.Get() == entity;
+	};
+	auto found = std::find_if(_entities.begin(), _entities.end(), findFunction);
+	FIRE_ASSERT(found != _entities.end());
+
+	if(!_entitiesToRemove.empty())
+	{
+		FIRE_ASSERT(std::find_if(_entitiesToRemove.begin(), _entitiesToRemove.end(), findFunction) == _entitiesToRemove.end());
+	}
+
+	if(std::find_if(_entitiesToModify.begin(), _entitiesToModify.end(), findFunction) == _entitiesToModify.end())
+	{
+		_entitiesToModify.push_back(*found);
+	}
 }
 
 void Engine::ManageSystems()
 {
-	if(m_systemsToAdd.empty() && m_systemsToRemove.empty())
+	if(_systemsToAdd.empty() && _systemsToRemove.empty())
 	{
 		return;
 	}
 
-	// remove systems
-	for(auto system : m_systemsToRemove)
+	for(auto system : _systemsToRemove)
 	{
 		for(auto entity : system->_entities)
 		{
@@ -204,21 +231,19 @@ void Engine::ManageSystems()
 		}
 		system->OnRemoveFromEngine();
 		system->_engine = nullptr;
+		std::remove(_systems.begin(), _systems.end(), system);
 	}
 
-	//add systems
-	for(auto system : m_systemsToAdd)
+	for(auto system : _systemsToAdd)
 	{
 		system->OnBeforeAddToEngine();
-
 		system->_modified = true;
-		system->_active = true;
 		system->_engine = this;
 
+		_systems.push_back(system);
 		system->OnAddToEngine();
 
-		// add entities to the systems
-		for(auto entity : m_entities)
+		for(auto entity : _entities)
 		{
 			if(system->Filter(entity))
 			{
@@ -227,77 +252,92 @@ void Engine::ManageSystems()
 			}
 		}
 	}
-	m_systemsToAdd.clear();
-	m_systemsToRemove.clear();
+	_systemsToAdd.clear();
+	_systemsToRemove.clear();
 }
 
 void Engine::ManageEntities()
 {
-	if(m_entitiesToRemove.empty() && m_entitiesToChange.empty())
+	if(_entitiesToRemove.empty() && _entitiesToAdd.empty() && _entitiesToModify.empty())
 	{
 		return;
 	}
 
-	// change entities
-	for(auto entity : m_entitiesToChange)
+	for(auto entity : _entitiesToAdd)
 	{
-		// add if needed.
-		if(std::find(m_entities.begin(), m_entities.end(), entity) == m_entities.end())
+		// add the entity to the engine if needed
+		if(std::find(_entities.begin(), _entities.end(), entity) == _entities.end())
 		{
-			m_entities.push_back(entity);
+			entity->_owningEngine = this;
+			_entities.push_back(entity);
 		}
 
-		for(auto system : m_systems)
+		// go through the systems and add entities if it will take them.
+		for(auto system : _systems)
 		{
-			Vector<WeakPtr<Entity> >& entities = system->_entities;
-			// if the entity is already inside the 
-			auto found = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
-				return e.Lock().Get() == entity.Get();
-			});
-			
-			if(found == entities.end())
+			if(system->Filter(entity))
 			{
-				if(system->Filter(entity))
+				Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
+				auto found = std::find(systemEntities.begin(), systemEntities.end(), entity);
+				if (found == systemEntities.end())
 				{
 					system->_modified = true;
-					entities.push_back(entity);
+					systemEntities.push_back(entity);
 					system->OnEntityAdded(entity);
 				}
-			}
-			else
-			{
-				system->_modified = true;
-				entities.erase(found);
-				system->OnEntityRemoved(entity);
 			}
 		}
 	}
 
-	// remove entities
-	for(auto entity : m_entitiesToRemove)
+	// If entities reported that they had new components added to them, we need to add them to apropriate systems.
+	for(auto entity : _entitiesToModify)
 	{
-		auto entityItr = std::find(m_entities.begin(), m_entities.end(), entity);
-		if(entityItr != m_entities.end())
+		for(auto system : _systems)
 		{
-			//m_entities.erase(entityItr);
-			for(auto system : m_systems)
+			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
+			auto found = std::find(systemEntities.begin(), systemEntities.end(), entity);
+			if(system->Filter(entity))
 			{
-				Vector<WeakPtr<Entity>>& entities = system->_entities;
-				auto systemContainsItr = std::find_if(entities.begin(), entities.end(), [&entity](const WeakPtr<Entity>& e) {
-					return e.Lock().Get() == entity.Get();
-				});
-				if(systemContainsItr != entities.end())
+				if(found == systemEntities.end())
 				{
 					system->_modified = true;
-					entities.erase(systemContainsItr);
+					systemEntities.push_back(entity);
+					system->OnEntityAdded(entity);
+				}
+			}
+			// if it's no longer valid for this system, we need to remove it.
+			else
+			{
+				if(found != systemEntities.end())
+				{
+					system->_modified = true;
+					systemEntities.erase(found);
 					system->OnEntityRemoved(entity);
 				}
 			}
 		}
 	}
 
-	m_entitiesToRemove.clear();
-	m_entitiesToChange.clear();
+	// finally, remove all entities that need to be removed
+	for(auto entity : _entitiesToRemove)
+	{
+		auto foundEntity = std::find(_entities.begin(), _entities.end(), entity);
+		for(auto system : _systems)
+		{
+			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
+			auto foundInSystem = std::find(systemEntities.begin(), systemEntities.end(), entity);
+			if(foundInSystem != systemEntities.end())
+			{
+				system->_modified = true;
+				systemEntities.erase(foundInSystem);
+				system->OnEntityRemoved(entity);
+			}
+		}
+	}
+
+	_entitiesToAdd.clear();
+	_entitiesToModify.clear();
+	_entitiesToRemove.clear();
 }
 
 CLOSE_NAMESPACE(Firestorm);

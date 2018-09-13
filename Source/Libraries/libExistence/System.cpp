@@ -19,14 +19,14 @@ FIRE_MIRROR_DEFINE(SystemEvent)
 {
 }
 
-SystemEvent::SystemEvent(SystemEvent::Type type, WeakPtr<Engine> engine)
+SystemEvent::SystemEvent(SystemEvent::Type type, Engine* engine)
 : type(type)
 , engine(engine)
 , entity(nullptr)
 {
 
 }
-SystemEvent::SystemEvent(Type type, WeakPtr<Entity> entity)
+SystemEvent::SystemEvent(Type type, Entity* entity)
 : type(type)
 , engine(nullptr)
 , entity(entity)
@@ -85,7 +85,7 @@ bool System::Contains(const WeakPtr<Entity>& entity) const
 	if(entity)
 	{
 		return std::find_if(_entities.begin(), _entities.end(), [&entity](const WeakPtr<Entity>& e) {
-			return e.Lock().Get() == entity.Lock().Get();
+			return e == entity;
 		}) != _entities.end();
 	}
 	return false;
@@ -122,7 +122,7 @@ void System::AddToEngine(Engine* engine)
 		_engine = engine;
 		Dispatcher.Dispatch(SystemEvent {
 			SystemEvent::kEvent_OnAddedToEngine,
-			WeakPtr<Engine>(engine)
+			engine
 		});
 		OnAddToEngine();
 	}
