@@ -38,3 +38,4 @@ Build/**/*.ilk
 
 Premake/**
 Build/**
+BuildScripts/Projects/**
