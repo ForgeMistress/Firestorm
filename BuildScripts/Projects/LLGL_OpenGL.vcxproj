@@ -164,7 +164,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4250;4251;4290;4103;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;LLGL_GL_ENABLE_EXT_PLACEHOLDERS;LLGL_GL_ENABLE_VENDOR_EXT;LLGL_GL_ENABLE_DSA_EXT;_DEBUG;LLGL_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty;..\ThirdParty\LLGL\include;..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -183,7 +183,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4250;4251;4290;4103;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;LLGL_GL_ENABLE_EXT_PLACEHOLDERS;LLGL_GL_ENABLE_VENDOR_EXT;LLGL_GL_ENABLE_DSA_EXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty;..\ThirdParty\LLGL\include;..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -199,7 +199,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4250;4251;4290;4103;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;LLGL_GL_ENABLE_EXT_PLACEHOLDERS;LLGL_GL_ENABLE_VENDOR_EXT;LLGL_GL_ENABLE_DSA_EXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty;..\ThirdParty\LLGL\include;..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -215,7 +215,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4250;4251;4290;4103;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;LLGL_GL_ENABLE_EXT_PLACEHOLDERS;LLGL_GL_ENABLE_VENDOR_EXT;LLGL_GL_ENABLE_DSA_EXT;_DEBUG;LLGL_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty;..\ThirdParty\LLGL\include;..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -234,7 +234,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4250;4251;4290;4103;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;LLGL_GL_ENABLE_EXT_PLACEHOLDERS;LLGL_GL_ENABLE_VENDOR_EXT;LLGL_GL_ENABLE_DSA_EXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty;..\ThirdParty\LLGL\include;..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -250,7 +250,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4250;4251;4290;4103;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;LLGL_GL_ENABLE_EXT_PLACEHOLDERS;LLGL_GL_ENABLE_VENDOR_EXT;LLGL_GL_ENABLE_DSA_EXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty;..\ThirdParty\LLGL\include;..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\glfw\deps;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -261,12 +261,94 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\ThirdParty\LLGL\sources\Renderer\OpenGL\Platform\GLContext.h" />
-    <ClInclude Include="..\ThirdParty\LLGL\sources\Renderer\OpenGL\Platform\Win32\Win32GLContext.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\GLCore.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\GLExtensionRegistry.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\GLImport.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\GLImportExt.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\GLTypes.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\Texture\GLTexImage.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\Texture\GLTexSubImage.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLBuffer.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLBufferArray.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLIndexBuffer.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLVertexArrayObject.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLVertexBuffer.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLVertexBufferArray.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Ext\GLExtensionLoader.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Ext\GLExtensions.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Ext\GLExtensionsNull.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLCommandBuffer.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLCommandQueue.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLRenderContext.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLRenderSystem.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLRenderingCaps.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\OpenGL.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Platform\GLContext.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Platform\Win32\Win32GLContext.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLBlendState.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLComputePipeline.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLDepthStencilState.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLFence.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLGraphicsPipeline.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLPipelineLayout.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLQueryHeap.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLRasterizerState.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLRenderPass.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLResourceHeap.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLState.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLStateManager.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Shader\GLShader.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Shader\GLShaderProgram.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Shader\GLShaderUniform.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLFramebuffer.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLRenderTarget.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLRenderbuffer.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLSampler.h" />
+    <ClInclude Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLTexture.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\ThirdParty\LLGL\sources\Renderer\OpenGL\Platform\GLContext.cpp" />
-    <ClCompile Include="..\ThirdParty\LLGL\sources\Renderer\OpenGL\Platform\Win32\Win32GLContext.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\GLCore.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\GLExtensionRegistry.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\GLTypes.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\Texture\GLTexImage.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\GLCommon\Texture\GLTexSubImage.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLBuffer.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLBufferArray.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLIndexBuffer.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLVertexArrayObject.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLVertexBuffer.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Buffer\GLVertexBufferArray.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Ext\GLExtensionLoader.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Ext\GLExtensions.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Ext\GLExtensionsNull.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLCommandBuffer.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLCommandQueue.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLModuleInterface.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLRenderContext.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLRenderSystem_Buffers.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLRenderSystem_Common.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLRenderSystem_Textures.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\GLRenderingCaps.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Platform\GLContext.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Platform\Win32\Win32GLContext.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLBlendState.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLComputePipeline.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLDepthStencilState.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLFence.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLGraphicsPipeline.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLQueryHeap.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLRasterizerState.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLRenderPass.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLResourceHeap.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\RenderState\GLStateManager.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Shader\GLShader.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Shader\GLShaderProgram.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Shader\GLShaderUniform.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLFramebuffer.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLRenderTarget.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLRenderbuffer.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLSampler.cpp" />
+    <ClCompile Include="..\..\ThirdParty\LLGL\sources\Renderer\OpenGL\Texture\GLTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="LLGL.vcxproj">

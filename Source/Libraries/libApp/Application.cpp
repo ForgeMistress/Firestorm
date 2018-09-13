@@ -42,6 +42,7 @@ Application::Application()
 
 Application::~Application()
 {
+	//_renderMgr.System->Release(*_renderMgr.Context);
 }
 
 void Application::Initialize(int ac, char** av)
@@ -51,7 +52,7 @@ void Application::Initialize(int ac, char** av)
 	try
 	{
 		// Initialize the rendering context.
-		_renderSystem = LLGL::RenderSystem::Load("OpenGL");
+		_renderMgr.System = LLGL::RenderSystem::Load("OpenGL");
 
 		LLGL::RenderContextDescriptor contextDesc;
 		{
@@ -59,10 +60,10 @@ void Application::Initialize(int ac, char** av)
 			contextDesc.vsync.enabled = true;
 			contextDesc.profileOpenGL.contextProfile = LLGL::OpenGLContextProfile::CoreProfile;
 		}
-		_renderContext = _renderSystem->CreateRenderContext(contextDesc);
+		_renderMgr.Context = _renderMgr.System->CreateRenderContext(contextDesc);
 
 		// Print renderer information
-		const auto& info = _renderSystem->GetRendererInfo();
+		const auto& info = _renderMgr.System->GetRendererInfo();
 
 		std::cout << "Renderer:         " << info.rendererName << std::endl;
 		std::cout << "Device:           " << info.deviceName << std::endl;
@@ -84,7 +85,7 @@ void Application::Initialize(int ac, char** av)
 			}
 		});*/
 
-		auto& window = static_cast<LLGL::Window&>(_renderContext->GetSurface());
+		auto& window = static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface());
 		window.SetTitle(L"Fuck");
 		window.Show();
 
@@ -106,7 +107,7 @@ int Application::Run()
 	auto timer = LLGL::Timer::Create();
 	auto start = std::chrono::system_clock::now();
 
-	while(static_cast<LLGL::Window&>(_renderContext->GetSurface()).ProcessEvents())
+	while(static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface()).ProcessEvents())
 	{
 		timer->MeasureTime();
 		auto end = std::chrono::system_clock::now();
@@ -139,10 +140,10 @@ int Application::Run()
 				isRunning = false;
 			}
 		}*/
-		_renderContext->Present();
+		_renderMgr.Context->Present();
 	}
 	//_surface->Close();
-
+	
 	return OnShutdown();
 }
 
@@ -179,14 +180,9 @@ Vector2 Application::GetResolution() const
 	return { 800,600 };
 }
 
-LLGL::RenderSystem* Application::GetRenderer() const
+RenderMgr& Application::GetRenderMgr()
 {
-	return _renderSystem.get();
-}
-
-LLGL::RenderContext* Application::GetRenderContext() const
-{
-	return _renderContext;
+	return _renderMgr;
 }
 
 void Application::OnChar(Surface* surface, unsigned int c)

@@ -27,6 +27,14 @@ public:
 	class Application* App;
 };
 
+
+struct RenderMgr final
+{
+	std::unique_ptr<LLGL::RenderSystem> System{ nullptr };
+	LLGL::RenderContext* Context{ nullptr };
+};
+
+
 class Application : public IInputEventListener
 {
 public:
@@ -44,8 +52,10 @@ public:
 
 	Vector2 GetResolution() const;
 
-	LLGL::RenderSystem* GetRenderer() const;
-	LLGL::RenderContext* GetRenderContext() const;
+	RenderMgr& GetRenderMgr();
+
+	//LLGL::RenderSystem* GetRenderer() const;
+	//LLGL::RenderContext* GetRenderContext() const;
 
 	virtual void OnInitialize(int ac, char** av) = 0;
 	virtual void OnUpdate(double deltaT) = 0;
@@ -97,8 +107,7 @@ private:
 
 	RefPtr<Surface> _surface{ nullptr };
 
-	std::unique_ptr<LLGL::RenderSystem> _renderSystem{ nullptr };
-	LLGL::RenderContext* _renderContext{ nullptr };
+	RenderMgr _renderMgr;
 };
 
 CLOSE_NAMESPACE(Firestorm);

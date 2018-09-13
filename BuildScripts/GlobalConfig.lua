@@ -58,6 +58,7 @@ function configureEngineLib(libName)
         THIRD_PARTY_SRC_DIR,
         THIRD_PARTY_SRC_DIR.."/rttr/src",
         THIRD_PARTY_SRC_DIR.."/glfw/include",
+        THIRD_PARTY_SRC_DIR.."/LLGL/include",
         THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include"
     })
     libdirs({ ENGINE_BIN_OUTPUT_DIR })

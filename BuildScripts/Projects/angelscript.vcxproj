@@ -157,7 +157,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty\angelscript\sdk\angelscript\include;..\..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -173,7 +173,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty\angelscript\sdk\angelscript\include;..\..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -189,7 +189,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty\angelscript\sdk\angelscript\include;..\..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -205,7 +205,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty\angelscript\sdk\angelscript\include;..\..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -221,7 +221,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty\angelscript\sdk\angelscript\include;..\..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -237,7 +237,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\ThirdParty\angelscript\sdk\angelscript\include;..\..\ThirdParty\angelscript\sdk\angelscript\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -248,6 +248,85 @@
       <AdditionalLibraryDirectories>..\Bin\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_array.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_atomic.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_builder.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_bytecode.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_compiler.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_config.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_configgroup.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_context.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_criticalsection.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_datatype.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_debug.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_gc.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_generic.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_map.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_memory.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_module.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_namespace.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_objecttype.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_outputbuffer.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_parser.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_property.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_restore.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptcode.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptengine.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptfunction.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptnode.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptobject.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_string.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_string_util.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_symboltable.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_texts.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_thread.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_tokendef.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_tokenizer.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_typeinfo.h" />
+    <ClInclude Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_variablescope.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_atomic.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_builder.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_bytecode.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_arm.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_mips.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_ppc.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_ppc_64.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_sh4.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_x64_gcc.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_x64_mingw.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_x64_msvc.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_x86.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_callfunc_xenon.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_compiler.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_configgroup.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_context.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_datatype.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_gc.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_generic.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_globalproperty.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_memory.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_module.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_objecttype.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_outputbuffer.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_parser.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_restore.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptcode.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptengine.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptfunction.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptnode.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_scriptobject.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_string.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_string_util.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_thread.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_tokenizer.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_typeinfo.cpp" />
+    <ClCompile Include="..\..\ThirdParty\angelscript\sdk\angelscript\source\as_variablescope.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

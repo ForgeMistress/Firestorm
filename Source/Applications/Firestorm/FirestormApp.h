@@ -7,6 +7,8 @@ using namespace Firestorm;
 class FirestormApp : public Application
 {
 public:
+	virtual ~FirestormApp();
+
 	virtual void OnInitialize(int ac, char** av);
 	virtual void OnUpdate(double deltaT);
 	virtual void OnClose();
@@ -17,14 +19,13 @@ public:
 private:
 	LLGL::VertexFormat _vertFormat;
 
-	RefPtr<LLGL::Buffer> _vertexBuffer{ nullptr };
-
-	RefPtr<LLGL::Shader> _vertexShader{ nullptr };
-	RefPtr<LLGL::Shader> _fragmentShader{ nullptr };
-	RefPtr<LLGL::ShaderProgram> _shader{ nullptr };
-	RefPtr<LLGL::GraphicsPipeline> _pipeline{ nullptr };
-	RefPtr<LLGL::CommandQueue> _commandQueue{ nullptr };
-	RefPtr<LLGL::CommandBuffer> _commandBuffer{ nullptr };
+	LLGL::Buffer* _vertexBuffer{ nullptr };
+	LLGL::Shader* _vertexShader{ nullptr };
+	LLGL::Shader* _fragmentShader{ nullptr };
+	LLGL::ShaderProgram* _shader{ nullptr };
+	LLGL::GraphicsPipeline* _pipeline{ nullptr };
+	LLGL::CommandQueue* _commandQueue{ nullptr };
+	LLGL::CommandBuffer* _commandBuffer{ nullptr };
 };
 
 #endif

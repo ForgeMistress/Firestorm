@@ -47,9 +47,9 @@ kind("SharedLib")
 targetdir(ENGINE_BIN_OUTPUT_DIR)
 
 includedirs({
-    "ThirdParty",
-    "ThirdParty/LLGL/include",
-    "ThirdParty/glfw/deps"
+    THIRD_PARTY_SRC_DIR,
+    THIRD_PARTY_SRC_DIR.."/LLGL/include",
+    THIRD_PARTY_SRC_DIR.."/glfw/deps"
 })
 
 filter({"action:vs*"})
@@ -83,7 +83,7 @@ end
 if _OPTIONS["enable-debug-layer"] then
     group("Renderer/DebugLayer")
     files({
-        "ThirdParty/LLGL/sources/Renderer/DebugLayer/**.*"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/DebugLayer/**.*"
     })
 end
 
@@ -94,21 +94,21 @@ files({
 
 group("Sources/Core")
 files({
-    "ThirdParty/LLGL/sources/Core/*.h",
-    "ThirdParty/LLGL/sources/Core/*.cpp",
+    THIRD_PARTY_SRC_DIR.."/LLGL/sources/Core/*.h",
+    THIRD_PARTY_SRC_DIR.."/LLGL/sources/Core/*.cpp",
 })
 
 group("Sources/Platform")
 files({
-    "ThirdParty/LLGL/sources/Platform/*.h",
-    "ThirdParty/LLGL/sources/Platform/*.cpp",
-    "ThirdParty/LLGL/sources/Platform/"..host.."/*.h",
-    "ThirdParty/LLGL/sources/Platform/"..host.."/*.cpp",
+    THIRD_PARTY_SRC_DIR.."/LLGL/sources/Platform/*.h",
+    THIRD_PARTY_SRC_DIR.."/LLGL/sources/Platform/*.cpp",
+    THIRD_PARTY_SRC_DIR.."/LLGL/sources/Platform/"..host.."/*.h",
+    THIRD_PARTY_SRC_DIR.."/LLGL/sources/Platform/"..host.."/*.cpp",
 })
 
 files({
-    "ThirdParty/LLGL/sources/Renderer/*.h",
-    "ThirdParty/LLGL/sources/Renderer/*.cpp"
+    THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/*.h",
+    THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/*.cpp"
 })
 
 
@@ -129,9 +129,9 @@ if gfxapi == "OpenGL" then
     libdirs({ENGINE_BIN_OUTPUT_DIR})
 
     includedirs({
-        "ThirdParty",
-        "ThirdParty/LLGL/include",
-        "ThirdParty/glfw/deps"
+        THIRD_PARTY_SRC_DIR,
+        THIRD_PARTY_SRC_DIR.."/LLGL/include",
+        THIRD_PARTY_SRC_DIR.."/glfw/deps"
     })
 
     filter({"action:vs*"})
@@ -181,56 +181,56 @@ if gfxapi == "OpenGL" then
 
     group("GLCommon")
     files({
-        "ThirdParty/LLGL/sources/Renderer/GLCommon/*.h",
-        "ThirdParty/LLGL/sources/Renderer/GLCommon/*.cpp",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/GLCommon/*.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/GLCommon/*.cpp",
     })
     
     group("GLCommon/Texture")
     files({
-        "ThirdParty/LLGL/sources/Renderer/GLCommon/Texture/*.h",
-        "ThirdParty/LLGL/sources/Renderer/GLCommon/Texture/*.cpp"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/GLCommon/Texture/*.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/GLCommon/Texture/*.cpp"
     })
     
     group("OpenGL")
     files({
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/*.h",
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/*.cpp"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/*.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/*.cpp"
     })
     group("OpenGL/Buffer")
     files({
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Buffer/*.h",
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Buffer/*.cpp"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Buffer/*.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Buffer/*.cpp"
     })
     group("OpenGL/Ext")
     files({
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Ext/*.h",
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Ext/*.cpp"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Ext/*.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Ext/*.cpp"
     })
     group("OpenGL/Platform")
     files({
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Platform/GLContext.h",
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Platform/GLContext.cpp"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Platform/GLContext.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Platform/GLContext.cpp"
     })
     if host == "Win32" then
         files({
-            "ThirdParty/LLGL/sources/Renderer/OpenGL/Platform/Win32/Win32GLContext.h",
-            "ThirdParty/LLGL/sources/Renderer/OpenGL/Platform/Win32/Win32GLContext.cpp"
+            THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Platform/Win32/Win32GLContext.h",
+            THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Platform/Win32/Win32GLContext.cpp"
         })
     end
     -- TODO: Implement other hosts.
     group("OpenGL/RenderState")
     files({
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/RenderState/*.h",
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/RenderState/*.cpp"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/RenderState/*.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/RenderState/*.cpp"
     })
     group("OpenGL/Shader")
     files({
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Shader/*.h",
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Shader/*.cpp"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Shader/*.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Shader/*.cpp"
     })
     group("OpenGL/Texture")
     files({
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Texture/*.h",
-        "ThirdParty/LLGL/sources/Renderer/OpenGL/Texture/*.cpp"
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Texture/*.h",
+        THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/Texture/*.cpp"
     })
 end

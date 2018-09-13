@@ -8,8 +8,20 @@
 #include <libIO/libIO.h>
 #include <libIO/Logger.h>
 
+FirestormApp::~FirestormApp()
+{
+	RenderMgr& renderMgr = GetRenderMgr();
+	renderMgr.System->Release(*_commandBuffer);
+	renderMgr.System->Release(*_vertexShader);
+	renderMgr.System->Release(*_fragmentShader);
+	renderMgr.System->Release(*_shader);
+	renderMgr.System->Release(*_pipeline);
+	renderMgr.System->Release(*_vertexBuffer);
+}
+
 void FirestormApp::OnInitialize(int ac, char** av)
 {
+	RenderMgr& renderMgr = GetRenderMgr();
 	Dispatcher.Register(&FirestormApp::HandleApplicationWantsToClose, this);
 
 	struct Vertex
@@ -35,7 +47,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 		vertexBufferDesc.size = sizeof(vertices);
 		vertexBufferDesc.vertexBuffer.format = vertexFormat;
 	}
-	LLGL::RenderSystem* renderer = GetRenderer();
+	LLGL::RenderSystem* renderer = renderMgr.System.get();
 	_vertexBuffer = renderer->CreateBuffer(vertexBufferDesc, vertices);
 
 	String vertShaderSource = libIO::LoadFileString("Firestorm/Shaders/Triangle.vert");
@@ -77,8 +89,8 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	LLGL::ShaderProgramDescriptor shaderProgramDesc;
 	{
 		shaderProgramDesc.vertexFormats = { vertexFormat };
-		shaderProgramDesc.vertexShader = _vertexShader.Get();
-		shaderProgramDesc.fragmentShader = _fragmentShader.Get();
+		shaderProgramDesc.vertexShader = _vertexShader;
+		shaderProgramDesc.fragmentShader = _fragmentShader;
 	}
 	_shader = renderer->CreateShaderProgram(shaderProgramDesc);
 
@@ -89,8 +101,8 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;
 	{
-		pipelineDesc.shaderProgram = _shader.Get();
-		pipelineDesc.renderPass = GetRenderContext()->GetRenderPass();
+		pipelineDesc.shaderProgram = _shader;
+		pipelineDesc.renderPass = renderMgr.Context->GetRenderPass();
 	}
 	_pipeline = renderer->CreateGraphicsPipeline(pipelineDesc);
 
@@ -104,6 +116,8 @@ void FirestormApp::OnUpdate(double deltaT)
 {
 	try
 	{
+		RenderMgr& renderMgr = GetRenderMgr();
+
 		_commandBuffer->Begin();
 		{
 			Vector2 res(GetResolution());
@@ -116,7 +130,7 @@ void FirestormApp::OnUpdate(double deltaT)
 
 			_commandBuffer->SetVertexBuffer(*_vertexBuffer);
 
-			_commandBuffer->BeginRenderPass(*GetRenderContext());
+			_commandBuffer->BeginRenderPass(*renderMgr.Context);
 			{
 				_commandBuffer->Clear(LLGL::ClearFlags::Color);
 				_commandBuffer->Draw(3, 0);
@@ -128,7 +142,7 @@ void FirestormApp::OnUpdate(double deltaT)
 	}
 	catch(std::exception& e)
 	{
-		//FIRE_LOG_ERROR(String(e.what()));
+		FIRE_LOG_ERROR(String(e.what()));
 		Close();
 	}
 }

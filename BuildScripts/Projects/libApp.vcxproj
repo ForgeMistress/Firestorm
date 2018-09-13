@@ -158,7 +158,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -176,7 +176,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -194,7 +194,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -212,7 +212,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -230,7 +230,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
@@ -248,7 +248,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>FIRE_PLATFORM_WINDOWS;FIRE_VISUALSTUDIO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Source\Libraries;..\..\ThirdParty;..\..\ThirdParty\rttr\src;..\..\ThirdParty\glfw\include;..\..\ThirdParty\LLGL\include;..\..\ThirdParty\angelscript\sdk\angelscript\include;..\ThirdParty;..\ThirdParty\glfw\include;..\ThirdParty\rttr\src;..\ThirdParty\LLGL\include;..\..\Source\Libraries\libCore;..\..\Source\Libraries\libExistence;..\..\Source\Libraries\libIO;..\..\Source\Libraries\libJson;..\..\Source\Libraries\libMath;..\..\Source\Libraries\libMirror;..\..\Source\Libraries\libScene;..\..\Source\Libraries\libScript;..\..\Source\Libraries\libSerial;..\..\Source\Libraries\libUI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
