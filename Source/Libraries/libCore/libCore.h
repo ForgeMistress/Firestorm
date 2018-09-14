@@ -190,4 +190,6 @@ CLOSE_NAMESPACE(Firestorm);
 
 #define FIRE_ASSERT assert
 
+#define FIRE_BROKEN FIRE_ASSERT(false && "it's fucking broken. don't use this.")
+
 #endif

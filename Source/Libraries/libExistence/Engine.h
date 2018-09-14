@@ -33,17 +33,17 @@ public:
 	Engine();
 	virtual ~Engine();
 
-	inline void Pause();
-	inline void Unpause();
-	inline void TogglePause();
-	inline void ShutDown();
+	void Pause();
+	void Unpause();
+	void TogglePause();
+	void ShutDown();
 
 	void Update(double deltaT);
 
 	template <class T>
 	bool AddSystem()
 	{
-		return AddSystem(T::MyType());
+		return AddSystem(new T);
 	}
 	bool AddSystem(Mirror::Type systemType);
 

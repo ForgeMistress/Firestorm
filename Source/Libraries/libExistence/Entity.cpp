@@ -38,6 +38,7 @@ Entity::~Entity()
 
 bool Entity::AddComponent(Mirror::Type type)
 {
+	FIRE_BROKEN;
 	FIRE_ASSERT(type.is_valid());
 	Mirror::Instance componentInstance = type.create();
 	if(componentInstance.is_valid())

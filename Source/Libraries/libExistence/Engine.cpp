@@ -268,8 +268,6 @@ void Engine::ManageSystems()
 		system->OnRemoveFromEngine();
 		system->_engine = nullptr;
 
-		size_t size = _systems.size();
-		//_systems.erase(std::remove(_systems.begin(), _systems.end(), system), _systems.end());
 		Remove(_systems, system);
 	}
 
@@ -284,10 +282,10 @@ void Engine::ManageSystems()
 
 		for(auto entity : _entities)
 		{
-			if(system->Filter(entity.Get()))
+			if(system->Filter(entity))
 			{
-				system->_entities.push_back(entity.Get());
-				system->OnEntityAdded(entity.Get());
+				system->_entities.push_back(entity);
+				system->OnEntityAdded(entity);
 			}
 		}
 	}
@@ -311,20 +309,18 @@ void Engine::ManageEntities()
 			_entities.push_back(entity);
 		}
 
-		auto e = entity.Get();
-
 		// go through the systems and add entities if it will take them.
 		for(auto system : _systems)
 		{
-			if(system->Filter(e))
+			if(system->Filter(entity))
 			{
-				Vector<Entity*>& systemEntities = system->_entities;
-				auto found = std::find(systemEntities.begin(), systemEntities.end(), e);
+				Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
+				auto found = std::find(systemEntities.begin(), systemEntities.end(), entity);
 				if(found == systemEntities.end())
 				{
 					system->_modified = true;
-					systemEntities.push_back(e);
-					system->OnEntityAdded(e);
+					systemEntities.push_back(entity);
+					system->OnEntityAdded(entity);
 				}
 			}
 		}
@@ -333,19 +329,17 @@ void Engine::ManageEntities()
 	// If entities reported that they had new components added to them, we need to add them to apropriate systems.
 	for(auto entity : _entitiesToModify)
 	{
-		auto e = entity.Get();
-
 		for(auto system : _systems)
 		{
-			Vector<Entity*>& systemEntities = system->_entities;
-			auto found = std::find(systemEntities.begin(), systemEntities.end(), entity.Get());
-			if(system->Filter(e))
+			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
+			auto found = std::find(systemEntities.begin(), systemEntities.end(), entity);
+			if(system->Filter(entity))
 			{
 				if(found == systemEntities.end())
 				{
 					system->_modified = true;
-					systemEntities.push_back(e);
-					system->OnEntityAdded(e);
+					systemEntities.push_back(entity);
+					system->OnEntityAdded(entity);
 				}
 			}
 			// if it's no longer valid for this system, we need to remove it.
@@ -355,7 +349,7 @@ void Engine::ManageEntities()
 				{
 					system->_modified = true;
 					systemEntities.erase(found);
-					system->OnEntityRemoved(e);
+					system->OnEntityRemoved(entity);
 				}
 			}
 		}
@@ -364,18 +358,16 @@ void Engine::ManageEntities()
 	// finally, remove all entities that need to be removed
 	for(auto entity : _entitiesToRemove)
 	{
-		auto e = entity.Get();
-
 		auto foundEntity = std::find(_entities.begin(), _entities.end(), entity);
 		for(auto system : _systems)
 		{
-			Vector<Entity*>& systemEntities = system->_entities;
-			auto foundInSystem = std::find(systemEntities.begin(), systemEntities.end(), e);
+			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
+			auto foundInSystem = std::find(systemEntities.begin(), systemEntities.end(), entity);
 			if(foundInSystem != systemEntities.end())
 			{
 				system->_modified = true;
 				systemEntities.erase(foundInSystem);
-				system->OnEntityRemoved(e);
+				system->OnEntityRemoved(entity);
 			}
 		}
 	}

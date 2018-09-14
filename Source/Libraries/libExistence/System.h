@@ -55,7 +55,7 @@ public:
 		Run the filtering routine to determine whether or not the \ref Entity will be able
 		to be added to this system.
 	 **/
-	bool Filter(const Entity* entity) const;
+	bool Filter(const WeakPtr<Entity>& entity) const;
 
 	/**
 		\function GetEngine
@@ -77,11 +77,6 @@ public:
 	void SetName(const String& name);
 
 	/**
-		Check whether or not this system contains the entity.
-	 **/
-	bool Contains(const Entity* entity) const;
-
-	/**
 		Pause the execution of this system temporarily.
 	 **/
 	void Pause();
@@ -98,14 +93,14 @@ protected:
 	/**
 		Called when, for whatever reason, an entity is added to the internal entity list.
 	 **/
-	virtual void OnEntityAdded(const Entity* /*entity*/) {}
+	virtual void OnEntityAdded(const WeakPtr<Entity>& /*entity*/) {}
 
 	/**
 		Called when, for whatever reason, an entity is no longer a part of this system.
 
 		\arg \c Entity The entity that has been removed from the system. Guaranteed to be valid so no validation is required.
 	**/
-	virtual void OnEntityRemoved(const Entity* /*entity*/) {}
+	virtual void OnEntityRemoved(const WeakPtr<Entity>& /*entity*/) {}
 
 	/**
 		\function OnBeforeAddToEngine
@@ -136,7 +131,7 @@ protected:
 		\arg \c DeltaT The delta time that has passed between calls.
 		\arg \c Entities A list of Entities that the System can act upon.
 	 **/
-	virtual void OnTick(double /*deltaT*/, const Vector<Entity*>& /*entities*/) {}
+	virtual void OnTick(double /*deltaT*/, const Vector<WeakPtr<Entity>>& /*entities*/) {}
 
 	/**
 		\function OnEntityFilter
@@ -148,7 +143,7 @@ protected:
 
 		\return shouldAdd true if this entity should be added and false if not.
 	 **/
-	virtual bool OnEntityFilter(const Entity* entity) const { return false; }
+	virtual bool OnEntityFilter(const WeakPtr<Entity>& entity) const { return false; }
 
 	virtual void* DoInspect(Mirror::Type type);
 
@@ -163,11 +158,11 @@ private:
 	String _name;
 
 	// Runtime.
-	bool            _modified;
-	bool            _active;
-	bool            _paused;
-	Engine*         _engine;
-	Vector<Entity*> _entities;
+	bool                    _modified;
+	bool                    _active;
+	bool                    _paused;
+	Engine*                 _engine;
+	Vector<WeakPtr<Entity>> _entities;
 };
 
 CLOSE_NAMESPACE(Firestorm);

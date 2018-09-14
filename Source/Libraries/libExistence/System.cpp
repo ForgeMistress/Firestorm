@@ -56,7 +56,7 @@ System::~System()
 	_entities.clear();
 }
 
-bool System::Filter(const Entity* entity) const
+bool System::Filter(const WeakPtr<Entity>& entity) const
 {
 	if(entity)
 	{
@@ -78,17 +78,6 @@ const String& System::GetName() const
 void System::SetName(const String& name)
 {
 	_name = name;
-}
-
-bool System::Contains(const Entity* entity) const
-{
-	if(entity)
-	{
-		return std::find_if(_entities.begin(), _entities.end(), [&entity](const Entity* e) {
-			return e == entity;
-		}) != _entities.end();
-	}
-	return false;
 }
 
 void System::Pause()
