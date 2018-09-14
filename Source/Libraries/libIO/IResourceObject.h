@@ -11,6 +11,8 @@
 #define LIBIO_RESOURCEOBJECT_H_
 #pragma once
 
+#include <json/value.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 class IDocument;
@@ -21,8 +23,8 @@ class IResourceObject
 public:
 	virtual ~IResourceObject() {}
 
-	virtual Result<void, Error> Load(const RefPtr<IDocument>& reader) = 0;
-	virtual Result<void, Error> Save(RefPtr<IDocument>& writer) const = 0;
+	virtual Result<void, Error> Load(const Json::Value& inValue) = 0;
+	virtual Result<void, Error> Save(Json::Value& outValue) const = 0;
 };
 
 CLOSE_NAMESPACE(Firestorm);

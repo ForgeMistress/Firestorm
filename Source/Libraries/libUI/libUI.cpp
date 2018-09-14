@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "libUI.h"
 
-void Firestorm::libUI::Initialize(int ac, char** av)
+OPEN_NAMESPACE(Firestorm);
+
+void libUI::Initialize(int ac, char** av)
 {
 }
+
+CLOSE_NAMESPACE(Firestorm);

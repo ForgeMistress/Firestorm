@@ -3,12 +3,11 @@
 #define LIBUI_H_
 #pragma once
 
-namespace Firestorm
+OPEN_NAMESPACE(Firestorm);
+struct libUI
 {
-	struct libUI
-	{
-		static void Initialize(int ac, char** av);
-	};
-}
+	static void Initialize(int ac, char** av);
+};
+CLOSE_NAMESPACE(Firestormn);
 
 #endif

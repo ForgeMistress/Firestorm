@@ -3,12 +3,13 @@
 #define LIBSCENE_H_
 #pragma once
 
-namespace Firestorm
+OPEN_NAMESPACE(Firestorm);
+
+struct libScene
 {
-	struct libScene
-	{
-		static void Initialize(int ac, char** av);
-	};
-}
+	static void Initialize(int ac, char** av);
+};
+
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

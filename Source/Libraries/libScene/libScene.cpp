@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "libScene.h"
 
-void Firestorm::libScene::Initialize(int ac, char** av)
+OPEN_NAMESPACE(Firestorm);
+
+void libScene::Initialize(int ac, char** av)
 {
 }
+
+CLOSE_NAMESPACE(Firestorm);
