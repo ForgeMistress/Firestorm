@@ -70,11 +70,9 @@ bool libIO::Mount(const String& dir, const String& mountPoint)
 	{
 		return false;
 	}
-	//FIRE_LOG_DEBUG(":: Mounted Directory", dir, "to mount point", mountPoint);
-	std::cout << ":: Mounted Directory" << dir << "to mount point" << mountPoint << std::endl;
+	FIRE_LOG_DEBUG(":: Mounted Directory", dir, "to mount point", mountPoint);
 	return true;
 }
-
 
 Vector<char> libIO::LoadFile(const String& filename)
 {
