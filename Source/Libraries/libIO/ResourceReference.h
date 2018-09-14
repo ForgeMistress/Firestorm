@@ -23,7 +23,9 @@ class ResourceReference : public Mirror::Object
 	FIRE_MIRROR_DECLARE(ResourceReference, Mirror::Object);
 public:
 	ResourceReference();
+	explicit ResourceReference(const String& resourcePath);
 	virtual ~ResourceReference();
+
 private:
 	String _resourcePath;
 };

@@ -16,6 +16,11 @@ ResourceReference::ResourceReference()
 {
 }
 
+ResourceReference::ResourceReference(const String& resourcePath)
+: _resourcePath(resourcePath)
+{
+}
+
 ResourceReference::~ResourceReference()
 {
 }

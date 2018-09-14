@@ -19,7 +19,6 @@ SceneGraphResource::SceneGraphResource()
 
 SceneGraphResource::~SceneGraphResource()
 {
-
 }
 
 
@@ -32,6 +31,5 @@ Result<void, Error> SceneGraphResource::Save(Json::Value& outValue) const
 {
 	return FIRE_RESULT(void);
 }
-
 
 CLOSE_NAMESPACE(Firestorm);
