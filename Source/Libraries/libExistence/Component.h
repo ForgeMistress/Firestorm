@@ -51,7 +51,7 @@ public:
 	inline WeakPtr<Entity>& GetEntity();
 
 protected:
-	virtual void* DoInspect(Mirror::Type type);
+	virtual void* DoInspect(Mirror::Type type) override;
 
 private:
 	String m_name;

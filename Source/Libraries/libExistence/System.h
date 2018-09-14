@@ -55,7 +55,7 @@ public:
 		Run the filtering routine to determine whether or not the \ref Entity will be able
 		to be added to this system.
 	 **/
-	bool Filter(const WeakPtr<Entity>& entity) const;
+	bool Filter(const Entity* entity) const;
 
 	/**
 		\function GetEngine
@@ -72,22 +72,16 @@ public:
 	const String& GetName() const;
 
 	/**
-		\function SetName
-
 		Set the name of this system.
-	**/
+	 **/
 	void SetName(const String& name);
 
 	/**
-		\function Contains
-
 		Check whether or not this system contains the entity.
 	 **/
-	bool Contains(const WeakPtr<Entity>& entity) const;
+	bool Contains(const Entity* entity) const;
 
 	/**
-		\function Pause
-
 		Pause the execution of this system temporarily.
 	 **/
 	void Pause();
@@ -96,28 +90,22 @@ protected:
 	friend class Engine;
 
 	/**
-		\function OnModified
-
 		Called when the \ref System is modified in any conceivable way. This function is called as part of the update loop and so can
 		be reliably used to detect when objects are added or removed.
 	 **/
 	virtual void OnModified(double deltaT) {}
 
 	/**
-		\function OnEntityAdded
-
 		Called when, for whatever reason, an entity is added to the internal entity list.
 	 **/
-	virtual void OnEntityAdded(const WeakPtr<Entity>& /*entity*/) {}
+	virtual void OnEntityAdded(const Entity* /*entity*/) {}
 
 	/**
-		\function OnEntityRemoved
-
 		Called when, for whatever reason, an entity is no longer a part of this system.
 
 		\arg \c Entity The entity that has been removed from the system. Guaranteed to be valid so no validation is required.
 	**/
-	virtual void OnEntityRemoved(const WeakPtr<Entity>& /*entity*/) {}
+	virtual void OnEntityRemoved(const Entity* /*entity*/) {}
 
 	/**
 		\function OnBeforeAddToEngine
@@ -128,8 +116,6 @@ protected:
 	virtual void OnBeforeAddToEngine() {}
 
 	/**
-		\function OnAddToEngine
-
 		Callback function called when this system is added to an \ref Engine. \ref GetEngine() is guaranteed to return a pointer
 		to a valid \ref Engine instance that is, indeed, the \ref Engine instance that will hold this \ref System for the duration
 		of its operation.
@@ -137,9 +123,7 @@ protected:
 	virtual void OnAddToEngine() {}
 
 	/**
-		\function OnRemoveFromEngine
-
-		Callback called when this system is removed from an engine. \ref GetEngine() is guaranteed to not be nullptr until
+		Callback called when this system is removed from an engine. #GetEngine() is guaranteed to not be nullptr until
 		after this function returns.
 	 **/
 	virtual void OnRemoveFromEngine() {}
@@ -147,12 +131,12 @@ protected:
 	/**
 		\function OnTick
 
-		Callback function called by its holding \ref Engine when it needs to be updated.
+		Callback function called by its holding Engine when it needs to be updated.
 
 		\arg \c DeltaT The delta time that has passed between calls.
-		\arg \c Entities A list of \ref Entities that the \ref System can act upon.
+		\arg \c Entities A list of Entities that the System can act upon.
 	 **/
-	virtual void OnTick(double /*deltaT*/, const Vector<WeakPtr<Entity>>& /*entities*/) {}
+	virtual void OnTick(double /*deltaT*/, const Vector<Entity*>& /*entities*/) {}
 
 	/**
 		\function OnEntityFilter
@@ -160,11 +144,11 @@ protected:
 		This callback function is used to tell the \ref Engine whether or not the passed \ref Entity should become a 
 		part of this system.
 
-		\arg \c entity A \ref WeakPtr to an \ref Entity instance. Guaranteed to be valid and so no validity checking is required.
+		\arg \c entity A WeakPtr to an Entity instance. Guaranteed to be valid and so no validity checking is required.
 
-		\return true if this entity should be added and false if not.
+		\return shouldAdd true if this entity should be added and false if not.
 	 **/
-	virtual bool OnEntityFilter(const WeakPtr<Entity>& entity) const { return false; }
+	virtual bool OnEntityFilter(const Entity* entity) const { return false; }
 
 	virtual void* DoInspect(Mirror::Type type);
 
@@ -174,17 +158,16 @@ private:
 	/* /!\ INTERNAL ONLY /!\ */
 	void AddToEngine(Engine* engine);
 	void Reset();
-	bool AddEntity(WeakPtr<Entity>& entity);
 
 	// Reflected.
 	String _name;
 
 	// Runtime.
-	bool                    _modified;
-	bool                    _active;
-	bool                    _paused;
-	Engine*                 _engine;
-	Vector<WeakPtr<Entity>> _entities;
+	bool            _modified;
+	bool            _active;
+	bool            _paused;
+	Engine*         _engine;
+	Vector<Entity*> _entities;
 };
 
 CLOSE_NAMESPACE(Firestorm);

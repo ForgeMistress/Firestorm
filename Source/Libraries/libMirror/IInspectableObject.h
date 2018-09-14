@@ -17,27 +17,24 @@ OPEN_NAMESPACE(Firestorm);
 OPEN_NAMESPACE(Mirror);
 
 /**
-\class IInspectableObject
-
-An abstract class for an object that can have its interfaces inspected. Objects that derive from
-this interface must override DoInspect and check the rttr::type that is passed in. If the object matches
-the type, then it must return the pointer to the object static_casted to the apropriate type.
+	\class IInspectableObject
+	
+	An abstract class for an object that can have its interfaces inspected. Objects that derive from
+	this interface must override DoInspect and check the rttr::type that is passed in. If the object matches
+	the type, then it must return the pointer to the object static_casted to the apropriate type.
 **/
 class IInspectableObject
 {
 	FIRE_MIRROR_DECLARE(IInspectableObject);
 public:
 	/**
-	Inspect an object to see if it implements the type defined in the template.
+		Inspect an object to see if it implements the type defined in the template.
 	**/
 	template <class Interface_t>
 	Interface_t* Inspect();
 
-	/**
-		Inspect an object to see if it implements the type defined in the template.
-	**/
 	template <class Interface_t>
-	const Interface_t* Inspect() const;
+	Interface_t* Inspect() const;
 
 	/**
 		Inspect an object to see if it implements the provided type.
@@ -57,15 +54,16 @@ protected:
 template <class Interface_t>
 Interface_t* IInspectableObject::Inspect()
 {
-	return static_cast<Interface_t*>(DoInspect(Interface_t::MyType()));
+	return reinterpret_cast<Interface_t*>(DoInspect(Interface_t::MyType()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class Interface_t>
-const Interface_t* IInspectableObject::Inspect() const
+Interface_t* IInspectableObject::Inspect() const
 {
-	return reinterpret_cast<const Interface_t*>(DoInspect(Interface_t::MyType()));
+	IInspectableObject* obj = const_cast<IInspectableObject*>(this);
+	return reinterpret_cast<Interface_t*>(obj->DoInspect(Interface_t::MyType()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

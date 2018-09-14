@@ -14,10 +14,10 @@
 #include <libCore/RefPtr.h>
 #include <libMirror/Object.h>
 
-OPEN_NAMESPACE(Firestorm);
+#include "System.h"
+#include "Entity.h"
 
-class System;
-class Entity;
+OPEN_NAMESPACE(Firestorm);
 
 /**
 	\class Engine
@@ -40,10 +40,12 @@ public:
 
 	void Update(double deltaT);
 
-	bool AddSystem(const String& system);
-	bool RemoveSystem(const String& system);
-
-	bool AddSystem(const RefPtr<System>& system);
+	template <class T>
+	bool AddSystem()
+	{
+		return AddSystem(T::MyType());
+	}
+	bool AddSystem(Mirror::Type systemType);
 
 	template <class T>
 	bool RemoveSystem()
@@ -53,17 +55,25 @@ public:
 	bool RemoveSystem(Mirror::Type type);
 
 	bool AddEntity(const RefPtr<Entity>& entity);
-	bool RemoveEntity(const RefPtr<Entity>& entity);
+	bool RemoveEntity(const WeakPtr<Entity>& entity);
 
 	void Refresh();
 
 	const String& GetName() const;
 	void SetName(const String& name);
 
-	bool Contains(const WeakPtr<Entity>& entity);
-
 	size_t GetNumSystems() const;
+	WeakPtr<System> GetSystem(size_t index) const;
+
+	template <class T>
+	Vector<WeakPtr<System>> GetSystems() const
+	{
+		return GetSystems(T::MyType());
+	}
+	Vector<WeakPtr<System>> GetSystems(Mirror::Type type) const;
+
 	size_t GetNumEntities() const;
+	WeakPtr<Entity> GetEntity(size_t index) const;
 
 private:
 	friend class Entity;
@@ -71,6 +81,9 @@ private:
 
 	void ManageSystems();
 	void ManageEntities();
+
+	bool RemoveSystem(const RefPtr<System>& system);
+	bool AddSystem(const RefPtr<System>& system);
 
 	typedef Vector<RefPtr<System>> SystemList;
 	typedef Vector<RefPtr<Entity>> EntityList;
@@ -80,15 +93,21 @@ private:
 	SystemList _systems;
 	EntityList _entities;
 
+	UnorderedSet<Mirror::Type> _systemTypes;
+
 	// Runtime
 	bool _running;
 	bool _paused;
 
-	List<RefPtr<Entity>> _entitiesToAdd;
-	List<RefPtr<Entity>> _entitiesToModify;
-	List<RefPtr<Entity>> _entitiesToRemove;
-	List<RefPtr<System>> _systemsToAdd;
-	List<RefPtr<System>> _systemsToRemove;
+	using EntityPtr = RefPtr<Entity>;
+	using SystemPtr = RefPtr<System>;
+
+	UnorderedSet<EntityPtr> _entitiesToAdd;
+	UnorderedSet<EntityPtr> _entitiesToModify;
+	UnorderedSet<EntityPtr> _entitiesToRemove;
+
+	UnorderedSet<SystemPtr> _systemsToAdd;
+	UnorderedSet<SystemPtr> _systemsToRemove;
 };
 
 typedef RefPtr<Engine>  EnginePtr;

@@ -30,7 +30,8 @@ void* IInspectableObject::Inspect(Type type)
 
 void* IInspectableObject::DoInspect(Type type)
 {
-	DOINSPECT_SIMPLE(type);
+	if(IInspectableObject::MyType() == type)
+		return static_cast<IInspectableObject*>(this);
 	return nullptr;
 }
 

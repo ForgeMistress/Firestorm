@@ -56,7 +56,7 @@ System::~System()
 	_entities.clear();
 }
 
-bool System::Filter(const WeakPtr<Entity>& entity) const
+bool System::Filter(const Entity* entity) const
 {
 	if(entity)
 	{
@@ -80,11 +80,11 @@ void System::SetName(const String& name)
 	_name = name;
 }
 
-bool System::Contains(const WeakPtr<Entity>& entity) const
+bool System::Contains(const Entity* entity) const
 {
 	if(entity)
 	{
-		return std::find_if(_entities.begin(), _entities.end(), [&entity](const WeakPtr<Entity>& e) {
+		return std::find_if(_entities.begin(), _entities.end(), [&entity](const Entity* e) {
 			return e == entity;
 		}) != _entities.end();
 	}
@@ -96,22 +96,13 @@ void System::Pause()
 	_paused = true;
 }
 
-bool System::AddEntity(WeakPtr<Entity>& entity)
+void* System::DoInspect(Mirror::Type type) 
 {
-	if(entity)
+	if(type == System::MyType())
 	{
-		if(OnEntityFilter(entity))
-		{
-			_entities.push_back(entity);
-			return true;
-		}
+		return static_cast<System*>(this);
 	}
-	return false;
-}
 
-void* System::DoInspect(Mirror::Type type)
-{
-	DOINSPECT_SIMPLE(type);
 	return IInspectableObject::DoInspect(type);
 }
 

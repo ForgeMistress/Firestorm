@@ -43,9 +43,9 @@ void libIO::Initialize(int ac, char** av)
 		LogLastPhysfsError("Error when mounting 'Assets' directory");
 
 	String appDir(assetsDir + "/" + appName.c_str());
-	if(PHYSFS_isDirectory(appDir.c_str()) || PHYSFS_exists(appDir.c_str()))
-		if(!libIO::Mount(appDir, "/"))
-			LogLastPhysfsError("Error when mounting '"+appName+"' directory");
+
+	if(!libIO::Mount(appDir, "/"))
+		LogLastPhysfsError("Error when mounting '"+appName+"' directory");
 
 	String modules(parser.Get("--Modules", ""));
 	if(!modules.empty())
@@ -70,7 +70,8 @@ bool libIO::Mount(const String& dir, const String& mountPoint)
 	{
 		return false;
 	}
-	FIRE_LOG_DEBUG(":: Mounted Directory", dir, "to mount point", mountPoint);
+	//FIRE_LOG_DEBUG(":: Mounted Directory", dir, "to mount point", mountPoint);
+	std::cout << ":: Mounted Directory" << dir << "to mount point" << mountPoint << std::endl;
 	return true;
 }
 
@@ -82,12 +83,12 @@ Vector<char> libIO::LoadFile(const String& filename)
 	if(file)
 	{
 		PHYSFS_sint64 len = PHYSFS_fileLength(file);
-		data.reserve(len);
-		data.resize(len);
+		data.reserve(static_cast<size_t>(len));
+		data.resize(static_cast<size_t>(len));
 
 		PHYSFS_readBytes(file, &data[0], len);
-		PHYSFS_close(file);
 	}
+	PHYSFS_close(file);
 	return data;
 }
 

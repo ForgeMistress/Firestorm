@@ -167,6 +167,20 @@ struct libCore
 
 extern Vector<String> SplitString(const String& str, char delim);
 
+template<class T>
+extern void Remove(Vector<T>& v, const T& value)
+{
+	v.erase(std::remove(v.begin(), v.end(), value), v.end());
+}
+
+template <class T, class U>
+extern bool Exists(const T& search, const U& value)
+{
+	if(std::find(search.begin(), search.end(), value) == search.end())
+		return false;
+	return true;
+}
+
 CLOSE_NAMESPACE(Firestorm);
 
 /**

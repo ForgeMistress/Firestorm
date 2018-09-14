@@ -25,20 +25,41 @@ public:
 
 	inline const String& GetName() const { return _name; }
 
-	bool AddComponent(const RefPtr<Component>& component);
+	template <class T>
+	bool AddComponent()
+	{
+		return AddComponent(T::MyType());
+	}
+	bool AddComponent(Mirror::Type type);
 
-	bool RemoveComponent(const RefPtr<Component>& component);
+	template <class T>
+	bool RemoveComponent()
+	{
+		return RemoveComponent(T::MyType());
+	}
 	bool RemoveComponent(const String& componentName);
 	bool RemoveComponent(Mirror::Type ofType);
 
 	size_t GetNumComponents() const;
+	WeakPtr<Component> GetComponent(size_t index) const;
+	WeakPtr<Component> GetComponent(const String& name) const;
+
+	template <class T>
+	Vector<WeakPtr<Component>> GetComponents() const
+	{
+		return GetComponents(T::MyType());
+	}
+	Vector<WeakPtr<Component>> GetComponents(Mirror::Type type) const;
 
 private:
 	virtual void* DoInspect(Mirror::Type type);
 
+	bool AddComponent(const RefPtr<Component>& component);
+	bool RemoveComponent(const RefPtr<Component>& component);
+
 	// Reflected
-	String                    _name;
-	Vector<RefPtr<Component>> _components;
+	String                     _name;
+	Vector<RefPtr<Component>>  _components;
 
 	// Not reflected.
 	friend class Engine;

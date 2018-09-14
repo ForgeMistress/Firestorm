@@ -47,9 +47,9 @@ WeakPtr<Entity>& Component::GetEntity()
 
 void* Component::DoInspect(Mirror::Type type)
 {
-	DOINSPECT_SIMPLE(type);
+	if(Component::MyType() == type)
+		return static_cast<Component*>(this);
 	return IInspectableObject::DoInspect(type);
 }
-
 
 CLOSE_NAMESPACE(Firestorm);

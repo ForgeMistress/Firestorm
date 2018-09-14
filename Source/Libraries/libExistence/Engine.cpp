@@ -10,9 +10,6 @@
 #include "stdafx.h"
 #include "Engine.h"
 
-#include "System.h"
-#include "Entity.h"
-
 OPEN_NAMESPACE(Firestorm);
 
 
@@ -91,10 +88,10 @@ void Engine::Update(double deltaT)
 	}
 }
 
-bool Engine::AddSystem(const String& system)
+bool Engine::AddSystem(Mirror::Type systemType)
 {
-	Mirror::Type systemType = Mirror::Type::get_by_name(system);
-	if(systemType.is_valid())
+	FIRE_ASSERT(systemType.is_valid());
+	if(_systemTypes.find(systemType) == _systemTypes.end())
 	{
 		Mirror::Instance instance = systemType.create();
 		if(instance.is_valid())
@@ -105,30 +102,45 @@ bool Engine::AddSystem(const String& system)
 	return false;
 }
 
-bool Engine::RemoveSystem(const String& system)
-{
-	return false;
-}
-
 bool Engine::AddSystem(const RefPtr<System>& system)
 {
-	if(std::find(_systemsToAdd.begin(), _systemsToAdd.end(), system) == _systemsToAdd.end())
+	if(_systemTypes.find(system->GetType()) == _systemTypes.end())
 	{
-		_systemsToAdd.push_back(system);
-		return true;
+		if(_systemsToAdd.find(system) == _systemsToAdd.end())
+		{
+			_systemsToAdd.insert(system);
+			_systemTypes.insert(system->GetType());
+		}
+	}
+	return true;
+}
+
+bool Engine::RemoveSystem(Mirror::Type type)
+{
+	FIRE_ASSERT(type.is_valid());
+	if(_systemTypes.find(type) != _systemTypes.end())
+	{
+		auto found = std::find_if(_systems.begin(), _systems.end(), [&type](const RefPtr<System>& system) {
+			return system->GetType() == type;
+		});
+		if(found != _systems.end())
+		{
+			_systemsToRemove.insert((*found));
+			return true;
+		}
 	}
 	return false;
 }
 
-bool Engine::RemoveSystem(Mirror::Type systemType)
+// PRIVATE
+bool Engine::RemoveSystem(const RefPtr<System>& system)
 {
-	auto findFunction = [&systemType](const RefPtr<System>& system) {
-		return system->GetType() == systemType;
-	};
-	auto found = std::find_if(_systems.begin(), _systems.end(), findFunction);
+	auto found = std::find_if(_systems.begin(), _systems.end(), [&system](const RefPtr<System>& sys) {
+		return system == sys;
+	});
 	if(found != _systems.end())
 	{
-		_systemsToRemove.push_back((*found));
+		_systemsToRemove.insert(system);
 		return true;
 	}
 	return false;
@@ -136,19 +148,20 @@ bool Engine::RemoveSystem(Mirror::Type systemType)
 
 bool Engine::AddEntity(const RefPtr<Entity>& entity)
 {
-	if(std::find(_entitiesToAdd.begin(), _entitiesToAdd.end(), entity) == _entitiesToAdd.end())
+	if(Exists(_entitiesToAdd, entity))
 	{
-		_entitiesToAdd.push_back(entity);
+		_entitiesToAdd.insert(entity);
 		return true;
 	}
 	return false;
 }
 
-bool Engine::RemoveEntity(const RefPtr<Entity>& entity)
+// PRIVATE
+bool Engine::RemoveEntity(const WeakPtr<Entity>& entity)
 {
-	if(std::find(_entities.begin(), _entities.end(), entity) != _entities.end())
+	if(Exists(_entities, entity.Lock()))
 	{
-		_entitiesToRemove.push_back(entity);
+		_entitiesToRemove.insert(entity.Lock());
 		return true;
 	}
 	return false;
@@ -182,19 +195,39 @@ void Engine::SetName(const String& name)
 	_name = name;
 }
 
-bool Engine::Contains(const WeakPtr<Entity>& entity)
-{
-	return std::find(_entities.begin(), _entities.end(), entity.Lock()) != _entities.end();
-}
-
 size_t Engine::GetNumSystems() const
 {
 	return _systems.size();
 }
 
+WeakPtr<System> Engine::GetSystem(size_t index) const
+{
+	FIRE_ASSERT(index < _systems.size());
+	return _systems[index];
+}
+
+Vector<WeakPtr<System>> Engine::GetSystems(Mirror::Type type) const
+{
+	Vector<WeakPtr<System>> output;
+	for(auto system : _systems)
+	{
+		if (system->Inspect(type) != nullptr)
+		{
+			output.push_back(system);
+		}
+	}
+	return output;
+}
+
 size_t Engine::GetNumEntities() const
 {
 	return _entities.size();
+}
+
+WeakPtr<Entity> Engine::GetEntity(size_t index) const
+{
+	FIRE_ASSERT(index < _entities.size());
+	return _entities[index];
 }
 
 void Engine::ModifyEntity(Entity* entity)
@@ -207,12 +240,15 @@ void Engine::ModifyEntity(Entity* entity)
 
 	if(!_entitiesToRemove.empty())
 	{
-		FIRE_ASSERT(std::find_if(_entitiesToRemove.begin(), _entitiesToRemove.end(), findFunction) == _entitiesToRemove.end());
+		if(std::find_if(_entitiesToRemove.begin(), _entitiesToRemove.end(), findFunction) == _entitiesToRemove.end())
+		{
+			return;
+		}
 	}
 
 	if(std::find_if(_entitiesToModify.begin(), _entitiesToModify.end(), findFunction) == _entitiesToModify.end())
 	{
-		_entitiesToModify.push_back(*found);
+		_entitiesToModify.insert(*found);
 	}
 }
 
@@ -231,7 +267,10 @@ void Engine::ManageSystems()
 		}
 		system->OnRemoveFromEngine();
 		system->_engine = nullptr;
-		std::remove(_systems.begin(), _systems.end(), system);
+
+		size_t size = _systems.size();
+		//_systems.erase(std::remove(_systems.begin(), _systems.end(), system), _systems.end());
+		Remove(_systems, system);
 	}
 
 	for(auto system : _systemsToAdd)
@@ -245,10 +284,10 @@ void Engine::ManageSystems()
 
 		for(auto entity : _entities)
 		{
-			if(system->Filter(entity))
+			if(system->Filter(entity.Get()))
 			{
-				system->_entities.push_back(entity);
-				system->OnEntityAdded(entity);
+				system->_entities.push_back(entity.Get());
+				system->OnEntityAdded(entity.Get());
 			}
 		}
 	}
@@ -272,18 +311,20 @@ void Engine::ManageEntities()
 			_entities.push_back(entity);
 		}
 
+		auto e = entity.Get();
+
 		// go through the systems and add entities if it will take them.
 		for(auto system : _systems)
 		{
-			if(system->Filter(entity))
+			if(system->Filter(e))
 			{
-				Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
-				auto found = std::find(systemEntities.begin(), systemEntities.end(), entity);
-				if (found == systemEntities.end())
+				Vector<Entity*>& systemEntities = system->_entities;
+				auto found = std::find(systemEntities.begin(), systemEntities.end(), e);
+				if(found == systemEntities.end())
 				{
 					system->_modified = true;
-					systemEntities.push_back(entity);
-					system->OnEntityAdded(entity);
+					systemEntities.push_back(e);
+					system->OnEntityAdded(e);
 				}
 			}
 		}
@@ -292,17 +333,19 @@ void Engine::ManageEntities()
 	// If entities reported that they had new components added to them, we need to add them to apropriate systems.
 	for(auto entity : _entitiesToModify)
 	{
+		auto e = entity.Get();
+
 		for(auto system : _systems)
 		{
-			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
-			auto found = std::find(systemEntities.begin(), systemEntities.end(), entity);
-			if(system->Filter(entity))
+			Vector<Entity*>& systemEntities = system->_entities;
+			auto found = std::find(systemEntities.begin(), systemEntities.end(), entity.Get());
+			if(system->Filter(e))
 			{
 				if(found == systemEntities.end())
 				{
 					system->_modified = true;
-					systemEntities.push_back(entity);
-					system->OnEntityAdded(entity);
+					systemEntities.push_back(e);
+					system->OnEntityAdded(e);
 				}
 			}
 			// if it's no longer valid for this system, we need to remove it.
@@ -312,7 +355,7 @@ void Engine::ManageEntities()
 				{
 					system->_modified = true;
 					systemEntities.erase(found);
-					system->OnEntityRemoved(entity);
+					system->OnEntityRemoved(e);
 				}
 			}
 		}
@@ -321,16 +364,18 @@ void Engine::ManageEntities()
 	// finally, remove all entities that need to be removed
 	for(auto entity : _entitiesToRemove)
 	{
+		auto e = entity.Get();
+
 		auto foundEntity = std::find(_entities.begin(), _entities.end(), entity);
 		for(auto system : _systems)
 		{
-			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
-			auto foundInSystem = std::find(systemEntities.begin(), systemEntities.end(), entity);
+			Vector<Entity*>& systemEntities = system->_entities;
+			auto foundInSystem = std::find(systemEntities.begin(), systemEntities.end(), e);
 			if(foundInSystem != systemEntities.end())
 			{
 				system->_modified = true;
 				systemEntities.erase(foundInSystem);
-				system->OnEntityRemoved(entity);
+				system->OnEntityRemoved(e);
 			}
 		}
 	}

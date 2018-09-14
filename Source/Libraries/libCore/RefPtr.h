@@ -45,8 +45,10 @@ class RefPtr
 	/*static_assert(std::has_virtual_destructor<
 		std::conditional<std::is_polymorphic<T>::value, T, _RefPtr_DummyType>::type
 	>::value, "Objects used in a RefPtr must have a virtual destructor");*/
+	
 public:
 	typedef T element_type;
+	typedef T* pointer_type;
 
 	RefPtr()
 	: _object(nullptr)
@@ -374,9 +376,22 @@ struct wrapper_mapper<Firestorm::RefPtr<T>>
 			ok = false;
 			return Firestorm::RefPtr<U>(nullptr);
 		}
+		std::shared_ptr<U> p;
 	}
 };
 
 CLOSE_NAMESPACE(rttr);
+
+OPEN_NAMESPACE(std);
+
+template<class T>
+struct hash<Firestorm::RefPtr<T>>
+{
+	size_t operator()(const Firestorm::RefPtr<T>& ptr) const
+	{
+		return std::hash<Firestorm::RefPtr<T>::pointer_type>()(ptr.Get());
+	}
+};
+CLOSE_NAMESPACE(std);
 
 #endif
