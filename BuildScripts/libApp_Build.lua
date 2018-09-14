@@ -23,9 +23,10 @@ for _,v in ipairs(ENGINE_GAME_LIBS) do
 end
 -- addDependencies(ENGINE_GAME_LIBS)
 
-links({
-    "LLGL"
+dependson({
+    "LLGL",
+    "LLGL_OpenGL"
 })
-if _OPTIONS["gfxapi"] == "OpenGL" then
+--[[if _OPTIONS["gfxapi"] == "OpenGL" then
     links({"glfw", "OpenGL32"})
-end
+end]]

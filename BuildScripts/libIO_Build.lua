@@ -14,4 +14,4 @@ addDependencies({
     "libMirror",
     "libJson"
 })
-links({"physfs"})
+dependson({"physfs"})

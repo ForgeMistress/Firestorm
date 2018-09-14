@@ -149,14 +149,16 @@ if gfxapi == "OpenGL" then
             "LLGL_GL_ENABLE_DSA_EXT"
         })
 
+    dependson({"LLGL"})
     filter({"configurations:Debug*"})
+        links({"LLGLD"})
         targetname("LLGL_"..gfxapi.."D")
         defines({"_DEBUG","LLGL_DEBUG"})
-        links({"LLGLD"})
         runtime("Debug")
 
     filter({"configurations:Release* or Final*"})
         targetname("LLGL_"..gfxapi)
+        dependson({"LLGL"})
         links({"LLGL"})
     filter({})
 
@@ -184,13 +186,13 @@ if gfxapi == "OpenGL" then
         THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/GLCommon/*.h",
         THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/GLCommon/*.cpp",
     })
-    
+
     group("GLCommon/Texture")
     files({
         THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/GLCommon/Texture/*.h",
         THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/GLCommon/Texture/*.cpp"
     })
-    
+
     group("OpenGL")
     files({
         THIRD_PARTY_SRC_DIR.."/LLGL/sources/Renderer/OpenGL/*.h",

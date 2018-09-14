@@ -20,4 +20,4 @@ addDependencies({
     "libMirror"
 })
 
-links("jsoncpp")
+dependson("jsoncpp")

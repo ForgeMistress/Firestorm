@@ -3,11 +3,13 @@
 
 #include <sstream>
 
-void Firestorm::libCore::Initialize(int ac, char** av)
+OPEN_NAMESPACE(Firestorm);
+
+void libCore::Initialize(int ac, char** av)
 {
 }
 
-OPEN_NAMESPACE(Firestorm);
+
 Vector<String> SplitString(const String & str, char delim)
 {
 	Vector<String> tokens;

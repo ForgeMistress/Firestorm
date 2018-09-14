@@ -15,6 +15,7 @@
 #include <libCore/Result.h>
 
 #include <libMirror/EventDispatcher.h>
+#include "File.h"
 
 OPEN_NAMESPACE(Firestorm);
 

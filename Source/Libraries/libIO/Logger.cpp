@@ -13,7 +13,7 @@
 OPEN_NAMESPACE(Firestorm);
 
 Logger Logger::DEBUG_LOGGER(std::cout);
-Logger Logger::WARNING_LOGGER(std::cout);
+Logger Logger::WARN_LOGGER(std::cout);
 Logger Logger::ERROR_LOGGER(std::cerr);
 
 Logger::Logger(std::ostream& ostream)

@@ -82,8 +82,6 @@ Json::Value libSerial::Convert(const Mirror::Variant& var)
 	return Json::Value::nullSingleton();
 }
 
-
-
 void libSerial::Initialize(int ac, char** av)
 {
 }

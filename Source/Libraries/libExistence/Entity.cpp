@@ -18,8 +18,8 @@ OPEN_NAMESPACE(Firestorm);
 
 FIRE_MIRROR_DEFINE(Firestorm::Entity)
 {
-	_class.property("name",       &Entity::_name);
-	_class.property("components", &Entity::_components);
+	Class.property("name",       &Entity::_name);
+	Class.property("components", &Entity::_components);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,12 +38,12 @@ Entity::~Entity()
 
 bool Entity::AddComponent(Mirror::Type type)
 {
-	FIRE_BROKEN;
 	FIRE_ASSERT(type.is_valid());
+	FIRE_ASSERT(type.is_derived_from<Component>());
 	Mirror::Instance componentInstance = type.create();
 	if(componentInstance.is_valid())
 	{
-		return AddComponent(componentInstance.try_convert<Component>());
+		return AddComponent(RefPtr<Component>(componentInstance.try_convert<Component>()));
 	}
 	return false;
 }

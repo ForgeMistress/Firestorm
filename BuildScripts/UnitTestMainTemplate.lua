@@ -13,8 +13,8 @@ UNIT_TEST_MAIN = [[
 {INCLUDES}
 
 #include <libCore/RefPtr.h>
+#include <libCore/LibraryRegistrar.h>
 #include <libIO/Logger.h>
-#include <libHarnessed/libHarnessed.h>
 
 using namespace Firestorm;
 
@@ -22,6 +22,7 @@ using namespace Firestorm;
 
 int main(int ac, char** av)
 {
+
 {LIB_INITIALIZATIONS}
 
     Vector<RefPtr<TestHarness>> TESTS = {

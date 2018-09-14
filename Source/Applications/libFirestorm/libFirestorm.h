@@ -3,10 +3,14 @@
 #define LIBFIRESTORM_H_
 #pragma once
 
+#include <libCore/libCore.h>
+
 OPEN_NAMESPACE(Firestorm);
 
-struct libFirestorm
+struct libFirestorm : public Library<libFirestorm>
 {
+	FIRE_LIBRARY(libFirestorm);
+private:
 	static void Initialize(int ac, char** av);
 };
 

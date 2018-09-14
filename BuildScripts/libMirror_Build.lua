@@ -19,4 +19,4 @@ addDependencies({
     "libMath"
 })
 
-links({ "rttr" })
+dependson({ "rttr" })

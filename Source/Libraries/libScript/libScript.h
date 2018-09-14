@@ -3,12 +3,16 @@
 #define LIBSCRIPT_H_
 #pragma once
 
-namespace Firestorm
+#include <libCore/libCore.h>
+
+OPEN_NAMESPACE(Firestorm);
+
+struct libScript : public Library<libScript>
 {
-	struct libScript
-	{
-		static void Initialize(int ac, char** av);
-	};
-}
+	FIRE_LIBRARY(libScript);
+private:
+	static void Initialize(int ac, char** av);
+};
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

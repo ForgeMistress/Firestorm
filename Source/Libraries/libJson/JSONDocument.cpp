@@ -38,17 +38,17 @@ namespace {
 
 FIRE_MIRROR_DEFINE_NAMED(JSONDocument, "Firestorm::Document::JSON")
 {
-	_class.method("MakeBlank", &MakeBlankJSON)
+	Class.method("MakeBlank", &MakeBlankJSON)
 	(
 		IDocument::MakerFunctionBlank()
 	);
 
-	_class.method("MakeData", &MakeDataJSON)
+	Class.method("MakeData", &MakeDataJSON)
 	(
 		IDocument::MakerFunctionData()
 	);
 
-	Method("InitializeAsIfNew", &JSONDocument::InitializeAsIfNew);
+	Class.method("InitializeAsIfNew", &JSONDocument::InitializeAsIfNew);
 }
 
 JSONDocument::JSONDocument()

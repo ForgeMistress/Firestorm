@@ -21,4 +21,4 @@ addDependencies({
     "libJson"
 })
 
-links({ "rttr", "jsoncpp" })
+dependson({ "rttr", "jsoncpp" })

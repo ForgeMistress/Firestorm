@@ -5,6 +5,9 @@
 #include "Logger.h"
 #include <libCore/ArgParser.h>
 
+#include "IResourceObject.h"
+#include "ResourceReference.h"
+
 OPEN_NAMESPACE(Firestorm);
 
 static void LogLastPhysfsError(const String& preamble)
@@ -16,10 +19,8 @@ static void LogLastPhysfsError(const String& preamble)
 
 void libIO::Initialize(int ac, char** av)
 {
-	static bool initialized = false;
-	if (initialized)
-		return;
-	initialized = true;
+	Lib::RegisterReflection<IResourceObject>();
+	Lib::RegisterReflection<ResourceReference>();
 
 	ArgParser parser(ac, av);
 
@@ -27,7 +28,6 @@ void libIO::Initialize(int ac, char** av)
 
 	String assetsDir(parser.Get("--AssetsDir", av[0]));
 
-	FIRE_LOG_DEBUG(":: Working Directory Is -> ", assetsDir);
 	if(PHYSFS_init(assetsDir.c_str()) != 0)
 	{
 		LogLastPhysfsError("Error Initializing physfs");
@@ -60,8 +60,6 @@ void libIO::Initialize(int ac, char** av)
 
 	String prefDir(PHYSFS_getPrefDir("com.org.firestorm", appName.c_str()));
 	PHYSFS_setWriteDir(prefDir.c_str());
-
-	FIRE_LOG_DEBUG(":: Preferences directory is set to:", prefDir);
 }
 
 bool libIO::Mount(const String& dir, const String& mountPoint)
@@ -70,7 +68,6 @@ bool libIO::Mount(const String& dir, const String& mountPoint)
 	{
 		return false;
 	}
-	FIRE_LOG_DEBUG(":: Mounted Directory", dir, "to mount point", mountPoint);
 	return true;
 }
 

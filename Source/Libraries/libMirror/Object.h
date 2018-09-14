@@ -23,6 +23,26 @@
 #include <rttr/detail/parameter_info/parameter_names.h>
 #include <rttr/variant.h>
 
+// Borrowed from https://stackoverflow.com/questions/401621/best-way-to-for-c-types-to-self-register-in-a-list
+template<typename D>
+struct AutomaticRegister
+{
+public:
+	struct ExecRegister
+	{
+		ExecRegister()
+		{
+			D::DoRegisterReflection();
+		}
+	};
+private:
+	// will force instantiation of definition of static member
+	template<ExecRegister&> struct ref_it {};
+
+	static ExecRegister s_registerObject;
+	static ref_it<s_registerObject> s_referrer;
+};
+
 /**
 	Macro that provides more functions to a reflected object.
 
@@ -30,18 +50,15 @@
 	static Is       - Checks the type against all common forms.
 	virtual GetType - Retrieve the type at the instance leve.
 **/
-#define FIRE_MIRROR_DECLARE(ObjectType, ...)                                                                    \
+#define FIRE_MIRROR_DECLARE(ObjectType, ...)                                                                   \
+	private:                                                                                                   \
+		template <class T> friend struct Library;                                                              \
+		using register_type = rttr::registration::class_<ObjectType>;                                          \
+		static void DoRegisterReflection(register_type& Registrar);                                            \
 	public:                                                                                                    \
-		typedef ObjectType WhatIAm_t;                                                                          \
-		class Registrar : public ::Firestorm::Mirror::RegistrarBase<ObjectType>									   \
-		{																									   \
-		public:																								   \
-			Registrar();																					   \
-		};																									   \
-	public:                                                                                                    \
-		static rttr::type  MyType()                     { return rttr::type::get<WhatIAm_t>(); }               \
-		static  bool       Is(rttr::type rttrType)      { return WhatIAm_t::MyType() == rttrType; }            \
-		virtual RTTR_INLINE rttr::type GetType() const  { return WhatIAm_t::MyType(); }                        \
+		static void RegisterReflection();                                                                      \
+		static rttr::type  MyType()                     { return rttr::type::get<ObjectType>(); }              \
+		virtual RTTR_INLINE rttr::type GetType() const  { return ObjectType::MyType(); }                       \
 		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); } \
 		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); }              \
 		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() {                                    \
@@ -53,24 +70,35 @@
 		using base_class_list = rttr::detail::type_list<__VA_ARGS__>;                                          \
 	private:                                                                                                   \
 		template<typename Ctor_Type, typename Policy, typename Accessor, typename Arg_Indexer> 				   \
-		friend struct rttr::detail::constructor_invoker;
+		friend struct rttr::detail::constructor_invoker
 
 /**
 	Define a class for the reflection system.
  **/
 #define FIRE_MIRROR_DEFINE(ObjectType) FIRE_MIRROR_DEFINE_NAMED(ObjectType, #ObjectType)
 
-/**
-	Define the specifics of the class declaration while keying it to a specific name.
- **/
-#define FIRE_MIRROR_DEFINE_NAMED(ObjectType, ObjectName)			                   \
-	ObjectType::Registrar::Registrar()											   \
-	: RegistrarBase<ObjectType>(rttr::registration::class_<ObjectType>(ObjectName))
-
-/**
-	Register the class type to the reflection system. You will see this called in the lib*::Initialize functions.
- **/
-#define FIRE_MIRROR_REGISTER(ObjectType) ObjectType::Registrar()
+#if defined FIRE_DEBUG || FIRE_RELEASE
+	#define FIRE_MIRROR_DEFINE_NAMED(ObjectType, ObjectName)			                       \
+		void ObjectType::RegisterReflection()                                                  \
+		{                                                                                      \
+			static bool s_alreadyRegistered = false;                                           \
+			FIRE_ASSERT(s_alreadyRegistered == false &&                                        \
+				"object of type '"#ObjectType"' is already registered for reflection");          \
+			s_alreadyRegistered = true;                                                        \
+			std::cout<<"    :: Registering Class Type: "<<ObjectName<<std::endl<<std::flush;   \
+			ObjectType::register_type registration(ObjectName);                                \
+			ObjectType::DoRegisterReflection(registration);                                    \
+		}                                                                                      \
+		void ObjectType::DoRegisterReflection(register_type& Class)
+#elif defined FIRE_FINAL
+	#define FIRE_MIRROR_DEFINE_NAMED(ObjectType, ObjectName)                               \
+		void ObjectType::RegisterReflection()                                              \
+		{                                                                                  \
+			rttr::registration::class_<ObjectType> registration(ObjectName);               \
+			ObjectType::DoRegisterReflection(registration);                                \
+		}                                                                                  \
+		void ObjectType::DoRegisterReflection(register_type& Class)
+#endif
 
 /**
 	Define the class level metadata while in an FIRE_MIRROR_DEFINE* block.
@@ -79,116 +107,6 @@
 
 OPEN_NAMESPACE(Firestorm);
 OPEN_NAMESPACE(Mirror);
-
-template <class Class_Type>
-class RegistrarBase
-{
-public:
-	explicit RegistrarBase(rttr::registration::class_<Class_Type>& klass)
-	: _class(klass)
-	{
-	}
-
-	template<typename... Args>
-	rttr::registration::class_<Class_Type>& operator()(Args&&...args) { return _class(args...); }
-
-	template<typename... Args>
-	rttr::registration::class_<Class_Type>& ClassInfo(Args&&...args) { return _class(args...); }
-
-	template<
-		typename... Args,
-		typename acc_level = rttr::detail::public_access,
-		typename Tp = typename std::enable_if<
-			rttr::detail::contains<
-				acc_level,
-				rttr::detail::access_levels_list
-			>::value
-		>::type
-	> rttr::registration::bind<rttr::detail::ctor, Class_Type, acc_level, Args...>
-		Constructor(acc_level level = acc_level())
-	{
-		return _class.constructor<Args...,acc_level,Tp>(level);
-	}
-
-	template<
-		typename F,
-		typename acc_level = rttr::detail::public_access,
-		typename Tp = typename std::enable_if<
-			!rttr::detail::contains<
-				F,
-				rttr::detail::access_levels_list
-			>::value
-		>::type
-	> rttr::registration::bind<rttr::detail::ctor_func, Class_Type, F, acc_level>
-		Constructor(F func, acc_level level = acc_level())
-	{
-		return _class.constructor<F,acc_level,Tp>(func, level);
-	}
-
-	template<
-		typename A,
-		typename acc_level = rttr::detail::public_access,
-		typename Tp = typename std::enable_if<
-			rttr::detail::contains<
-				acc_level,
-				rttr::detail::access_levels_list
-			>::value
-		>::type
-	> rttr::registration::bind<rttr::detail::prop, Class_Type, A, acc_level>
-		Property(rttr::string_view name, A acc, acc_level level = acc_level())
-	{
-		return _class.property(name, acc, level);
-	}
-
-	template<
-		typename A,
-		typename acc_level = rttr::detail::public_access,
-		typename Tp = typename std::enable_if<
-			rttr::detail::contains<
-				acc_level,
-				rttr::detail::access_levels_list
-			>::value
-		>::type
-	> rttr::registration::bind<rttr::detail::prop_readonly, Class_Type, A, acc_level>
-		ReadOnlyProperty(rttr::string_view name, A acc, acc_level level = acc_level())
-	{
-		return _class.property_readonly<A,acc_level,Tp>(name, acc, level);
-	}
-
-	template<
-		typename A1,
-		typename A2,
-		typename Tp = typename std::enable_if<
-			!rttr::detail::contains<
-				A2,
-				rttr::detail::access_levels_list
-			>::value
-		>::type,
-		typename acc_level = rttr::detail::public_access
-	>
-	rttr::registration::bind<rttr::detail::prop, Class_Type, A1, A2, acc_level> Property(rttr::string_view name, A1 getter, A2 setter, acc_level level = acc_level())
-	{
-		return _class.property<A1,A2,Tp,acc_level>(name, getter, setter, level);
-	}
-
-	template<
-		typename F,
-		typename acc_level = rttr::detail::public_access
-	>
-	rttr::registration::bind<rttr::detail::meth, Class_Type, F, acc_level> Method(rttr::string_view name, F f, acc_level level = acc_level())
-	{
-		return _class.method<F,acc_level>(name, f, level);
-	}
-
-	template<typename Enum_Type>
-	rttr::registration::bind<rttr::detail::enum_, Class_Type, Enum_Type> Enumeration(rttr::string_view name)
-	{
-		return _class.enumeration<Enum_Type>(name);
-	}
-
-protected:
-	rttr::registration::class_<Class_Type>& _class;
-};
 
 /**
 	Typedef for rttr::type. Use this instead of rttr::type.
@@ -314,66 +232,8 @@ public:
 	virtual ~Object();
 };
 
-/**
-	\macro DOINSPECT_SIMPLE
-
-	\code{.cpp}
-	class SomeClass : public Mirror::Object,
-                      public Mirror::IInspectableObject
-	{
-		MIRROR_DECLARE(SomeClass, Mirror::Object, Mirror::IInspectableObject, ISomeInterface);
-	protected:
-		virtual void* DoInspect(Mirror::Type type)
-		{
-			DOINSPECT_SIMPLE(type);
-			return IInspectableObject::DoInspect(type);
-		}
-	};
-	\endcode
- **/
-#define DOINSPECT_SIMPLE(ARG) \
-	if(WhatIAm_t::MyType() == ARG) \
-	{ \
-		return static_cast< WhatIAm_t* >(this); \
-	}
-
-/**
-	\macro DOINSPECT_INTERFACE
-
-	\code{.cpp}
-	class ISomeInterface
-	{
-		MIRROR_DECLARE(ISomeInterface);
-	public:
-		virtual void SomeMethod() = 0;
-	};
-	class SomeClass : public Mirror::Object,
-                      public Mirror::IInspectableObject,
-                      public ISomeInterface
-	{
-		MIRROR_DECLARE(SomeClass, Mirror::Object, Mirror::IInspectableObject, ISomeInterface);
-	protected:
-		virtual void* DoInspect(Mirror::Type type)
-		{
-			DOINSPECT_SIMPLE(type);
-			DOINSPECT_INTERFACE(ISomeInterface, type);
-			return IInspectableObject::DoInspect(type);
-		}
-	private:
-		virtual void SomeMethod()
-		{
-			// do stuff
-		}
-	};
-	\endcode
- **/
-#define DOINSPECT_INTERFACE(INTERFACE, ARG) \
-	if(INTERFACE::MyType() == ARG) \
-	{ \
-		return static_cast< INTERFACE* >(this); \
-	}
-
 CLOSE_NAMESPACE(Mirror);
 CLOSE_NAMESPACE(Firestorm);
+
 
 #endif

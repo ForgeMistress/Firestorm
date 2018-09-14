@@ -25,7 +25,7 @@ public:
 	void Write(T& firstArg, Args... args);
 
 	static Logger DEBUG_LOGGER;
-	static Logger WARNING_LOGGER;
+	static Logger WARN_LOGGER;
 	static Logger ERROR_LOGGER;
 
 private:
@@ -52,23 +52,31 @@ void Logger::DoWrite(T& arg, Args... args)
 	DoWrite(args...);
 }
 
+#define DEFINE_LOGGER_FUNCTION(LEVEL) \
+template<class... Args>\
+extern void FIRE_LOG_##LEVEL##(Args... args)\
+{\
+	Logger::##LEVEL##_LOGGER.Write(args...);\
+}
+
+template<class... Args>
+extern void FIRE_LOG_DEBUG(Args... args)
+{
+	Logger::DEBUG_LOGGER.Write(args...);
+}
+
+template<class... Args>
+extern void FIRE_LOG_WARNING(Args... args)
+{
+	Logger::WARNING_LOGGER.Write(args...);
+}
+
+template<class... Args>
+extern void FIRE_LOG_ERROR(Args... args)
+{
+	Logger::ERROR_LOGGER.Write(args...);
+}
+
 CLOSE_NAMESPACE(Firestorm);
-
-#define FIRE_LOG(OUTPUT, ...) ::Firestorm::Logger::##OUTPUT##_LOGGER.Write(__VA_ARGS__)
-
-/**
-	Log to the default std::cout ostream.
- **/
-#define FIRE_LOG_DEBUG(...) FIRE_LOG(DEBUG, __VA_ARGS__)
-
-/**
-	Log to the default std::cout ostream.
- **/
-#define FIRE_LOG_WARNING(...) FIRE_LOG(WARNING, __VA_ARGS__)
-
-/**
-	Log to the default std::cerr ostream.
- **/
-#define FIRE_LOG_ERROR(...) FIRE_LOG(ERROR, __VA_ARGS__)
 
 #endif

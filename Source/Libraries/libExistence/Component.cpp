@@ -14,7 +14,7 @@ OPEN_NAMESPACE(Firestorm);
 
 FIRE_MIRROR_DEFINE(Firestorm::Component)
 {
-	Property("name", &Component::GetName, &Component::SetName);
+	Class.property("name", &Component::GetName, &Component::SetName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

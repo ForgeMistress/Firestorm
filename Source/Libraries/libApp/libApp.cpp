@@ -7,9 +7,9 @@ OPEN_NAMESPACE(Firestorm);
 
 void libApp::Initialize(int ac, char** av)
 {
-	FIRE_MIRROR_REGISTER(ApplicationWantsToCloseEvent);
-	FIRE_MIRROR_REGISTER(MouseButtonEvent);
-	FIRE_MIRROR_REGISTER(MouseMoveEvent);
+	Lib::RegisterReflection<ApplicationWantsToCloseEvent>();
+	Lib::RegisterReflection<MouseButtonEvent>();
+	Lib::RegisterReflection<MouseMoveEvent>();
 }
 
 CLOSE_NAMESPACE(Firestorm);

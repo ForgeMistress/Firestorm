@@ -23,4 +23,4 @@ addDependencies({
     "libExistence"
 })
 
-links({ "rttr", "jsoncpp" })
+dependson({ "rttr", "jsoncpp" })

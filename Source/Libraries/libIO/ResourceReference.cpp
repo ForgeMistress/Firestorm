@@ -12,12 +12,11 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-ResourceReference::ResourceReference()
+FIRE_MIRROR_DEFINE(Firestorm::ResourceReference)
 {
 }
 
-ResourceReference::ResourceReference(const String& resourcePath)
-: _resourcePath(resourcePath)
+ResourceReference::ResourceReference()
 {
 }
 

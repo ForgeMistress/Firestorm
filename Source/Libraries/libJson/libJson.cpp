@@ -2,7 +2,11 @@
 #include "libJson.h"
 #include "JSONDocument.h"
 
-void Firestorm::libJson::Initialize(int ac, char** av)
+OPEN_NAMESPACE(Firestorm);
+
+void libJson::Initialize(int ac, char** av)
 {
-	FIRE_MIRROR_REGISTER(JSONDocument);
+	Lib::RegisterReflection<JSONDocument>();
 }
+
+CLOSE_NAMESPACE(Firestorm);

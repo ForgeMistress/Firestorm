@@ -12,6 +12,10 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+FIRE_MIRROR_DEFINE(Firestorm::MeshResource)
+{
+}
+
 MeshResource::MeshResource()
 {
 }

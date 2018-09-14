@@ -18,7 +18,6 @@ OPEN_NAMESPACE(Firestorm);
 
 ArgParser::ArgParser(int ac, char** av)
 {
-	std::cout << std::endl;
 	for(int i = 0; i < ac; ++i)
 	{
 		String arg(av[i]);
@@ -31,7 +30,6 @@ ArgParser::ArgParser(int ac, char** av)
 		{
 			_args[splitString[0]] = splitString[1];
 		}
-		std::cout << "key=" << splitString[0] << " val=" << _args[splitString[0]] << std::endl << std::flush;
 	}
 }
 

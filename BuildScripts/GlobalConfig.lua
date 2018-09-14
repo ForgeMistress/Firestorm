@@ -70,7 +70,7 @@ function configureEngineLib(libName)
         ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.h",
         ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.cpp"
     })
-    links({"rttr"})
+    dependson({"rttr"})
 end
 
 function configureToolsApplication(appName, gameName)
@@ -166,6 +166,13 @@ function configureGame(gameName)
         "--AppName="..gameName
     })
     debugdir(ENGINE_BIN_OUTPUT_DIR)
+    links({"LLGL"})
+    --[[filter("configurations:Debug*")
+        links({ ENGINE_BIN_OUTPUT_DIR.."/LLGLD" })
+
+    filter("configurations:Release* or Final*")
+        links({ ENGINE_BIN_OUTPUT_DIR.."/LLGL" })
+    clearFilters()]]
 end
 
 function configureGameLib(gameName)
@@ -220,12 +227,12 @@ function configureUnitTestApplication()
     local INCLUDES = {}
 
     for _, libName in ipairs(ENGINE_LIBS) do
+        table.insert(INCLUDES, "#include <"..libName.."/"..libName..".h>")
+        table.insert(LIB_INITIALIZATIONS, "    Library<::Firestorm::"..libName..">::Initialize(ac,av);")
         if hasUnitTest(libName) then
             local nameStr = libName.."PrepareHarness"
-            table.insert(INCLUDES, "#include <"..libName.."/"..libName..".h>")
             table.insert(FWD_DECLARES, "RefPtr<TestHarness> "..nameStr.."(int ac, char** av);")
             table.insert(TEST_FUNCTIONS, "        "..nameStr.."(ac, av)")
-            table.insert(LIB_INITIALIZATIONS, "    "..libName.."::Initialize(ac,av);")
         end
     end
 
@@ -286,18 +293,7 @@ function configureUnitTestApplication()
         "--AppName=UnitTest"
     })
 
-    filter("configurations:Debug64")
-        libdirs({
-            THIRD_PARTY_SRC_DIR.."/LLGL/build/build/Debug"
-        })
-        links({ "LLGLD" })
-
-    filter("configurations:Release64")
-        libdirs({
-            THIRD_PARTY_SRC_DIR.."/LLGL/build/build/Release"
-        })
-        links({ "LLGL" })
-    clearFilters()
+    links({"LLGL"})
 
     debugdir(ENGINE_BIN_OUTPUT_DIR)
 end
@@ -318,7 +314,7 @@ function addDependencies(deps)
         table.insert(includeDirs, ENGINE_LIB_SOURCE_DIR.."/"..dep)
     end
     includedirs(includeDirs)
-    links(deps)
+    dependson(deps)
 end
 
 ------------------------------------------------------------------------------------------------------------------------

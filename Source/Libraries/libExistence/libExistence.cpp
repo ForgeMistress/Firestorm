@@ -6,10 +6,12 @@
 #include "Entity.h"
 #include "System.h"
 
-void Firestorm::libExistence::Initialize(int ac, char** av)
+OPEN_NAMESPACE(Firestorm);
+void libExistence::Initialize(int ac, char** av)
 {
-	FIRE_MIRROR_REGISTER(Component);
-	FIRE_MIRROR_REGISTER(Engine);
-	FIRE_MIRROR_REGISTER(Entity);
-	FIRE_MIRROR_REGISTER(System);
+	Lib::RegisterReflection<Component>();
+	Lib::RegisterReflection<Engine>();
+	Lib::RegisterReflection<Entity>();
+	Lib::RegisterReflection<System>();
 }
+CLOSE_NAMESPACE(Firestorm);

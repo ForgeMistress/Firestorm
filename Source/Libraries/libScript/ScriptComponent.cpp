@@ -14,6 +14,10 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+FIRE_MIRROR_DEFINE(Firestorm::ScriptComponent)
+{
+}
+
 ScriptComponent::ScriptComponent()
 {
 }
@@ -25,7 +29,8 @@ ScriptComponent::~ScriptComponent()
 
 void* ScriptComponent::DoInspect(Mirror::Type type)
 {
-	DOINSPECT_SIMPLE(type);
+	if(ScriptComponent::MyType() == type)
+		return static_cast<ScriptComponent*>(this);
 	return Component::DoInspect(type);
 }
 

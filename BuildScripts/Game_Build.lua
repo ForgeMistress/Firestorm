@@ -10,20 +10,13 @@
 configureGameLib("Firestorm")
 configureGame("Firestorm")
 
-addDependencies({
-    "libCore",
-    "libMirror",
-    "libMath",
-    "libIO",
-    "libJson",
-    "libExistence"
-})
+addDependencies(ENGINE_GAME_LIBS)
+links(ENGINE_GAME_LIBS)
 
 links({
     "rttr",
     "jsoncpp",
     "angelscript",
-    "GLFW",
     "LLGL"
 })
 

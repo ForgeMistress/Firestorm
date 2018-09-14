@@ -3,11 +3,13 @@
 #define LIBIO_H_
 #pragma once
 
+#include <libCore/libCore.h>
+
 OPEN_NAMESPACE(Firestorm);
 
-struct libIO
+struct libIO : public Library<libIO>
 {
-	static void Initialize(int ac, char** av);
+	FIRE_LIBRARY(libIO);
 
 	/**
 		Mount a directory at the specified mount point.
@@ -20,6 +22,9 @@ struct libIO
 	static Vector<char> LoadFile(const String& filename);
 
 	static String LoadFileString(const String& filename);
+
+private:
+	static void Initialize(int ac, char** av);
 };
 
 CLOSE_NAMESPACE(Firestorm);

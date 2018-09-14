@@ -36,7 +36,7 @@ SystemEvent::SystemEvent(Type type, Entity* entity)
 
 FIRE_MIRROR_DEFINE(Firestorm::System)
 {
-	Property("name", &System::GetName, &System::SetName)
+	Class.property("name", &System::GetName, &System::SetName)
 	(
 		MIRROR_META_SAVELOAD
 	);

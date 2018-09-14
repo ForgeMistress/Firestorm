@@ -20,7 +20,7 @@ addDependencies({
     "libJson"
 })
 
-links({"LLGL", "angelscript"})
-if _OPTIONS["gfxapi"] == "OpenGL" then
+dependson({"LLGL", "angelscript"})
+--[[if _OPTIONS["gfxapi"] == "OpenGL" then
     links({"OpenGL32"})
-end
+end]]

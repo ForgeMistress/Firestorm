@@ -11,8 +11,10 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-struct libApp
+struct libApp : public Library<libApp>
 {
+	FIRE_LIBRARY(libApp);
+
 	static void Initialize(int ac, char** av);
 };
 

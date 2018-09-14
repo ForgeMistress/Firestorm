@@ -1,15 +1,21 @@
 #include "stdafx.h"
 
+#include <libApp/libApp.h>
 #include <libCore/libCore.h>
 #include <libExistence/libExistence.h>
 #include <libHarnessed/libHarnessed.h>
 #include <libIO/libIO.h>
+#include <libJson/libJson.h>
+#include <libMath/libMath.h>
 #include <libMirror/libMirror.h>
+#include <libScene/libScene.h>
 #include <libScript/libScript.h>
+#include <libSerial/libSerial.h>
+#include <libUI/libUI.h>
 
 #include <libCore/RefPtr.h>
+#include <libCore/LibraryRegistrar.h>
 #include <libIO/Logger.h>
-#include <libHarnessed/libHarnessed.h>
 
 using namespace Firestorm;
 
@@ -22,12 +28,19 @@ RefPtr<TestHarness> libScriptPrepareHarness(int ac, char** av);
 
 int main(int ac, char** av)
 {
-    libCore::Initialize(ac,av);
-    libExistence::Initialize(ac,av);
-    libHarnessed::Initialize(ac,av);
-    libIO::Initialize(ac,av);
-    libMirror::Initialize(ac,av);
-    libScript::Initialize(ac,av);
+
+    Library<::Firestorm::libApp>::Initialize(ac,av);
+    Library<::Firestorm::libCore>::Initialize(ac,av);
+    Library<::Firestorm::libExistence>::Initialize(ac,av);
+    Library<::Firestorm::libHarnessed>::Initialize(ac,av);
+    Library<::Firestorm::libIO>::Initialize(ac,av);
+    Library<::Firestorm::libJson>::Initialize(ac,av);
+    Library<::Firestorm::libMath>::Initialize(ac,av);
+    Library<::Firestorm::libMirror>::Initialize(ac,av);
+    Library<::Firestorm::libScene>::Initialize(ac,av);
+    Library<::Firestorm::libScript>::Initialize(ac,av);
+    Library<::Firestorm::libSerial>::Initialize(ac,av);
+    Library<::Firestorm::libUI>::Initialize(ac,av);
 
     Vector<RefPtr<TestHarness>> TESTS = {
         libCorePrepareHarness(ac, av),

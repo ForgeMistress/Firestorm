@@ -118,7 +118,7 @@ CLOSE_NAMESPACE(Firestorm);
 	{																			 \
 		try																		 \
 		{																		 \
-			T::Initialize(ac, av);												 \
+			Library<T>::Initialize(ac, av);									     \
 		}																		 \
 		catch(std::exception& e)												 \
 		{																		 \

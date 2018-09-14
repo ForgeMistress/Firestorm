@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "libFirestorm.h"
 
-void Firestorm::libFirestorm::Initialize(int ac, char** av)
+OPEN_NAMESPACE(Firestorm);
+void libFirestorm::Initialize(int ac, char** av)
 {
 }
+CLOSE_NAMESPACE(Firestorm);

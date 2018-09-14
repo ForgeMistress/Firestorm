@@ -54,10 +54,10 @@ filter("configurations:Release64 or Final64");
     libdirs({ "Bin/x64/Release" })
 clearFilters()
 
-filter("configurations:Debug*")
-    runtime("Debug")
-filter("configurations:Release* or Final*")
-    runtime("Release")
+filter("configurations:Debug*");             runtime("Debug");   defines({"FIRE_DEBUG"});
+filter("configurations:Release* or Final*"); runtime("Release");
+filter("configurations:Release*");                               defines({"FIRE_RELEASE"});
+filter("configurations:Final*");                                 defines({"FIRE_FINAL"});
 clearFilters()
 
 function build(lib)

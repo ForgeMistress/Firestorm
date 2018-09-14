@@ -86,7 +86,7 @@ void Application::Initialize(int ac, char** av)
 		});*/
 
 		auto& window = static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface());
-		window.SetTitle(L"Fuck");
+		window.SetTitle(L"Firestorm Application");
 		window.Show();
 
 		OnInitialize(ac, av);

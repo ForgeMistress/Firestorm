@@ -28,6 +28,7 @@
 #include <shared_mutex>
 
 #include "Expected.h"
+#include "LibraryRegistrar.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -160,8 +161,10 @@ template <class T> using AddPointer = std::add_pointer<T>;
 
 CLOSE_NAMESPACE(Traits);
 
-struct libCore
+struct libCore : public Library<libCore>
 {
+	FIRE_LIBRARY(libCore);
+private:
 	static void Initialize(int ac, char** av);
 };
 

@@ -3,21 +3,18 @@
 #define LIBHARNESSED_H_
 #pragma once
 
-#ifdef LIB_HARNESSED
-	#error "libHarnessed.h already included"
-#endif
-
-#define LIB_HARNESSED
+#include <libCore/libCore.h>
 
 #include "TestHarness.h"
 #include "TestCase.h"
 
-namespace Firestorm
+OPEN_NAMESPACE(Firestorm);
+struct libHarnessed : public Library<libHarnessed>
 {
-	struct libHarnessed
-	{
-		static void Initialize(int ac, char** av);
-	};
-}
+	FIRE_LIBRARY(libHarnessed);
+private:
+	static void Initialize(int ac, char** av);
+};
+CLOSE_NAMESPACE(Firestorm);
 
 #endif
