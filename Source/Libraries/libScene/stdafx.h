@@ -7,6 +7,13 @@
 #pragma once
 
 #include <libCore/libCore.h>
+#include <libCore/Result.h>
+
 #include <libMirror/Object.h>
+
+#include <libIO/libIO.h>
+#include <libIO/IResourceObject.h>
+
+#include <LLGL/LLGL.h>
 
 #endif

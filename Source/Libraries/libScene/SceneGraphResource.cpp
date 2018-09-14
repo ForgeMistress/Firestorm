@@ -1,23 +1,37 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  MeshResource
+//  SceneGraphResource
 //
-//  Loads up the vertex data for a mesh and loads it to the video card.
+//  Loads up the scene graph for a given mesh.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "MeshResource.h"
+#include "SceneGraphResource.h"
 
 OPEN_NAMESPACE(Firestorm);
 
-MeshResource::MeshResource()
+SceneGraphResource::SceneGraphResource()
 {
+
 }
 
-MeshResource::~MeshResource()
+SceneGraphResource::~SceneGraphResource()
 {
+
 }
+
+
+Result<void, Error> SceneGraphResource::Load(const Json::Value& inValue)
+{
+	return FIRE_RESULT(void);
+}
+
+Result<void, Error> SceneGraphResource::Save(Json::Value& outValue) const
+{
+	return FIRE_RESULT(void);
+}
+
 
 CLOSE_NAMESPACE(Firestorm);

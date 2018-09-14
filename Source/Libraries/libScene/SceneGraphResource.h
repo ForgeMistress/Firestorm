@@ -1,25 +1,28 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  MeshResource
+//  SceneGraphResource
 //
-//  Loads up the vertex data for a mesh and loads it to the video card.
+//  Loads up the scene graph for a given mesh.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBSCENE_MESHRESOURCE_H_
-#define LIBSCENE_MESHRESOURCE_H_
+#ifndef LIBSCENE_SCENEGRAPHRESOURCE_H_
+#define LIBSCENE_SCENEGRAPHRESOURCE_H_
 #pragma once
 
 OPEN_NAMESPACE(Firestorm);
 
-class MeshResource : public IResourceObject
+class SceneGraphResource : public IResourceObject
 {
-	FIRE_MIRROR_DECLARE(MeshResource, IResourceObject);
+	FIRE_MIRROR_DECLARE(SceneGraphResource, IResourceObject);
 public:
-	MeshResource();
-	virtual ~MeshResource();
+	SceneGraphResource();
+	virtual ~SceneGraphResource();
 
+
+	virtual Result<void, Error> Load(const Json::Value& inValue);
+	virtual Result<void, Error> Save(Json::Value& outValue) const;
 private:
 };
 
