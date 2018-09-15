@@ -28,9 +28,6 @@ public:
 	virtual ~ScriptComponent();
 
 	String ResourceFile;
-
-protected:
-	virtual void* DoInspect(Mirror::Type type);
 };
 
 CLOSE_NAMESPACE(Firestorm);

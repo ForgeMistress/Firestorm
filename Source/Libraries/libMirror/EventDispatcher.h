@@ -24,7 +24,6 @@ CLOSE_NAMESPACE(Mirror);
 
 class IEvent
 {
-	FIRE_MIRROR_DECLARE(IEvent);
 public:
 	virtual const Mirror::Type& GetEventType() const = 0;
 };

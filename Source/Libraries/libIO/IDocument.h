@@ -21,7 +21,6 @@ CLOSE_NAMESPACE(Mirror);
 
 class IDocument
 {
-	FIRE_MIRROR_DECLARE(IDocument);
 public:
 	virtual ~IDocument() {}
 

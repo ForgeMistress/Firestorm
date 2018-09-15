@@ -35,7 +35,7 @@ struct ComponentMetadata
 class Component : public Mirror::Object,
                   public Mirror::IInspectableObject
 {
-	FIRE_MIRROR_DECLARE(Component, Mirror::Object, Mirror::IInspectableObject);
+	FIRE_MIRROR_DECLARE(Component, Mirror::Object);
 public:
 	Component();
 	virtual ~Component();
@@ -57,9 +57,6 @@ public:
 		\return entity The internally held WeakPtr<Entity> without const qualifiers.
 	**/
 	inline WeakPtr<Entity>& GetEntity();
-
-protected:
-	virtual void* DoInspect(Mirror::Type type) override;
 
 private:
 	String m_name;

@@ -44,7 +44,7 @@ public:
 class System : public Mirror::Object,
                public Mirror::IInspectableObject
 {
-	FIRE_MIRROR_DECLARE(System, Mirror::Object, Mirror::IInspectableObject);
+	FIRE_MIRROR_DECLARE(System, Mirror::Object);
 public:
 	System();
 	virtual ~System();

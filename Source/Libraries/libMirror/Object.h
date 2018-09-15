@@ -85,6 +85,10 @@ typedef rttr::registration Registration;
  **/
 typedef rttr::detail::metadata Metadata;
 
+typedef rttr::policy::ctor ConstructorPolicy;
+typedef rttr::policy::prop PropertyPolicy;
+typedef rttr::policy::meth MethodPolicy;
+
 /**
 	Alias for rttr::metadata function. Use this instead of rttr::metadata.
  **/

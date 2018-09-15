@@ -11,6 +11,4 @@
 #include "IDocument.h"
 OPEN_NAMESPACE(Firestorm);
 
-FIRE_MIRROR_DEFINE_NAMED(IDocument, "Firestorm::IDocument"){}
-
 CLOSE_NAMESPACE(Firestorm);

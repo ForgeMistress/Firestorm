@@ -25,7 +25,6 @@ OPEN_NAMESPACE(Mirror);
 **/
 class IInspectableObject
 {
-	FIRE_MIRROR_DECLARE(IInspectableObject);
 public:
 	/**
 		Inspect an object to see if it implements the type defined in the template.

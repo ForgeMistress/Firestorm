@@ -14,10 +14,6 @@ OPEN_NAMESPACE(Firestorm);
 
 FIRE_MIRROR_DEFINE(Firestorm::Component)
 {
-	Class.constructor<>()
-	(
-		rttr::policy::ctor::as_raw_ptr
-	);
 	Class.property("name", &Component::GetName, &Component::SetName);
 }
 
@@ -59,15 +55,6 @@ const WeakPtr<Entity>& Component::GetEntity() const
 WeakPtr<Entity>& Component::GetEntity()
 {
 	return m_entity;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void* Component::DoInspect(Mirror::Type type)
-{
-	if(Component::MyType() == type)
-		return static_cast<Component*>(this);
-	return IInspectableObject::DoInspect(type);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

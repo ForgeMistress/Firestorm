@@ -19,7 +19,7 @@ OPEN_NAMESPACE(Firestorm);
 class JSONDocument : public Mirror::Object,
                      public IDocument
 {
-	FIRE_MIRROR_DECLARE(JSONDocument, Mirror::Object, IDocument);
+	FIRE_MIRROR_DECLARE(JSONDocument, Mirror::Object);
 public:
 	JSONDocument();
 	explicit JSONDocument(const Vector<char>& data);

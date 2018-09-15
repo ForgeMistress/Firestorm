@@ -15,6 +15,7 @@ OPEN_NAMESPACE(Firestorm);
 
 class AABB_2D
 {
+	FIRE_MIRROR_DECLARE(AABB_2D);
 public:
 	AABB_2D();
 	AABB_2D(float top, float left, float bottom, float right);
@@ -27,6 +28,7 @@ public:
 
 class AABB_3D
 {
+	FIRE_MIRROR_DECLARE(AABB_3D);
 public:
 	AABB_3D();
 	AABB_3D(float minx, float miny, float minz, float maxx, float maxy, float maxz);

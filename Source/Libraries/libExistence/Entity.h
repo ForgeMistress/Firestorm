@@ -15,15 +15,21 @@ OPEN_NAMESPACE(Firestorm);
 
 class Component;
 
+/**
+	An entity's cache coherency can easily be optimized by doing placement new
+	with enough space allocated for both the entity _and_ the components we know it is going to hold, leaving room for
+	the entity to have components added and removed as we need them. Since the Entity itself is responsible for 
+	allocating the components it wants to hold, we are in complete control of the memory at this level.
+ **/
 class Entity : public Mirror::Object,
                public Mirror::IInspectableObject
 {
-	FIRE_MIRROR_DECLARE(Firestorm::Entity, Firestorm::Mirror::Object, Firestorm::Mirror::IInspectableObject);
+	FIRE_MIRROR_DECLARE(Firestorm::Entity, Firestorm::Mirror::Object);
 public:
 	Entity();
 	virtual ~Entity();
 
-	inline const String& GetName() const { return _name; }
+	const String& GetName() const { return _name; }
 
 	template <class T>
 	bool AddComponent()

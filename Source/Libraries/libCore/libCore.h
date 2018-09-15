@@ -184,6 +184,12 @@ extern bool Exists(const T& search, const U& value)
 	return true;
 }
 
+template <class T>
+extern T* PlacementNew(void* place)
+{
+	return new (place) T;
+}
+
 CLOSE_NAMESPACE(Firestorm);
 
 /**

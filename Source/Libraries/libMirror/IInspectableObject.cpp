@@ -15,12 +15,6 @@ OPEN_NAMESPACE(Mirror);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FIRE_MIRROR_DEFINE(Firestorm::Mirror::IInspectableObject)
-{
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void* IInspectableObject::Inspect(Type type)
 {
 	return DoInspect(type);
@@ -30,8 +24,6 @@ void* IInspectableObject::Inspect(Type type)
 
 void* IInspectableObject::DoInspect(Type type)
 {
-	if(IInspectableObject::MyType() == type)
-		return static_cast<IInspectableObject*>(this);
 	return nullptr;
 }
 

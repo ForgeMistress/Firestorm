@@ -15,7 +15,7 @@ OPEN_NAMESPACE(Firestorm);
 
 class MeshResource : public IResourceObject
 {
-	FIRE_MIRROR_DECLARE(MeshResource, IResourceObject);
+	FIRE_MIRROR_DECLARE(MeshResource);
 public:
 	MeshResource();
 	virtual ~MeshResource();
