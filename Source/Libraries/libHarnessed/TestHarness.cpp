@@ -11,6 +11,7 @@
 #include "TestHarness.h"
 #include "TestCase.h"
 
+
 OPEN_NAMESPACE(Firestorm);
 
 TestHarness::TestHarness(const String& name, bool quietly)
@@ -23,22 +24,28 @@ uint32_t TestHarness::Run()
 {
 	FIRE_ASSERT(m_cases.size() == m_caseNames.size());
 
-	uint32_t errors = 0;
-	TestCase testCase;
-	if(!m_quietly)
-	{
-		cout << "Test: " << m_name << endl << endl;
-	}
+	Print("Test: %s", m_name);
+	Print("");
 
+	uint32_t finalErrorCount = 0;
+	bool hasFailed = false;
 	for(size_t i=0;i<m_cases.size(); ++i)
 	{
-		const TestFunction_t& test = m_cases[i];
+		auto test = m_cases[i];
 		const String& testName = m_caseNames[i];
 
-		String testResult;
-		String errorStr;
+		Print("Case[%d] %s",i, testName);
+		TestCase testCase(testName, this);
 
-		bool passed = false;
+		test(testCase);
+		auto failures = testCase.m_failures;
+		if(!failures.empty())
+		{
+			finalErrorCount += failures.size();
+			Print("!!  Case [%d] failed with %d errors...", i, failures.size());
+		}
+
+		/*bool passed = false;
 		try
 		{
 			test(testCase);
@@ -48,27 +55,37 @@ uint32_t TestHarness::Run()
 		catch(const TestCase::AssertionException& ex)
 		{
 			testResult = "[FAILED]";
-			errorStr = String("        Error: ") + ex.GetMessage();
-			++errors;
+			//errorStr = String("        Error: ") + ex.GetMessage();
+			//++errors;
 		}
 		catch(std::exception& e)
 		{
 			testResult = "[FAILED]";
-			errorStr = String("        Error: ") + e.what();
-			++errors;
-		}
+			//errorStr = String("        Error: ") + e.what();
+			//++errors;
+		}*/
 
-		if(!m_quietly)
+		
+		/*auto failures = testCase.GetFailures();
+		errors += failures.size();
+		if(failures.empty())
+		{
+			testResult = "[PASSED]";
+		}
+		if (!m_quietly)
 		{
 			cout << testResult << " " << testName << endl;
-
-			if(!passed)
-			{
-				cout << errorStr << endl;
-			}
 		}
+
+		for(auto failure : failures)
+		{
+			if (!m_quietly)
+			{
+				cout << "        Error: " << failure << endl;
+			}
+		}*/
 	}
-	return errors;
+	return finalErrorCount;
 }
 
 void TestHarness::It(const String& caseName, TestFunction_t testFunction)
@@ -79,6 +96,11 @@ void TestHarness::It(const String& caseName, TestFunction_t testFunction)
 	}
 	m_cases.push_back(testFunction);
 	m_caseNames.push_back(caseName);
+}
+
+void TestHarness::ReportError(TestCase* tc, const String& message)
+{
+	Print("    Error: %s", message);
 }
 
 CLOSE_NAMESPACE(Firestorm);

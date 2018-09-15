@@ -29,21 +29,54 @@ public:
 
 	void Assert(bool assertion, const String& message);
 
+	void AssertIsTrue(bool assertion, const String& message);
+
+	void AssertIsFalse(bool assertion, const String& message);
+
+	template<class T>
+	void AssertIsNull(T ptr, const String& message);
+
 	template<class T>
 	void AssertNotNull(T ptr, const String& message);
 
 
 	size_t GetFailureCount() const;
+	const Vector<String>& GetFailures() const { return m_failures; }
 
 protected:
-	TestCase() {}
+	TestCase(const String& name, class TestHarness* harness)
+		: _name(name)
+		, _harness(harness) {}
 	~TestCase() {}
 
 	friend class TestHarness;
 
 private:
+	class TestHarness* _harness;
 	Vector<String> m_failures;
+	String _name;
+	bool _hasFailed{ false };
 };
+
+template<class T>
+void TestCase::AssertNotNull(T ptr, const String& message)
+{
+	if(ptr == nullptr)
+	{
+		//throw AssertionException(message);
+		m_failures.push_back(message);
+	}
+}
+
+template<class T>
+void TestCase::AssertIsNull(T ptr, const String& message)
+{
+	if(ptr != nullptr)
+	{
+		//throw AssertionException(message);
+		m_failures.push_back(message);
+	}
+}
 
 CLOSE_NAMESPACE(Firestorm);
 #endif

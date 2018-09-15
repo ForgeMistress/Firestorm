@@ -140,7 +140,7 @@ void FirestormApp::OnUpdate(double deltaT)
 	}
 	catch(std::exception& e)
 	{
-		FIRE_LOG_ERROR(String(e.what()));
+		FIRE_LOG_ERROR(e.what());
 		Close();
 	}
 }

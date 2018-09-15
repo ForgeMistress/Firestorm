@@ -52,6 +52,8 @@ int main(int ac, char** av)
     };
 
     uint32_t overallFailureCount = 0;
+	FIRE_LOG_DEBUG("");
+	FIRE_LOG_DEBUG("-----------------------------------------------------------------------------------------------------------");
 
     for(RefPtr<TestHarness>& harness : TESTS)
     {
@@ -60,13 +62,13 @@ int main(int ac, char** av)
 
         // report the results for this particular test.
         FIRE_LOG_DEBUG("");
-        FIRE_LOG_DEBUG("Completed", harness->GetName(), "with", testResults, "errors...");
+        FIRE_LOG_DEBUG("Completed %s with %d errors...", harness->GetName(), testResults);
         FIRE_LOG_DEBUG("-----------------------------------------------------------------------------------------------------------");
     }
 
     if(overallFailureCount > 0)
     {
-        FIRE_LOG_DEBUG("Completed all tests with", overallFailureCount, "errors.");
+        FIRE_LOG_DEBUG("Completed all tests with %d errors...", overallFailureCount);
     }
     else
     {

@@ -93,7 +93,7 @@ void Application::Initialize(int ac, char** av)
 	}
 	catch(std::exception& e)
 	{
-		FIRE_LOG_ERROR("Error Loading RenderSystem: ", e.what());
+		FIRE_LOG_ERROR("Error Loading RenderSystem: %s", e.what());
 	}
 }
 

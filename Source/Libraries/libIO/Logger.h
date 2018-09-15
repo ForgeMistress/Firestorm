@@ -24,6 +24,55 @@ public:
 	template <class T, class ...Args>
 	void Write(T& firstArg, Args... args);
 
+	inline std::ostream& mprintf(const char * fstr) throw()
+	{
+		return m_ostream << fstr;
+	}
+
+	template<typename T, typename... Args>
+	std::ostream& mprintf(const char * fstr, const T & x) throw()
+	{
+		size_t i = 0;
+		char c = fstr[0];
+
+		while(c != '%')
+		{
+			if (c == 0) return m_ostream; // string is finished
+			m_ostream << c;
+			c = fstr[++i];
+		};
+		c = fstr[++i];
+		m_ostream << x;
+
+		if (c == 0) return m_ostream; // 
+
+		// print the rest of the stirng
+		m_ostream << &fstr[++i];
+		return m_ostream;
+	}
+
+
+	template<typename T, typename... Args>
+	std::ostream & mprintf(const char * fstr, const T & x, Args... args) throw()
+	{
+		size_t i = 0;
+		char c = fstr[0];
+
+		while(c != '%')
+		{
+			if (c == 0) return m_ostream; // string is finished
+			m_ostream << c;
+			c = fstr[++i];
+		}
+		c = fstr[++i];
+		m_ostream << x;
+
+		if (c == 0) return m_ostream; // string is finished
+
+		return mprintf(&fstr[++i], args...);
+	}
+
+
 	static Logger DEBUG_LOGGER;
 	static Logger WARN_LOGGER;
 	static Logger ERROR_LOGGER;
@@ -60,21 +109,24 @@ extern void FIRE_LOG_##LEVEL##(Args... args)\
 }
 
 template<class... Args>
-extern void FIRE_LOG_DEBUG(Args... args)
+extern void FIRE_LOG_DEBUG(const String& format, Args... args)
 {
-	Logger::DEBUG_LOGGER.Write(args...);
+	String f = format + "\n";
+	Logger::DEBUG_LOGGER.mprintf(f.c_str(), args...);
 }
 
 template<class... Args>
-extern void FIRE_LOG_WARNING(Args... args)
+extern void FIRE_LOG_WARNING(const String& format, Args... args)
 {
-	Logger::WARNING_LOGGER.Write(args...);
+	String f = format + "\n";
+	Logger::WARNING_LOGGER.mprintf(f.c_str(), args...);
 }
 
 template<class... Args>
-extern void FIRE_LOG_ERROR(Args... args)
+extern void FIRE_LOG_ERROR(const String& format, Args... args)
 {
-	Logger::ERROR_LOGGER.Write(args...);
+	String f = format + "\n";
+	Logger::ERROR_LOGGER.mprintf(f.c_str(), args...);
 }
 
 CLOSE_NAMESPACE(Firestorm);

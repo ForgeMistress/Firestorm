@@ -148,7 +148,7 @@ typedef rttr::detail::metadata Metadata;
 /**
 	Alias for rttr::metadata function. Use this instead of rttr::metadata.
  **/
-static Metadata Meta(Variant key, Variant value);
+extern Metadata Meta(Variant key, Variant value);
 
 /**
 	\struct PropMeta

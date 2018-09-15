@@ -30,7 +30,7 @@ public:
 	{
 		return AddComponent(new T);
 	}
-	bool AddComponent(Mirror::Type type);
+	bool AddComponent(const Mirror::Type& type);
 
 	template <class T>
 	bool RemoveComponent()
@@ -56,6 +56,8 @@ private:
 
 	bool AddComponent(const RefPtr<Component>& component);
 	bool RemoveComponent(const RefPtr<Component>& component);
+
+	bool HasComponentOfType(Mirror::Type type) const;
 
 	// Reflected
 	String                     _name;

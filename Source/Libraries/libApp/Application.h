@@ -112,42 +112,42 @@ private:
 
 CLOSE_NAMESPACE(Firestorm);
 
-#define FIRE_RUN_APPLICATION(CLASS_NAME)                                         \
-	template <class T>                                                           \
-	static void InitializeLib(int ac, char** av)                                 \
-	{																			 \
-		try																		 \
-		{																		 \
-			Library<T>::Initialize(ac, av);									     \
-		}																		 \
-		catch(std::exception& e)												 \
-		{																		 \
-			FIRE_LOG_ERROR("Exception initializing lib :: Error -> ", e.what()); \
-			std::cout<<std::flush;                                               \
-			throw std::runtime_error("lib init exception encountered");			 \
-		}																		 \
-	}																			 \
-                                                                                 \
-	int main(int ac, char** av)                                     			 \
-	{                                                               			 \
-		InitializeLib<::Firestorm::libApp>(ac,av);           			         \
-		InitializeLib<::Firestorm::libCore>(ac,av);           			         \
-		InitializeLib<::Firestorm::libExistence>(ac,av);           			     \
-		InitializeLib<::Firestorm::libIO>(ac,av);           			         \
-		InitializeLib<::Firestorm::libJson>(ac,av);           			         \
-		InitializeLib<::Firestorm::libMath>(ac,av);           			         \
-		InitializeLib<::Firestorm::libMirror>(ac,av);           			     \
-		InitializeLib<::Firestorm::libScene>(ac,av);           			         \
-		InitializeLib<::Firestorm::libScript>(ac,av);           			     \
-		InitializeLib<::Firestorm::libSerial>(ac,av);           			     \
-		InitializeLib<::Firestorm::libUI>(ac,av);           			         \
-                                                                    			 \
-		::Firestorm::Application* app = new CLASS_NAME();           			 \
-		FIRE_ASSERT(app && "application could not be initialized"); 			 \
-		app->Initialize(ac, av);                                    			 \
-		int result = app->Run();                                    			 \
-		delete app;                                                 			 \
-		return result;                                              			 \
+#define FIRE_RUN_APPLICATION(CLASS_NAME)                                           \
+	template <class T>                                                             \
+	static void InitializeLib(int ac, char** av)                                   \
+	{																			   \
+		try																		   \
+		{																		   \
+			Library<T>::Initialize(ac, av);									       \
+		}																		   \
+		catch(std::exception& e)												   \
+		{																		   \
+			FIRE_LOG_ERROR("Exception initializing lib :: Error -> %s", e.what()); \
+			std::cout<<std::flush;                                                 \
+			throw std::runtime_error("lib init exception encountered");			   \
+		}																		   \
+	}																			   \
+                                                                                   \
+	int main(int ac, char** av)                                     			   \
+	{                                                               			   \
+		InitializeLib<::Firestorm::libApp>(ac,av);           			           \
+		InitializeLib<::Firestorm::libCore>(ac,av);           			           \
+		InitializeLib<::Firestorm::libExistence>(ac,av);           			       \
+		InitializeLib<::Firestorm::libIO>(ac,av);           			           \
+		InitializeLib<::Firestorm::libJson>(ac,av);           			           \
+		InitializeLib<::Firestorm::libMath>(ac,av);           			           \
+		InitializeLib<::Firestorm::libMirror>(ac,av);           			       \
+		InitializeLib<::Firestorm::libScene>(ac,av);           			           \
+		InitializeLib<::Firestorm::libScript>(ac,av);           			       \
+		InitializeLib<::Firestorm::libSerial>(ac,av);           			       \
+		InitializeLib<::Firestorm::libUI>(ac,av);           			           \
+                                                                    			   \
+		::Firestorm::Application* app = new CLASS_NAME();           			   \
+		FIRE_ASSERT(app && "application could not be initialized"); 			   \
+		app->Initialize(ac, av);                                    			   \
+		int result = app->Run();                                    			   \
+		delete app;                                                 			   \
+		return result;                                              			   \
 	}
 
 #endif

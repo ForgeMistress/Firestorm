@@ -11,6 +11,8 @@
 #define HARNESSED_TESTHARNESS_H_
 #pragma once
 
+#include <libIO/Logger.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 class TestCase;
@@ -18,7 +20,7 @@ class TestCase;
 class TestHarness
 {
 public:
-	typedef Function<void (TestCase&)> TestFunction_t;
+	typedef Function<void(TestCase&)> TestFunction_t;
 
 	TestHarness(const String& name, bool quietly = false);
 	virtual ~TestHarness() {}
@@ -36,6 +38,15 @@ public:
 	void It(const String& name, TestFunction_t testFunction);
 
     const String& GetName() const { return m_name; }
+
+	template <class... Args_t>
+	void Print(const char* fmt, Args_t... args)
+	{
+		if(!m_quietly)
+			FIRE_LOG_ERROR(fmt, args...);
+	}
+
+	void ReportError(TestCase* tc, const String& message);
 
 private:
 	String m_name;

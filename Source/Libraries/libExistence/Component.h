@@ -18,6 +18,15 @@ OPEN_NAMESPACE(Firestorm);
 
 class Entity;
 
+struct ComponentMetadata
+{
+	enum List
+	{
+		kSingleton, //< The default class level metadata for Components. Only one of this type of component may exist inside of an entity.
+		kPlural     //< Metadata that allows more than one component of this type to exist in an Entity.
+	};
+};
+
 /**
 	\class Component
 

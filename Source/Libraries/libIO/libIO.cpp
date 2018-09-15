@@ -14,7 +14,7 @@ static void LogLastPhysfsError(const String& preamble)
 {
 	PHYSFS_ErrorCode lastErrorCode = PHYSFS_getLastErrorCode();
 	if(lastErrorCode != PHYSFS_ERR_OK)
-		FIRE_LOG_ERROR(preamble, "->", String(PHYSFS_getErrorByCode(lastErrorCode)));
+		FIRE_LOG_ERROR("%s -> %s", preamble, PHYSFS_getErrorByCode(lastErrorCode));
 }
 
 void libIO::Initialize(int ac, char** av)

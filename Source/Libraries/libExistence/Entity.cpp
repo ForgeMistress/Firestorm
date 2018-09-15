@@ -36,10 +36,20 @@ Entity::~Entity()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Entity::AddComponent(Mirror::Type type)
+bool Entity::AddComponent(const Mirror::Type& type)
 {
 	FIRE_ASSERT(type.is_valid());
 	FIRE_ASSERT(type.is_derived_from<Component>());
+
+	if(HasComponentOfType(type))
+	{
+		Mirror::Variant classMeta = type.get_metadata(ComponentMetadata::kSingleton);
+		if (classMeta.is_valid() && classMeta.get_value<bool>() == true)
+		{
+			return false;
+		}
+	}
+
 	Mirror::Instance componentInstance = type.create();
 	if(componentInstance.is_valid())
 	{
@@ -150,17 +160,17 @@ void* Entity::DoInspect(Mirror::Type type)
 
 bool Entity::AddComponent(const RefPtr<Component>& component)
 {
-	for (auto com : _components)
+	for(auto com : _components)
 	{
-		if (com == component)
+		if(com == component)
 			return false;
 
-		if (com->GetType() == component->GetType())
+		if(com->GetType() == component->GetType())
 			return false;
 	}
 	_modified = true;
 
-	if (_owningEngine)
+	if(_owningEngine)
 		_owningEngine->ModifyEntity(this);
 
 	_components.push_back(component);
@@ -182,6 +192,21 @@ bool Entity::RemoveComponent(const RefPtr<Component>& component)
 			_owningEngine->ModifyEntity(this);
 
 		return true;
+	}
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Entity::HasComponentOfType(Mirror::Type type) const
+{
+	for(auto component : _components)
+	{
+		Mirror::Type componentType = component->GetType();
+		if(componentType == type)
+		{
+			return true;
+		}
 	}
 	return false;
 }
