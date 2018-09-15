@@ -12,6 +12,8 @@
 #include "Component.h"
 #include "Engine.h"
 
+#include <libIO/Logger.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,19 +43,23 @@ bool Entity::AddComponent(const Mirror::Type& type)
 	FIRE_ASSERT(type.is_valid());
 	FIRE_ASSERT(type.is_derived_from<Component>());
 
+	auto constructors = type.get_constructors();
+
 	if(HasComponentOfType(type))
 	{
-		Mirror::Variant classMeta = type.get_metadata(ComponentMetadata::kSingleton);
-		if (classMeta.is_valid() && classMeta.get_value<bool>() == true)
+		// check if it's plural
+		Mirror::Variant pluralMeta = type.get_metadata(ComponentMetadata::kPlural);
+		bool isPlural = pluralMeta.is_valid() && pluralMeta.get_value<bool>() == true;
+		if(!isPlural)
 		{
 			return false;
 		}
 	}
 
-	Mirror::Instance componentInstance = type.create();
-	if(componentInstance.is_valid())
+	Mirror::Variant componentVar = type.create({});
+	if(componentVar.is_valid())
 	{
-		return AddComponent(RefPtr<Component>(componentInstance.try_convert<Component>()));
+		return AddComponent(RefPtr<Component>(componentVar.convert<Component*>()));
 	}
 	return false;
 }
@@ -62,6 +68,7 @@ bool Entity::AddComponent(const Mirror::Type& type)
 
 bool Entity::RemoveComponent(const String& componentName)
 {
+
 	auto findFunction = [&componentName](const RefPtr<Component>& c) {
 		return c->GetName() == componentName;
 	};
@@ -158,14 +165,15 @@ void* Entity::DoInspect(Mirror::Type type)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// INTERNAL ONLY! //
 bool Entity::AddComponent(const RefPtr<Component>& component)
 {
+	FIRE_ASSERT(component);
+	if (!component)
+		return false;
 	for(auto com : _components)
 	{
 		if(com == component)
-			return false;
-
-		if(com->GetType() == component->GetType())
 			return false;
 	}
 	_modified = true;
@@ -203,7 +211,7 @@ bool Entity::HasComponentOfType(Mirror::Type type) const
 	for(auto component : _components)
 	{
 		Mirror::Type componentType = component->GetType();
-		if(componentType == type)
+		if(type == componentType)
 		{
 			return true;
 		}

@@ -24,6 +24,10 @@ Metadata Meta(Variant key, Variant value)
 
 FIRE_MIRROR_DEFINE(Firestorm::Mirror::Object)
 {
+	Class.constructor<>()
+	(
+		rttr::policy::ctor::as_raw_ptr
+	);
 }
 
 Object::~Object()

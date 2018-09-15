@@ -43,6 +43,10 @@ Vector2 MouseMoveEvent::GetDelta() const
 	};
 }
 
+FIRE_MIRROR_DEFINE(ScrollWheelEvent)
+{
+}
+
 ScrollWheelEvent::ScrollWheelEvent(Application* app, const Vector2& offset)
 : App(app)
 , Offset(offset)

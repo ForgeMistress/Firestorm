@@ -28,7 +28,7 @@ public:
 	template <class T>
 	bool AddComponent()
 	{
-		return AddComponent(new T);
+		return AddComponent(T::MyType());
 	}
 	bool AddComponent(const Mirror::Type& type);
 

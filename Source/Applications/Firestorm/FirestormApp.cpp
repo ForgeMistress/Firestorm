@@ -79,7 +79,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 			std::string log = shader->QueryInfoLog();
 			if(!log.empty())
 			{
-				//FIRE_LOG_ERROR(log);
+				FIRE_LOG_ERROR(log);
 			}
 		}
 	}

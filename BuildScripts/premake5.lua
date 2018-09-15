@@ -21,43 +21,36 @@ include("Options")
 
 -- All projects will have the following build targets available to them.
 configurations({
-    "Debug32", "Release32", "Final32",
-    "Debug64", "Release64", "Final64"
+    "Debug", 
+    "Release",
+    "Final",
+})
+
+platforms({
+    "Win32",
+    "Win64"
 })
 
 location("Projects")
 
-filter("configurations:Debug32 or Release32 or Final32")
+filter("platforms:Win32")
     architecture("x86")
-clearFilters()
-
-filter("configurations:Debug64 or Release64 or Final64")
+filter("platforms:Win64")
     architecture("x86_64")
-clearFilters()
 
 filter("action:vs*")
     defines({ "FIRE_VISUALSTUDIO" })
 clearFilters()
 
-filter("configurations:Debug32")
-    libdirs({ "Bin/x86/Debug" })
-clearFilters()
-filter("configurations:Release32 or Final32")
-    libdirs({ "Bin/x86/Release" })
-clearFilters()
-
-filter("configurations:Debug64")
-    libdirs({ "Bin/x64/Debug" })
-clearFilters()
-
-filter("configurations:Release64 or Final64");
-    libdirs({ "Bin/x64/Release" })
-clearFilters()
-
-filter("configurations:Debug*");             runtime("Debug");   defines({"FIRE_DEBUG"});
-filter("configurations:Release* or Final*"); runtime("Release");
-filter("configurations:Release*");                               defines({"FIRE_RELEASE"});
-filter("configurations:Final*");                                 defines({"FIRE_FINAL"});
+filter("configurations:Debug")
+    runtime("Debug")
+    defines({"FIRE_DEBUG"});
+filter("configurations:Release")
+    runtime("Release")
+    defines({"FIRE_RELEASE"})
+filter("configurations:Final")
+    runtime("Release");
+    defines({"FIRE_FINAL"});
 clearFilters()
 
 function build(lib)

@@ -23,6 +23,8 @@
 #include <rttr/detail/parameter_info/parameter_names.h>
 #include <rttr/variant.h>
 
+#include "MirrorMacros.h"
+
 // Borrowed from https://stackoverflow.com/questions/401621/best-way-to-for-c-types-to-self-register-in-a-list
 template<typename D>
 struct AutomaticRegister
@@ -42,68 +44,6 @@ private:
 	static ExecRegister s_registerObject;
 	static ref_it<s_registerObject> s_referrer;
 };
-
-/**
-	Macro that provides more functions to a reflected object.
-
-	static MyType   - Retrieves a consistent type.
-	static Is       - Checks the type against all common forms.
-	virtual GetType - Retrieve the type at the instance leve.
-**/
-#define FIRE_MIRROR_DECLARE(ObjectType, ...)                                                                   \
-	private:                                                                                                   \
-		template <class T> friend struct Library;                                                              \
-		using register_type = rttr::registration::class_<ObjectType>;                                          \
-		static void DoRegisterReflection(register_type& Registrar);                                            \
-	public:                                                                                                    \
-		static void RegisterReflection();                                                                      \
-		static rttr::type  MyType()                     { return rttr::type::get<ObjectType>(); }              \
-		virtual RTTR_INLINE rttr::type GetType() const  { return ObjectType::MyType(); }                       \
-		virtual RTTR_INLINE rttr::type get_type() const { return rttr::detail::get_type_from_instance(this); } \
-		virtual RTTR_INLINE void* get_ptr()             { return reinterpret_cast<void*>(this); }              \
-		virtual RTTR_INLINE rttr::detail::derived_info get_derived_info() {                                    \
-			return {                                                                                           \
-				reinterpret_cast<void*>(this),                                                                 \
-				rttr::detail::get_type_from_instance(this)                                                     \
-			};                                                                                                 \
-		}                                                                                                      \
-		using base_class_list = rttr::detail::type_list<__VA_ARGS__>;                                          \
-	private:                                                                                                   \
-		template<typename Ctor_Type, typename Policy, typename Accessor, typename Arg_Indexer> 				   \
-		friend struct rttr::detail::constructor_invoker
-
-/**
-	Define a class for the reflection system.
- **/
-#define FIRE_MIRROR_DEFINE(ObjectType) FIRE_MIRROR_DEFINE_NAMED(ObjectType, #ObjectType)
-
-#if defined FIRE_DEBUG || FIRE_RELEASE
-	#define FIRE_MIRROR_DEFINE_NAMED(ObjectType, ObjectName)			                       \
-		void ObjectType::RegisterReflection()                                                  \
-		{                                                                                      \
-			static bool s_alreadyRegistered = false;                                           \
-			FIRE_ASSERT(s_alreadyRegistered == false &&                                        \
-				"object of type '"#ObjectType"' is already registered for reflection");          \
-			s_alreadyRegistered = true;                                                        \
-			std::cout<<"    :: Registering Class Type: "<<ObjectName<<std::endl<<std::flush;   \
-			ObjectType::register_type registration(ObjectName);                                \
-			ObjectType::DoRegisterReflection(registration);                                    \
-		}                                                                                      \
-		void ObjectType::DoRegisterReflection(register_type& Class)
-#elif defined FIRE_FINAL
-	#define FIRE_MIRROR_DEFINE_NAMED(ObjectType, ObjectName)                               \
-		void ObjectType::RegisterReflection()                                              \
-		{                                                                                  \
-			rttr::registration::class_<ObjectType> registration(ObjectName);               \
-			ObjectType::DoRegisterReflection(registration);                                \
-		}                                                                                  \
-		void ObjectType::DoRegisterReflection(register_type& Class)
-#endif
-
-/**
-	Define the class level metadata while in an FIRE_MIRROR_DEFINE* block.
- **/
-#define FIRE_CLASS_METADATA(...) ( __VA_ARGS__ )
 
 OPEN_NAMESPACE(Firestorm);
 OPEN_NAMESPACE(Mirror);

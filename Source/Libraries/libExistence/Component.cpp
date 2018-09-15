@@ -14,10 +14,6 @@ OPEN_NAMESPACE(Firestorm);
 
 FIRE_MIRROR_DEFINE(Firestorm::Component)
 {
-	Class
-	(
-		Mirror::Meta(ComponentMetadata::kSingleton, true)
-	);
 	Class.constructor<>()
 	(
 		rttr::policy::ctor::as_raw_ptr
