@@ -15,6 +15,7 @@
 #include <libCore/Result.h>
 #include <libCore/SynchronizedQueue.h>
 #include <libMirror/EventDispatcher.h>
+#include <libCore/libCore.h>
 
 #include "IResourceObject.h"
 
@@ -46,18 +47,40 @@ struct FileLoadErrorEvent
 	String Error;
 };
 
+struct DefaultLoadFunctor
+{
+	DefaultLoadFunctor(const ResourceReference& resourceReference)
+		: _resourceReference(resourceReference)
+	{
+	}
+
+	IResourceObject* operator()()
+	{
+		return nullptr;
+	}
+
+	const ResourceReference& _resourceReference;
+};
+
+/**
+	Type traits object for resources.
+ **/
 template <class Resource_t>
 struct ResourceLoader
 {
-	using load_function = Function<void(void)>;
-	using resource_type = void;
-
+	/**
+		This should store the type of the functor that 
+	 **/
+	using load_functor = DefaultLoadFunctor;
+	using resource_type = IResourceObject;
 };
 
 /**
 	\class FileIOMgr
 
 	Manages the asynchronous loading of 
+
+	https://github.com/embeddedartistry/embedded-resources/blob/master/examples/cpp/dispatch.cpp
  **/
 class FileIOMgr final
 {
@@ -70,7 +93,8 @@ public:
 	template <class T>
 	void Load(const ResourceReference& ref)
 	{
-		Load();
+		static_assert(std::is_base_of<IResourceObject, T>::value)
+		Load(std::bind(ResourceLoader<T>::load_functor(ref)));
 	}
 
 	void Load(const Func_t& loadFunctor);

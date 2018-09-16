@@ -23,7 +23,7 @@ FIRE_MIRROR_DEFINE(FileLoadErrorEvent) {}
 
 FileIOMgr::FileIOMgr()
 {
-	for (int i = 0; i < _numThreads; ++i)
+	for(char i = 0; i < _numThreads; ++i)
 	{
 		_threads[i] = Thread(std::bind(&FileIOMgr::ThreadRun));
 	}
@@ -34,7 +34,7 @@ FileIOMgr::~FileIOMgr()
 	_quit = true;
 	_cv.notify_all();
 
-	for(int i = 0; i < _numThreads; i++)
+	for(char i = 0; i < _numThreads; i++)
 	{
 		if(_threads[i].joinable())
 		{
