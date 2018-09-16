@@ -38,6 +38,7 @@ struct FileLoadedEvent
 struct FileLoadErrorEvent
 {
 	FIRE_MIRROR_DECLARE(FileLoadErrorEvent);
+
 	FileLoadErrorEvent(const String& error)
 		: Error(error)
 	{

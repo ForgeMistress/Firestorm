@@ -134,7 +134,7 @@ public:
 	}
 
 	template<class Arg_t, class Class_t = void>
-	Receipt Register(std::function<void(const Arg_t&)>& callback)
+	Receipt Register(Function<void(const Arg_t&)>& callback)
 	{
 		typedef Event<Arg_t> Event_t;
 

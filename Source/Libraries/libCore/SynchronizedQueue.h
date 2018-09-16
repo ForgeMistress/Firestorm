@@ -36,7 +36,7 @@ public:
 	void pop(T& item)
 	{
 		std::unique_lock<std::mutex> lock(_mutex);
-		while (_queue.empty())
+		while(_queue.empty())
 		{
 			_cond.wait(lock);
 		}
