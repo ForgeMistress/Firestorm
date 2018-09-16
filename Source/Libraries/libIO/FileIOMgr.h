@@ -69,10 +69,20 @@ template <class Resource_t>
 struct ResourceLoader
 {
 	/**
-		This should store the type of the functor that 
+		This should store the type of the functor that will be used to load the resource.
+
+		The load functor should implement the following.
+
+		ctor(const ResourceReference&) with the functor making use of the resource reference
+		to load the resource.
+		operator() with the return being IResourceObject*.
 	 **/
 	using load_functor = DefaultLoadFunctor;
-	using resource_type = IResourceObject;
+
+	/**
+		The top level type of the resource that is being returned. Convenience mostly.
+	 **/
+	using resource_type = T;
 };
 
 /**
