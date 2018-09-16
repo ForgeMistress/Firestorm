@@ -46,6 +46,14 @@ struct FileLoadErrorEvent
 	String Error;
 };
 
+template <class Resource_t>
+struct ResourceLoader
+{
+	using load_function = Function<void(void)>;
+	using resource_type = void;
+
+};
+
 /**
 	\class FileIOMgr
 
@@ -54,27 +62,34 @@ struct FileLoadErrorEvent
 class FileIOMgr final
 {
 public:
+	using Func_t = Function<void(void)>;
+
 	FileIOMgr();
 	~FileIOMgr();
+
+	template <class T>
+	void Load(const ResourceReference& ref)
+	{
+		Load();
+	}
+
+	void Load(const Func_t& loadFunctor);
+	void Load(Func_t&& loadFunctor);
 
 	EventDispatcher Dispatcher;
 
 private:
-	struct QueueItem
-	{
-		/**
-			The type of resource object we will want to construct on successful load.
-		 **/
-		Mirror::Type ResourceType;
-	};
+	static const char _numThreads{ 2 };
+	String _name;
+	Mutex _lock;
 
-	static void ThreadRun(SynchronizedQueue<QueueItem>* queue, EventDispatcher* dispatcher);
+	Thread _threads[_numThreads];
 
-	SynchronizedQueue<QueueItem> _queue;
-	Thread _threads[2] = {
-		Thread(FileIOMgr::ThreadRun, &_queue, &Dispatcher),
-		Thread(FileIOMgr::ThreadRun, &_queue, &Dispatcher)
-	};
+	std::queue<Func_t> _queue;
+	std::condition_variable _cv;
+	bool _quit{ false };
+
+	void ThreadRun();
 };
 
 CLOSE_NAMESPACE(Firestorm);
