@@ -10,9 +10,6 @@
 #include "stdafx.h"
 #include "FileIOMgr.h"
 
-#include "File.h"
-
-#include <physfs/physfs.h>
 #include "ResourceReference.h"
 #include <libIO/libIO.h>
 
