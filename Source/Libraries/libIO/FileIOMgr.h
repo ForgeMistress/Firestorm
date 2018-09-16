@@ -54,9 +54,9 @@ struct DefaultLoadFunctor
 	{
 	}
 
-	IResourceObject* operator()()
+	Result<IResourceObject*, Error> operator()()
 	{
-		return nullptr;
+		return FIRE_ERROR(1, "Can not load a resource from the DefaultLoadFunctor");
 	}
 
 	const ResourceReference& _resourceReference;
@@ -75,7 +75,9 @@ struct ResourceLoader
 
 		ctor(const ResourceReference&) with the functor making use of the resource reference
 		to load the resource.
-		operator() with the return being IResourceObject*.
+
+		Result<IResourceObject*, Error> operator(), which actually performs the logic of
+		loading the resource.
 	 **/
 	using load_functor = DefaultLoadFunctor;
 
