@@ -11,6 +11,9 @@
 #define LIBIO_RESOURCEREFERENCE_H_
 #pragma once
 
+#include <future>
+#include "IResourceObject.h"
+
 OPEN_NAMESPACE(Firestorm);
 
 /**
@@ -25,8 +28,31 @@ public:
 	ResourceReference();
 	virtual ~ResourceReference();
 
+	/**
+		Retrieve the path to the resource on disk.
+	 **/
+	const String& GetResourcePath() const;
+
+	/**
+		Retrieve whether or not the file is loaded.
+	 **/
+	bool GetIsLoaded() const;
+
+	/**
+		
+	 **/
+
+
 private:
+	friend class FileIOMgr;
+
+	void SetResult(const Result<void, Error>& result);
+
+	Mutex _mutex;
+	Result<void, Error> _lastLoadResult;
+
 	String _resourcePath;
+	bool _isLoaded{ false };
 };
 
 CLOSE_NAMESPACE(Firestorm);

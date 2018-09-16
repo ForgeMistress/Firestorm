@@ -19,6 +19,7 @@ class IDocument;
 
 class IResourceObject
 {
+	FIRE_MIRROR_DECLARE(IResourceObject);
 public:
 	virtual ~IResourceObject() {}
 

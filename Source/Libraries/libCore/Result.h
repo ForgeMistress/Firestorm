@@ -45,8 +45,9 @@ using Result = tl::expected<Expected_t, Unexpected_t>;
 #define FIRE_ERROR( CODE, ERROR_STRING ) \
 	tl::make_unexpected(Error( CODE, ERROR_STRING ))
 
-#define FIRE_RESULT( EXPECTED, ... ) \
-	Result< EXPECTED, Error >(__VA_ARGS__)
+#define FIRE_RESULT( VALUE ) \
+	Result< decltype(VALUE), Error >(VALUE)
 
+#define FIRE_RESULT_OK Result<void,Error>()
 CLOSE_NAMESPACE(Firestorm);
 #endif

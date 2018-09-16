@@ -4,6 +4,7 @@
 #pragma once
 
 #include <libCore/libCore.h>
+#include <libCore/Result.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -19,9 +20,9 @@ struct libIO : public Library<libIO>
 	/**
 		Load a file from disk. The operation happens synchronously.
 	 **/
-	static Vector<char> LoadFile(const String& filename);
+	static Result<Vector<char>, Error> LoadFile(const String& filename);
 
-	static String LoadFileString(const String& filename);
+	static Result<String, Error> LoadFileString(const String& filename);
 
 private:
 	static void Initialize(int ac, char** av);

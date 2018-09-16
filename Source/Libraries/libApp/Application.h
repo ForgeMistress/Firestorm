@@ -54,8 +54,7 @@ public:
 
 	RenderMgr& GetRenderMgr();
 
-	//LLGL::RenderSystem* GetRenderer() const;
-	//LLGL::RenderContext* GetRenderContext() const;
+	void EnableWindowResizing(bool enabled) const;
 
 	virtual void OnInitialize(int ac, char** av) = 0;
 	virtual void OnUpdate(double deltaT) = 0;

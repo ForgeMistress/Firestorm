@@ -14,6 +14,7 @@ OPEN_NAMESPACE(Firestorm);
 
 FIRE_MIRROR_DEFINE(Firestorm::ResourceReference)
 {
+	Class.property("resourcePath", &ResourceReference::_resourcePath);
 }
 
 ResourceReference::ResourceReference()
@@ -21,6 +22,20 @@ ResourceReference::ResourceReference()
 }
 
 ResourceReference::~ResourceReference()
+{
+}
+
+const String& ResourceReference::GetResourcePath() const
+{
+	return _resourcePath;
+}
+
+bool ResourceReference::GetIsLoaded() const
+{
+	return _isLoaded;
+}
+
+void ResourceReference::SetResult(const Result<void, Error>& result)
 {
 }
 

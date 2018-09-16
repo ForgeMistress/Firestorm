@@ -21,7 +21,7 @@ OPEN_NAMESPACE(Firestorm);
 
 Application* Application::g_theApp = nullptr;
 
-FIRE_MIRROR_DEFINE(ApplicationWantsToCloseEvent)
+FIRE_MIRROR_DEFINE(Firestorm::ApplicationWantsToCloseEvent)
 {
 }
 
@@ -183,6 +183,14 @@ Vector2 Application::GetResolution() const
 RenderMgr& Application::GetRenderMgr()
 {
 	return _renderMgr;
+}
+
+void Application::EnableWindowResizing(bool enabled) const
+{
+	LLGL::Window& window = static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface());
+	LLGL::WindowDescriptor desc = window.GetDesc();
+	desc.resizable = enabled;
+	window.SetDesc(desc);
 }
 
 void Application::OnChar(Surface* surface, unsigned int c)

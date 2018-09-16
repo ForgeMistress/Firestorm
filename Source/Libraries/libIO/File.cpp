@@ -88,7 +88,7 @@ Result<void, Error> File::InvokeWriteCallback(const WriteResult& result)
 {
 	if(_state == STATE_WRITING_TO_DISK)
 	{
-		return FIRE_RESULT(void);
+		return FIRE_RESULT_OK;
 	}
 	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not invoke write callback. '" + _filename + "' is not queued for write");
 }
@@ -97,7 +97,7 @@ Result<void, Error> File::InvokeReadCallback(const ReadResult& result)
 {
 	if(_state == STATE_READING_FROM_DISK)
 	{
-		return FIRE_RESULT(void);
+		return FIRE_RESULT_OK;
 	}
 	return FIRE_ERROR(ERROR_IMPROPER_STATE, "could not invoke read callback. '" + _filename + "' is not queued for read");
 }
@@ -136,7 +136,7 @@ Result<void, Error> File::PerformDiskReadSync()
 			PHYSFS_close(file);
 			_state = STATE_LOADED;
 
-			return FIRE_RESULT(void);
+			return FIRE_RESULT_OK;
 		}
 		else
 		{

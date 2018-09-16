@@ -8,6 +8,8 @@
 #include "IResourceObject.h"
 #include "ResourceReference.h"
 
+#include "FileIOMgr.h"
+
 OPEN_NAMESPACE(Firestorm);
 
 static void LogLastPhysfsError(const String& preamble)
@@ -20,6 +22,9 @@ static void LogLastPhysfsError(const String& preamble)
 void libIO::Initialize(int ac, char** av)
 {
 	Lib::RegisterReflection<ResourceReference>();
+	Lib::RegisterReflection<IResourceObject>();
+	Lib::RegisterReflection<FileLoadedEvent>();
+	Lib::RegisterReflection<FileLoadErrorEvent>();
 
 	ArgParser parser(ac, av);
 
@@ -70,26 +75,47 @@ bool libIO::Mount(const String& dir, const String& mountPoint)
 	return true;
 }
 
-Vector<char> libIO::LoadFile(const String& filename)
+Result<Vector<char>, Error> libIO::LoadFile(const String& filename)
 {
 	Vector<char> data;
 	PHYSFS_File* file = PHYSFS_openRead(filename.c_str());
-	if(file)
+	if (file)
 	{
 		PHYSFS_sint64 len = PHYSFS_fileLength(file);
+		if(len == -1)
+		{
+			PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
+			return FIRE_ERROR(err, PHYSFS_getErrorByCode(err));
+		}
 		data.reserve(static_cast<size_t>(len));
 		data.resize(static_cast<size_t>(len));
 
-		PHYSFS_readBytes(file, &data[0], len);
+		PHYSFS_sint64 read = PHYSFS_readBytes(file, &data[0], len);
+		if(read == -1)
+		{
+			PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
+			return FIRE_ERROR(err, PHYSFS_getErrorByCode(err));
+		}
+	}
+	else
+	{
+		PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
+		return FIRE_ERROR(err, PHYSFS_getErrorByCode(err));
 	}
 	PHYSFS_close(file);
 	return data;
 }
 
-String libIO::LoadFileString(const String& filename)
+Result<String, Error> libIO::LoadFileString(const String& filename)
 {
-	Vector<char> data = LoadFile(filename);
-	return String(data.begin(), data.end());
+	Result<Vector<char>, Error> data = LoadFile(filename);
+	if (data.has_value())
+	{
+		auto d = data.value();
+		return FIRE_RESULT(String(d.begin(), d.end()));
+	}
+	Error e = data.error();
+	return FIRE_ERROR(e.Code, e.Message);
 }
 
 CLOSE_NAMESPACE(Firestorm);

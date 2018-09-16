@@ -21,6 +21,8 @@ FirestormApp::~FirestormApp()
 
 void FirestormApp::OnInitialize(int ac, char** av)
 {
+	EnableWindowResizing(true);
+
 	RenderMgr& renderMgr = GetRenderMgr();
 	Dispatcher.Register(&FirestormApp::HandleApplicationWantsToClose, this);
 
@@ -50,15 +52,17 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	LLGL::RenderSystem* renderer = renderMgr.System.get();
 	_vertexBuffer = renderer->CreateBuffer(vertexBufferDesc, vertices);
 
-	String vertShaderSource = libIO::LoadFileString("/Shaders/Triangle.vert");
-	FIRE_ASSERT(!vertShaderSource.empty());
+	Result<String, Error> vertShaderSource = libIO::LoadFileString("/Shaders/Triangle.vert");
+	// FIRE_ASSERT(!vertShaderSource.empty());
 
-	String fragShaderSource = libIO::LoadFileString("/Shaders/Triangle.frag");
-	FIRE_ASSERT(!fragShaderSource.empty());
+	FIRE_ASSERT(vertShaderSource.has_value());
+
+	Result<String, Error> fragShaderSource = libIO::LoadFileString("/Shaders/Triangle.frag");
+	FIRE_ASSERT(fragShaderSource.has_value());
 
 	LLGL::ShaderDescriptor vertShaderDesc;
 	{
-		vertShaderDesc.source = vertShaderSource.c_str();
+		vertShaderDesc.source = vertShaderSource.value().c_str();
 		vertShaderDesc.sourceType = LLGL::ShaderSourceType::CodeString;
 		vertShaderDesc.type = LLGL::ShaderType::Vertex;
 	}
@@ -66,7 +70,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 	LLGL::ShaderDescriptor fragShaderDesc;
 	{
-		fragShaderDesc.source = fragShaderSource.c_str();
+		fragShaderDesc.source = fragShaderSource.value().c_str();
 		fragShaderDesc.sourceType = LLGL::ShaderSourceType::CodeString;
 		fragShaderDesc.type = LLGL::ShaderType::Fragment;
 	}

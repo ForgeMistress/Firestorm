@@ -28,7 +28,7 @@ RefPtr<TestHarness> libScriptPrepareHarness(int ac, char** av);
 
 int main(int ac, char** av)
 {
-	FIRE_LOG_DEBUG(":: Sizeof std::size_t = %d || char = %d", sizeof(std::size_t), sizeof(char));
+
     Library<::Firestorm::libApp>::Initialize(ac,av);
     Library<::Firestorm::libCore>::Initialize(ac,av);
     Library<::Firestorm::libExistence>::Initialize(ac,av);
