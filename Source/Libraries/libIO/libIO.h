@@ -18,6 +18,11 @@ struct libIO : public Library<libIO>
 	static bool Mount(const String& directory, const String& mountpoint);
 
 	/**
+		Check if the file exists.
+	 **/
+	static bool FileExists(const String& filename);
+
+	/**
 		Load a file from disk. The operation happens synchronously.
 	 **/
 	static Result<Vector<char>, Error> LoadFile(const String& filename);

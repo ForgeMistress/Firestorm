@@ -38,17 +38,10 @@ public:
 	 **/
 	bool GetIsLoaded() const;
 
-	/**
-		
-	 **/
-
-
 private:
 	friend class FileIOMgr;
+	void SetResourcePath(const String& path);
 
-	void SetResult(const Result<void, Error>& result);
-
-	Mutex _mutex;
 	Result<void, Error> _lastLoadResult;
 
 	String _resourcePath;

@@ -18,6 +18,17 @@ OPEN_NAMESPACE(Firestorm);
 FIRE_MIRROR_DEFINE(FileLoadedEvent) {}
 FIRE_MIRROR_DEFINE(FileLoadErrorEvent) {}
 
+
+DefaultLoadFunctor::DefaultLoadFunctor(const ResourceReference& resourceReference)
+: _resourceReference(resourceReference)
+{
+}
+
+Result<RefPtr<IResourceObject>, Error> DefaultLoadFunctor::operator()()
+{
+	return FIRE_ERROR(1, "Can not load a resource from the DefaultLoadFunctor");
+}
+
 FileIOMgr::FileIOMgr()
 {
 	for(char i = 0; i < _numThreads; ++i)
@@ -28,16 +39,7 @@ FileIOMgr::FileIOMgr()
 
 FileIOMgr::~FileIOMgr()
 {
-	_quit = true;
-	_cv.notify_all();
-
-	for(char i = 0; i < _numThreads; i++)
-	{
-		if(_threads[i].joinable())
-		{
-			_threads[i].join();
-		}
-	}
+	Shutdown();
 }
 
 void FileIOMgr::Load(const Func_t& loadFunctor)
@@ -54,6 +56,20 @@ void FileIOMgr::Load(Func_t&& loadFunctor)
 	_queue.push(std::move(loadFunctor));
 	lock.unlock();
 	_cv.notify_all();
+}
+
+void FileIOMgr::Shutdown()
+{
+	_quit = true;
+	_cv.notify_all();
+
+	for(char i = 0; i < _numThreads; i++)
+	{
+		if(_threads[i].joinable())
+		{
+			_threads[i].join();
+		}
+	}
 }
 
 void FileIOMgr::ThreadRun()

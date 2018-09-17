@@ -21,8 +21,26 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+
+struct ResourceIOErrors
+{
+	enum Errors : char
+	{
+		//< Return this error when the file could not be found.
+		kFileNotFound,
+
+		//< Return this if the file fails to load for some reason.
+		kFileRead,
+
+		//< Return this error when there's an error with parsing.
+		kParsingException,
+		kProcessingException
+	};
+};
+
+
 /**
-	
+	Event that is dispatched when a file finishes loading.
  **/
 struct FileLoadedEvent
 {
@@ -36,6 +54,9 @@ struct FileLoadedEvent
 	RefPtr<IResourceObject> Resource;
 };
 
+/**
+	Event that is dispatched when a file load encounters an error.
+ **/
 struct FileLoadErrorEvent
 {
 	FIRE_MIRROR_DECLARE(FileLoadErrorEvent);
@@ -49,16 +70,8 @@ struct FileLoadErrorEvent
 
 struct DefaultLoadFunctor
 {
-	DefaultLoadFunctor(const ResourceReference& resourceReference)
-		: _resourceReference(resourceReference)
-	{
-	}
-
-	Result<RefPtr<IResourceObject>, Error> operator()()
-	{
-		return FIRE_ERROR(1, "Can not load a resource from the DefaultLoadFunctor");
-	}
-
+	DefaultLoadFunctor(const ResourceReference& resourceReference);
+	Result<RefPtr<IResourceObject>, Error> operator()();
 	const ResourceReference& _resourceReference;
 };
 
@@ -73,13 +86,13 @@ struct ResourceLoader
 
 		The load functor should implement the following.
 
-		ctor(const ResourceReference&) with the functor making use of the resource reference
+		ctor(ResourceReference*, args...) with the functor making use of the resource reference
 		to load the resource.
 
 		Result<RefPtr<IResourceObject>, Error> operator(), which actually performs the logic of
 		loading the resource.
 	 **/
-	using load_functor = DefaultLoadFunctor;
+	using load_type = DefaultLoadFunctor;
 
 	/**
 		The top level type of the resource that is being returned. Convenience mostly.
@@ -102,20 +115,23 @@ public:
 	FileIOMgr();
 	~FileIOMgr();
 
-	template <class T>
-	void Load(const ResourceReference& ref)
+	template <class T, class... Args>
+	void Load(ResourceReference* ref, Args... args)
 	{
 		static_assert(std::is_base_of<IResourceObject, T>::value)
-		Load(std::bind(ResourceLoader<T>::load_functor(ref)));
+		Load(std::bind(ResourceLoader<T>::load_type(ref, args...)));
 	}
 
 	void Load(const Func_t& loadFunctor);
 	void Load(Func_t&& loadFunctor);
 
+	void Shutdown();
+
 	EventDispatcher Dispatcher;
 
 private:
 	static const char _numThreads{ 2 };
+
 	String _name;
 	Mutex _lock;
 
