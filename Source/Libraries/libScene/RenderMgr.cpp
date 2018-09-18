@@ -39,10 +39,26 @@ void RenderMgr::Initialize(const String& system, const LLGL::RenderContextDescri
 	// Print renderer information
 	const auto& info = System->GetRendererInfo();
 
+	if(info.rendererName.find("OpenGL") != String::npos)
+	{
+		_rendererName = Renderers::OpenGL;
+	}
+	else if(info.rendererName.find("Direct3D") != String::npos)
+	{
+		_rendererName = Renderers::Direct3D;
+	}
+
 	FIRE_LOG_DEBUG("Renderer:         %s", info.rendererName);
 	FIRE_LOG_DEBUG("Device:           %s", info.deviceName);
 	FIRE_LOG_DEBUG("Vendor:           %s", info.vendorName);
 	FIRE_LOG_DEBUG("Shading Language: %s", info.shadingLanguageName);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderMgr::Shutdown()
+{
+	System->Release(*Context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +77,7 @@ bool RenderMgr::IsUsingRenderer(const String& api)
 
 const String& RenderMgr::GetRenderer() const
 {
-	return System->GetRendererInfo().rendererName;
+	return _rendererName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

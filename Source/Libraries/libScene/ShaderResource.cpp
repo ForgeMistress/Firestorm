@@ -16,10 +16,10 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ShaderResource::ShaderResource(LLGL::RenderSystem* renderSystem)
-: _renderSystem(renderSystem)
+ShaderResource::ShaderResource(RenderMgr& renderMgr)
+: _renderMgr(renderMgr)
 {
-	FIRE_ASSERT(_renderSystem != nullptr);
+	FIRE_ASSERT(_renderMgr.System != nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -28,16 +28,23 @@ ShaderResource::~ShaderResource()
 {
 	for(auto shader : _shaders)
 	{
-		_renderSystem->Release(*shader);
+		_renderMgr.System->Release(*shader);
 	}
-	_renderSystem->Release(*_shaderProgram);
+	_renderMgr.System->Release(*_shaderProgram);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ShaderLoader::ShaderLoader(ResourceReference* res, LLGL::RenderSystem* system)
-: _resHandle(res)
-, _system(system)
+bool ShaderResource::DecodeData(const Vector<char>& data)
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ShaderLoader::ShaderLoader(ResourceReference* res, RenderMgr& renderMgr)
+: _renderMgr(renderMgr)
+, _resHandle(res)
 {
 	_builder["collectComments"] = false;
 	_reader = _builder.newCharReader();
@@ -66,6 +73,7 @@ Result<RefPtr<IResourceObject>, Error> ShaderLoader::operator()()
 				return FIRE_ERROR(ResourceIOErrors::kParsingException, errors);
 			}
 
+			const String& rendererName = _
 			if(root.isMember("OpenGL"))
 			{
 			}

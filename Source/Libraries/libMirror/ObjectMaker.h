@@ -54,23 +54,24 @@ public:
 	}
 	bool RegisterMaker(Mirror::Type type, IMaker* maker);
 
-	template<class T>
+	template<class T, class... Args_t>
 	T* Make() const
 	{
 		return reinterpret_cast<T*>(Make(T::MyType()));
 	}
 	void* Make(Mirror::Type type) const;
 
-	template<class T>
+	template<class T, class... Args_t>
 	T* Make(void* place) const
 	{
 		return reinterpret_cast<T*>(Make(T::MyType(), place));
 	}
+
 	void* Make(Mirror::Type type, void* place) const;
 
 private:
 	const IMaker* GetMaker(Mirror::Type type) const;
-	Vector<Pair<Mirror::Type, IMaker*>> _makers;
+	UnorderedMap<Mirror::Type, IMaker*> _makers;
 	Mutex _lock;
 };
 

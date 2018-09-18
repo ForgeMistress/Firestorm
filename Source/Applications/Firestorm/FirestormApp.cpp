@@ -8,6 +8,8 @@
 #include <libIO/libIO.h>
 #include <libIO/Logger.h>
 
+#include <libScene/ShaderResource.h>
+
 FirestormApp::~FirestormApp()
 {
 	RenderMgr& renderMgr = GetRenderMgr();
@@ -187,6 +189,5 @@ void FirestormApp::RegisterResourceTypes()
 	ObjectMaker& objectMaker = GetObjectMaker();
 	RenderMgr& renderMgr = GetRenderMgr();
 
-
-
+	objectMaker.RegisterMaker<ShaderResource>(new ShaderResourceMaker(renderMgr));
 }

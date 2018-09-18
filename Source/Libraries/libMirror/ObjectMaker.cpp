@@ -19,9 +19,9 @@ ObjectMaker::ObjectMaker()
 ObjectMaker::~ObjectMaker()
 {
 	std::scoped_lock lock(_lock);
-	for(size_t i = 0; i < _makers.size(); ++i)
+	for(auto makerPair : _makers)
 	{
-		delete _makers[i].second;
+		delete makerPair.second;
 	}
 	_makers.clear();
 }
@@ -29,13 +29,12 @@ ObjectMaker::~ObjectMaker()
 bool ObjectMaker::RegisterMaker(Mirror::Type type, IMaker* maker)
 {
 	std::scoped_lock lock(_lock);
-	for(size_t i = 0; i < _makers.size(); ++i)
+	if(_makers.find(type) == _makers.end())
 	{
-		if(_makers[i].first == type)
-			return false;
+		_makers[type] = maker;
+		return true;
 	}
-	_makers.push_back(std::make_pair(std::move(type), maker));
-	return true;
+	return false;
 }
 
 void* ObjectMaker::Make(Mirror::Type type) const
@@ -53,12 +52,9 @@ void* ObjectMaker::Make(Mirror::Type type, void* place) const
 const IMaker* ObjectMaker::GetMaker(Mirror::Type type) const
 {
 	std::scoped_lock lock(_lock);
-	for(size_t i = 0; i < _makers.size(); ++i)
-	{
-		const auto& item = _makers[i];
-		if(item.first == type)
-			return item.second;
-	}
+	auto found = _makers.find(type);
+	if(found != _makers.end())
+		return (*found).second;
 	return nullptr;
 }
 

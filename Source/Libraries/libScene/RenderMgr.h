@@ -37,6 +37,8 @@ public:
 
 	void Initialize(const String& renderingSystem, const LLGL::RenderContextDescriptor& renderContextDesc);
 
+	void Shutdown();
+
 	bool IsUsingRenderer(const String& api);
 
 	const String& GetRenderer() const;
@@ -47,6 +49,9 @@ public:
 public:
 	std::unique_ptr<LLGL::RenderSystem> System{ nullptr };
 	LLGL::RenderContext* Context{ nullptr };
+
+private:
+	String _rendererName;
 
 	FileIOMgr& _fileIOMgr;
 	ObjectMaker& _objectMaker;

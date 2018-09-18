@@ -53,6 +53,8 @@ Application::Application()
 
 Application::~Application()
 {
+	_objectMaker.Shutdown();
+	_renderMgr.Shutdown();
 	//_renderMgr.System->Release(*_renderMgr.Context);
 }
 

@@ -22,6 +22,8 @@ class IResourceObject
 	FIRE_MIRROR_DECLARE(IResourceObject);
 public:
 	virtual ~IResourceObject() {}
+
+	virtual bool DecodeData(const Vector<char>& data) = 0;
 };
 
 CLOSE_NAMESPACE(Firestorm);
