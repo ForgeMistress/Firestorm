@@ -29,7 +29,8 @@ Result<RefPtr<IResourceObject>, Error> DefaultLoadFunctor::operator()()
 	return FIRE_ERROR(1, "Can not load a resource from the DefaultLoadFunctor");
 }
 
-FileIOMgr::FileIOMgr()
+FileIOMgr::FileIOMgr(ObjectMaker& objectMaker)
+: _objectMaker(objectMaker)
 {
 	for(char i = 0; i < _numThreads; ++i)
 	{

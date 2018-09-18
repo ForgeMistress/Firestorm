@@ -17,6 +17,8 @@ public:
 	void HandleApplicationWantsToClose(const ApplicationWantsToCloseEvent& event);
 
 private:
+	void RegisterResourceTypes();
+
 	LLGL::VertexFormat _vertFormat;
 
 	LLGL::Buffer* _vertexBuffer{ nullptr };

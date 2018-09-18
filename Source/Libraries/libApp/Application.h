@@ -12,9 +12,13 @@
 #pragma once
 
 #include "Surface.h"
+#include "ObjectMaker.h"
 
 #include <libMirror/EventDispatcher.h>
 #include <libCore/ArgParser.h>
+
+#include <libIO/FileIOMgr.h>
+#include <libScene/RenderMgr.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -25,13 +29,6 @@ public:
 	ApplicationWantsToCloseEvent(class Application* app);
 
 	class Application* App;
-};
-
-
-struct RenderMgr final
-{
-	std::unique_ptr<LLGL::RenderSystem> System{ nullptr };
-	LLGL::RenderContext* Context{ nullptr };
 };
 
 
@@ -48,11 +45,36 @@ public:
 	void AllowClose();
 	void DisallowClose();
 
-	const ArgParser& Args() const;
-
 	Vector2 GetResolution() const;
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	GLOBAL SYSTEMS
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+		Retrieve the ArgParser for this Application.
+	 **/
+	const ArgParser& Args() const;
+
+	/**
+		Retrieve a reference to the FileIOMgr for this application.
+	 **/
+	FileIOMgr& GetFileIOMgr();
+
+	/**
+		Retrieve a reference to the RenderMgr for this Application.
+	 **/
 	RenderMgr& GetRenderMgr();
+
+
+	/**
+		Retrieve a reference to the ObjectMaker for this Application.
+	 **/
+	ObjectMaker& GetObjectMaker();
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	END GLOBAL SYSTEMS
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void EnableWindowResizing(bool enabled) const;
 
@@ -96,8 +118,6 @@ private:
 
 	static Application* g_theApp;
 
-	ArgParser* _args;
-
 	bool _waitingForCloseResponse{ false };
 	bool _closeAllowed{ false };
 
@@ -106,7 +126,16 @@ private:
 
 	RefPtr<Surface> _surface{ nullptr };
 
-	RenderMgr _renderMgr;
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	GLOBAL SYSTEMS
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	std::unique_ptr<ArgParser> _args;
+	FileIOMgr                  _fileIOMgr;
+	RenderMgr                  _renderMgr;
+	ObjectMaker                _objectMaker;
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//	END GLOBAL SYSTEMS
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 
 CLOSE_NAMESPACE(Firestorm);

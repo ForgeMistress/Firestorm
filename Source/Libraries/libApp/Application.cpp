@@ -19,19 +19,28 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Application* Application::g_theApp = nullptr;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 FIRE_MIRROR_DEFINE(Firestorm::ApplicationWantsToCloseEvent)
 {
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 : App(app)
 {
-
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Application::Application()
+: _fileIOMgr(_objectMaker)
+, _renderMgr(_fileIOMgr, _objectMaker)
 {
 	FIRE_ASSERT(g_theApp == nullptr && "only one instance of an Application can exist at a time");
 	if(g_theApp == nullptr)
@@ -40,35 +49,29 @@ Application::Application()
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Application::~Application()
 {
 	//_renderMgr.System->Release(*_renderMgr.Context);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::Initialize(int ac, char** av)
 {
-	_args = new ArgParser(ac, av);
+	_args = std::make_unique<ArgParser>(ac, av);
 
 	try
 	{
 		// Initialize the rendering context.
-		_renderMgr.System = LLGL::RenderSystem::Load("OpenGL");
-
 		LLGL::RenderContextDescriptor contextDesc;
 		{
 			contextDesc.videoMode.resolution = { 800,600 };
 			contextDesc.vsync.enabled = true;
 			contextDesc.profileOpenGL.contextProfile = LLGL::OpenGLContextProfile::CoreProfile;
 		}
-		_renderMgr.Context = _renderMgr.System->CreateRenderContext(contextDesc);
-
-		// Print renderer information
-		const auto& info = _renderMgr.System->GetRendererInfo();
-
-		std::cout << "Renderer:         " << info.rendererName << std::endl;
-		std::cout << "Device:           " << info.deviceName << std::endl;
-		std::cout << "Vendor:           " << info.vendorName << std::endl;
-		std::cout << "Shading Language: " << info.shadingLanguageName << std::endl;
+		_renderMgr.Initialize("OpenGL", contextDesc);
 
 		/*LLGL::Extent2D size(800, 600);
 		_surface = new Surface(this, size, "Firestorm Window");
@@ -96,6 +99,8 @@ void Application::Initialize(int ac, char** av)
 		FIRE_LOG_ERROR("Error Loading RenderSystem: %s", e.what());
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int Application::Run()
 {
@@ -147,12 +152,16 @@ int Application::Run()
 	return OnShutdown();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::Close()
 {
 	//_surface->SetWindowShouldClose(true);
 	_closeAllowed = true;
 	OnClose();
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Application::AllowClose()
 {
@@ -161,6 +170,8 @@ void Application::AllowClose()
 	_closeAllowed = true;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::DisallowClose()
 {
 	FIRE_ASSERT(_waitingForCloseResponse == true && "Can not call AllowClose while not waiting for a close response");
@@ -168,10 +179,7 @@ void Application::DisallowClose()
 	_closeAllowed = false;
 }
 
-const ArgParser& Application::Args() const
-{
-	return *_args;
-}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Vector2 Application::GetResolution() const
 {
@@ -180,10 +188,33 @@ Vector2 Application::GetResolution() const
 	return { 800,600 };
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	GLOBAL SYSTEMS
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const ArgParser& Application::Args() const
+{
+	return *_args.get();
+}
+
+FileIOMgr& Application::GetFileIOMgr()
+{
+	return _fileIOMgr;
+}
+
 RenderMgr& Application::GetRenderMgr()
 {
 	return _renderMgr;
 }
+
+ObjectMaker& Application::GetObjectMaker()
+{
+	return _objectMaker;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	END GLOBAL SYSTEMS
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Application::EnableWindowResizing(bool enabled) const
 {
@@ -193,25 +224,35 @@ void Application::EnableWindowResizing(bool enabled) const
 	window.SetDesc(desc);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::OnChar(Surface* surface, unsigned int c)
 {
 	Dispatcher.Dispatch(CharEvent{ this, c });
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Application::OnCharMods(Surface* surface, unsigned int codepoint, int mods)
 {
 	Dispatcher.Dispatch(CharModsEvent{ this, codepoint, mods });
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::OnMouseButtonDown(Surface* surface, int mouseButton, int mods)
 {
 	Dispatcher.Dispatch(MouseButtonEvent{ this, mouseButton, true, mods });
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::OnMouseButtonUp(Surface* surface, int mouseButton, int mods)
 {
 	Dispatcher.Dispatch(MouseButtonEvent{ this, mouseButton, false, mods });
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Application::OnMouseMoved(Surface* surface, const Vector2& mousePos)
 {
@@ -220,30 +261,42 @@ void Application::OnMouseMoved(Surface* surface, const Vector2& mousePos)
 	Dispatcher.Dispatch(MouseMoveEvent{ this, _previousMousePos,_currentMousePos });
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::OnMouseScroll(Surface* surface, const Vector2& wheelOffset)
 {
 	Dispatcher.Dispatch(ScrollWheelEvent{ this, wheelOffset });
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Application::OnKeyDown(Surface* surface, int key, int scancode, int mods)
 {
 	Dispatcher.Dispatch(KeyEvent{ this, key, scancode, mods, true });
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::OnKeyUp(Surface* surface, int key, int scancode, int mods)
 {
 	Dispatcher.Dispatch(KeyEvent{ this, key, scancode, mods, false });
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Application::OnKeyRepeat(Surface* surface, int key, int scancode, int mods)
 {
 	Dispatcher.Dispatch(KeyRepeatEvent{ this, key, scancode, mods });
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Application::DoSetJoystickUserData(void* userData, int jid)
 {
 	//_surface->SetJoystickUserData(jid, userData);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void* Application::DoGetJoystickUserData(int jid)
 {
@@ -251,9 +304,13 @@ void* Application::DoGetJoystickUserData(int jid)
 	return nullptr;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Application* Application::TheApp()
 {
 	return g_theApp;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CLOSE_NAMESPACE(Firestorm);

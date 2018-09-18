@@ -15,7 +15,9 @@
 #include <libCore/Result.h>
 #include <libCore/SynchronizedQueue.h>
 #include <libMirror/EventDispatcher.h>
+#include <libMirror/ObjectMaker.h>
 #include <libCore/libCore.h>
+#include "ResourceReference.h"
 
 #include "IResourceObject.h"
 
@@ -112,7 +114,7 @@ class FileIOMgr final
 public:
 	using Func_t = Function<void(void)>;
 
-	FileIOMgr();
+	FileIOMgr(ObjectMaker& objectMaker);
 	~FileIOMgr();
 
 	template <class T, class... Args>
@@ -140,6 +142,8 @@ private:
 	std::queue<Func_t> _queue;
 	std::condition_variable _cv;
 	bool _quit{ false };
+
+	ObjectMaker& _objectMaker;
 
 	void ThreadRun();
 };

@@ -21,6 +21,9 @@ FirestormApp::~FirestormApp()
 
 void FirestormApp::OnInitialize(int ac, char** av)
 {
+	RegisterResourceTypes();
+
+
 	EnableWindowResizing(true);
 
 	RenderMgr& renderMgr = GetRenderMgr();
@@ -161,4 +164,29 @@ int FirestormApp::OnShutdown()
 void FirestormApp::HandleApplicationWantsToClose(const ApplicationWantsToCloseEvent& event)
 {
 	event.App->AllowClose();
+}
+
+struct ShaderMaker : public IMaker
+{
+	ShaderMaker(RenderMgr& renderMgr)
+	: _renderMgr(renderMgr)
+	{
+	}
+
+	virtual void* Make() const
+	{
+		return nullptr;
+	}
+
+	RenderMgr& _renderMgr;
+};
+
+void FirestormApp::RegisterResourceTypes()
+{
+	// Register the resource types.
+	ObjectMaker& objectMaker = GetObjectMaker();
+	RenderMgr& renderMgr = GetRenderMgr();
+
+
+
 }
