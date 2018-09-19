@@ -41,6 +41,7 @@ ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 Application::Application()
 : _fileIOMgr(_objectMaker)
 , _renderMgr(_fileIOMgr, _objectMaker)
+, _mainThreadId(std::this_thread::get_id())
 {
 	FIRE_ASSERT(g_theApp == nullptr && "only one instance of an Application can exist at a time");
 	if(g_theApp == nullptr)
@@ -53,7 +54,7 @@ Application::Application()
 
 Application::~Application()
 {
-	_objectMaker.Shutdown();
+	//_objectMaker.Shutdown();
 	_renderMgr.Shutdown();
 	//_renderMgr.System->Release(*_renderMgr.Context);
 }
@@ -106,6 +107,8 @@ void Application::Initialize(int ac, char** av)
 
 int Application::Run()
 {
+	_mainThreadId = std::this_thread::get_id();
+
 	bool windowWantsToClose{ false };
 	double deltaT{ 0.0 };
 	bool isRunning{ true };
@@ -116,6 +119,8 @@ int Application::Run()
 
 	while(static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface()).ProcessEvents())
 	{
+		_mainThreadId = std::this_thread::get_id();
+
 		timer->MeasureTime();
 		auto end = std::chrono::system_clock::now();
 		if(std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > 0)
