@@ -44,12 +44,12 @@ struct ResourceIOErrors
 /**
 	Event that is dispatched when a file finishes loading.
  **/
-struct FileLoadedEvent
+struct ResourceLoadedEvent
 {
-	FIRE_MIRROR_DECLARE(FileLoadedEvent);
+	FIRE_MIRROR_DECLARE(ResourceLoadedEvent);
 
-	FileLoadedEvent(const RefPtr<IResourceObject>& resource)
-		: Resource(resource)
+	ResourceLoadedEvent(const RefPtr<IResourceObject>& resource)
+	: Resource(resource)
 	{
 	}
 
@@ -59,47 +59,32 @@ struct FileLoadedEvent
 /**
 	Event that is dispatched when a file load encounters an error.
  **/
-struct FileLoadErrorEvent
+struct ResourceLoadErrorEvent
 {
-	FIRE_MIRROR_DECLARE(FileLoadErrorEvent);
+	FIRE_MIRROR_DECLARE(ResourceLoadErrorEvent);
 
-	FileLoadErrorEvent(const String& error)
-		: Error(error)
+	ResourceLoadErrorEvent(const ResourceReference& ref, const String& error)
+	: Resource(ref)
+	, Error(error)
 	{
 	}
+	ResourceReference Resource;
 	String Error;
 };
 
-struct DefaultLoadFunctor
+class ResourceLoader
 {
-	DefaultLoadFunctor(const ResourceReference& resourceReference);
-	Result<RefPtr<IResourceObject>, Error> operator()();
-	const ResourceReference& _resourceReference;
-};
+	FIRE_MIRROR_DECLARE(ResourceLoader);
+public:
+	ResourceLoader(const ResourceReference& ref);
+	virtual ~ResourceLoader();
 
-/**
-	Type traits object for resources.
- **/
-template <class Resource_t>
-struct ResourceLoader
-{
-	/**
-		This should store the type of the functor that will be used to load the resource.
+	RefPtr<IResourceObject> Load() const;
 
-		The load functor should implement the following.
+	const ResourceReference& GetResourceRef() const { return _resource; }
 
-		ctor(ResourceReference*, args...) with the functor making use of the resource reference
-		to load the resource.
-
-		Result<RefPtr<IResourceObject>, Error> operator(), which actually performs the logic of
-		loading the resource.
-	 **/
-	using load_type = DefaultLoadFunctor;
-
-	/**
-		The top level type of the resource that is being returned. Convenience mostly.
-	 **/
-	using resource_type = Resource_t;
+protected:
+	ResourceReference _resource;
 };
 
 /**
@@ -117,15 +102,15 @@ public:
 	FileIOMgr(ObjectMaker& objectMaker);
 	~FileIOMgr();
 
-	template <class T, class... Args>
-	void Load(ResourceReference* ref, Args... args)
+	template <class ResourceType_t>
+	void Load(const ResourceReference& ref)
 	{
-		static_assert(std::is_base_of<IResourceObject, T>::value)
-		Load(std::bind(ResourceLoader<T>::load_type(ref, args...)));
+		Load(ref, ResourceType_t::MyType());
 	}
+	void Load(const ResourceReference& ref, Mirror::Type resourceLoaderType);
 
-	void Load(const Func_t& loadFunctor);
-	void Load(Func_t&& loadFunctor);
+	/*void Load(const Func_t& loadFunctor);
+	void Load(Func_t&& loadFunctor);*/
 
 	void Shutdown();
 
@@ -139,7 +124,7 @@ private:
 
 	Thread _threads[_numThreads];
 
-	std::queue<Func_t> _queue;
+	std::queue<ResourceLoader*> _queue;
 	std::condition_variable _cv;
 	bool _quit{ false };
 

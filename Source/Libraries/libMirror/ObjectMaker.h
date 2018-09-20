@@ -69,6 +69,13 @@ public:
 
 	void* Make(Mirror::Type type, void* place) const;
 
+	template<class T>
+	bool IsMakerRegistered()
+	{
+		return IsMakerRegistered(T::MyType());
+	}
+	bool IsMakerRegistered(Mirror::Type type) const;
+
 private:
 	const IMaker* GetMaker(Mirror::Type type) const;
 	UnorderedMap<Mirror::Type, IMaker*> _makers;
