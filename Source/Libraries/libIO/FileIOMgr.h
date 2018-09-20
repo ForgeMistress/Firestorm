@@ -99,7 +99,7 @@ struct ResourceLoader
 	/**
 		The top level type of the resource that is being returned. Convenience mostly.
 	 **/
-	using resource_type = T;
+	using resource_type = Resource_t;
 };
 
 /**

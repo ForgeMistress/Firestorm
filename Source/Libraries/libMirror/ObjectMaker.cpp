@@ -51,7 +51,7 @@ void* ObjectMaker::Make(Mirror::Type type, void* place) const
 
 const IMaker* ObjectMaker::GetMaker(Mirror::Type type) const
 {
-	std::scoped_lock lock(_lock);
+	std::scoped_lock<std::mutex> lock(_lock);
 	auto found = _makers.find(type);
 	if(found != _makers.end())
 		return (*found).second;

@@ -37,7 +37,7 @@ ShaderResource::~ShaderResource()
 
 bool ShaderResource::DecodeData(const Vector<char>& data)
 {
-
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +73,6 @@ Result<RefPtr<IResourceObject>, Error> ShaderLoader::operator()()
 				return FIRE_ERROR(ResourceIOErrors::kParsingException, errors);
 			}
 
-			const String& rendererName = _
 			if(root.isMember("OpenGL"))
 			{
 			}

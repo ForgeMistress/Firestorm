@@ -190,6 +190,38 @@ extern T* PlacementNew(void* place)
 	return new (place) T;
 }
 
+
+
+
+
+template <class Class_t, class Arg_t>
+Function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&), Class_t* instance)
+{
+	return std::bind(funcPointer, instance, std::placeholders::_1);
+}
+
+template <class Class_t, class Arg_t>
+Function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&), const Class_t* instance)
+{
+	return std::bind(funcPointer, const_cast<Class_t*>(instance), std::placeholders::_1);
+}
+
+template <class Class_t, class Arg_t>
+Function<void(const Arg_t&)> WrapFn(void (Class_t::*funcPointer)(const Arg_t&) const, const Class_t* instance)
+{
+	return std::bind(funcPointer, const_cast<Class_t*>(instance), std::placeholders::_1);
+}
+
+template <class Arg_t>
+Function<void(const Arg_t&)> WrapFn(void(*funcPointer)(const Arg_t&))
+{
+	return std::function<void(const Arg_t&)>(funcPointer);
+}
+
+
+
+
+
 CLOSE_NAMESPACE(Firestorm);
 
 /**
