@@ -24,7 +24,7 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ShaderResource final
+class ShaderResource final : public IResourceObject
 {
 	FIRE_MIRROR_DECLARE(ShaderResource);
 	friend struct ShaderLoader;
@@ -38,24 +38,6 @@ private:
 	LLGL::ShaderProgram* _shaderProgram{ nullptr };
 };
 
-struct ShaderLoader;
-
-struct ShaderLoaderMaker : public IMaker
-{
-	ShaderLoaderMaker(RenderMgr& renderMgr)
-	: _renderMgr(renderMgr) 
-	{
-	}
-
-	virtual void* Make() override
-	{
-		return _pool.Get(_renderMgr);
-	}
-
-	RenderMgr& _renderMgr;
-	ObjectPool<ShaderLoader> _pool;
-};
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct ShaderLoader final : public ResourceLoader
@@ -65,9 +47,12 @@ struct ShaderLoader final : public ResourceLoader
 
 	virtual ResourceMgr::LoadResult Load(const ResourceReference& ref) override;
 private:
-	RenderMgr&              _renderMgr;
-	Json::CharReaderBuilder _builder;
-	Json::CharReader*       _reader;
+	LLGL::Shader* MakeShader(const Vector<char>& data, LLGL::ShaderType shaderType);
+
+	RenderMgr&                 _renderMgr;
+	Json::CharReaderBuilder    _builder;
+	Json::CharReader*          _reader;
+	ObjectPool<ShaderResource> _shaderPool;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
