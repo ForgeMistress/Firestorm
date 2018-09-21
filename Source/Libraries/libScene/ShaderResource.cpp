@@ -57,7 +57,7 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 	if(!libIO::FileExists(filename))
 	{
 		Result<Vector<char>, Error> result = libIO::LoadFile(filename);
-		if(result.has_value())
+		if (result.has_value())
 		{
 			const Vector<char>& data = result.value();
 			Json::Value root;
@@ -67,8 +67,16 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 				return FIRE_ERROR(ResourceIOErrors::kParsingException, errors);
 			}
 
-			if(root.isMember("OpenGL"))
+			if(_renderMgr.IsUsingRenderer(Renderers::OpenGL))
 			{
+				if(root.isMember(Renderers::OpenGL))
+				{
+
+				}
+			}
+			else if(_renderMgr.IsUsingRenderer(Renderers::Direct3D))
+			{
+				FIRE_ASSERT(false && "direct3D support is not yet implemented");
 			}
 		}
 		else
