@@ -168,26 +168,11 @@ void FirestormApp::HandleApplicationWantsToClose(const ApplicationWantsToCloseEv
 	event.App->AllowClose();
 }
 
-struct ShaderMaker : public IMaker
-{
-	ShaderMaker(RenderMgr& renderMgr)
-	: _renderMgr(renderMgr)
-	{
-	}
-
-	virtual void* Make() const
-	{
-		return nullptr;
-	}
-
-	RenderMgr& _renderMgr;
-};
-
 void FirestormApp::RegisterResourceTypes()
 {
 	// Register the resource types.
 	ObjectMaker& objectMaker = GetObjectMaker();
 	RenderMgr& renderMgr = GetRenderMgr();
 
-	objectMaker.RegisterMaker<ShaderResource>(new ShaderResourceMaker(renderMgr));
+	objectMaker.RegisterMaker<ShaderResource>(new ShaderLoaderMaker(renderMgr));
 }

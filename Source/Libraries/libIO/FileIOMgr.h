@@ -28,6 +28,9 @@ struct ResourceIOErrors
 {
 	enum Errors : char
 	{
+		//< Can't use the default loader dumbass.
+		kDefaultLoader,
+
 		//< Return this error when the file could not be found.
 		kFileNotFound,
 
@@ -36,55 +39,28 @@ struct ResourceIOErrors
 
 		//< Return this error when there's an error with parsing.
 		kParsingException,
+
 		kProcessingException
 	};
 };
 
+using ResourceLoadResult_t = Result<RefPtr<IResourceObject>, Error>;
+using LoadFunctor_t = Function<ResourceLoadResult_t(const ResourceReference&)>;
 
-/**
-	Event that is dispatched when a file finishes loading.
- **/
-struct ResourceLoadedEvent
+struct ResourceLoader
 {
-	FIRE_MIRROR_DECLARE(ResourceLoadedEvent);
-
-	ResourceLoadedEvent(const RefPtr<IResourceObject>& resource)
-	: Resource(resource)
-	{
-	}
-
-	RefPtr<IResourceObject> Resource;
-};
-
-/**
-	Event that is dispatched when a file load encounters an error.
- **/
-struct ResourceLoadErrorEvent
-{
-	FIRE_MIRROR_DECLARE(ResourceLoadErrorEvent);
-
-	ResourceLoadErrorEvent(const ResourceReference& ref, const String& error)
-	: Resource(ref)
-	, Error(error)
-	{
-	}
-	ResourceReference Resource;
-	String Error;
-};
-
-class ResourceLoader
-{
-	FIRE_MIRROR_DECLARE(ResourceLoader);
-public:
 	ResourceLoader(const ResourceReference& ref);
-	virtual ~ResourceLoader();
+	ResourceLoadResult_t operator()();
+};
 
-	RefPtr<IResourceObject> Load() const;
-
-	const ResourceReference& GetResourceRef() const { return _resource; }
-
-protected:
-	ResourceReference _resource;
+/**
+	Specialize this to provide the data for the resource loader.
+ **/
+template<class T>
+struct ResourceTraits
+{
+	using type = T;
+	using loader = ResourceLoader;
 };
 
 /**
@@ -96,25 +72,19 @@ protected:
  **/
 class FileIOMgr final
 {
+	typedef std::pair<const ResourceReference&, LoadFunctor_t> LoadOp_t;
 public:
-	using Func_t = Function<void(void)>;
-
-	FileIOMgr(ObjectMaker& objectMaker);
+	FileIOMgr(ObjectMaker& objMaker);
 	~FileIOMgr();
 
 	template <class ResourceType_t>
 	void Load(const ResourceReference& ref)
 	{
-		Load(ref, ResourceType_t::MyType());
+		Load(std::make_pair(ref,_objMaker.Make<ResourceTraits<ResourceType_t>::loader>()));
 	}
-	void Load(const ResourceReference& ref, Mirror::Type resourceLoaderType);
-
-	/*void Load(const Func_t& loadFunctor);
-	void Load(Func_t&& loadFunctor);*/
+	void Load(LoadOp_t loadFunctor);
 
 	void Shutdown();
-
-	EventDispatcher Dispatcher;
 
 private:
 	static const char _numThreads{ 2 };
@@ -124,11 +94,11 @@ private:
 
 	Thread _threads[_numThreads];
 
-	std::queue<ResourceLoader*> _queue;
+	std::queue<LoadOp_t> _queue;
 	std::condition_variable _cv;
 	bool _quit{ false };
 
-	ObjectMaker& _objectMaker;
+	ObjectMaker& _objMaker;
 
 	void ThreadRun();
 };

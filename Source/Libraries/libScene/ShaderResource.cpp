@@ -35,16 +35,8 @@ ShaderResource::~ShaderResource()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ShaderResource::DecodeData(const Vector<char>& data)
-{
-	return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ShaderLoader::ShaderLoader(ResourceReference* res, RenderMgr& renderMgr)
+ShaderLoader::ShaderLoader(RenderMgr& renderMgr)
 : _renderMgr(renderMgr)
-, _resHandle(res)
 {
 	_builder["collectComments"] = false;
 	_reader = _builder.newCharReader();
@@ -57,9 +49,9 @@ ShaderLoader::~ShaderLoader()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Result<RefPtr<IResourceObject>, Error> ShaderLoader::operator()()
+ResourceLoadResult_t ShaderLoader::operator()(const ResourceReference& ref)
 {
-	const String& filename = _resHandle->GetResourcePath();
+	const String& filename = ref.GetResourcePath();
 	if(!libIO::FileExists(filename))
 	{
 		Result<Vector<char>, Error> result = libIO::LoadFile(filename);
@@ -86,6 +78,7 @@ Result<RefPtr<IResourceObject>, Error> ShaderLoader::operator()()
 	{
 		return FIRE_ERROR(ResourceIOErrors::kFileNotFound, "could not find file " + filename);
 	}
+	return FIRE_ERROR(ResourceIOErrors::kProcessingException, "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -23,8 +23,6 @@ void libIO::Initialize(int ac, char** av)
 {
 	Lib::RegisterReflection<ResourceReference>();
 	Lib::RegisterReflection<IResourceObject>();
-	Lib::RegisterReflection<FileLoadedEvent>();
-	Lib::RegisterReflection<FileLoadErrorEvent>();
 
 	ArgParser parser(ac, av);
 

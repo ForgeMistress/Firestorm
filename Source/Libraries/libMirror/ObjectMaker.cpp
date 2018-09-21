@@ -37,19 +37,18 @@ bool ObjectMaker::RegisterMaker(Mirror::Type type, IMaker* maker)
 	return false;
 }
 
-void* ObjectMaker::Make(Mirror::Type type) const
+void* ObjectMaker::Make(Mirror::Type type)
 {
-	const IMaker* maker = GetMaker(type);
+	IMaker* maker = GetMaker(type);
 	return maker->Make();
 }
 
-void* ObjectMaker::Make(Mirror::Type type, void* place) const
+bool ObjectMaker::IsMakerRegistered(Mirror::Type type) const
 {
-	const IMaker* maker = GetMaker(type);
-	return maker->MakeInPlace(place);
+	return _makers.find(type) != _makers.end();
 }
 
-const IMaker* ObjectMaker::GetMaker(Mirror::Type type) const
+IMaker* ObjectMaker::GetMaker(Mirror::Type type) const
 {
 	std::scoped_lock<std::mutex> lock(_lock);
 	auto found = _makers.find(type);

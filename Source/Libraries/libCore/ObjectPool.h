@@ -20,9 +20,9 @@ class ObjectPool final
 {
 	struct Deleter
 	{
-		Deleter(Vector<T*>& recycle);
+		Deleter(ObjectPool<T>& recycle);
 		void operator()(T* ptr);
-		Vector<T*>& _recycle;
+		ObjectPool<T>& _recycle;
 	};
 public:
 	using Handle = std::unique_ptr<T, Deleter>;
@@ -42,7 +42,7 @@ public:
 	}
 
 	template<class... Args_t>
-	Handle Get(Args_t&&... args)
+	Handle GetManaged(Args_t&&... args)
 	{
 		return Handle(Get(args), Deleter(_recycle));
 	}
@@ -62,7 +62,7 @@ private:
 };
 
 template<class T>
-ObjectPool<T>::Deleter::Deleter(Vector<T*>& recycle)
+ObjectPool<T>::Deleter::Deleter(ObjectPool<T>& recycle)
 : _recycle(recycle)
 {
 }
@@ -70,11 +70,7 @@ ObjectPool<T>::Deleter::Deleter(Vector<T*>& recycle)
 template<class T>
 void ObjectPool<T>::Deleter::operator()(T* ptr)
 {
-	if(ptr != nullptr)
-	{
-		ptr->~T();
-		_recycle.push_back(ptr);
-	}
+	_recycle.Return(ptr);
 }
 
 CLOSE_NAMESPACE(Firestorm);

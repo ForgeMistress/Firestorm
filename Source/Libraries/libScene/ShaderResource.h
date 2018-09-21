@@ -17,6 +17,7 @@
 
 #include <json/json.h>
 #include <json/reader.h>
+#include <libCore/ObjectPool.h>
 
 #include "RenderMgr.h"
 
@@ -27,12 +28,10 @@ OPEN_NAMESPACE(Firestorm);
 class ShaderResource final
 {
 	FIRE_MIRROR_DECLARE(ShaderResource);
-	friend class ShaderLoader;
+	friend struct ShaderLoader;
 public:
 	ShaderResource(RenderMgr& renderMgr);
 	virtual ~ShaderResource();
-
-	virtual bool DecodeData(const Vector<char>& data);
 
 private:
 	RenderMgr& _renderMgr;
@@ -40,35 +39,34 @@ private:
 	LLGL::ShaderProgram* _shaderProgram{ nullptr };
 };
 
-struct ShaderResourceMaker : public IMaker
-{
-	ShaderResourceMaker(RenderMgr& renderMgr)
-		: _renderMgr(renderMgr) { }
+struct ShaderLoader;
 
-	virtual void* Make() const override
+struct ShaderLoaderMaker : public IMaker
+{
+	ShaderLoaderMaker(RenderMgr& renderMgr)
+	: _renderMgr(renderMgr) 
 	{
-		return new ShaderResource(_renderMgr);
 	}
 
-	virtual void* MakeInPlace(void* place) const override
+	virtual void* Make() override
 	{
-		return new (place) ShaderResource(_renderMgr);
+		return _pool.Get(_renderMgr);
 	}
 
 	RenderMgr& _renderMgr;
+	ObjectPool<ShaderLoader> _pool;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct ShaderLoader final
 {
-	ShaderLoader(ResourceReference* res, RenderMgr& renderMgr);
+	ShaderLoader(RenderMgr& renderMgr);
 	~ShaderLoader();
 
-	Result<RefPtr<IResourceObject>, Error> operator()();
+	ResourceLoadResult_t operator()(const ResourceReference& ref);
 private:
 	RenderMgr&              _renderMgr;
-	ResourceReference*      _resHandle;
 	Json::CharReaderBuilder _builder;
 	Json::CharReader*       _reader;
 };
@@ -76,10 +74,10 @@ private:
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <>
-struct ResourceLoader<ShaderResource>
+struct ResourceTraits<ShaderResource>
 {
-	using load_type     = ShaderLoader;
-	using resource_type = ShaderResource;
+	using type   = ShaderResource;
+	using loader = ShaderLoader;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
