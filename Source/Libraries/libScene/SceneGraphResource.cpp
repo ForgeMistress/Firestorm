@@ -27,14 +27,14 @@ SceneGraphResource::~SceneGraphResource()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Result<void, Error> SceneGraphResource::Load(const Json::Value& inValue)
+Result<void, ErrorCode> SceneGraphResource::Load(const Json::Value& inValue)
 {
 	return FIRE_RESULT_OK;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Result<void, Error> SceneGraphResource::Save(Json::Value& outValue) const
+Result<void, ErrorCode> SceneGraphResource::Save(Json::Value& outValue) const
 {
 	return FIRE_RESULT_OK;
 }

@@ -32,10 +32,12 @@ public:
 	ShaderResource(RenderMgr& renderMgr);
 	virtual ~ShaderResource();
 
+	LLGL::ShaderProgram* GetProgram() const;
+
 private:
-	RenderMgr& _renderMgr;
-	Vector<LLGL::Shader*> _shaders;
-	LLGL::ShaderProgram* _shaderProgram{ nullptr };
+	RenderMgr&                  _renderMgr;
+	Vector<LLGL::Shader*>       _shaders;
+	LLGL::ShaderProgram*        _shaderProgram{ nullptr };
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

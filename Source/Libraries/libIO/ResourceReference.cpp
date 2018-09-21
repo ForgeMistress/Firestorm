@@ -18,7 +18,13 @@ FIRE_MIRROR_DEFINE(Firestorm::ResourceReference)
 		.property("resourcePath", &ResourceReference::_resourcePath);
 }
 
-ResourceReference::ResourceReference()
+ErrorCode ResourceReference::Errors::UNKNOWN_STATE("the error state is in a state of limbo...");
+ErrorCode ResourceReference::Errors::THERE_IS_NO_ERROR("there is no error to return");
+ErrorCode ResourceReference::Errors::NOT_FINISHED_LOADING("the resource is not finished loading yet");
+
+ResourceReference::ResourceReference(const String& path)
+: _resourcePath(path)
+, _error(&Errors::UNKNOWN_STATE, "the error code is in an unknown state")
 {
 }
 
@@ -31,25 +37,82 @@ const String& ResourceReference::GetResourcePath() const
 	return _resourcePath;
 }
 
-bool ResourceReference::GetIsLoaded() const
+bool ResourceReference::IsReady() const
 {
-	return _future.valid();
+	// return early if we're already ready.
+	if(_isReady) return _isReady;
+
+	std::future_status status = _future.wait_for(std::chrono::milliseconds(1));
+	if(status == std::future_status::ready)
+	{
+		_isReady = true;
+		auto result = _future.get();
+		if(result.has_value())
+		{
+			_resource = result.value();
+		}
+		else
+		{
+			_error = result.error();
+			_errorSet = true;
+		}
+	}
+	return _isReady;
 }
 
-bool ResourceReference::HasError()
+bool ResourceReference::HasError() const
 {
-	return _future.valid() && _future.get().has_value();
+	if(!IsReady())
+	{
+		// if we're not ready yet and someone attempts to call HasError, we should set the internal
+		// error to NOT_FINISHED_LOADING for when they inevitably call GetError.
+		// this way they can properly handle their code.
+		_error = Error(&Errors::NOT_FINISHED_LOADING, "you called ResourceReference::HasError "
+                                                      "a little early there brah...");
+		return true;
+	}
+	return _errorSet;
 }
 
-bool ResourceReference::HasResource()
+bool ResourceReference::HasResource() const
 {
-	return _future.valid() && _future.get().has_value();
+	if(IsReady())
+	{
+		return _resource != nullptr;
+	}
+	return false;
 }
 
-RefPtr<IResourceObject> ResourceReference::GetResource()
+RefPtr<IResourceObject> ResourceReference::GetResource() const
 {
-	auto fvalue = _future.get();
-	return fvalue.value();
+	if(IsReady())
+	{
+		return _resource;
+	}
+	return nullptr;
+}
+
+Error ResourceReference::GetError() const
+{
+	if(IsReady())
+	{
+		if(_errorSet)
+		{
+			return _error;
+		}
+		else
+		{
+			if(_resource)
+				return Error(&Errors::THERE_IS_NO_ERROR, "there was no error to report. the resource is set and ready to go.");
+		}
+	}
+	return Error(&Errors::UNKNOWN_STATE, "no error to retrieve just yet");
+}
+
+void ResourceReference::Release()
+{
+	if(_resource)
+		_resource = nullptr;
 }
 
 void ResourceReference::SetResourcePath(const String& path)

@@ -86,6 +86,8 @@ using Mutex = std::mutex;
 
 using SharedMutex = std::shared_mutex;
 
+using ID = uint32_t;
+
 // Aliases for type_trait structs in type_traits (C++11)
 OPEN_NAMESPACE(Traits);
 
@@ -164,8 +166,12 @@ CLOSE_NAMESPACE(Traits);
 struct libCore : public Library<libCore>
 {
 	FIRE_LIBRARY(libCore);
+
+	static void SetThreadName(Thread& thread, const String& name);
+
 private:
 	static void Initialize(int ac, char** av);
+
 };
 
 extern Vector<String> SplitString(const String& str, char delim);

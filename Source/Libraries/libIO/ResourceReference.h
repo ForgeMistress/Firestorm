@@ -22,11 +22,18 @@ OPEN_NAMESPACE(Firestorm);
 
 	This class instance does not contain any data. Instead, it merely defines a reference to a resource.
  **/
-class ResourceReference : public Mirror::Object
+class ResourceReference final : public Mirror::Object
 {
 	FIRE_MIRROR_DECLARE(ResourceReference, Mirror::Object);
 public:
-	ResourceReference();
+	struct Errors
+	{
+		static ErrorCode UNKNOWN_STATE;        // set when the state is unknown.
+		static ErrorCode THERE_IS_NO_ERROR;             // returned when there's no error set.
+		static ErrorCode NOT_FINISHED_LOADING; // returned when the resource has not finished loading yet.
+	};
+
+	ResourceReference(const String& path = "");
 	virtual ~ResourceReference();
 
 	/**
@@ -37,22 +44,46 @@ public:
 	/**
 		Retrieve whether or not the file is loaded.
 	 **/
-	bool GetIsLoaded() const;
+	bool IsReady() const;
 
 	/**
 		Check whether or not the resource loaded with an error.
 	 **/
-	bool HasError();
+	bool HasError() const;
 
 	/**
 		Check whether or not the ResourceReference is holding a resource. Opposite of HasError
 	 **/
-	bool HasResource();
+	bool HasResource() const;
+
+	template<class Resource_t>
+	RefPtr<Resource_t> GetResource() const
+	{
+		static_assert(std::is_base_of<IResourceObject, Resource_t>::value, "cast type must derive "
+                                                                           "from IResourceObject");
+		return GetResource().Upcast<Resource_t>();
+	}
 
 	/**
 		Retrieve the resource if it is finished loading.
 	 **/
-	RefPtr<IResourceObject> GetResource();
+	RefPtr<IResourceObject> GetResource() const;
+
+	/**
+		Retrieve the error if it is reported that there is an error.
+
+		\note If a call to #ResourceReference::HasError is made before the resource finished loading,
+		then this will return #ResourceReference::Errors::NOT_FINISHED_LOADING. This is meant to convey
+		that there is no state to really work with yet. IT IS NOT A CRITICAL ERROR! IT IS MERELY A WARNING!
+		Functions like #ResourceReference::HasError should only be called once #ResourceReference::IsReady 
+		returns true, that way you can know for sure.
+	 **/
+	Error GetError() const;
+
+	/**
+		Release the loaded resource being held by this ResourceReference.
+	 **/
+	void Release();
 
 private:
 	friend class ResourceMgr;
@@ -60,10 +91,14 @@ private:
 
 	void SetFuture(std::future<ResourceMgr::LoadResult>&& future);
 
-	std::future<ResourceMgr::LoadResult> _future;
+	// so much mutable...
+	mutable std::future<ResourceMgr::LoadResult> _future;
+	mutable RefPtr<IResourceObject> _resource;
+	mutable Error _error;
+	mutable bool _errorSet{ false };
+	mutable bool _isReady{ false };
 
 	String _resourcePath;
-	bool _isLoaded{ false };
 };
 
 CLOSE_NAMESPACE(Firestorm);

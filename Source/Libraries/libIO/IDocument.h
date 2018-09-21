@@ -24,7 +24,15 @@ class IDocument
 public:
 	virtual ~IDocument() {}
 
-	enum Codes : uint8_t
+	static ErrorCode ERROR;
+	static ErrorCode READ_DOCUMENT_FAILED;
+	static ErrorCode READ_VALUE_FAILED;
+	static ErrorCode SUBSECTION_NOT_FOUND;
+	static ErrorCode FIND_SUBSECTION_FAILED;
+	static ErrorCode ENTER_SUBSECTION_FAILED;
+	static ErrorCode GET_TYPE_FAILED;
+
+	/*enum Codes : uint8_t
 	{
 		ERROR, // generic
 		READ_DOCUMENT_FAILED,
@@ -33,7 +41,7 @@ public:
 		FIND_SUBSECTION_FAILED,
 		ENTER_SUBSECTION_FAILED,
 		GET_TYPE_FAILED
-	};
+	};*/
 
 	virtual bool InitializeAsIfNew() = 0;
 

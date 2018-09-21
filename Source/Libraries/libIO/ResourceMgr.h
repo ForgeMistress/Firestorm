@@ -17,6 +17,7 @@
 #include <libMirror/EventDispatcher.h>
 #include <libMirror/ObjectMaker.h>
 #include <libCore/libCore.h>
+#include <libCore/ObjectPool.h>
 
 #include <future>
 
@@ -27,22 +28,11 @@ OPEN_NAMESPACE(Firestorm);
 
 struct ResourceIOErrors
 {
-	enum Errors : char
-	{
-		//< Can't use the default loader dumbass.
-		kDefaultLoader,
-
-		//< Return this error when the file could not be found.
-		kFileNotFound,
-
-		//< Return this if the file fails to load for some reason.
-		kFileRead,
-
-		//< Return this error when there's an error with parsing.
-		kParsingException,
-
-		kProcessingException
-	};
+	static ErrorCode DEFAULT_LOADER;
+	static ErrorCode FILE_NOT_FOUND_ERROR;
+	static ErrorCode FILE_READ_ERROR;
+	static ErrorCode PARSING_ERROR;
+	static ErrorCode PROCESSING_ERROR;
 };
 
 class ResourceLoader;
@@ -78,25 +68,30 @@ private:
 
 	struct LoadOp
 	{
-		LoadOp(ResourceLoader* loader, ResourceReference& ref);
+		LoadOp(ResourceLoader* loader, ResourceReference* ref);
+		LoadOp(LoadOp&& other);
+		LoadOp& operator=(LoadOp&& other);
+
+		LoadOp(const LoadOp&) = delete;
+		LoadOp& operator=(const LoadOp&) = delete;
 
 		ResourceLoader*    loader;
-		ResourceReference& ref;
+		ResourceReference* ref;
 		Promise_t          promise;
-		Future_t           future;
 	};
+	ObjectPool<LoadOp> _opPool;
 public:
 	ResourceMgr();
 	~ResourceMgr();
 
 	template <class ResourceType_t>
-	void Load(const ResourceReference& ref)
+	void Load(ResourceReference& ref)
 	{
 		ResourceLoader* loader = GetLoader(ResourceType_t::MyType());
 		FIRE_ASSERT(loader && "no loader installed for this resource type");
-		Load(LoadOp{ loader, ref });
+		Load(_opPool.Get(loader, &ref));
 	}
-	void Load(LoadOp&& loadOp);
+	void Load(LoadOp* loadOp);
 
 	template<class Res_t>
 	bool InstallLoader(ResourceLoader* loader)
@@ -117,7 +112,7 @@ private:
 
 	Thread _threads[_numThreads];
 
-	std::queue<LoadOp> _queue;
+	std::queue<LoadOp*> _queue;
 	std::condition_variable _cv;
 	bool _quit{ false };
 

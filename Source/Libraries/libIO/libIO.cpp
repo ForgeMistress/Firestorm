@@ -12,6 +12,8 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+ErrorCode libIO::INTERNAL_ERROR("there was an error that occurred with the internal libraries");
+
 static void LogLastPhysfsError(const String& preamble)
 {
 	PHYSFS_ErrorCode lastErrorCode = PHYSFS_getLastErrorCode();
@@ -88,7 +90,7 @@ Result<Vector<char>, Error> libIO::LoadFile(const String& filename)
 		if(len == -1)
 		{
 			PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
-			return FIRE_ERROR(err, PHYSFS_getErrorByCode(err));
+			return FIRE_ERROR(INTERNAL_ERROR, PHYSFS_getErrorByCode(err));
 		}
 		data.reserve(static_cast<size_t>(len));
 		data.resize(static_cast<size_t>(len));
@@ -97,13 +99,13 @@ Result<Vector<char>, Error> libIO::LoadFile(const String& filename)
 		if(read == -1)
 		{
 			PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
-			return FIRE_ERROR(err, PHYSFS_getErrorByCode(err));
+			return FIRE_ERROR(INTERNAL_ERROR, PHYSFS_getErrorByCode(err));
 		}
 	}
 	else
 	{
 		PHYSFS_ErrorCode err = PHYSFS_getLastErrorCode();
-		return FIRE_ERROR(err, PHYSFS_getErrorByCode(err));
+		return FIRE_ERROR(INTERNAL_ERROR, PHYSFS_getErrorByCode(err));
 	}
 	PHYSFS_close(file);
 	return data;
@@ -112,13 +114,12 @@ Result<Vector<char>, Error> libIO::LoadFile(const String& filename)
 Result<String, Error> libIO::LoadFileString(const String& filename)
 {
 	Result<Vector<char>, Error> data = LoadFile(filename);
-	if (data.has_value())
+	if(data.has_value())
 	{
 		auto d = data.value();
 		return FIRE_RESULT(String(d.begin(), d.end()));
 	}
-	Error e = data.error();
-	return FIRE_ERROR(e.Code, e.Message);
+	return FIRE_FORWARD_ERROR(data.error());
 }
 
 CLOSE_NAMESPACE(Firestorm);

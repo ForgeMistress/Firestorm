@@ -13,7 +13,6 @@
 
 #include "Object.h"
 
-#include <libIO/File.h>
 #include <libIO/IDocument.h>
 
 

@@ -37,6 +37,13 @@ ShaderResource::~ShaderResource()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+LLGL::ShaderProgram* ShaderResource::GetProgram() const
+{
+	return _shaderProgram;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ShaderLoader::ShaderLoader(RenderMgr& renderMgr)
 : _renderMgr(renderMgr)
 {
@@ -64,10 +71,10 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 			JSONCPP_STRING errors;
 			if(!_reader->parse(&data[0], &data[data.size()], &root, &errors))
 			{
-				return FIRE_ERROR(ResourceIOErrors::kParsingException, errors);
+				return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, errors);
 			}
 
-			ShaderResource* shaderResource = new ShaderResource(_renderMgr);
+			ShaderResource* shaderResource = _shaderPool.Get(_renderMgr);
 			std::unordered_map<LLGL::ShaderType, LLGL::Shader*> shaders;
 
 			if(_renderMgr.IsUsingRenderer(Renderers::OpenGL))
@@ -83,16 +90,14 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 						Result<Vector<char>, Error> result = libIO::LoadFile(value);
 						if(!result.has_value())
 						{
-							delete shaderResource;
-							return FIRE_ERROR(ResourceIOErrors::kFileRead, "fragment shader could not be loaded");
+							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "fragment shader could not be loaded");
 						}
 
 						LLGL::Shader* shader = MakeShader(result.value(), LLGL::ShaderType::Vertex);
 						if(shader->HasErrors())
 						{
 							_renderMgr.System->Release(*shader);
-							delete shaderResource;
-							return FIRE_ERROR(ResourceIOErrors::kParsingException, shader->QueryInfoLog());
+							return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, shader->QueryInfoLog());
 						}
 						shaders[LLGL::ShaderType::Vertex] = shader;
 					}
@@ -104,16 +109,14 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 						Result<Vector<char>, Error> result = libIO::LoadFile(value);
 						if(!result.has_value())
 						{
-							delete shaderResource;
-							return FIRE_ERROR(ResourceIOErrors::kFileRead, "fragment shader could not be loaded");
+							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "fragment shader could not be loaded");
 						}
 
 						LLGL::Shader* shader = MakeShader(result.value(), LLGL::ShaderType::Vertex);
 						if(shader->HasErrors())
 						{
 							_renderMgr.System->Release(*shader);
-							delete shaderResource;
-							return FIRE_ERROR(ResourceIOErrors::kParsingException, shader->QueryInfoLog());
+							return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, shader->QueryInfoLog());
 						}
 						shaders[LLGL::ShaderType::Vertex] = shader;
 					}
@@ -125,16 +128,14 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 						Result<Vector<char>, Error> result = libIO::LoadFile(value);
 						if(!result.has_value())
 						{
-							delete shaderResource;
-							return FIRE_ERROR(ResourceIOErrors::kFileRead, "geometry shader could not be loaded");
+							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "geometry shader could not be loaded");
 						}
 
 						LLGL::Shader* shader = MakeShader(result.value(), LLGL::ShaderType::Geometry);
 						if(shader->HasErrors())
 						{
 							_renderMgr.System->Release(*shader);
-							delete shaderResource;
-							return FIRE_ERROR(ResourceIOErrors::kParsingException, shader->QueryInfoLog());
+							return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, shader->QueryInfoLog());
 						}
 						shaders[LLGL::ShaderType::Geometry] = shader;
 					}
@@ -155,9 +156,8 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 			LLGL::ShaderProgram* shaderProgram = _renderMgr.System->CreateShaderProgram(desc);
 			if(shaderProgram->HasErrors())
 			{
-				delete shaderResource;
 				_renderMgr.System->Release(*shaderProgram);
-				return FIRE_ERROR(ResourceIOErrors::kProcessingException, shaderProgram->QueryInfoLog());
+				return FIRE_ERROR(ResourceIOErrors::PROCESSING_ERROR, shaderProgram->QueryInfoLog());
 			}
 
 			for(auto i : shaders)
@@ -166,18 +166,20 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 			}
 			shaderResource->_shaderProgram = shaderProgram;
 			
-			return shaderResource;
+			return RefPtr<IResourceObject>(shaderResource, [this](IResourceObject* ptr) {
+				_shaderPool.Return(reinterpret_cast<ShaderResource*>(ptr));
+			});
 		}
 		else
 		{
-			return FIRE_ERROR(ResourceIOErrors::kFileRead, result.error().Message);
+			return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, ((String)result.error()));
 		}
 	}
 	else
 	{
-		return FIRE_ERROR(ResourceIOErrors::kFileNotFound, "could not find file " + filename);
+		return FIRE_ERROR(ResourceIOErrors::FILE_NOT_FOUND_ERROR, filename);
 	}
-	return FIRE_ERROR(ResourceIOErrors::kProcessingException, "");
+	return FIRE_ERROR(ResourceIOErrors::PROCESSING_ERROR);
 }
 
 LLGL::Shader* ShaderLoader::MakeShader(const Vector<char>& data, LLGL::ShaderType shaderType)

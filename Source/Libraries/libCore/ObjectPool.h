@@ -15,46 +15,66 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+template<class T> class ObjectPool;
+
+template<class T>
+class PoolPtr final
+{
+public:
+	PoolPtr(T* ptr, ObjectPool<T>& pool);
+	PoolPtr(PoolPtr&& other);
+
+	~PoolPtr();
+
+	/**
+		Release the held pointer without recycling it. DANGEROUS! DO NOT DO THIS IF YOU DON'T KNOW
+		WHAT THE IMPLICATIONS ARE. YOU ARE RESPONSIBLE FOR RETURNING THE POINTER TO THE POOL
+		WHEN YOU ARE DONE WITH IT!
+	 **/
+	T* Release();
+
+	/**
+		Return the held pointer to the pool.
+	 **/
+	void Recycle();
+
+	/**
+		Return whether or not this PoolPtr holds an actual honest to the gods live pointer.
+	 **/
+	bool IsValid() const;
+
+	T* operator->()
+	{
+		return _ptr;
+	}
+
+	const T* operator->() const
+	{
+		return _ptr;
+	}
+
+private:
+	// move only because reasons.
+	// oh, and no move assignment either you plebian.
+	PoolPtr(const PoolPtr&) = delete;
+	PoolPtr& operator=(const PoolPtr&) = delete;
+	PoolPtr& operator=(PoolPtr&& other) = delete;
+
+	T* _ptr{ nullptr };
+	ObjectPool<T>& _pool;
+};
+
 template <class T>
 class ObjectPool final
 {
-	struct Deleter
-	{
-		Deleter(ObjectPool<T>& recycle);
-		void operator()(T* ptr);
-		ObjectPool<T>& _recycle;
-	};
 public:
-	using Handle = std::unique_ptr<T, Deleter>;
+	template<class... Args_t>
+	T* Get(Args_t&&... args);
 
 	template<class... Args_t>
-	T* Get(Args_t&&... args)
-	{
-		if(_recycle.empty())
-		{
-			T& item = _pool.emplace_front(std::forward<Args_t>(args)...);
-			return &item;
-		}
-		auto item = _recycle.back();
-		_recycle.pop_back();
-		new (item) T(std::forward<Args_t>(args)...);
-		return item;
-	}
+	PoolPtr<T> GetManaged(Args_t&&... args);
 
-	template<class... Args_t>
-	Handle GetManaged(Args_t&&... args)
-	{
-		return Handle(Get(args), Deleter(_recycle));
-	}
-
-	void Return(T* ptr)
-	{
-		if(ptr != nullptr)
-		{
-			ptr->~T();
-			_recycle.push_back(ptr);
-		}
-	}
+	void Return(T* ptr);
 
 private:
 	std::forward_list<T> _pool;
@@ -62,15 +82,83 @@ private:
 };
 
 template<class T>
-ObjectPool<T>::Deleter::Deleter(ObjectPool<T>& recycle)
-: _recycle(recycle)
+PoolPtr<T>::PoolPtr(T* ptr, ObjectPool<T>& pool)
+: _ptr(ptr)
+, _pool(pool)
 {
 }
 
 template<class T>
-void ObjectPool<T>::Deleter::operator()(T* ptr)
+PoolPtr<T>::~PoolPtr()
 {
-	_recycle.Return(ptr);
+	if (_ptr)
+		_pool.Return(_ptr);
+	_ptr = nullptr;
+}
+
+template<class T>
+PoolPtr<T>::PoolPtr(PoolPtr&& other)
+	: _ptr(other._ptr)
+	, _pool(other._pool)
+{
+	other._ptr = nullptr;
+}
+
+template<class T>
+T* PoolPtr<T>::Release()
+{
+	T* ptr = _ptr;
+	_ptr = nullptr;
+	return ptr;
+}
+
+template<class T>
+void PoolPtr<T>::Recycle()
+{
+	if(_ptr)
+	{
+		_pool.Return(_ptr);
+		_ptr = nullptr;
+	}
+}
+
+template<class T>
+bool PoolPtr<T>::IsValid() const
+{
+	return _ptr != nullptr;
+}
+
+
+template<class T>
+template<class... Args_t>
+T* ObjectPool<T>::Get(Args_t&&... args)
+{
+	if(_recycle.empty())
+	{
+		T& item = _pool.emplace_front(std::forward<Args_t>(args)...);
+		return &item;
+	}
+	auto item = _recycle.back();
+	_recycle.pop_back();
+	new (item) T(std::forward<Args_t>(args)...);
+	return item;
+}
+
+template<class T>
+template<class... Args_t>
+PoolPtr<T> ObjectPool<T>::GetManaged(Args_t&&... args)
+{
+	return PoolPtr<T>{ Get(args), *this };
+}
+
+template<class T>
+void ObjectPool<T>::Return(T* ptr)
+{
+	if (ptr != nullptr)
+	{
+		ptr->~T();
+		_recycle.push_back(ptr);
+	}
 }
 
 CLOSE_NAMESPACE(Firestorm);

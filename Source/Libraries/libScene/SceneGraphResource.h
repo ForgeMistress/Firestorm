@@ -21,8 +21,8 @@ public:
 	virtual ~SceneGraphResource();
 
 
-	virtual Result<void, Error> Load(const Json::Value& inValue);
-	virtual Result<void, Error> Save(Json::Value& outValue) const;
+	virtual Result<void, ErrorCode> Load(const Json::Value& inValue);
+	virtual Result<void, ErrorCode> Save(Json::Value& outValue) const;
 private:
 };
 

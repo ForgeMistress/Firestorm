@@ -64,42 +64,35 @@ void Application::Initialize(int ac, char** av)
 {
 	_args = std::make_unique<ArgParser>(ac, av);
 
-	try
+	// Initialize the rendering context.
+	LLGL::RenderContextDescriptor contextDesc;
 	{
-		// Initialize the rendering context.
-		LLGL::RenderContextDescriptor contextDesc;
+		contextDesc.videoMode.resolution = { 800,600 };
+		contextDesc.vsync.enabled = true;
+		contextDesc.profileOpenGL.contextProfile = LLGL::OpenGLContextProfile::CoreProfile;
+	}
+	_renderMgr.Initialize("OpenGL", contextDesc);
+
+	/*LLGL::Extent2D size(800, 600);
+	_surface = new Surface(this, size, "Firestorm Window");
+
+	_surface->SetInputListener(this);
+	_surface->SetJoystickCallback([](int jid, int event) -> void {
+		if (event == GLFW_CONNECTED)
 		{
-			contextDesc.videoMode.resolution = { 800,600 };
-			contextDesc.vsync.enabled = true;
-			contextDesc.profileOpenGL.contextProfile = LLGL::OpenGLContextProfile::CoreProfile;
+			Application::TheApp()->Dispatcher.Dispatch(JoystickConnectedEvent{ Application::TheApp(), jid });
 		}
-		_renderMgr.Initialize("OpenGL", contextDesc);
+		else if (event == GLFW_DISCONNECTED)
+		{
+			Application::TheApp()->Dispatcher.Dispatch(JoystickDisconnectedEvent{ Application::TheApp(), jid });
+		}
+	});*/
 
-		/*LLGL::Extent2D size(800, 600);
-		_surface = new Surface(this, size, "Firestorm Window");
+	auto& window = static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface());
+	window.SetTitle(L"Firestorm Application");
+	window.Show();
 
-		_surface->SetInputListener(this);
-		_surface->SetJoystickCallback([](int jid, int event) -> void {
-			if (event == GLFW_CONNECTED)
-			{
-				Application::TheApp()->Dispatcher.Dispatch(JoystickConnectedEvent{ Application::TheApp(), jid });
-			}
-			else if (event == GLFW_DISCONNECTED)
-			{
-				Application::TheApp()->Dispatcher.Dispatch(JoystickDisconnectedEvent{ Application::TheApp(), jid });
-			}
-		});*/
-
-		auto& window = static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface());
-		window.SetTitle(L"Firestorm Application");
-		window.Show();
-
-		OnInitialize(ac, av);
-	}
-	catch(std::exception& e)
-	{
-		FIRE_LOG_ERROR("Error Loading RenderSystem: %s", e.what());
-	}
+	OnInitialize(ac, av);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

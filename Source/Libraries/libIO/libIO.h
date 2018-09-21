@@ -12,6 +12,8 @@ struct libIO : public Library<libIO>
 {
 	FIRE_LIBRARY(libIO);
 
+	static ErrorCode INTERNAL_ERROR;
+
 	/**
 		Mount a directory at the specified mount point.
 	 **/

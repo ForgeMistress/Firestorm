@@ -10,13 +10,18 @@
 
 #include <libScene/ShaderResource.h>
 
+FirestormApp::FirestormApp()
+: _shaderResource("/Shaders/Triangle.shader")
+{
+}
+
 FirestormApp::~FirestormApp()
 {
 	RenderMgr& renderMgr = GetRenderMgr();
 	renderMgr.System->Release(*_commandBuffer);
-	renderMgr.System->Release(*_vertexShader);
+	/*renderMgr.System->Release(*_vertexShader);
 	renderMgr.System->Release(*_fragmentShader);
-	renderMgr.System->Release(*_shader);
+	renderMgr.System->Release(*_shader);*/
 	renderMgr.System->Release(*_pipeline);
 	renderMgr.System->Release(*_vertexBuffer);
 }
@@ -24,7 +29,6 @@ FirestormApp::~FirestormApp()
 void FirestormApp::OnInitialize(int ac, char** av)
 {
 	RegisterResourceTypes();
-
 
 	EnableWindowResizing(true);
 
@@ -57,7 +61,24 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	LLGL::RenderSystem* renderer = renderMgr.System.get();
 	_vertexBuffer = renderer->CreateBuffer(vertexBufferDesc, vertices);
 
-	Result<String, Error> vertShaderSource = libIO::LoadFileString("/Shaders/Triangle.vert");
+	auto& resourceMgr = GetResourceMgr();
+	resourceMgr.Load<ShaderResource>(_shaderResource);
+
+	while (!_shaderResource.IsReady())
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+
+	if (!_shaderResource.HasResource())
+	{
+		FIRE_ASSERT(_shaderResource.HasError());
+		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource.GetError());
+	}
+
+	RefPtr<ShaderResource> resource = _shaderResource.GetResource<ShaderResource>();
+	FIRE_ASSERT(resource && "it's probably the upcast operation in GetResource that fucked it up");
+
+	/*Result<String, Error> vertShaderSource = libIO::LoadFileString("/Shaders/Triangle.vert");
 	// FIRE_ASSERT(!vertShaderSource.empty());
 
 	FIRE_ASSERT(vertShaderSource.has_value());
@@ -104,11 +125,11 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	if(_shader->HasErrors())
 	{
 		throw std::runtime_error(_shader->QueryInfoLog());
-	}
+	}*/
 
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;
 	{
-		pipelineDesc.shaderProgram = _shader;
+		pipelineDesc.shaderProgram = resource->GetProgram();
 		pipelineDesc.renderPass = renderMgr.Context->GetRenderPass();
 	}
 	_pipeline = renderer->CreateGraphicsPipeline(pipelineDesc);
@@ -123,6 +144,9 @@ void FirestormApp::OnUpdate(double deltaT)
 {
 	try
 	{
+		if (_commandBuffer == nullptr)
+			return;
+
 		RenderMgr& renderMgr = GetRenderMgr();
 
 		_commandBuffer->Begin();
