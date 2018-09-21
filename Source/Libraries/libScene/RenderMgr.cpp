@@ -17,7 +17,7 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RenderMgr::RenderMgr(FileIOMgr& fileIOMgr, ObjectMaker& objectMaker)
+RenderMgr::RenderMgr(ResourceMgr& fileIOMgr, ObjectMaker& objectMaker)
 : _fileIOMgr(fileIOMgr)
 , _objectMaker(objectMaker)
 {

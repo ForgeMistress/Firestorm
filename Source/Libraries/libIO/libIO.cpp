@@ -8,7 +8,7 @@
 #include "IResourceObject.h"
 #include "ResourceReference.h"
 
-#include "FileIOMgr.h"
+#include "ResourceMgr.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -71,6 +71,11 @@ bool libIO::Mount(const String& dir, const String& mountPoint)
 		return false;
 	}
 	return true;
+}
+
+bool libIO::FileExists(const String& filename)
+{
+	return PHYSFS_exists(filename.c_str()) != 0;
 }
 
 Result<Vector<char>, Error> libIO::LoadFile(const String& filename)

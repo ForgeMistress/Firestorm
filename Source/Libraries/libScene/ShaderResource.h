@@ -12,8 +12,7 @@
 #pragma once
 
 #include <libIO/ResourceReference.h>
-#include <libIO/FileIOMgr.h>
-#include <libIO/ResourceReference.h>
+#include <libIO/ResourceMgr.h>
 
 #include <json/json.h>
 #include <json/reader.h>
@@ -59,12 +58,12 @@ struct ShaderLoaderMaker : public IMaker
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ShaderLoader final
+struct ShaderLoader final : public ResourceLoader
 {
 	ShaderLoader(RenderMgr& renderMgr);
 	~ShaderLoader();
 
-	ResourceLoadResult_t operator()(const ResourceReference& ref);
+	virtual ResourceMgr::LoadResult Load(const ResourceReference& ref) override;
 private:
 	RenderMgr&              _renderMgr;
 	Json::CharReaderBuilder _builder;

@@ -14,6 +14,8 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+FIRE_MIRROR_DEFINE(ShaderResource){}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ShaderResource::ShaderResource(RenderMgr& renderMgr)
@@ -49,7 +51,7 @@ ShaderLoader::~ShaderLoader()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoadResult_t ShaderLoader::operator()(const ResourceReference& ref)
+ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 {
 	const String& filename = ref.GetResourcePath();
 	if(!libIO::FileExists(filename))

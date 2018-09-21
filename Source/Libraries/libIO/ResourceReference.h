@@ -13,6 +13,7 @@
 
 #include <future>
 #include "IResourceObject.h"
+#include "ResourceMgr.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -38,11 +39,28 @@ public:
 	 **/
 	bool GetIsLoaded() const;
 
+	/**
+		Check whether or not the resource loaded with an error.
+	 **/
+	bool HasError();
+
+	/**
+		Check whether or not the ResourceReference is holding a resource. Opposite of HasError
+	 **/
+	bool HasResource();
+
+	/**
+		Retrieve the resource if it is finished loading.
+	 **/
+	RefPtr<IResourceObject> GetResource();
+
 private:
-	friend class FileIOMgr;
+	friend class ResourceMgr;
 	void SetResourcePath(const String& path);
 
-	Result<void, Error> _lastLoadResult;
+	void SetFuture(std::future<ResourceMgr::LoadResult>&& future);
+
+	std::future<ResourceMgr::LoadResult> _future;
 
 	String _resourcePath;
 	bool _isLoaded{ false };

@@ -13,11 +13,11 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-class FileIOMgr;
+class ResourceMgr;
 
 class File final
 {
-	friend class FileIOMgr;
+	friend class ResourceMgr;
 
 public:
 	enum State
@@ -48,7 +48,7 @@ private:
 	/**
 		The constructor for a File object.
 	 **/
-	File(const FileIOMgr* fileIOMgr, const String& filename);
+	File(const ResourceMgr* fileIOMgr, const String& filename);
 public:
 	virtual ~File() {}
 	/**
@@ -121,7 +121,7 @@ public:
 
 private:
 	// reference to the FileIOMgr that created this object.
-	const FileIOMgr* _mgr;
+	const ResourceMgr* _mgr;
 
 	// the data that has been loaded from disk, if any.
 	DataBuffer _data;

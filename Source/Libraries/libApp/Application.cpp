@@ -39,8 +39,7 @@ ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Application::Application()
-: _fileIOMgr(_objectMaker)
-, _renderMgr(_fileIOMgr, _objectMaker)
+: _renderMgr(_resourceMgr, _objectMaker)
 , _mainThreadId(std::this_thread::get_id())
 {
 	FIRE_ASSERT(g_theApp == nullptr && "only one instance of an Application can exist at a time");
@@ -204,14 +203,14 @@ const ArgParser& Application::Args() const
 	return *_args.get();
 }
 
-FileIOMgr& Application::GetFileIOMgr()
-{
-	return _fileIOMgr;
-}
-
 RenderMgr& Application::GetRenderMgr()
 {
 	return _renderMgr;
+}
+
+ResourceMgr& Application::GetResourceMgr()
+{
+	return _resourceMgr;
 }
 
 ObjectMaker& Application::GetObjectMaker()

@@ -173,6 +173,6 @@ void FirestormApp::RegisterResourceTypes()
 	// Register the resource types.
 	ObjectMaker& objectMaker = GetObjectMaker();
 	RenderMgr& renderMgr = GetRenderMgr();
-
-	objectMaker.RegisterMaker<ShaderResource>(new ShaderLoaderMaker(renderMgr));
+	ResourceMgr& resourceMgr = GetResourceMgr();
+	resourceMgr.InstallLoader<ShaderResource>(new ShaderLoader(renderMgr));
 }

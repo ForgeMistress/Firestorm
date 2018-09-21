@@ -14,7 +14,7 @@
 #include <LLGL/LLGL.h>
 #include <LLGL/RenderContext.h>
 
-#include <libIO/FileIOMgr.h>
+#include <libIO/ResourceMgr.h>
 #include <libMirror/ObjectMaker.h>
 
 OPEN_NAMESPACE(Firestorm);
@@ -32,7 +32,7 @@ struct Renderers
 class RenderMgr final
 {
 public:
-	RenderMgr(FileIOMgr& fileIOMgr, ObjectMaker& objectMaker);
+	RenderMgr(ResourceMgr& fileIOMgr, ObjectMaker& objectMaker);
 	~RenderMgr();
 
 	void Initialize(const String& renderingSystem, const LLGL::RenderContextDescriptor& renderContextDesc);
@@ -53,7 +53,7 @@ public:
 private:
 	String _rendererName;
 
-	FileIOMgr& _fileIOMgr;
+	ResourceMgr& _fileIOMgr;
 	ObjectMaker& _objectMaker;
 };
 

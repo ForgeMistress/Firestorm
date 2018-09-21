@@ -33,12 +33,33 @@ const String& ResourceReference::GetResourcePath() const
 
 bool ResourceReference::GetIsLoaded() const
 {
-	return _isLoaded;
+	return _future.valid();
+}
+
+bool ResourceReference::HasError()
+{
+	return _future.valid() && _future.get().has_value();
+}
+
+bool ResourceReference::HasResource()
+{
+	return _future.valid() && _future.get().has_value();
+}
+
+RefPtr<IResourceObject> ResourceReference::GetResource()
+{
+	auto fvalue = _future.get();
+	return fvalue.value();
 }
 
 void ResourceReference::SetResourcePath(const String& path)
 {
 	_resourcePath = path;
+}
+
+void ResourceReference::SetFuture(std::future<ResourceMgr::LoadResult>&& future)
+{
+	_future = std::move(future);
 }
 
 CLOSE_NAMESPACE(Firestorm);

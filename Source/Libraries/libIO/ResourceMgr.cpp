@@ -8,7 +8,7 @@
 //  Copyright (c) Project Firestorm 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "FileIOMgr.h"
+#include "ResourceMgr.h"
 
 #include "ResourceReference.h"
 #include <libIO/libIO.h>
@@ -17,13 +17,13 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::ResourceLoader(const ResourceReference&)
+ResourceLoader::ResourceLoader()
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoadResult_t ResourceLoader::operator()()
+ResourceMgr::LoadResult ResourceLoader::Load(const ResourceReference&)
 {
 	return FIRE_ERROR(ResourceIOErrors::kDefaultLoader,
 		"define a new loader for this type numbnuts (specialize ResourceTraits).");
@@ -31,36 +31,45 @@ ResourceLoadResult_t ResourceLoader::operator()()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FileIOMgr::FileIOMgr(ObjectMaker& objMaker)
-: _objMaker(objMaker)
+ResourceMgr::LoadOp::LoadOp(ResourceLoader* loader, ResourceReference& ref)
+: loader(loader)
+, ref(ref)
+, future(promise.get_future())
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceMgr::ResourceMgr()
 {
 	for(size_t i = 0; i < _numThreads; ++i)
 	{
-		_threads[i] = Thread(std::bind(&FileIOMgr::ThreadRun, this));
+		_threads[i] = Thread(std::bind(&ResourceMgr::ThreadRun, this));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FileIOMgr::~FileIOMgr()
+ResourceMgr::~ResourceMgr()
 {
 	Shutdown();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileIOMgr::Load(LoadOp_t load)
+void ResourceMgr::Load(LoadOp&& load)
 {
 	std::unique_lock lock(_lock);
-	_queue.push(load);
+	_queue.push(std::move(load));
+	_queue.back().ref.SetFuture(std::move(_queue.back().promise.get_future()));
 	lock.unlock();
 	_cv.notify_all();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileIOMgr::Shutdown()
+void ResourceMgr::Shutdown()
 {
 	_quit = true;
 	_cv.notify_all();
@@ -72,11 +81,39 @@ void FileIOMgr::Shutdown()
 			_threads[i].join();
 		}
 	}
+	for(size_t i = 0; i < _loaders.size(); ++i)
+	{
+		delete _loaders[i].second;
+	}
+	_loaders.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileIOMgr::ThreadRun()
+bool ResourceMgr::InstallLoader(Mirror::Type type, ResourceLoader* loader)
+{
+	for(size_t i = 0; i < _loaders.size(); ++i)
+	{
+		if(_loaders[i].first == type)
+			return false;
+	}
+	_loaders.push_back(std::make_pair(type, loader));
+	return true;
+}
+
+ResourceLoader* ResourceMgr::GetLoader(Mirror::Type type)
+{
+	for (size_t i = 0; i < _loaders.size(); ++i)
+	{
+		if(_loaders[i].first == type)
+			return _loaders[i].second;
+	}
+	return nullptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceMgr::ThreadRun()
 {
 	std::unique_lock lock(_lock);
 	do
@@ -86,11 +123,14 @@ void FileIOMgr::ThreadRun()
 		});
 		if(!_queue.empty() && !_quit)
 		{
-			auto oper = std::move(_queue.front());
+			auto& oper = std::move(_queue.front());
 			_queue.pop();
 			lock.unlock();
 
-			oper.second(oper.first);
+			auto loader = oper.loader;
+			auto& promise = oper.promise;
+
+			oper.promise.set_value(loader->Load(oper.ref));
 
 			lock.lock();
 		}

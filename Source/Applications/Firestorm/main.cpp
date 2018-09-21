@@ -13,7 +13,7 @@
 #include <libUI/libUI.h>
 
 #include <libIO/Logger.h>
-#include <libIO/FileIOMgr.h>
+#include <libIO/ResourceMgr.h>
 
 #include <libApp/Application.h>
 

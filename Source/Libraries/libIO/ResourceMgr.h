@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  FileIOMgr.h
+//  ResourceMgr
 //
 //  
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBIO_FILEIOMGR_H_
-#define LIBIO_FILEIOMGR_H_
+#ifndef LIBIO_RESOURCEMGR_H____
+#define LIBIO_RESOURCEMGR_H____
 #pragma once
 
 #include <libCore/Expected.h>
@@ -17,7 +17,8 @@
 #include <libMirror/EventDispatcher.h>
 #include <libMirror/ObjectMaker.h>
 #include <libCore/libCore.h>
-#include "ResourceReference.h"
+
+#include <future>
 
 #include "IResourceObject.h"
 
@@ -44,14 +45,7 @@ struct ResourceIOErrors
 	};
 };
 
-using ResourceLoadResult_t = Result<RefPtr<IResourceObject>, Error>;
-using LoadFunctor_t = Function<ResourceLoadResult_t(const ResourceReference&)>;
-
-struct ResourceLoader
-{
-	ResourceLoader(const ResourceReference& ref);
-	ResourceLoadResult_t operator()();
-};
+class ResourceLoader;
 
 /**
 	Specialize this to provide the data for the resource loader.
@@ -63,6 +57,8 @@ struct ResourceTraits
 	using loader = ResourceLoader;
 };
 
+class ResourceReference;
+
 /**
 	\class FileIOMgr
 
@@ -70,23 +66,50 @@ struct ResourceTraits
 
 	https://github.com/embeddedartistry/embedded-resources/blob/master/examples/cpp/dispatch.cpp
  **/
-class FileIOMgr final
+class ResourceMgr final
 {
-	typedef std::pair<const ResourceReference&, LoadFunctor_t> LoadOp_t;
 public:
-	FileIOMgr(ObjectMaker& objMaker);
-	~FileIOMgr();
+	using LoadResult = Result<RefPtr<IResourceObject>, Error>;
+
+private:
+	using Task_t = std::function<LoadResult(const ResourceReference&)>;
+	using Future_t = std::future<LoadResult>;
+	using Promise_t = std::promise<LoadResult>;
+
+	struct LoadOp
+	{
+		LoadOp(ResourceLoader* loader, ResourceReference& ref);
+
+		ResourceLoader*    loader;
+		ResourceReference& ref;
+		Promise_t          promise;
+		Future_t           future;
+	};
+public:
+	ResourceMgr();
+	~ResourceMgr();
 
 	template <class ResourceType_t>
 	void Load(const ResourceReference& ref)
 	{
-		Load(std::make_pair(ref,_objMaker.Make<ResourceTraits<ResourceType_t>::loader>()));
+		ResourceLoader* loader = GetLoader(ResourceType_t::MyType());
+		FIRE_ASSERT(loader && "no loader installed for this resource type");
+		Load(LoadOp{ loader, ref });
 	}
-	void Load(LoadOp_t loadFunctor);
+	void Load(LoadOp&& loadOp);
+
+	template<class Res_t>
+	bool InstallLoader(ResourceLoader* loader)
+	{
+		return InstallLoader(Res_t::MyType(), loader);
+	}
 
 	void Shutdown();
 
 private:
+	bool InstallLoader(Mirror::Type type, ResourceLoader* loader);
+	ResourceLoader* GetLoader(Mirror::Type type);
+
 	static const char _numThreads{ 2 };
 
 	String _name;
@@ -94,13 +117,22 @@ private:
 
 	Thread _threads[_numThreads];
 
-	std::queue<LoadOp_t> _queue;
+	std::queue<LoadOp> _queue;
 	std::condition_variable _cv;
 	bool _quit{ false };
 
-	ObjectMaker& _objMaker;
+	Vector<std::pair<Mirror::Type, ResourceLoader*>> _loaders;
 
 	void ThreadRun();
+};
+
+class ResourceLoader
+{
+public:
+	ResourceLoader();
+	virtual ~ResourceLoader() {}
+
+	virtual ResourceMgr::LoadResult Load(const ResourceReference& ref);
 };
 
 CLOSE_NAMESPACE(Firestorm);

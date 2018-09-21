@@ -17,7 +17,7 @@
 #include <libMirror/EventDispatcher.h>
 #include <libCore/ArgParser.h>
 
-#include <libIO/FileIOMgr.h>
+#include <libIO/ResourceMgr.h>
 #include <libScene/RenderMgr.h>
 
 OPEN_NAMESPACE(Firestorm);
@@ -57,15 +57,14 @@ public:
 	const ArgParser& Args() const;
 
 	/**
-		Retrieve a reference to the FileIOMgr for this application.
-	 **/
-	FileIOMgr& GetFileIOMgr();
-
-	/**
 		Retrieve a reference to the RenderMgr for this Application.
 	 **/
 	RenderMgr& GetRenderMgr();
 
+	/**
+		Retrieve a reference to the ResourceMgr for this Application.
+	 **/
+	ResourceMgr& GetResourceMgr();
 
 	/**
 		Retrieve a reference to the ObjectMaker for this Application.
@@ -132,7 +131,7 @@ private:
 	//	GLOBAL SYSTEMS
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	std::unique_ptr<ArgParser> _args;
-	FileIOMgr                  _fileIOMgr;
+	ResourceMgr                _resourceMgr;
 	RenderMgr                  _renderMgr;
 	ObjectMaker                _objectMaker;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

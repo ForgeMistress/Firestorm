@@ -6,7 +6,7 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-File::File(const FileIOMgr* fileIOMgr, const String& filename)
+File::File(const ResourceMgr* fileIOMgr, const String& filename)
 : _mgr(fileIOMgr)
 , _state(STATE_UNLOADED)
 {
