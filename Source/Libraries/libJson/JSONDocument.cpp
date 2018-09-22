@@ -408,13 +408,13 @@ Result<void, Error> JSONDocument::Section::SetPosFromRoot(const std::initializer
 
 bool JSONDocument::Section::HasChild(const String& childName) const
 {
-	assert(m_cursor != nullptr);
+	FIRE_ASSERT(m_cursor != nullptr);
 	return m_cursor->isMember(childName);
 }
 
 Result<void, Error> JSONDocument::Section::MoveToChild(const String& toChild)
 {
-	assert(m_cursor != nullptr);
+	FIRE_ASSERT(m_cursor != nullptr);
 	if(m_cursor->isMember(toChild))
 	{
 		m_cursorParents.push_back(m_cursor);
@@ -426,14 +426,14 @@ Result<void, Error> JSONDocument::Section::MoveToChild(const String& toChild)
 
 Result<void, Error> JSONDocument::Section::SetChild(const String& childName, Json::Value& jsonValue)
 {
-	assert(m_cursor != nullptr);
+	FIRE_ASSERT(m_cursor != nullptr);
 	(*m_cursor)[childName] = jsonValue;
 	return Result<void, Error>();
 }
 
 Result<Json::Value*, Error> JSONDocument::Section::GetChild(const String& childName) const
 {
-	assert(m_cursor != nullptr);
+	FIRE_ASSERT(m_cursor != nullptr);
 	if (m_cursor->isMember(childName))
 	{
 		return &(*m_cursor)[childName];
@@ -443,19 +443,19 @@ Result<Json::Value*, Error> JSONDocument::Section::GetChild(const String& childN
 
 const Json::Value& JSONDocument::Section::GetValue(const String& name) const
 {
-	assert(m_cursor != nullptr);
+	FIRE_ASSERT(m_cursor != nullptr);
 	return (*m_cursor)[name];
 }
 
 Json::ValueType JSONDocument::Section::GetJsonType(const String& name) const
 {
-	assert(m_cursor != nullptr);
+	FIRE_ASSERT(m_cursor != nullptr);
 	return (*m_cursor)[name].type();
 }
 
 Result<void, Error> JSONDocument::Section::MoveToParent()
 {
-	assert(!m_cursorParents.empty());
+	FIRE_ASSERT(!m_cursorParents.empty());
 	m_cursor = m_cursorParents.back();
 	m_cursorParents.pop_back();
 	return Result<void, Error>();

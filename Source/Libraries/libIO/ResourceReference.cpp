@@ -18,13 +18,13 @@ FIRE_MIRROR_DEFINE(Firestorm::ResourceReference)
 		.property("resourcePath", &ResourceReference::_resourcePath);
 }
 
-ErrorCode ResourceReference::Errors::UNKNOWN_STATE("the error state is in a state of limbo...");
-ErrorCode ResourceReference::Errors::THERE_IS_NO_ERROR("there is no error to return");
-ErrorCode ResourceReference::Errors::NOT_FINISHED_LOADING("the resource is not finished loading yet");
+FIRE_ERRORCODE_DEF(ResourceReference::Errors::UNKNOWN_STATE, "the error state is in a state of limbo...");
+FIRE_ERRORCODE_DEF(ResourceReference::Errors::THERE_IS_NO_ERROR, "there is no error to return");
+FIRE_ERRORCODE_DEF(ResourceReference::Errors::NOT_FINISHED_LOADING, "the resource is not finished loading yet");
 
 ResourceReference::ResourceReference(const String& path)
 : _resourcePath(path)
-, _error(&Errors::UNKNOWN_STATE, "the error code is in an unknown state")
+, _error(Errors::UNKNOWN_STATE, "the error code is in an unknown state")
 {
 }
 
@@ -67,8 +67,8 @@ bool ResourceReference::HasError() const
 		// if we're not ready yet and someone attempts to call HasError, we should set the internal
 		// error to NOT_FINISHED_LOADING for when they inevitably call GetError.
 		// this way they can properly handle their code.
-		_error = Error(&Errors::NOT_FINISHED_LOADING, "you called ResourceReference::HasError "
-                                                      "a little early there brah...");
+		_error = Error(Errors::NOT_FINISHED_LOADING, "you called ResourceReference::HasError "
+                                                     "a little early there brah...");
 		return true;
 	}
 	return _errorSet;
@@ -103,10 +103,10 @@ Error ResourceReference::GetError() const
 		else
 		{
 			if(_resource)
-				return Error(&Errors::THERE_IS_NO_ERROR, "there was no error to report. the resource is set and ready to go.");
+				return Error(Errors::THERE_IS_NO_ERROR, "there was no error to report. the resource is set and ready to go.");
 		}
 	}
-	return Error(&Errors::UNKNOWN_STATE, "no error to retrieve just yet");
+	return Error(Errors::UNKNOWN_STATE, "no error to retrieve just yet");
 }
 
 void ResourceReference::Release()
@@ -120,7 +120,7 @@ void ResourceReference::SetResourcePath(const String& path)
 	_resourcePath = path;
 }
 
-void ResourceReference::SetFuture(std::future<ResourceMgr::LoadResult>&& future)
+void ResourceReference::SetFuture(std::future<Result<RefPtr<IResourceObject>, Error>>&& future)
 {
 	_future = std::move(future);
 }

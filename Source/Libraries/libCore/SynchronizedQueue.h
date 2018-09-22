@@ -11,10 +11,6 @@
 #define LIBCORE_SYNCHRONIZEDQUEUE_H_
 #pragma once
 
-#include <queue>
-#include <mutex>
-#include <condition_variable>
-
 OPEN_NAMESPACE(Firestorm);
 
 template <class T>

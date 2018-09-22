@@ -11,9 +11,9 @@
 #define LIBIO_RESOURCEREFERENCE_H_
 #pragma once
 
-#include <future>
 #include "IResourceObject.h"
-#include "ResourceMgr.h"
+
+#include <future>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -26,11 +26,13 @@ class ResourceReference final : public Mirror::Object
 {
 	FIRE_MIRROR_DECLARE(ResourceReference, Mirror::Object);
 public:
+	using Future = std::future<Result<RefPtr<IResourceObject>, Error>>;
+
 	struct Errors
 	{
-		static ErrorCode UNKNOWN_STATE;        // set when the state is unknown.
-		static ErrorCode THERE_IS_NO_ERROR;             // returned when there's no error set.
-		static ErrorCode NOT_FINISHED_LOADING; // returned when the resource has not finished loading yet.
+		FIRE_ERRORCODE(UNKNOWN_STATE);        // set when the state is unknown.
+		FIRE_ERRORCODE(THERE_IS_NO_ERROR);             // returned when there's no error set.
+		FIRE_ERRORCODE(NOT_FINISHED_LOADING); // returned when the resource has not finished loading yet.
 	};
 
 	ResourceReference(const String& path = "");
@@ -89,10 +91,10 @@ private:
 	friend class ResourceMgr;
 	void SetResourcePath(const String& path);
 
-	void SetFuture(std::future<ResourceMgr::LoadResult>&& future);
+	void SetFuture(std::future<Result<RefPtr<IResourceObject>, Error>>&& future);
 
 	// so much mutable...
-	mutable std::future<ResourceMgr::LoadResult> _future;
+	mutable std::future<Result<RefPtr<IResourceObject>, Error>> _future;
 	mutable RefPtr<IResourceObject> _resource;
 	mutable Error _error;
 	mutable bool _errorSet{ false };

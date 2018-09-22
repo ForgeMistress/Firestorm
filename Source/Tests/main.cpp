@@ -15,7 +15,7 @@
 
 #include <libCore/RefPtr.h>
 #include <libCore/LibraryRegistrar.h>
-#include <libIO/Logger.h>
+#include <libCore/Logger.h>
 
 using namespace Firestorm;
 

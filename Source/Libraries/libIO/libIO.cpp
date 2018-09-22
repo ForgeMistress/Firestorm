@@ -2,7 +2,8 @@
 #include "libIO.h"
 
 #include <physfs/physfs.h>
-#include "Logger.h"
+
+#include <libCore/Logger.h>
 #include <libCore/ArgParser.h>
 
 #include "IResourceObject.h"
@@ -12,7 +13,7 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-ErrorCode libIO::INTERNAL_ERROR("there was an error that occurred with the internal libraries");
+const ErrorCode* libIO::INTERNAL_ERROR(new ErrorCode("there was an error that occurred with the internal libraries"));
 
 static void LogLastPhysfsError(const String& preamble)
 {

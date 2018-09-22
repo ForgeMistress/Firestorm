@@ -14,10 +14,10 @@
 #include <LLGL/LLGL.h>
 #include <LLGL/RenderContext.h>
 
-#include <libIO/ResourceMgr.h>
-#include <libMirror/ObjectMaker.h>
-
 OPEN_NAMESPACE(Firestorm);
+
+class ResourceMgr;
+class ObjectMaker;
 
 /**
 	Struct containing identifier strings for different rendering backends

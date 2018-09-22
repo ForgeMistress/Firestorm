@@ -11,6 +11,7 @@
 #include "ShaderResource.h"
 
 #include <libIO/libIO.h>
+#include <libIO/ResourceIOErrors.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -28,11 +29,7 @@ ShaderResource::ShaderResource(RenderMgr& renderMgr)
 
 ShaderResource::~ShaderResource()
 {
-	for(auto shader : _shaders)
-	{
-		_renderMgr.System->Release(*shader.second);
-	}
-	_renderMgr.System->Release(*_shaderProgram);
+	PurgeCompiledShaders();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +118,7 @@ ShaderLoader::~ShaderLoader()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
+ShaderLoader::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 {
 	const String& filename = ref.GetResourcePath();
 	if(libIO::FileExists(filename))

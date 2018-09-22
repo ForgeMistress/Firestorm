@@ -53,7 +53,7 @@ template <typename Expected_t, typename Unexpected_t>
 using Result = tl::expected<Expected_t, Unexpected_t>;
 
 #define FIRE_ERROR( ERROR_CODE, ... ) \
-	tl::make_unexpected( Error( &ERROR_CODE, __VA_ARGS__ ) )
+	tl::make_unexpected( Error( ERROR_CODE, __VA_ARGS__ ) )
 
 #define FIRE_FORWARD_ERROR( ERROR ) \
 	tl::make_unexpected( ERROR )
@@ -63,5 +63,12 @@ using Result = tl::expected<Expected_t, Unexpected_t>;
 	Result< decltype(VALUE), Error >(VALUE)
 
 #define FIRE_RESULT_OK Result<void,ErrorCode>()
+
+
+#define FIRE_ERRORCODE(SYMBOL) static const ErrorCode* SYMBOL
+
+#define FIRE_ERRORCODE_DEF(SYMBOL, MESSAGE) \
+	const ::Firestorm::ErrorCode* SYMBOL = new ErrorCode("["#SYMBOL"] "##MESSAGE)
+
 CLOSE_NAMESPACE(Firestorm);
 #endif

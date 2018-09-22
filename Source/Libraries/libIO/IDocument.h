@@ -24,13 +24,13 @@ class IDocument
 public:
 	virtual ~IDocument() {}
 
-	static ErrorCode ERROR;
-	static ErrorCode READ_DOCUMENT_FAILED;
-	static ErrorCode READ_VALUE_FAILED;
-	static ErrorCode SUBSECTION_NOT_FOUND;
-	static ErrorCode FIND_SUBSECTION_FAILED;
-	static ErrorCode ENTER_SUBSECTION_FAILED;
-	static ErrorCode GET_TYPE_FAILED;
+	static const ErrorCode* ERROR;
+	static const ErrorCode* READ_DOCUMENT_FAILED;
+	static const ErrorCode* READ_VALUE_FAILED;
+	static const ErrorCode* SUBSECTION_NOT_FOUND;
+	static const ErrorCode* FIND_SUBSECTION_FAILED;
+	static const ErrorCode* ENTER_SUBSECTION_FAILED;
+	static const ErrorCode* GET_TYPE_FAILED;
 
 	/*enum Codes : uint8_t
 	{

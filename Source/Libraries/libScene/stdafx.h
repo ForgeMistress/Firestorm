@@ -7,14 +7,16 @@
 #pragma once
 
 #include <libCore/libCore.h>
-#include <libCore/Result.h>
-#include <libCore/RefPtr.h>
 
 #include <libMirror/Object.h>
 
 #include <libIO/libIO.h>
 #include <libIO/IResourceObject.h>
+#include <libIO/ResourceMgr.h>
+#include <libIO/ResourceCache.h>
 
 #include <LLGL/LLGL.h>
+
+#include <json/json.h>
 
 #endif

@@ -2,6 +2,7 @@
 #define LIBAPP_H_
 #pragma once
 
+#include <libCore/LibraryRegistrar.h>
 #include <libMirror/EventDispatcher.h>
 #include <libMirror/Object.h>
 

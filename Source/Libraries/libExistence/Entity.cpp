@@ -12,7 +12,7 @@
 #include "Component.h"
 #include "Engine.h"
 
-#include <libIO/Logger.h>
+#include <libCore/Logger.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -132,7 +132,7 @@ WeakPtr<Component> Entity::GetComponent(const String& name) const
 	{
 		return (*found);
 	}
-	return nullptr;
+	return RefPtr<Component>(nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

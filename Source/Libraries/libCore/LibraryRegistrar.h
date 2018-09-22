@@ -15,7 +15,7 @@
 	template <class T> friend struct Library;   \
 	static constexpr char* s_libName = #LIBTYPE
 
-OPEN_NAMESPACE(Firestorm);
+namespace Firestorm {
 
 template <class T>
 struct Library
@@ -47,6 +47,6 @@ void Library<T>::RegisterReflection()
 	FIRE_LOG_DEBUG("        :: Size of %s = %d ((%d))", t.get_name(), t.get_sizeof(), sizeof(U));
 }
 
-CLOSE_NAMESPACE(Firestorm);
+}
 
 #endif

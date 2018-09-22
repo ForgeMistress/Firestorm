@@ -154,11 +154,9 @@ PoolPtr<T> ObjectPool<T>::GetManaged(Args_t&&... args)
 template<class T>
 void ObjectPool<T>::Return(T* ptr)
 {
-	if (ptr != nullptr)
-	{
-		ptr->~T();
-		_recycle.push_back(ptr);
-	}
+	FIRE_ASSERT(ptr != nullptr);
+	ptr->~T();
+	_recycle.push_back(ptr);
 }
 
 CLOSE_NAMESPACE(Firestorm);

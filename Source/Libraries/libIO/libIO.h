@@ -5,6 +5,7 @@
 
 #include <libCore/libCore.h>
 #include <libCore/Result.h>
+#include <libCore/RefPtr.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -12,7 +13,7 @@ struct libIO : public Library<libIO>
 {
 	FIRE_LIBRARY(libIO);
 
-	static ErrorCode INTERNAL_ERROR;
+	static const ErrorCode* INTERNAL_ERROR;
 
 	/**
 		Mount a directory at the specified mount point.

@@ -87,7 +87,7 @@ const char* TypeTraits<TEMPLATE_TYPE>::GetTypeString()                          
 const Mirror::Type TypeTraits<TEMPLATE_TYPE>::GetMirrorType() { return Mirror::Type::get<TEMPLATE_TYPE>(); }				   \
 Result<void, Error> TypeTraits<TEMPLATE_TYPE>::ReadFromDocument(IDocument* reader, const String& key, TEMPLATE_TYPE& outValue) \
 {																												               \
-	assert(reader && "document reader is nullptr in Traits<int8_t>::ReadFromDocument.");						               \
+	FIRE_ASSERT(reader && "document reader is nullptr in Traits<int8_t>::ReadFromDocument.");						               \
 	TEMPLATE_TYPE val;																							               \
 	Result<void, Error> res = reader->Read##FUNCTION_POSTFIX(key.c_str(), val);									               \
 	if (res.has_value())																						               \
@@ -98,7 +98,7 @@ Result<void, Error> TypeTraits<TEMPLATE_TYPE>::ReadFromDocument(IDocument* reade
 }																												               \
 Result<void, Error> TypeTraits<TEMPLATE_TYPE>::WriteToDocument(IDocument* writer, const String& key, TEMPLATE_TYPE value)      \
 {																												               \
-	assert(writer && "document writer is nullptr in Traits<"#TEMPLATE_TYPE">::WriteToDocument.");				               \
+	FIRE_ASSERT(writer && "document writer is nullptr in Traits<"#TEMPLATE_TYPE">::WriteToDocument.");				               \
 	Result<void, Error> res = writer->Write##FUNCTION_POSTFIX(key.c_str(), value);								               \
 	if (res.has_value())																						               \
 	{																											               \

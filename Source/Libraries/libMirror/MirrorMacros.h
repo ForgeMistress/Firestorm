@@ -2,7 +2,7 @@
 #define LIBMIRROR_MIRRORMACROS_H_
 #pragma once
 
-#include <libIO/Logger.h>
+#include <libCore/Logger.h>
 
 #if defined FIRE_DEBUG || FIRE_RELEASE
 /**

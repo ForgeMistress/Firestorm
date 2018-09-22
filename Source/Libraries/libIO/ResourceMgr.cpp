@@ -11,58 +11,27 @@
 #include "ResourceMgr.h"
 
 #include "ResourceReference.h"
-#include <libIO/libIO.h>
+#include "ResourceIOErrors.h"
+
 #include <sstream>
 
 OPEN_NAMESPACE(Firestorm);
-
-ErrorCode ResourceIOErrors::DEFAULT_LOADER("define a new loader for this type");
-ErrorCode ResourceIOErrors::FILE_NOT_FOUND_ERROR("file was not found");
-ErrorCode ResourceIOErrors::FILE_READ_ERROR("file could not be read");
-ErrorCode ResourceIOErrors::PARSING_ERROR("there was an error while parsing the data in file");
-ErrorCode ResourceIOErrors::PROCESSING_ERROR("there was an error while processing the file");
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceLoader::ResourceLoader()
-{
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceMgr::LoadResult ResourceLoader::Load(const ResourceReference&)
-{
-	return FIRE_ERROR(ResourceIOErrors::DEFAULT_LOADER);
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ResourceMgr::LoadOp::LoadOp(ResourceLoader* loader, ResourceReference* ref)
 : loader(loader)
 , ref(ref)
+, promise(new Promise_t())
 {
-	ref->SetFuture(promise.get_future());
+	ref->SetFuture(promise->get_future());
 }
 
-ResourceMgr::LoadOp::LoadOp(LoadOp&& other)
-: loader(std::move(other.loader))
-, ref(std::move(other.ref))
-, promise(std::move(other.promise))
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceMgr::LoadOp::~LoadOp()
 {
-	other.loader = nullptr;
-	other.ref = nullptr;
-}
-
-ResourceMgr::LoadOp& ResourceMgr::LoadOp::operator=(LoadOp&& other)
-{
-	loader = std::move(other.loader);
-	ref = std::move(other.ref);
-	promise = std::move(other.promise);
-
-	other.loader = nullptr;
-	other.ref = nullptr;
-
-	return *this;
+	delete promise;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,9 +43,12 @@ ResourceMgr::ResourceMgr()
 		std::stringstream ss;
 		ss << "ResourceMgr Thread [" << i << "]";
 		_threads[i] = Thread(std::bind(&ResourceMgr::ThreadRun, this));
+
+		while(!_threads[i].joinable()); // wait until the thread is joinable.
+
 		libCore::SetThreadName(_threads[i], ss.str());
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	// std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +133,7 @@ void ResourceMgr::ThreadRun()
 			auto loader = oper->loader;
 			auto& promise = oper->promise;
 
-			oper->promise.set_value(loader->Load(*oper->ref));
+			oper->promise->set_value(loader->Load(*oper->ref));
 
 			lock.lock();
 			_opPool.Return(oper);

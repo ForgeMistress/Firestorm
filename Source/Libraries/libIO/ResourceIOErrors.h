@@ -1,0 +1,31 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  ResourceIOErrors
+//
+//  Holder for errors that can be returned by a ResourceLoader.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//  Copyright (c) Project Firestorm 2018
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifndef LIBIO_RESOURCEIOERRORS_H_
+#define LIBIO_RESOURCEIOERRORS_H_
+#pragma once
+
+#include <libCore/Result.h>
+
+OPEN_NAMESPACE(Firestorm);
+
+class ErrorCode;
+
+struct ResourceIOErrors
+{
+	FIRE_ERRORCODE(DEFAULT_LOADER);
+	FIRE_ERRORCODE(FILE_NOT_FOUND_ERROR);
+	FIRE_ERRORCODE(FILE_READ_ERROR);
+	FIRE_ERRORCODE(PARSING_ERROR);
+	FIRE_ERRORCODE(PROCESSING_ERROR);
+};
+
+CLOSE_NAMESPACE(Firestorm);
+
+#endif

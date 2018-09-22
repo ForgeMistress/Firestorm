@@ -11,9 +11,11 @@
 #define LIBSCENE_MESHRESOURCE_H_
 #pragma once
 
+#include "RenderMgr.h"
+
 OPEN_NAMESPACE(Firestorm);
 
-class MeshResource : public IResourceObject
+class MeshResource final : public IResourceObject
 {
 	FIRE_MIRROR_DECLARE(MeshResource);
 public:
@@ -22,6 +24,24 @@ public:
 
 private:
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct MeshLoader final : public ResourceLoader
+{
+	MeshLoader(RenderMgr& renderMgr);
+	~MeshLoader();
+
+	virtual LoadResult Load(const ResourceReference& ref) override;
+private:
+
+	RenderMgr&                 _renderMgr;
+	Json::CharReaderBuilder    _builder;
+	Json::CharReader*          _reader;
+	ObjectPool<MeshResource>   _meshPool;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CLOSE_NAMESPACE(Firestorm);
 

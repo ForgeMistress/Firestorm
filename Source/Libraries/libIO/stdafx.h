@@ -16,4 +16,15 @@
 
 #include <physfs/physfs.h>
 
+#include <future>
+#include <functional>
+#include <thread>
+
+OPEN_NAMESPACE(Firestorm);
+
+class IResourceObject;
+using ResourceMgrResult = Result<RefPtr<IResourceObject>, Error>;
+
+CLOSE_NAMESPACE(Firestorm);
+
 #endif

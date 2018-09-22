@@ -9,7 +9,9 @@
 #include "stdafx.h"
 #include "RenderMgr.h"
 
-#include <libIO/Logger.h>
+#include <libCore/Logger.h>
+#include <libMirror/ObjectMaker.h>
+#include <libIO/ResourceMgr.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

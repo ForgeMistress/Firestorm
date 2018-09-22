@@ -24,7 +24,7 @@ namespace {
 		surface = nullptr;
 		listener = nullptr;
 		surface = (Surface*)glfwGetWindowUserPointer(window);
-		FIRE_ASSERT(surface != nullptr && "glfw window has no surface associated with it");
+		FIRE_ASSERT_MSG(surface != nullptr, "glfw window has no surface associated with it");
 		listener = surface->GetInputListener();
 	}
 
@@ -157,7 +157,7 @@ LLGL::Extent2D Surface::GetContentSize() const
 
 bool Surface::AdaptForVideoMode(LLGL::VideoModeDescriptor& videoModeDesc)
 {
-	FIRE_ASSERT(_window != nullptr && "window was not created in Surface::AdaptForVideoMode");
+	FIRE_ASSERT_MSG(_window != nullptr, "window was not created in Surface::AdaptForVideoMode");
 	_size = videoModeDesc.resolution;
 	glfwSetWindowSize(_window, _size.width, _size.height);
 	return true;
@@ -194,7 +194,7 @@ void Surface::Close()
 
 void Surface::SetInputListener(IInputEventListener* listener)
 {
-	FIRE_ASSERT(_listener == nullptr && "can not set listener. it has already been set.");
+	FIRE_ASSERT_MSG(_listener == nullptr, "can not set listener. it has already been set.");
 	_listener = listener;
 }
 

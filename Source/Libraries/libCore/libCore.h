@@ -2,19 +2,14 @@
 #define LIBCORE_H_
 #pragma once
 
-#ifdef LIB_CORE
-#error "libCore.h already included"
-#endif
-
-#define LIB_CORE
-
-#define OPEN_NAMESPACE(ns) namespace ns { extern int ns_##ns
+#define OPEN_NAMESPACE(ns) namespace ns {
 #define CLOSE_NAMESPACE(ns) } // namespace ns
 
 #include <vector>
 #include <memory>
 #include <string>
 #include <list>
+#include <queue>
 #include <unordered_map>
 #include <unordered_set>
 #include <iostream>
@@ -25,17 +20,14 @@
 #include <atomic>
 #include <thread>
 #include <mutex>
-#include <shared_mutex>
+#include <future>
+#include <sstream>
+#include <ostream>
 
-#include "Expected.h"
 #include "LibraryRegistrar.h"
+#include "Expected.h"
 
 OPEN_NAMESPACE(Firestorm);
-
-template<
-	typename Expected_t, 
-	typename Unexpected_t
-> using Expected = tl::expected<Expected_t, Unexpected_t>;
 
 using std::cout;
 using std::endl;
@@ -83,8 +75,6 @@ template<class T> using Atomic = std::atomic<T>;
 using Thread = std::thread;
 
 using Mutex = std::mutex;
-
-using SharedMutex = std::shared_mutex;
 
 using ID = uint32_t;
 
@@ -234,9 +224,5 @@ CLOSE_NAMESPACE(Firestorm);
 	Use this to flag a variable as unused in a function.
  **/
 #define FIRE_UNUSED_VARIABLE(var) ((void)var)
-
-#define FIRE_ASSERT assert
-
-#define FIRE_BROKEN FIRE_ASSERT(false && "it's fucking broken. don't use this.")
 
 #endif

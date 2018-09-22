@@ -11,8 +11,9 @@
 #define LIBSCENE_SHADERRESOURCE_H_
 #pragma once
 
+#include <libIO/ResourceLoader.h>
+#include <libIO/IResourceObject.h>
 #include <libIO/ResourceReference.h>
-#include <libIO/ResourceMgr.h>
 
 #include <json/json.h>
 #include <json/reader.h>
@@ -51,7 +52,7 @@ struct ShaderLoader final : public ResourceLoader
 	ShaderLoader(RenderMgr& renderMgr);
 	~ShaderLoader();
 
-	virtual ResourceMgr::LoadResult Load(const ResourceReference& ref) override;
+	virtual LoadResult Load(const ResourceReference& ref) override;
 private:
 	LLGL::Shader* MakeShader(const Vector<char>& data, LLGL::ShaderType shaderType);
 
@@ -59,15 +60,6 @@ private:
 	Json::CharReaderBuilder    _builder;
 	Json::CharReader*          _reader;
 	ObjectPool<ShaderResource> _shaderPool;
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <>
-struct ResourceTraits<ShaderResource>
-{
-	using type   = ShaderResource;
-	using loader = ShaderLoader;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -15,7 +15,9 @@
 #include <libCore/libCore.h>
 #include <libCore/ArgParser.h>
 
-#include <libIO/Logger.h>
+#include <libCore/Logger.h>
+
+#include <libScene/RenderMgr.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -38,11 +40,10 @@ ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Application::Application()
-: _renderMgr(_resourceMgr, _objectMaker)
-, _mainThreadId(std::this_thread::get_id())
+Application::Application(Thread::id mainThreadId)
+: _mainThreadId(mainThreadId)
 {
-	FIRE_ASSERT(g_theApp == nullptr && "only one instance of an Application can exist at a time");
+	FIRE_ASSERT_MSG(g_theApp == nullptr, "only one instance of an Application can exist at a time");
 	if(g_theApp == nullptr)
 	{
 		g_theApp = this;
@@ -53,8 +54,9 @@ Application::Application()
 
 Application::~Application()
 {
+	_managerMgr.Shutdown();
 	//_objectMaker.Shutdown();
-	_renderMgr.Shutdown();
+	// _renderMgr.Shutdown();
 	//_renderMgr.System->Release(*_renderMgr.Context);
 }
 
@@ -64,6 +66,8 @@ void Application::Initialize(int ac, char** av)
 {
 	_args = std::make_unique<ArgParser>(ac, av);
 
+	auto& renderMgr = _managerMgr.GetRenderMgr();
+
 	// Initialize the rendering context.
 	LLGL::RenderContextDescriptor contextDesc;
 	{
@@ -71,7 +75,7 @@ void Application::Initialize(int ac, char** av)
 		contextDesc.vsync.enabled = true;
 		contextDesc.profileOpenGL.contextProfile = LLGL::OpenGLContextProfile::CoreProfile;
 	}
-	_renderMgr.Initialize("OpenGL", contextDesc);
+	renderMgr.Initialize("OpenGL", contextDesc);
 
 	/*LLGL::Extent2D size(800, 600);
 	_surface = new Surface(this, size, "Firestorm Window");
@@ -88,7 +92,7 @@ void Application::Initialize(int ac, char** av)
 		}
 	});*/
 
-	auto& window = static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface());
+	auto& window = static_cast<LLGL::Window&>(renderMgr.Context->GetSurface());
 	window.SetTitle(L"Firestorm Application");
 	window.Show();
 
@@ -109,7 +113,9 @@ int Application::Run()
 	auto timer = LLGL::Timer::Create();
 	auto start = std::chrono::system_clock::now();
 
-	while(static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface()).ProcessEvents())
+	auto& renderMgr = _managerMgr.GetRenderMgr();
+
+	while(static_cast<LLGL::Window&>(renderMgr.Context->GetSurface()).ProcessEvents())
 	{
 		_mainThreadId = std::this_thread::get_id();
 
@@ -144,7 +150,7 @@ int Application::Run()
 				isRunning = false;
 			}
 		}*/
-		_renderMgr.Context->Present();
+		renderMgr.Context->Present();
 	}
 	//_surface->Close();
 	
@@ -196,19 +202,9 @@ const ArgParser& Application::Args() const
 	return *_args.get();
 }
 
-RenderMgr& Application::GetRenderMgr()
+ManagerMgr& Application::GetSystems() const
 {
-	return _renderMgr;
-}
-
-ResourceMgr& Application::GetResourceMgr()
-{
-	return _resourceMgr;
-}
-
-ObjectMaker& Application::GetObjectMaker()
-{
-	return _objectMaker;
+	return _managerMgr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +213,8 @@ ObjectMaker& Application::GetObjectMaker()
 
 void Application::EnableWindowResizing(bool enabled) const
 {
-	LLGL::Window& window = static_cast<LLGL::Window&>(_renderMgr.Context->GetSurface());
+	auto& renderMgr = _managerMgr.GetRenderMgr();
+	LLGL::Window& window = static_cast<LLGL::Window&>(renderMgr.Context->GetSurface());
 	LLGL::WindowDescriptor desc = window.GetDesc();
 	desc.resizable = enabled;
 	window.SetDesc(desc);

@@ -1,27 +1,29 @@
 #include "stdafx.h"
 #include "FirestormApp.h"
 
+#include <libCore/Logger.h>
+
 #include <LLGL/LLGL.h>
 #include <LLGL/VertexAttribute.h>
 #include <LLGL/VertexFormat.h>
 
 #include <libIO/libIO.h>
-#include <libIO/Logger.h>
+#include <libIO/ResourceMgr.h>
 
 #include <libScene/ShaderResource.h>
 
-FirestormApp::FirestormApp()
-: _shaderResource("/Shaders/Triangle.shader")
+FirestormApp::FirestormApp(std::thread::id mainThreadID)
+: Application(mainThreadID)
+, _shaderResource("/Shaders/Triangle.shader")
 {
 }
 
 FirestormApp::~FirestormApp()
 {
-	RenderMgr& renderMgr = GetRenderMgr();
+	_shaderResource.Release();
+
+	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
 	renderMgr.System->Release(*_commandBuffer);
-	/*renderMgr.System->Release(*_vertexShader);
-	renderMgr.System->Release(*_fragmentShader);
-	renderMgr.System->Release(*_shader);*/
 	renderMgr.System->Release(*_pipeline);
 	renderMgr.System->Release(*_vertexBuffer);
 }
@@ -34,7 +36,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 	FIRE_ASSERT(libIO::FileExists("/Shaders/Triangle.shader"));
 
-	RenderMgr& renderMgr = GetRenderMgr();
+	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
 	Dispatcher.Register(&FirestormApp::HandleApplicationWantsToClose, this);
 
 	struct Vertex
@@ -63,7 +65,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	LLGL::RenderSystem* renderer = renderMgr.System.get();
 	_vertexBuffer = renderer->CreateBuffer(vertexBufferDesc, vertices);
 
-	auto& resourceMgr = GetResourceMgr();
+	auto& resourceMgr = GetSystems().GetResourceMgr();
 	resourceMgr.Load<ShaderResource>(_shaderResource);
 
 	while (!_shaderResource.IsReady())
@@ -78,58 +80,9 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	}
 
 	RefPtr<ShaderResource> resource = _shaderResource.GetResource<ShaderResource>();
-	FIRE_ASSERT(resource && "it's probably the upcast operation in GetResource that fucked it up");
+	FIRE_ASSERT_MSG(resource, "it's probably the upcast operation in GetResource that fucked it up");
 	bool result = resource->Compile();
-	FIRE_ASSERT(result && "shader failed to compile");
-
-	/*Result<String, Error> vertShaderSource = libIO::LoadFileString("/Shaders/Triangle.vert");
-	// FIRE_ASSERT(!vertShaderSource.empty());
-
-	FIRE_ASSERT(vertShaderSource.has_value());
-
-	Result<String, Error> fragShaderSource = libIO::LoadFileString("/Shaders/Triangle.frag");
-	FIRE_ASSERT(fragShaderSource.has_value());
-
-	LLGL::ShaderDescriptor vertShaderDesc;
-	{
-		vertShaderDesc.source = vertShaderSource.value().c_str();
-		vertShaderDesc.sourceType = LLGL::ShaderSourceType::CodeString;
-		vertShaderDesc.type = LLGL::ShaderType::Vertex;
-	}
-	_vertexShader = renderer->CreateShader(vertShaderDesc);
-
-	LLGL::ShaderDescriptor fragShaderDesc;
-	{
-		fragShaderDesc.source = fragShaderSource.value().c_str();
-		fragShaderDesc.sourceType = LLGL::ShaderSourceType::CodeString;
-		fragShaderDesc.type = LLGL::ShaderType::Fragment;
-	}
-	_fragmentShader = renderer->CreateShader(fragShaderDesc);
-
-	for (auto shader : { _vertexShader, _fragmentShader })
-	{
-		if (shader != nullptr)
-		{
-			std::string log = shader->QueryInfoLog();
-			if(!log.empty())
-			{
-				FIRE_LOG_ERROR(log);
-			}
-		}
-	}
-
-	LLGL::ShaderProgramDescriptor shaderProgramDesc;
-	{
-		shaderProgramDesc.vertexFormats = { vertexFormat };
-		shaderProgramDesc.vertexShader = _vertexShader;
-		shaderProgramDesc.fragmentShader = _fragmentShader;
-	}
-	_shader = renderer->CreateShaderProgram(shaderProgramDesc);
-
-	if(_shader->HasErrors())
-	{
-		throw std::runtime_error(_shader->QueryInfoLog());
-	}*/
+	FIRE_ASSERT_MSG(result, "shader failed to compile");
 
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;
 	{
@@ -151,7 +104,7 @@ void FirestormApp::OnUpdate(double deltaT)
 		if (_commandBuffer == nullptr)
 			return;
 
-		RenderMgr& renderMgr = GetRenderMgr();
+		auto& renderMgr = GetSystems().GetRenderMgr();
 
 		_commandBuffer->Begin();
 		{
@@ -199,8 +152,9 @@ void FirestormApp::HandleApplicationWantsToClose(const ApplicationWantsToCloseEv
 void FirestormApp::RegisterResourceTypes()
 {
 	// Register the resource types.
-	ObjectMaker& objectMaker = GetObjectMaker();
-	RenderMgr& renderMgr = GetRenderMgr();
-	ResourceMgr& resourceMgr = GetResourceMgr();
+	auto& systems = GetSystems();
+	auto& renderMgr = systems.GetRenderMgr();
+	auto& resourceMgr = systems.GetResourceMgr();
+
 	resourceMgr.InstallLoader<ShaderResource>(new ShaderLoader(renderMgr));
 }

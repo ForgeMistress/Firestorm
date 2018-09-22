@@ -7,77 +7,45 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBIO_RESOURCEMGR_H____
-#define LIBIO_RESOURCEMGR_H____
+#ifndef LIBIO_RESOURCEMGR_H_
+#define LIBIO_RESOURCEMGR_H_
 #pragma once
 
-#include <libCore/Expected.h>
+#include "ResourceLoader.h"
+
 #include <libCore/Result.h>
-#include <libCore/SynchronizedQueue.h>
-#include <libMirror/EventDispatcher.h>
-#include <libMirror/ObjectMaker.h>
-#include <libCore/libCore.h>
+#include <libCore/Expected.h>
 #include <libCore/ObjectPool.h>
 
-#include <future>
-
-#include "IResourceObject.h"
+#include <libMirror/EventDispatcher.h>
 
 OPEN_NAMESPACE(Firestorm);
 
-
-struct ResourceIOErrors
-{
-	static ErrorCode DEFAULT_LOADER;
-	static ErrorCode FILE_NOT_FOUND_ERROR;
-	static ErrorCode FILE_READ_ERROR;
-	static ErrorCode PARSING_ERROR;
-	static ErrorCode PROCESSING_ERROR;
-};
-
+class IResourceObject;
 class ResourceLoader;
-
-/**
-	Specialize this to provide the data for the resource loader.
- **/
-template<class T>
-struct ResourceTraits
-{
-	using type = T;
-	using loader = ResourceLoader;
-};
-
+class ResourceCache;
 class ResourceReference;
 
 /**
-	\class FileIOMgr
+	\class ResourceMgr
 
-	Manages the asynchronous loading of 
-
-	https://github.com/embeddedartistry/embedded-resources/blob/master/examples/cpp/dispatch.cpp
+	Manages the asynchronous loading of resources.
  **/
 class ResourceMgr final
 {
-public:
-	using LoadResult = Result<RefPtr<IResourceObject>, Error>;
-
 private:
-	using Task_t = std::function<LoadResult(const ResourceReference&)>;
-	using Future_t = std::future<LoadResult>;
-	using Promise_t = std::promise<LoadResult>;
+	using Task_t = std::function<ResourceLoader::LoadResult(const ResourceReference&)>;
+	using Future_t = std::future<ResourceLoader::LoadResult>;
+	using Promise_t = std::promise<ResourceLoader::LoadResult>;
 
-	struct LoadOp
+	struct LoadOp final
 	{
 		LoadOp(ResourceLoader* loader, ResourceReference* ref);
-		LoadOp(LoadOp&& other);
-		LoadOp& operator=(LoadOp&& other);
-
-		LoadOp(const LoadOp&) = delete;
-		LoadOp& operator=(const LoadOp&) = delete;
+		~LoadOp();
 
 		ResourceLoader*    loader;
 		ResourceReference* ref;
-		Promise_t          promise;
+		Promise_t*         promise;
 	};
 	ObjectPool<LoadOp> _opPool;
 public:
@@ -88,7 +56,7 @@ public:
 	void Load(ResourceReference& ref)
 	{
 		ResourceLoader* loader = GetLoader(ResourceType_t::MyType());
-		FIRE_ASSERT(loader && "no loader installed for this resource type");
+		FIRE_ASSERT_MSG(loader, "no loader installed for this resource type");
 		Load(_opPool.Get(loader, &ref));
 	}
 	void Load(LoadOp* loadOp);
@@ -119,15 +87,6 @@ private:
 	Vector<std::pair<Mirror::Type, ResourceLoader*>> _loaders;
 
 	void ThreadRun();
-};
-
-class ResourceLoader
-{
-public:
-	ResourceLoader();
-	virtual ~ResourceLoader() {}
-
-	virtual ResourceMgr::LoadResult Load(const ResourceReference& ref);
 };
 
 CLOSE_NAMESPACE(Firestorm);

@@ -9,7 +9,7 @@ using namespace Firestorm;
 class FirestormApp : public Application
 {
 public:
-	FirestormApp();
+	FirestormApp(std::thread::id mainThreadID);
 	virtual ~FirestormApp();
 
 	virtual void OnInitialize(int ac, char** av);
@@ -26,9 +26,6 @@ private:
 
 	LLGL::Buffer* _vertexBuffer{ nullptr };
 	ResourceReference _shaderResource;
-	/*LLGL::Shader* _vertexShader{ nullptr };
-	LLGL::Shader* _fragmentShader{ nullptr };
-	LLGL::ShaderProgram* _shader{ nullptr };*/
 	LLGL::GraphicsPipeline* _pipeline{ nullptr };
 	LLGL::CommandQueue* _commandQueue{ nullptr };
 	LLGL::CommandBuffer* _commandBuffer{ nullptr };

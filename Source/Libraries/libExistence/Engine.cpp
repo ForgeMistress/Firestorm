@@ -113,7 +113,7 @@ bool Engine::AddSystem(Mirror::Type systemType)
 		Mirror::Instance instance = systemType.create();
 		if(instance.is_valid())
 		{
-			return AddSystem(instance.try_convert<System>());
+			return AddSystem(RefPtr<System>(instance.try_convert<System>()));
 		}
 	}
 	return false;

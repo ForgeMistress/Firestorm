@@ -11,7 +11,7 @@
 #define HARNESSED_TESTHARNESS_H_
 #pragma once
 
-#include <libIO/Logger.h>
+#include <libCore/Logger.h>
 
 OPEN_NAMESPACE(Firestorm);
 

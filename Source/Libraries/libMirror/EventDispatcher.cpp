@@ -95,7 +95,8 @@ void EventDispatcher::Unregister(IEvent* event)
 			return r->_event == event;
 		});
 	}
-	FIRE_ASSERT(_numRegisteredEvents == _receipts.size() && "the number of registered events and known receipts do not match");
+	FIRE_ASSERT_MSG(_numRegisteredEvents == _receipts.size(), 
+		            "the number of registered events and known receipts do not match");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

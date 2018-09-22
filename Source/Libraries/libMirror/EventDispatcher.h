@@ -33,7 +33,7 @@ class EventDispatcher;
 class EDReceipt
 {
 	friend class EventDispatcher;
-	template<class T> friend class RefPtr;
+	template <class T> friend class RefPtr;
 private:
 	EDReceipt(EventDispatcher* dispatcher, IEvent* event);
 	~EDReceipt();
@@ -125,7 +125,7 @@ public:
 		_numRegisteredEvents++;
 		_mutex.unlock();
 
-		assert(_numRegisteredEvents == _receipts.size());
+		FIRE_ASSERT(_numRegisteredEvents == _receipts.size());
 
 		return r;
 	}
@@ -133,14 +133,14 @@ public:
 	template <class Arg_t>
 	void Dispatch(const Arg_t& arg)
 	{
-		assert(_numRegisteredEvents == _receipts.size());
+		FIRE_ASSERT(_numRegisteredEvents == _receipts.size());
 		std::scoped_lock lock(_mutex);
 		EventMap::iterator found = _events.find(Arg_t::MyType());
 		if(found != _events.end())
 		{
 			for(IEvent* item : found->second)
 			{
-				assert(item);
+				FIRE_ASSERT(item);
 				Event<Arg_t>* eventCasted = static_cast<Event<Arg_t>*>(item);
 				if(eventCasted)
 				{
