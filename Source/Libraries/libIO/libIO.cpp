@@ -122,4 +122,22 @@ Result<String, Error> libIO::LoadFileString(const String& filename)
 	return FIRE_FORWARD_ERROR(data.error());
 }
 
+static PHYSFS_EnumerateCallbackResult enumerateGetFiles(void* data, const char* origData, const char* fname)
+{
+	Vector<String>* ptr = static_cast<Vector<String>*>(data);
+	ptr->push_back(fname);
+	return PHYSFS_ENUM_OK;
+}
+
+Vector<String> libIO::GetFiles(const String& path)
+{
+	/*
+	PHYSFS_EnumerateCallbackResult (*PHYSFS_EnumerateCallback)(void *data,
+									   const char *origdir, const char *fname);
+	*/
+	Vector<String> outFiles;
+	PHYSFS_enumerate(path.c_str(), enumerateGetFiles, &outFiles);
+	return outFiles;
+}
+
 CLOSE_NAMESPACE(Firestorm);

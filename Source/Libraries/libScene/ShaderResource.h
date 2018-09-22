@@ -34,10 +34,14 @@ public:
 
 	LLGL::ShaderProgram* GetProgram() const;
 
+	bool Compile();
 private:
-	RenderMgr&                  _renderMgr;
-	Vector<LLGL::Shader*>       _shaders;
-	LLGL::ShaderProgram*        _shaderProgram{ nullptr };
+	void PurgeCompiledShaders();
+	RenderMgr&                                    _renderMgr;
+	UnorderedMap<LLGL::ShaderType, LLGL::Shader*> _shaders;
+	UnorderedMap<LLGL::ShaderType, Vector<char>>  _shaderData;
+	LLGL::ShaderProgram*                          _shaderProgram{ nullptr };
+	bool                                          _isCompiled{ false };
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

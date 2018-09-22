@@ -30,7 +30,7 @@ ShaderResource::~ShaderResource()
 {
 	for(auto shader : _shaders)
 	{
-		_renderMgr.System->Release(*shader);
+		_renderMgr.System->Release(*shader.second);
 	}
 	_renderMgr.System->Release(*_shaderProgram);
 }
@@ -39,7 +39,70 @@ ShaderResource::~ShaderResource()
 
 LLGL::ShaderProgram* ShaderResource::GetProgram() const
 {
+	FIRE_ASSERT(_isCompiled);
 	return _shaderProgram;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ShaderResource::Compile()
+{
+	FIRE_LOG_DEBUG("Compiling Shader...");
+	// create the shaders...
+	for(auto shaderData : _shaderData)
+	{
+		auto type = shaderData.first;
+		auto data = shaderData.second;
+		data.push_back('\0');
+		LLGL::ShaderDescriptor desc;
+		desc.type = type;
+		desc.source = &data[0];
+		desc.sourceSize = data.size();
+		desc.sourceType = LLGL::ShaderSourceType::CodeString;
+		_shaders[type] = _renderMgr.System->CreateShader(desc);
+		if (_shaders[type]->HasErrors())
+		{
+			FIRE_LOG_ERROR("Error Creating Shader: %s", _shaders[type]->QueryInfoLog());
+			PurgeCompiledShaders();
+			return false;
+		}
+	}
+
+	LLGL::ShaderProgramDescriptor desc;
+	if(_shaders.find(LLGL::ShaderType::Vertex) != _shaders.end())
+	{
+		desc.vertexShader = _shaders[LLGL::ShaderType::Vertex];
+	}
+	if(_shaders.find(LLGL::ShaderType::Fragment) != _shaders.end())
+	{
+		desc.fragmentShader = _shaders[LLGL::ShaderType::Fragment];
+	}
+	if(_shaders.find(LLGL::ShaderType::Geometry) != _shaders.end())
+	{
+		desc.geometryShader = _shaders[LLGL::ShaderType::Geometry];
+	}
+
+	_shaderProgram = _renderMgr.System->CreateShaderProgram(desc);
+	if(_shaderProgram->HasErrors())
+	{
+		FIRE_LOG_ERROR("Error Compiling Shader Program: %s", _shaderProgram->QueryInfoLog());
+		_renderMgr.System->Release(*_shaderProgram);
+		PurgeCompiledShaders();
+		return false;
+	}
+	_isCompiled = true;
+	return true;
+}
+
+void ShaderResource::PurgeCompiledShaders()
+{
+	for(auto shader : _shaders)
+	{
+		if(shader.second)
+			_renderMgr.System->Release(*shader.second);
+	}
+	if(_shaderProgram)
+		_renderMgr.System->Release(*_shaderProgram);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +124,7 @@ ShaderLoader::~ShaderLoader()
 ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 {
 	const String& filename = ref.GetResourcePath();
-	if(!libIO::FileExists(filename))
+	if(libIO::FileExists(filename))
 	{
 		Result<Vector<char>, Error> result = libIO::LoadFile(filename);
 		if (result.has_value())
@@ -69,7 +132,7 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 			const Vector<char>& data = result.value();
 			Json::Value root;
 			JSONCPP_STRING errors;
-			if(!_reader->parse(&data[0], &data[data.size()], &root, &errors))
+			if(!_reader->parse(&data[0], &data[data.size() - 1], &root, &errors))
 			{
 				return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, errors);
 			}
@@ -92,14 +155,7 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 						{
 							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "fragment shader could not be loaded");
 						}
-
-						LLGL::Shader* shader = MakeShader(result.value(), LLGL::ShaderType::Vertex);
-						if(shader->HasErrors())
-						{
-							_renderMgr.System->Release(*shader);
-							return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, shader->QueryInfoLog());
-						}
-						shaders[LLGL::ShaderType::Vertex] = shader;
+						shaderResource->_shaderData[LLGL::ShaderType::Vertex] = result.value();
 					}
 
 					if(openGL.isMember("fragment"))
@@ -112,13 +168,7 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "fragment shader could not be loaded");
 						}
 
-						LLGL::Shader* shader = MakeShader(result.value(), LLGL::ShaderType::Vertex);
-						if(shader->HasErrors())
-						{
-							_renderMgr.System->Release(*shader);
-							return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, shader->QueryInfoLog());
-						}
-						shaders[LLGL::ShaderType::Vertex] = shader;
+						shaderResource->_shaderData[LLGL::ShaderType::Fragment] = result.value();
 					}
 
 					if(openGL.isMember("geometry"))
@@ -130,14 +180,7 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 						{
 							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "geometry shader could not be loaded");
 						}
-
-						LLGL::Shader* shader = MakeShader(result.value(), LLGL::ShaderType::Geometry);
-						if(shader->HasErrors())
-						{
-							_renderMgr.System->Release(*shader);
-							return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, shader->QueryInfoLog());
-						}
-						shaders[LLGL::ShaderType::Geometry] = shader;
+						shaderResource->_shaderData[LLGL::ShaderType::Fragment] = result.value();
 					}
 				}
 			}
@@ -146,26 +189,7 @@ ResourceMgr::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 				FIRE_ASSERT(false && "direct3D support is not yet implemented");
 			}
 
-			// plug them all in to the shaderresource and build the shaderprogram.
-
-			LLGL::ShaderProgramDescriptor desc;
-			desc.vertexShader   = shaders[LLGL::ShaderType::Vertex];
-			desc.fragmentShader = shaders[LLGL::ShaderType::Fragment];
-			desc.geometryShader = shaders[LLGL::ShaderType::Geometry];
-
-			LLGL::ShaderProgram* shaderProgram = _renderMgr.System->CreateShaderProgram(desc);
-			if(shaderProgram->HasErrors())
-			{
-				_renderMgr.System->Release(*shaderProgram);
-				return FIRE_ERROR(ResourceIOErrors::PROCESSING_ERROR, shaderProgram->QueryInfoLog());
-			}
-
-			for(auto i : shaders)
-			{
-				shaderResource->_shaders.push_back(i.second);
-			}
-			shaderResource->_shaderProgram = shaderProgram;
-			
+			// return the shader resource now, because the shader has to be actually vompiled on the main thread.
 			return RefPtr<IResourceObject>(shaderResource, [this](IResourceObject* ptr) {
 				_shaderPool.Return(reinterpret_cast<ShaderResource*>(ptr));
 			});

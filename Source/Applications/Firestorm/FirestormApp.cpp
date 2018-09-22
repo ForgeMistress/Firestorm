@@ -32,6 +32,8 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 	EnableWindowResizing(true);
 
+	FIRE_ASSERT(libIO::FileExists("/Shaders/Triangle.shader"));
+
 	RenderMgr& renderMgr = GetRenderMgr();
 	Dispatcher.Register(&FirestormApp::HandleApplicationWantsToClose, this);
 
@@ -77,6 +79,8 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 	RefPtr<ShaderResource> resource = _shaderResource.GetResource<ShaderResource>();
 	FIRE_ASSERT(resource && "it's probably the upcast operation in GetResource that fucked it up");
+	bool result = resource->Compile();
+	FIRE_ASSERT(result && "shader failed to compile");
 
 	/*Result<String, Error> vertShaderSource = libIO::LoadFileString("/Shaders/Triangle.vert");
 	// FIRE_ASSERT(!vertShaderSource.empty());
