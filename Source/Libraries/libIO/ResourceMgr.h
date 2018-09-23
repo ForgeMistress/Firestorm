@@ -26,6 +26,28 @@ class ResourceLoader;
 class ResourceCache;
 class ResourceReference;
 
+struct ResourceTypeID
+{
+	const char* Name;
+};
+
+#define FIRE_RESOURCE_TYPE( CLASS, LOADER )         \
+public:											    \
+	friend class ResourceMgr;						\
+	friend class LOADER;                            \
+	using LoaderType = LOADER;						\
+	static const ResourceTypeID* MyResourceType() { \
+		static const ResourceTypeID* id = nullptr;	\
+		if(id == nullptr)							\
+			id = new ResourceTypeID{				\
+				#CLASS								\
+			};										\
+													\
+		return id;									\
+	}                                               \
+private:
+
+
 /**
 	\class ResourceMgr
 
@@ -43,11 +65,12 @@ private:
 		LoadOp(ResourceLoader* loader, ResourceReference* ref);
 		~LoadOp();
 
-		ResourceLoader*    loader;
-		ResourceReference* ref;
-		Promise_t*         promise;
+		ResourceLoader*                    loader;
+		ResourceReference*                 ref;
+#ifndef FIRE_FINAL
+		String             filename;
+#endif
 	};
-	ObjectPool<LoadOp> _opPool;
 public:
 	ResourceMgr();
 	~ResourceMgr();
@@ -55,23 +78,24 @@ public:
 	template <class ResourceType_t>
 	void Load(ResourceReference& ref)
 	{
-		ResourceLoader* loader = GetLoader(ResourceType_t::MyType());
+		ResourceLoader* loader = GetLoader(ResourceType_t::MyResourceType());
 		FIRE_ASSERT_MSG(loader, "no loader installed for this resource type");
-		Load(_opPool.Get(loader, &ref));
+		Load(std::move(LoadOp(loader, &ref)));
 	}
-	void Load(LoadOp* loadOp);
+	void Load(LoadOp&& loadOp);
 
-	template<class Res_t>
-	bool InstallLoader(ResourceLoader* loader)
+	template<class ResourceType_t, class... Args_t>
+	bool InstallLoader(Args_t&&... args)
 	{
-		return InstallLoader(Res_t::MyType(), loader);
+		ResourceLoader* loader = new typename ResourceType_t::LoaderType(std::forward<Args_t>(args)...);
+		return InstallLoader(ResourceType_t::MyResourceType(), loader);
 	}
 
 	void Shutdown();
 
 private:
-	bool InstallLoader(Mirror::Type type, ResourceLoader* loader);
-	ResourceLoader* GetLoader(Mirror::Type type);
+	bool InstallLoader(const ResourceTypeID*, ResourceLoader* loader);
+	ResourceLoader* GetLoader(const ResourceTypeID* type);
 
 	static const char _numThreads{ 2 };
 
@@ -80,11 +104,11 @@ private:
 
 	Thread _threads[_numThreads];
 
-	std::queue<LoadOp*> _queue;
+	std::queue<LoadOp> _queue;
 	std::condition_variable _cv;
 	bool _quit{ false };
 
-	Vector<std::pair<Mirror::Type, ResourceLoader*>> _loaders;
+	Vector<std::pair<const ResourceTypeID*, ResourceLoader*>> _loaders;
 
 	void ThreadRun();
 };

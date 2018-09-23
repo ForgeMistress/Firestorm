@@ -12,7 +12,7 @@
 #pragma once
 
 #include "IResourceObject.h"
-
+#include "ResourceLoader.h"
 #include <future>
 
 OPEN_NAMESPACE(Firestorm);
@@ -36,12 +36,18 @@ public:
 	};
 
 	ResourceReference(const String& path = "");
+	ResourceReference(ResourceReference&& other);
 	virtual ~ResourceReference();
 
 	/**
 		Retrieve the path to the resource on disk.
 	 **/
 	const String& GetResourcePath() const;
+
+	/**
+		Retrieve the path to this resource without the filename.
+	 **/
+	String GetPathTo() const;
 
 	/**
 		Retrieve whether or not the file is loaded.
@@ -63,7 +69,8 @@ public:
 	{
 		static_assert(std::is_base_of<IResourceObject, Resource_t>::value, "cast type must derive "
                                                                            "from IResourceObject");
-		return GetResource().Upcast<Resource_t>();
+		auto resource = GetResource();
+		return resource.Upcast<Resource_t>();
 	}
 
 	/**
@@ -91,10 +98,11 @@ private:
 	friend class ResourceMgr;
 	void SetResourcePath(const String& path);
 
-	void SetFuture(std::future<Result<RefPtr<IResourceObject>, Error>>&& future);
+	// void SetFuture(std::future<Result<RefPtr<IResourceObject>, Error>>&& future);
+	void SetResult(const ResourceLoader::LoadResult& result);
 
 	// so much mutable...
-	mutable std::future<Result<RefPtr<IResourceObject>, Error>> _future;
+	mutable Mutex _lock;
 	mutable RefPtr<IResourceObject> _resource;
 	mutable Error _error;
 	mutable bool _errorSet{ false };

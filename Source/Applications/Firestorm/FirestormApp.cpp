@@ -11,16 +11,20 @@
 #include <libIO/ResourceMgr.h>
 
 #include <libScene/ShaderResource.h>
+#include <libScene/MeshResource.h>
+#include <libScene/SceneGraphResource.h>
 
 FirestormApp::FirestormApp(std::thread::id mainThreadID)
 : Application(mainThreadID)
 , _shaderResource("/Shaders/Triangle.shader")
+, _meshResource("/Models/base-female.gltf")
 {
 }
 
 FirestormApp::~FirestormApp()
 {
 	_shaderResource.Release();
+	_meshResource.Release();
 
 	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
 	renderMgr.System->Release(*_commandBuffer);
@@ -35,6 +39,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	EnableWindowResizing(true);
 
 	FIRE_ASSERT(libIO::FileExists("/Shaders/Triangle.shader"));
+	FIRE_ASSERT(libIO::FileExists("/Models/base-female.gltf"));
 
 	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
 	Dispatcher.Register(&FirestormApp::HandleApplicationWantsToClose, this);
@@ -67,16 +72,23 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 	auto& resourceMgr = GetSystems().GetResourceMgr();
 	resourceMgr.Load<ShaderResource>(_shaderResource);
+	resourceMgr.Load<SceneGraphResource>(_meshResource);
 
-	while (!_shaderResource.IsReady())
+	while(!_shaderResource.IsReady() && !_meshResource.IsReady())
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
-	if (!_shaderResource.HasResource())
+	if(!_shaderResource.HasResource())
 	{
-		FIRE_ASSERT(_shaderResource.HasError());
 		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource.GetError());
+		FIRE_ASSERT(_shaderResource.HasError());
+	}
+
+	if(!_meshResource.HasResource())
+	{
+		FIRE_LOG_ERROR("Error Loading Mesh: %s", (String)_meshResource.GetError());
+		FIRE_ASSERT(_meshResource.HasError());
 	}
 
 	RefPtr<ShaderResource> resource = _shaderResource.GetResource<ShaderResource>();
@@ -156,5 +168,7 @@ void FirestormApp::RegisterResourceTypes()
 	auto& renderMgr = systems.GetRenderMgr();
 	auto& resourceMgr = systems.GetResourceMgr();
 
-	resourceMgr.InstallLoader<ShaderResource>(new ShaderLoader(renderMgr));
+	resourceMgr.InstallLoader<ShaderResource>(renderMgr);
+	resourceMgr.InstallLoader<MeshResource>(renderMgr);
+	resourceMgr.InstallLoader<SceneGraphResource>(renderMgr);
 }

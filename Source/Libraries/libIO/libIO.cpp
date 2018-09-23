@@ -25,7 +25,6 @@ static void LogLastPhysfsError(const String& preamble)
 void libIO::Initialize(int ac, char** av)
 {
 	Lib::RegisterReflection<ResourceReference>();
-	Lib::RegisterReflection<IResourceObject>();
 
 	ArgParser parser(ac, av);
 

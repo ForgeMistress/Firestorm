@@ -8,8 +8,6 @@ OPEN_NAMESPACE(Firestorm);
 
 void libScene::Initialize(int ac, char** av)
 {
-	Lib::RegisterReflection<MeshResource>();
-	Lib::RegisterReflection<ShaderResource>();
 }
 
 CLOSE_NAMESPACE(Firestorm);

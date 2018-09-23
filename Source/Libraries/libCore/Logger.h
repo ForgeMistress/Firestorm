@@ -12,6 +12,7 @@
 #pragma once
 
 #include <iostream>
+#include <mutex>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -111,6 +112,8 @@ extern void FIRE_LOG_##LEVEL##(Args... args)\
 template<class... Args>
 extern void FIRE_LOG_DEBUG(const String& format, Args... args)
 {
+	static std::mutex lock;
+	std::scoped_lock<std::mutex> l(lock);
 	String f = format + "\n";
 	Logger::DEBUG_LOGGER.mprintf(f.c_str(), args...);
 }
@@ -118,6 +121,8 @@ extern void FIRE_LOG_DEBUG(const String& format, Args... args)
 template<class... Args>
 extern void FIRE_LOG_WARNING(const String& format, Args... args)
 {
+	static std::mutex lock;
+	std::scoped_lock<std::mutex> l(lock);
 	String f = format + "\n";
 	Logger::WARNING_LOGGER.mprintf(f.c_str(), args...);
 }
@@ -125,6 +130,8 @@ extern void FIRE_LOG_WARNING(const String& format, Args... args)
 template<class... Args>
 extern void FIRE_LOG_ERROR(const String& format, Args... args)
 {
+	static std::mutex lock;
+	std::scoped_lock<std::mutex> l(lock);
 	String f = format + "\n";
 	Logger::ERROR_LOGGER.mprintf(f.c_str(), args...);
 }

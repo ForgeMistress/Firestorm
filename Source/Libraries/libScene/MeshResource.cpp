@@ -10,19 +10,15 @@
 #include "stdafx.h"
 #include "MeshResource.h"
 
+#include <libIO/ResourceReference.h>
 #include <libIO/ResourceIOErrors.h>
 
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FIRE_MIRROR_DEFINE(Firestorm::MeshResource)
-{
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-MeshResource::MeshResource()
+MeshResource::MeshResource(RenderMgr& renderMgr)
+: _renderMgr(renderMgr)
 {
 }
 
@@ -35,7 +31,7 @@ MeshResource::~MeshResource()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MeshLoader::MeshLoader(RenderMgr& renderMgr)
-	: _renderMgr(renderMgr)
+: _renderMgr(renderMgr)
 {
 
 }
@@ -49,9 +45,24 @@ MeshLoader::~MeshLoader()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MeshLoader::LoadResult MeshLoader::Load(const ResourceReference& ref)
+MeshLoader::LoadResult MeshLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
 {
-	return FIRE_ERROR(ResourceIOErrors::PROCESSING_ERROR);
+	auto path = ref.GetResourcePath();
+	if(libIO::FileExists(path))
+	{
+		auto result = libIO::LoadFile(path);
+		if(result.has_value())
+		{
+			MeshResource* resource = _pool.Get(_renderMgr);
+			resource->_data = result.value();
+			return RefPtr<IResourceObject>(resource, [this](IResourceObject* ptr) {
+				_pool.Return(reinterpret_cast<MeshResource*>(ptr));
+			});
+		}
+		return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "reading file '" + path + "'\nDetails: "+((String)result.error()));
+	}
+
+	return FIRE_ERROR(ResourceIOErrors::FILE_NOT_FOUND_ERROR, "could not find file '"+path+"'");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

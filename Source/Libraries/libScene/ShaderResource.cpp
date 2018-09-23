@@ -15,8 +15,6 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-FIRE_MIRROR_DEFINE(ShaderResource){}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ShaderResource::ShaderResource(RenderMgr& renderMgr)
@@ -118,13 +116,13 @@ ShaderLoader::~ShaderLoader()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ShaderLoader::LoadResult ShaderLoader::Load(const ResourceReference& ref)
+ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
 {
 	const String& filename = ref.GetResourcePath();
 	if(libIO::FileExists(filename))
 	{
 		Result<Vector<char>, Error> result = libIO::LoadFile(filename);
-		if (result.has_value())
+		if(result.has_value())
 		{
 			const Vector<char>& data = result.value();
 			Json::Value root;
@@ -191,16 +189,9 @@ ShaderLoader::LoadResult ShaderLoader::Load(const ResourceReference& ref)
 				_shaderPool.Return(reinterpret_cast<ShaderResource*>(ptr));
 			});
 		}
-		else
-		{
-			return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, ((String)result.error()));
-		}
+		return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, ((String)result.error()));
 	}
-	else
-	{
-		return FIRE_ERROR(ResourceIOErrors::FILE_NOT_FOUND_ERROR, filename);
-	}
-	return FIRE_ERROR(ResourceIOErrors::PROCESSING_ERROR);
+	return FIRE_ERROR(ResourceIOErrors::FILE_NOT_FOUND_ERROR, filename);
 }
 
 LLGL::Shader* ShaderLoader::MakeShader(const Vector<char>& data, LLGL::ShaderType shaderType)

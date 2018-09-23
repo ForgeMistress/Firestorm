@@ -13,32 +13,41 @@
 
 #include "RenderMgr.h"
 
+#include <libIO/ResourceMgr.h>
+#include <libIO/ResourceLoader.h>
+#include <libIO/IResourceObject.h>
+#include <libIO/ResourceReference.h>
+
 OPEN_NAMESPACE(Firestorm);
-
-class MeshResource final : public IResourceObject
-{
-	FIRE_MIRROR_DECLARE(MeshResource);
-public:
-	MeshResource();
-	virtual ~MeshResource();
-
-private:
-};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct MeshLoader final : public ResourceLoader
+class MeshLoader final : public ResourceLoader
 {
+public:
 	MeshLoader(RenderMgr& renderMgr);
 	~MeshLoader();
 
-	virtual LoadResult Load(const ResourceReference& ref) override;
-private:
+	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref) override;
 
-	RenderMgr&                 _renderMgr;
-	Json::CharReaderBuilder    _builder;
-	Json::CharReader*          _reader;
-	ObjectPool<MeshResource>   _meshPool;
+private:
+	RenderMgr&                     _renderMgr;
+	Json::CharReaderBuilder        _builder;
+	Json::CharReader*              _reader;
+	ObjectPool<class MeshResource> _pool;
+};
+
+
+class MeshResource final : public IResourceObject
+{
+	FIRE_RESOURCE_TYPE(MeshResource, MeshLoader);
+public:
+	MeshResource(RenderMgr& renderMgr);
+	virtual ~MeshResource();
+
+private:
+	RenderMgr& _renderMgr;
+	Vector<char> _data;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

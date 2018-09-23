@@ -28,6 +28,16 @@ ResourceReference::ResourceReference(const String& path)
 {
 }
 
+ResourceReference::ResourceReference(ResourceReference&& other)
+: _resource(std::move(other._resource))
+, _error(std::move(other._error))
+, _errorSet(other._errorSet)
+, _isReady(other._isReady)
+, _resourcePath(std::move(other._resourcePath))
+{
+	other._resource = nullptr;
+}
+
 ResourceReference::~ResourceReference()
 {
 }
@@ -37,26 +47,18 @@ const String& ResourceReference::GetResourcePath() const
 	return _resourcePath;
 }
 
+String ResourceReference::GetPathTo() const
+{
+	auto split = SplitString(_resourcePath, '/');
+	split.pop_back();
+	String out;
+	for (auto str : split)
+		out += str + "/";
+	return out;
+}
+
 bool ResourceReference::IsReady() const
 {
-	// return early if we're already ready.
-	if(_isReady) return _isReady;
-
-	std::future_status status = _future.wait_for(std::chrono::milliseconds(1));
-	if(status == std::future_status::ready)
-	{
-		_isReady = true;
-		auto result = _future.get();
-		if(result.has_value())
-		{
-			_resource = result.value();
-		}
-		else
-		{
-			_error = result.error();
-			_errorSet = true;
-		}
-	}
 	return _isReady;
 }
 
@@ -120,9 +122,19 @@ void ResourceReference::SetResourcePath(const String& path)
 	_resourcePath = path;
 }
 
-void ResourceReference::SetFuture(std::future<Result<RefPtr<IResourceObject>, Error>>&& future)
+void ResourceReference::SetResult(const ResourceLoader::LoadResult& result)
 {
-	_future = std::move(future);
+	std::scoped_lock<Mutex> lock(_lock);
+	if(result.has_value())
+	{
+		_resource = result.value();
+	}
+	else
+	{
+		_error = result.error();
+		_errorSet = true;
+	}
+	_isReady = true;
 }
 
 CLOSE_NAMESPACE(Firestorm);

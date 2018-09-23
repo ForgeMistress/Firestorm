@@ -11,6 +11,9 @@
 #define LIBSCENE_SHADERRESOURCE_H_
 #pragma once
 
+#include "RenderMgr.h"
+
+#include <libIO/ResourceMgr.h>
 #include <libIO/ResourceLoader.h>
 #include <libIO/IResourceObject.h>
 #include <libIO/ResourceReference.h>
@@ -19,16 +22,31 @@
 #include <json/reader.h>
 #include <libCore/ObjectPool.h>
 
-#include "RenderMgr.h"
-
 OPEN_NAMESPACE(Firestorm);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class ShaderLoader final : public ResourceLoader
+{
+public:
+	ShaderLoader(RenderMgr& renderMgr);
+	~ShaderLoader();
+
+	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref) override;
+private:
+	LLGL::Shader* MakeShader(const Vector<char>& data, LLGL::ShaderType shaderType);
+
+	RenderMgr&                 _renderMgr;
+	Json::CharReaderBuilder    _builder;
+	Json::CharReader*          _reader;
+	ObjectPool<class ShaderResource> _shaderPool;
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class ShaderResource final : public IResourceObject
 {
-	FIRE_MIRROR_DECLARE(ShaderResource);
-	friend struct ShaderLoader;
+	FIRE_RESOURCE_TYPE(ShaderResource, ShaderLoader);
 public:
 	ShaderResource(RenderMgr& renderMgr);
 	virtual ~ShaderResource();
@@ -43,23 +61,6 @@ private:
 	UnorderedMap<LLGL::ShaderType, Vector<char>>  _shaderData;
 	LLGL::ShaderProgram*                          _shaderProgram{ nullptr };
 	bool                                          _isCompiled{ false };
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct ShaderLoader final : public ResourceLoader
-{
-	ShaderLoader(RenderMgr& renderMgr);
-	~ShaderLoader();
-
-	virtual LoadResult Load(const ResourceReference& ref) override;
-private:
-	LLGL::Shader* MakeShader(const Vector<char>& data, LLGL::ShaderType shaderType);
-
-	RenderMgr&                 _renderMgr;
-	Json::CharReaderBuilder    _builder;
-	Json::CharReader*          _reader;
-	ObjectPool<ShaderResource> _shaderPool;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -89,7 +89,8 @@ public:
 		, _count(other._count)
 		, _deleter(other._deleter)
 	{
-		FIRE_ASSERT(_count && _count->_object == _object);
+		FIRE_ASSERT(_count);
+		FIRE_ASSERT(_count->_object == _object);
 		++_count->_strongCount;
 	}
 
@@ -188,13 +189,15 @@ public:
 	}
 
 	RefPtr(RefPtr<T>&& other)
-		: _object(other._object)
+	/*	: _object(other._object)
 		, _count(other._count)
-		, _deleter(other._deleter)
+		, _deleter(other._deleter)*/
 	{
-		FIRE_ASSERT_MSG(_count, "counter block was nullptr");
-		T* o = _count->_get_ptr<T>();
-		FIRE_ASSERT_MSG(o == _object, "counter block held a different object for some reason");
+		_object = std::move(other._object);
+		if (_count)
+			--_count->_strongCount;
+		_count = std::move(other._count);
+		_deleter = std::move(other._deleter);
 
 		// assumes ownership
 		other._count = nullptr;
@@ -229,6 +232,16 @@ public:
 			FIRE_ASSERT(_count);
 			++_count->_strongCount;
 		}
+		return *this;
+	}
+
+	RefPtr<T>& operator=(std::nullptr_t)
+	{
+		_object = nullptr;
+		if(_count)
+			--_count->_strongCount;
+		_count = nullptr;
+		_deleter = nullptr;
 		return *this;
 	}
 

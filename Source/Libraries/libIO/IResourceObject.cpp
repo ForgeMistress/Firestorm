@@ -12,8 +12,4 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-FIRE_MIRROR_DEFINE(Firestorm::IResourceObject)
-{
-}
-
 CLOSE_NAMESPACE(Firestorm);

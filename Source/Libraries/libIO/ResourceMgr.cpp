@@ -22,16 +22,16 @@ OPEN_NAMESPACE(Firestorm);
 ResourceMgr::LoadOp::LoadOp(ResourceLoader* loader, ResourceReference* ref)
 : loader(loader)
 , ref(ref)
-, promise(new Promise_t())
+#ifndef FIRE_FINAL
+, filename(ref->GetResourcePath())
+#endif
 {
-	ref->SetFuture(promise->get_future());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ResourceMgr::LoadOp::~LoadOp()
 {
-	delete promise;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,12 +60,12 @@ ResourceMgr::~ResourceMgr()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceMgr::Load(LoadOp* load)
+void ResourceMgr::Load(LoadOp&& load)
 {
 	std::unique_lock lock(_lock);
-	_queue.push(load);
+	_queue.push(std::move(load));
 	lock.unlock();
-	_cv.notify_one();
+	_cv.notify_all();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ void ResourceMgr::Shutdown()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceMgr::InstallLoader(Mirror::Type type, ResourceLoader* loader)
+bool ResourceMgr::InstallLoader(const ResourceTypeID* type, ResourceLoader* loader)
 {
 	for(size_t i = 0; i < _loaders.size(); ++i)
 	{
@@ -102,7 +102,7 @@ bool ResourceMgr::InstallLoader(Mirror::Type type, ResourceLoader* loader)
 	return true;
 }
 
-ResourceLoader* ResourceMgr::GetLoader(Mirror::Type type)
+ResourceLoader* ResourceMgr::GetLoader(const ResourceTypeID* type)
 {
 	for (size_t i = 0; i < _loaders.size(); ++i)
 	{
@@ -124,19 +124,27 @@ void ResourceMgr::ThreadRun()
 		});
 		if(!_queue.empty() && !_quit)
 		{
-			auto& oper = _queue.front();
+			auto& oper = std::move(_queue.front());
 			_queue.pop();
+
+			FIRE_LOG_DEBUG("Loading %s", oper.filename);
 
 			// unlock now that we're done messing with the queue.
 			lock.unlock();
 
-			auto loader = oper->loader;
-			auto& promise = oper->promise;
+			auto loader = oper.loader;
 
-			oper->promise->set_value(loader->Load(*oper->ref));
+			try
+			{
+				auto& result = loader->Load(this, *oper.ref);
+				oper.ref->SetResult(result);
+			}
+			catch(std::exception& e)
+			{
+				FIRE_LOG_ERROR("Error In Worker Thread: %s", e.what());
+			}
 
 			lock.lock();
-			_opPool.Return(oper);
 		}
 	} while(!_quit);
 }

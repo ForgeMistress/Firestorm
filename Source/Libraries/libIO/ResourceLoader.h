@@ -17,6 +17,7 @@
 OPEN_NAMESPACE(Firestorm);
 
 class ResourceReference;
+class ResourceMgr;
 
 class ResourceLoader
 {
@@ -26,7 +27,7 @@ public:
 	ResourceLoader();
 	virtual ~ResourceLoader();
 
-	virtual LoadResult Load(const ResourceReference& ref);
+	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref);
 };
 
 CLOSE_NAMESPACE(Firestorm);
