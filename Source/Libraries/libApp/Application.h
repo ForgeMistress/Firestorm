@@ -108,7 +108,7 @@ private:
 	Vector2 _previousMousePos;
 	Vector2 _currentMousePos;
 
-	RefPtr<Surface> _surface{ nullptr };
+	Surface* _surface{ nullptr };
 
 	Thread::id _mainThreadId;
 

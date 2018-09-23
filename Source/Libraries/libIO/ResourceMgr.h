@@ -12,6 +12,7 @@
 #pragma once
 
 #include "ResourceLoader.h"
+#include "IResourceObject.h"
 
 #include <libCore/Result.h>
 #include <libCore/Expected.h>
@@ -21,7 +22,6 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-class IResourceObject;
 class ResourceLoader;
 class ResourceCache;
 class ResourceReference;

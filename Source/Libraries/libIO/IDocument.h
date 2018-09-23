@@ -12,6 +12,7 @@
 #pragma once
 
 #include <libCore/Result.h>
+#include <libCore/IRefCounted.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -19,7 +20,7 @@ OPEN_NAMESPACE(Mirror);
 class Object;
 CLOSE_NAMESPACE(Mirror);
 
-class IDocument
+class IDocument : public IRefCounted
 {
 public:
 	virtual ~IDocument() {}

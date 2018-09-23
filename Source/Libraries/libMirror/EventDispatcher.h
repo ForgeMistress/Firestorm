@@ -13,6 +13,7 @@
 
 #include <libCore/RefPtr.h>
 #include "Object.h"
+#include <libCore/IRefCounted.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -30,7 +31,7 @@ public:
 
 class EventDispatcher;
 
-class EDReceipt
+class EDReceipt : public IRefCounted
 {
 	friend class EventDispatcher;
 	template <class T> friend class RefPtr;

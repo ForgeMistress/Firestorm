@@ -12,12 +12,13 @@
 #pragma once
 
 #include <libCore/Logger.h>
+#include <libCore/IRefCounted.h>
 
 OPEN_NAMESPACE(Firestorm);
 
 class TestCase;
 
-class TestHarness
+class TestHarness : public IRefCounted
 {
 public:
 	typedef Function<void(TestCase&)> TestFunction_t;

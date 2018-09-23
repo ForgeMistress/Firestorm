@@ -11,6 +11,8 @@
 #define LIBEXISTENCE_ENTITY_H_
 #pragma once
 
+#include <libCore/IRefCounted.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 class Component;
@@ -22,7 +24,8 @@ class Component;
 	allocating the components it wants to hold, we are in complete control of the memory at this level.
  **/
 class Entity : public Mirror::Object,
-               public Mirror::IInspectableObject
+               public Mirror::IInspectableObject,
+               public IRefCounted
 {
 	FIRE_MIRROR_DECLARE(Firestorm::Entity, Firestorm::Mirror::Object);
 public:

@@ -14,6 +14,7 @@
 #include "IResourceObject.h"
 #include "ResourceLoader.h"
 #include <future>
+#include <libCore/IRefCounted.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -22,12 +23,11 @@ OPEN_NAMESPACE(Firestorm);
 
 	This class instance does not contain any data. Instead, it merely defines a reference to a resource.
  **/
-class ResourceReference final : public Mirror::Object
+class ResourceReference final : public Mirror::Object,
+                                public IRefCounted
 {
 	FIRE_MIRROR_DECLARE(ResourceReference, Mirror::Object);
 public:
-	using Future = std::future<Result<RefPtr<IResourceObject>, Error>>;
-
 	struct Errors
 	{
 		FIRE_ERRORCODE(UNKNOWN_STATE);        // set when the state is unknown.

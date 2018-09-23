@@ -11,6 +11,7 @@
 #define LIBEXISTENCE_SYSTEM_H_
 #pragma once
 
+#include <libCore/IRefCounted.h>
 #include <libMirror/IInspectableObject.h>
 #include <libMirror/EventDispatcher.h>
 
@@ -42,7 +43,8 @@ public:
 };
 
 class System : public Mirror::Object,
-               public Mirror::IInspectableObject
+               public Mirror::IInspectableObject,
+	           public IRefCounted
 {
 	FIRE_MIRROR_DECLARE(System, Mirror::Object);
 public:

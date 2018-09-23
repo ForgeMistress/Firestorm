@@ -1,28 +1,35 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//<
-//<  \file ResourceObject.h
-//<
-//<  Contains \ref IResourceObject
-//<
+//
+//  IRefCounted
+//
+//  Base class for anything that wants to be used by RefPtr.
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBIO_RESOURCEOBJECT_H_
-#define LIBIO_RESOURCEOBJECT_H_
+#ifndef LIBCORE_IREFCOUNTED_H_
+#define LIBCORE_IREFCOUNTED_H_
 #pragma once
-
-#include <libCore/IRefCounted.h>
-#include <json/value.h>
 
 OPEN_NAMESPACE(Firestorm);
 
-class IDocument;
 
-class IResourceObject : public IRefCounted
+class IRefCounted
 {
+	template <class T> friend class RefPtr;
+	template <class T> friend class WeakPtr;
 public:
-	virtual ~IResourceObject() {}
+	IRefCounted() {}
+	virtual ~IRefCounted() {}
+
+	void AddRef() { ++_refCount; }
+	void DelRef() { --_refCount; }
+
+private:
+	size_t _refCount{ 0 };
 };
 
+
 CLOSE_NAMESPACE(Firestorm);
+
 #endif

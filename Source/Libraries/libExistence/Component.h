@@ -13,6 +13,7 @@
 
 #include <libCore/RefPtr.h>
 #include <libMirror/IInspectableObject.h>
+#include <libCore/IRefCounted.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -33,7 +34,8 @@ struct ComponentMetadata
 	contain application logic within their class definitions.
  **/
 class Component : public Mirror::Object,
-                  public Mirror::IInspectableObject
+                  public Mirror::IInspectableObject,
+                  public IRefCounted
 {
 	FIRE_MIRROR_DECLARE(Component, Mirror::Object);
 public:
