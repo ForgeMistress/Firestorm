@@ -124,11 +124,10 @@ void ResourceReference::SetResourcePath(const String& path)
 	_resourcePath = path;
 }
 
-void ResourceReference::SetResource(IResourceObject* resource, PointerHandlerExpr handler)
+void ResourceReference::SetResource(ResourceHandle resourceHandle)
 {
 	std::scoped_lock lock(_lock);
-	_resource = std::move(resource);
-	_resourceHandler = std::move(handler);
+	_resource = resourceHandle;
 	_isReady = true;
 	_errorSet = false;
 }

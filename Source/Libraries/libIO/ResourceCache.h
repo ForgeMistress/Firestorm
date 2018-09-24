@@ -18,21 +18,38 @@ OPEN_NAMESPACE(Firestorm);
 
 class ResourceCache;
 
-struct ResourcePtr
+class ResourceHandle final
 {
+	friend class ResourceCache;
 public:
-	ResourcePtr(ResourceCache& cache, const String& name, IResourceObject* obj);
-	ResourcePtr(const ResourcePtr& other);
+	ResourceHandle();
+	ResourceHandle(std::nullptr_t);
+	ResourceHandle(const String& name, IResourceObject* obj);
+	ResourceHandle(const ResourceHandle& other);
+	ResourceHandle(ResourceHandle&& other);
+	
+	~ResourceHandle();
 
-	~ResourcePtr();
+	ResourceHandle& operator=(const ResourceHandle& handle);
+	ResourceHandle& operator=(ResourceHandle&& handle);
+
+	bool operator==(const ResourceHandle& other);
 
 	const String& GetName() const;
 
+	template<class T>
+	T* Get()
+	{
+		return static_cast<T*>(_obj);
+	}
+
 private:
-	ResourceCache&   _cache;
+	void Set(const String& name, IResourceObject* obj);
+
 	String           _name;
 	IResourceObject* _obj{nullptr};
 };
+
 
 class ResourceCache
 {
@@ -40,11 +57,24 @@ public:
 	ResourceCache();
 	~ResourceCache();
 
-	void AddResource(const String& name, IResourceObject* resourceObject);
-	ResourcePtr GetResource(const String& name) const;
+	bool AddResource(const String& name, IResourceObject* resourceObject, ResourceHandle& outHandle);
+
+	bool HasResource(const String& name);
+
+	ResourceHandle GetResource(const String& name) const;
+
+	void ClearOrphanedResources();
 
 private:
-	Vector<IResourceObject*> _cache;
+	IResourceObject* FindResource(const String& name) const;
+
+	Mutex _lock;
+	struct CacheEntry
+	{
+		String           name;
+		IResourceObject* object;
+	};
+	Vector<CacheEntry> _cache;
 };
 
 CLOSE_NAMESPACE(Firestorm);

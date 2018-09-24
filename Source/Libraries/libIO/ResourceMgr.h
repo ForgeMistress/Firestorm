@@ -12,6 +12,7 @@
 #pragma once
 
 #include "ResourceLoader.h"
+#include "ResourceCache.h"
 #include "IResourceObject.h"
 
 #include <libCore/Result.h>
@@ -71,7 +72,7 @@ private:
 		String             filename;
 #endif
 	};
-	void Load(LoadOp&& loadOp);
+	void Load(ResourceLoader* loader, ResourceReference* ref);
 public:
 	ResourceMgr();
 	~ResourceMgr();
@@ -79,9 +80,18 @@ public:
 	template <class ResourceType_t>
 	void Load(ResourceReference& ref)
 	{
+		// retrieve the resource from the cache first if it exists.
+		const auto& path = ref.GetResourcePath();
+		if(_cache.HasResource(path))
+		{
+			// and set the resource right now.
+			ref.SetResource(_cache.GetResource(path));
+			return;
+		}
+		// otherwise we're gonna have to load this sucker.
 		ResourceLoader* loader = GetLoader(ResourceType_t::MyResourceType());
 		FIRE_ASSERT_MSG(loader, "no loader installed for this resource type");
-		Load(std::move(LoadOp(loader, &ref)));
+		Load(loader, &ref);
 	}
 
 	template<class ResourceType_t, class... Args_t>
@@ -109,6 +119,8 @@ private:
 	bool _quit{ false };
 
 	Vector<std::pair<const ResourceTypeID*, ResourceLoader*>> _loaders;
+
+	ResourceCache _cache;
 
 	void ThreadRun();
 };

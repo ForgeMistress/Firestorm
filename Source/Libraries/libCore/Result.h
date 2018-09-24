@@ -61,7 +61,7 @@ using Result = tl::expected<Expected_t, Unexpected_t>;
 	
 
 #define FIRE_RESULT( VALUE ) \
-	Result< decltype(VALUE), Error >(VALUE)
+	Result< std::decay<decltype(VALUE)>::type, Error >(VALUE)
 
 #define FIRE_RESULT_OK Result<void,ErrorCode>()
 

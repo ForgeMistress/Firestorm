@@ -13,6 +13,7 @@
 
 #include "IResourceObject.h"
 #include "ResourceLoader.h"
+#include "ResourceCache.h"
 #include <libCore/IRefCounted.h>
 #include <libMirror/Object.h>
 
@@ -67,18 +68,12 @@ public:
 	bool HasResource() const;
 
 	template<class Resource_t>
-	RefPtr<Resource_t> GetResource() const
+	Resource_t* GetResource() const
 	{
 		static_assert(std::is_base_of<IResourceObject, Resource_t>::value, "cast type must derive "
                                                                            "from IResourceObject");
-		auto resource = GetResourceBase();
-		return resource.Upcast<Resource_t>();
+		return _resource.Get<Resource_t>();
 	}
-
-	/**
-		Retrieve the resource if it is finished loading.
-	 **/
-	const RefPtr<IResourceObject>& GetResourceBase() const;
 
 	/**
 		Retrieve the error if it is reported that there is an error.
@@ -100,13 +95,12 @@ private:
 	friend class ResourceMgr;
 	void SetResourcePath(const String& path);
 
-	void SetResource(IResourceObject* resource, PointerHandlerExpr handler);
+	void SetResource(ResourceHandle resource);
 	void SetError(Error error);
 
 	// so much mutable...
 	mutable Mutex              _lock;
-	mutable IResourceObject*   _resource;
-	mutable PointerHandlerExpr _resourceHandler;
+	mutable ResourceHandle     _resource;
 	mutable Error              _error;
 	mutable bool               _errorSet{ false };
 	mutable bool               _isReady{ false };

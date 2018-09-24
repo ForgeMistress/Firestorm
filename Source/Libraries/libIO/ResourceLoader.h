@@ -12,6 +12,7 @@
 #pragma once
 
 #include "IResourceObject.h"
+#include "ResourceCache.h"
 #include <libCore/Result.h>
 
 OPEN_NAMESPACE(Firestorm);
@@ -23,7 +24,7 @@ class ResourceLoader
 {
 public:
 	using PtrHandler = std::function<void(IResourceObject*)>;
-	using LoadResult = Result<std::pair<IResourceObject*, PtrHandler>, Error>;
+	using LoadResult = Result<IResourceObject*, Error>;
 
 	ResourceLoader();
 	virtual ~ResourceLoader();

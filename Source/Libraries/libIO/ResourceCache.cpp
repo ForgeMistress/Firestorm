@@ -13,10 +13,21 @@
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ResourceHandle::ResourceHandle()
+: _obj(nullptr)
+{
+}
 
-ResourcePtr::ResourcePtr(ResourceCache& cache, const String& name, IResourceObject* obj)
-: _cache(cache)
-, _name(name)
+ResourceHandle::ResourceHandle(std::nullptr_t)
+: _obj(nullptr)
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceHandle::ResourceHandle(const String& name, IResourceObject* obj)
+: _name(name)
 , _obj(obj)
 {
 	_obj->AddRef();
@@ -24,9 +35,8 @@ ResourcePtr::ResourcePtr(ResourceCache& cache, const String& name, IResourceObje
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourcePtr::ResourcePtr(const ResourcePtr& other)
-: _cache(other._cache)
-, _name(other._name)
+ResourceHandle::ResourceHandle(const ResourceHandle& other)
+: _name(other._name)
 , _obj(other._obj)
 {
 	_obj->AddRef();
@@ -34,7 +44,16 @@ ResourcePtr::ResourcePtr(const ResourcePtr& other)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourcePtr::~ResourcePtr()
+ResourceHandle::ResourceHandle(ResourceHandle&& other)
+: _name(std::move(other._name))
+, _obj(other._obj)
+{
+	other._obj = nullptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceHandle::~ResourceHandle()
 {
 	if(_obj)
 		_obj->DelRef();
@@ -42,9 +61,54 @@ ResourcePtr::~ResourcePtr()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const String& ResourcePtr::GetName() const
+ResourceHandle& ResourceHandle::operator=(const ResourceHandle& other)
+{
+	if(this != &other)
+	{
+		_name = other._name;
+		_obj = other._obj;
+		_obj->AddRef();
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceHandle& ResourceHandle::operator=(ResourceHandle&& other)
+{
+	if(this != &other)
+	{
+		_name = std::move(other._name);
+		_obj = other._obj;
+
+		other._obj = nullptr;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ResourceHandle::operator==(const ResourceHandle& other)
+{
+	return _obj == other._obj;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const String& ResourceHandle::GetName() const
 {
 	return _name;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceHandle::Set(const String& name, IResourceObject* obj)
+{
+	if(_obj)
+		_obj->DelRef();
+
+	_name = name;
+	_obj = obj;
+
+	_obj->AddRef();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,28 +121,101 @@ ResourceCache::ResourceCache()
 
 ResourceCache::~ResourceCache()
 {
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceCache::AddResource(const String& name, IResourceObject* resourceObject)
-{
-
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourcePtr ResourceCache::GetResource(const String& name) const
-{
+	std::scoped_lock lock(_lock);
 	for(size_t i = 0; i < _cache.size(); ++i)
 	{
-		if(_cache[i].GetName() == name)
+		auto entry = _cache[i];
+		delete entry.object;
+	}
+	_cache.clear();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ResourceCache::AddResource(const String& name, IResourceObject* resourceObject, ResourceHandle& outHandle)
+{
+	std::scoped_lock lock(_lock);
+	FIRE_ASSERT_MSG(resourceObject->GetRefCount() == 0,
+					"the resource object was owned by something when it was added to the cache");
+	for(size_t i = 0; i < _cache.size(); ++i)
+	{
+		if(_cache[i].name == name)
+			return false;
+	}
+	_cache.push_back(CacheEntry{
+		name,
+		resourceObject
+	});
+	outHandle._name = name;
+	outHandle._obj = resourceObject;
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ResourceCache::HasResource(const String& name)
+{
+	std::scoped_lock lock(_lock);
+	for(size_t i = 0; i < _cache.size(); ++i)
+	{
+		auto& entry = _cache[i];
+		if(entry.name == name)
+			return true;
+	}
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceHandle ResourceCache::GetResource(const String& resource) const
+{
+	return ResourceHandle {
+		resource,
+		FindResource(resource)
+	};
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceCache::ClearOrphanedResources()
+{
+	std::scoped_lock lock(_lock);
+	auto iter = _cache.begin();
+	while(iter != _cache.end())
+	{
+		auto& entry = (*iter);
+		// orphaned
+		if(entry.object && entry.object->GetRefCount() == 0)
 		{
-			return _cache[i];
+			delete entry.object;
+			entry.object = nullptr;
+			iter = _cache.erase(iter);
+		}
+		// otherwise deallocated
+		else if(!entry.object)
+		{
+			iter = _cache.erase(iter);
+		}
+		else
+		{
+			++iter;
 		}
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+IResourceObject* ResourceCache::FindResource(const String& name) const
+{
+	std::scoped_lock lock(_lock);
+	for(size_t i = 0; i < _cache.size(); ++i)
+	{
+		if(_cache[i].name == name)
+		{
+			return _cache[i].object;
+		}
+	}
+	return nullptr;
+}
 
 CLOSE_NAMESPACE(Firestorm);

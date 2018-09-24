@@ -60,10 +60,12 @@ ResourceMgr::~ResourceMgr()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceMgr::Load(LoadOp&& load)
+void ResourceMgr::Load(ResourceLoader* loader, ResourceReference* ref)
 {
+	LoadOp loadOp(loader, ref);
+
 	std::unique_lock lock(_lock);
-	_queue.push(std::move(load));
+	_queue.push(std::move(loadOp));
 	lock.unlock();
 	_cv.notify_all();
 }
@@ -139,8 +141,9 @@ void ResourceMgr::ThreadRun()
 				auto result = loader->Load(this, *oper.ref);
 				if(result.has_value())
 				{
-					auto resultValue = result.value();
-					oper.ref->SetResource(resultValue.first, resultValue.second);
+
+					/*auto resultValue = result.value();
+					oper.ref->SetResource(resultValue.first);*/
 				}
 				else
 				{
