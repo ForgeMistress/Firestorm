@@ -12,6 +12,7 @@
 #pragma once
 
 #include <libCore/RefPtr.h>
+#include <libCore/WeakPtr.h>
 #include <libMirror/Object.h>
 
 #include "System.h"

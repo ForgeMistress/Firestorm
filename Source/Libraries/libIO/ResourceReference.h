@@ -69,14 +69,14 @@ public:
 	{
 		static_assert(std::is_base_of<IResourceObject, Resource_t>::value, "cast type must derive "
                                                                            "from IResourceObject");
-		auto resource = GetResource();
+		auto resource = GetResourceBase();
 		return resource.Upcast<Resource_t>();
 	}
 
 	/**
 		Retrieve the resource if it is finished loading.
 	 **/
-	RefPtr<IResourceObject> GetResource() const;
+	RefPtr<IResourceObject> GetResourceBase() const;
 
 	/**
 		Retrieve the error if it is reported that there is an error.

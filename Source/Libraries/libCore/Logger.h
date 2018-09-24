@@ -102,37 +102,30 @@ void Logger::DoWrite(T& arg, Args... args)
 	DoWrite(args...);
 }
 
-#define DEFINE_LOGGER_FUNCTION(LEVEL) \
-template<class... Args>\
-extern void FIRE_LOG_##LEVEL##(Args... args)\
-{\
-	Logger::##LEVEL##_LOGGER.Write(args...);\
-}
-
 template<class... Args>
-extern void FIRE_LOG_DEBUG(const String& format, Args... args)
+static void FIRE_LOG_DEBUG(const char* format, Args... args)
 {
-	static std::mutex lock;
-	std::scoped_lock<std::mutex> l(lock);
-	String f = format + "\n";
+	// static std::mutex lock;
+	// std::scoped_lock<std::mutex> l(lock);
+	String f = String(format) + "\n";
 	Logger::DEBUG_LOGGER.mprintf(f.c_str(), args...);
 }
 
 template<class... Args>
-extern void FIRE_LOG_WARNING(const String& format, Args... args)
+static void FIRE_LOG_WARNING(const char* format, Args... args)
 {
-	static std::mutex lock;
-	std::scoped_lock<std::mutex> l(lock);
-	String f = format + "\n";
+	// static std::mutex lock;
+	// std::scoped_lock<std::mutex> l(lock);
+	String f = String(format) + "\n";
 	Logger::WARNING_LOGGER.mprintf(f.c_str(), args...);
 }
 
 template<class... Args>
-extern void FIRE_LOG_ERROR(const String& format, Args... args)
+static void FIRE_LOG_ERROR(const char* format, Args... args)
 {
-	static std::mutex lock;
-	std::scoped_lock<std::mutex> l(lock);
-	String f = format + "\n";
+	// static std::mutex lock;
+	// std::scoped_lock<std::mutex> l(lock);
+	String f = String(format) + "\n";
 	Logger::ERROR_LOGGER.mprintf(f.c_str(), args...);
 }
 

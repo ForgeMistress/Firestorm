@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "Document.h"
 #include "IDocument.h"
+#include <libJson/JSONDocument.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -42,11 +43,17 @@ RefPtr<IDocument> MakeBlank(const String& type)
 		{
 			Mirror::Variant document = method.invoke({});
 			if(document.is_valid())
+			{
 				if(document.can_convert<RefPtr<IDocument>>())
-					return document.convert<RefPtr<IDocument>>();
+				{
+					RefPtr<IDocument> doc(document.convert<RefPtr<IDocument>>());
+					doc->FindSubsection("");
+					return doc;
+				}
+			}
 		}
 	}
-	return RefPtr<IDocument>(nullptr);
+	return nullptr;
 }
 
 RefPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data)
@@ -56,15 +63,21 @@ RefPtr<IDocument> MakeFromData(const String& type, const Vector<char>& data)
 	if(docType.is_valid())
 	{
 		auto method = GetMakerFunction(docType, IDocument::MAKER_FUNCTION_DATA);
-		if(method.is_valid())
+		if (method.is_valid())
 		{
 			Mirror::Variant document = method.invoke({}, data);
-			if(document.is_valid())
-				if(document.can_convert<RefPtr<IDocument>>())
-					return document.convert<RefPtr<IDocument>>();
+			if (document.is_valid())
+			{
+				if (document.can_convert<RefPtr<IDocument>>())
+				{
+					RefPtr<IDocument> doc(document.convert<RefPtr<IDocument>>());
+					doc->FindSubsection("");
+					return doc;
+				}
+			}
 		}
 	}
-	return RefPtr<IDocument>(nullptr);
+	return nullptr;
 }
 
 CLOSE_NAMESPACE(Document);

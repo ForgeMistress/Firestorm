@@ -11,6 +11,7 @@
 #define LIBCORE_OBJECTPOOL_H_
 #pragma once
 
+#include "Assert.h"
 #include <forward_list>
 
 OPEN_NAMESPACE(Firestorm);
@@ -127,7 +128,6 @@ bool PoolPtr<T>::IsValid() const
 {
 	return _ptr != nullptr;
 }
-
 
 template<class T>
 template<class... Args_t>

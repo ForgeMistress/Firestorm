@@ -16,8 +16,7 @@ includedirs({
 
 addDependencies({
     "libCore",
-    "libMirror",
-    "libJson"
+    "libMirror"
 })
 
 dependson({"LLGL", "angelscript"})

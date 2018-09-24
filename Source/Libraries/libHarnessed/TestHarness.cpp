@@ -20,6 +20,10 @@ TestHarness::TestHarness(const String& name, bool quietly)
 {
 }
 
+TestHarness::~TestHarness()
+{
+}
+
 uint32_t TestHarness::Run()
 {
 	FIRE_ASSERT(m_cases.size() == m_caseNames.size());

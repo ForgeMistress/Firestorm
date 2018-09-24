@@ -22,8 +22,9 @@ public:
 	IRefCounted() {}
 	virtual ~IRefCounted() {}
 
-	void AddRef() { ++_refCount; }
-	void DelRef() { --_refCount; }
+	size_t AddRef() { return ++_refCount; }
+	size_t DelRef() { return --_refCount; }
+	size_t GetRefCount() const { return _refCount; }
 
 private:
 	size_t _refCount{ 0 };

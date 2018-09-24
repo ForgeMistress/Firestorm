@@ -17,380 +17,354 @@
 
 #include "libCore.h"
 #include "Assert.h"
+#include "PtrControlBlock.h"
+#include <functional>
 #include <rttr/wrapper_mapper.h>
 
 OPEN_NAMESPACE(Firestorm);
 
-class RefPtrBase
-{
-	template <class T> friend class WeakPtr;
-public:
-	template <class T>
-	RefPtrBase(T* object)
-	: _object(static_cast<void*>(object))
-	{
-	}
-
-	template<class T>
-	T* get_ptr() const { return static_cast<T*>(_object); }
-
-	template<class T>
-	void set_ptr(T* ptr)
-	{
-		_object = ptr;
-	}
-
-	template<class T, class Del>
-	void delete_ptr(Del deleter)
-	{
-		// then delete the object.
-		if(deleter) deleter(static_cast<T*>(_object));
-		else delete static_cast<T*>(_object);
-	}
-
-private:
-	void* _object{ nullptr };
-};
-
 template<class T>
-class RefPtr : public RefPtrBase
+class RefPtr final
 {
 	template <class T> friend class WeakPtr;
-
 public:
 	using DeleteExpr = std::function<void(T*)>;
-	typedef T element_type;
-	typedef T* pointer_type;
 
+private:
+	DeleteExpr _deleter{ nullptr };
+	PtrControlBlock* _ctrl{ nullptr };
+
+public:
+	using element_type = T;
+	using pointer_type = T*;
+	using ctrl_type = PtrControlBlock;
+	using deleter_type = std::function<void(T*)>;
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Same Type Constructors
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// default
 	RefPtr()
+	: _ctrl(ctrl_type::make_block(nullptr))
 	, _deleter(nullptr)
 	{
 	}
 
+	// nullptr
 	RefPtr(std::nullptr_t)
+	: _ctrl(ctrl_type::make_block(nullptr))
 	, _deleter(nullptr)
 	{
 	}
 
-	RefPtr(T* object)
-	: RefPtrBase(object)
+	// raw pointer with no deleter
+	template<class Ptr_t>
+	RefPtr(Ptr_t* object)
+	: _ctrl(ctrl_type::make_block(object))
 	, _deleter(nullptr)
 	{
-		_object->AddRef();
+		static_assert(
+			std::is_base_of<T, Ptr_t>::value ||
+			std::is_same<T, Ptr_t>::value,
+			"invalid types passed");
+		add_ref();
 	}
 
-	template<class Deleter>
-	RefPtr(T* object, Deleter deleter)
-	: RefPtrBase(object)
+	// raw pointer with specified deleter
+	template<class Ptr_t, class Deleter>
+	RefPtr(Ptr_t* object, Deleter deleter)
+	: _ctrl(ctrl_type::make_block<Ptr_t>(object))
 	, _deleter(deleter)
 	{
-		get_ptr<T>()->AddRef();
+		static_assert(
+			std::is_base_of<T, Ptr_t>::value ||
+			std::is_same<T, Ptr_t>::value,
+			"invalid types passed");
+		add_ref();
 	}
 
-	RefPtr(const RefPtr<T>& other)
-	: RefPtrBase(other._object)
-	, _deleter(other._deleter)
+	// copy
+	template <class U>
+	RefPtr(const RefPtr<U>& other)
+		: _ctrl(other.get_ctrl())
 	{
-		get_ptr<T>()->AddRef();
-	}
-
-	// polymorphic support
-	template <class Subclass_t>
-	RefPtr(const RefPtr<Subclass_t>& other)
-		: RefPtrBase(other._get_ptr())
-	{
-		static_assert(std::is_base_of<T, Subclass_t>::value,
-			"the RefPtr passed to the casting constructor of RefPtr must hold a type that is a subclass of the held type");
-
-		get_ptr<T>()->AddRef();
-
-		// This is IWhatever, other is class Whatever : public IWhatever. ya feel?
-		auto otherDel = other._get_deleter();
+		static_assert(
+			std::is_base_of<T, RefPtr<U>::element_type>::value ||
+			std::is_same<T, RefPtr<U>::element_type>::value,
+			"invalid types passed");
+		auto otherDel = other.get_deleter();
 		if (otherDel)
-		{
-			// what has science done?
-			_deleter = [del = otherDel](T* ptr) {
-				if (ptr)
-					// so in order to call the other deleter what the superclass defined, we need to wrap it in our own
-					// that supports our needs.
-					del(reinterpret_cast<Subclass_t*>(ptr));
-			};
-		}
+			set_deleter(otherDel);
+
+		add_ref();
 	}
 
-	// polymorphic support with provided deleter.
-	template <class Subclass_t, class Del>
-	RefPtr(const RefPtr<Subclass_t>& other, Del deleter)
-		: RefPtrBase(other._object)
-		, _deleter(deleter)
-	{
-		static_assert(std::is_base_of<T, Subclass_t>::value,
-			"the RefPtr passed to the casting constructor of RefPtr must hold a type "
-			"that is a subclass of the held type");
-		get_ptr<T>()->AddRef();
-	}
-
-	// polymorphic support for raw pointer
-	template <class Subclass_t>
-	RefPtr(Subclass_t* ptr)
-	: RefPtrBase(static_cast<T*>(ptr))
-	{
-		static_assert(std::is_base_of<T, Subclass_t>::value,
-			"the RefPtr passed to the casting constructor of RefPtr must hold a type "
-			"that is a subclass of the held type");
-		get_ptr<T>()->AddRef();
-	}
-
-	// polymorphic support for raw pointer
-	template <class Subclass_t, class Del>
-	RefPtr(Subclass_t* ptr, Del deleter)
-	: RefPtrBase(static_cast<T*>(ptr))
+	// copy with provided deleter
+	template <class U, class Del>
+	RefPtr(const RefPtr<U>& other, Del deleter)
+	: _ctrl(other.get_ctrl())
 	, _deleter(deleter)
 	{
-		static_assert(std::is_base_of<T, Subclass_t>::value,
-			"the RefPtr passed to the casting constructor of RefPtr must hold a type "
-			"that is a subclass of the held type");
-		get_ptr<T>()->AddRef();
+		static_assert(
+			std::is_base_of<T, RefPtr<U>::element_type>::value ||
+			std::is_same<T, RefPtr<U>::element_type>::value,
+			"invalid types passed");
+		add_ref();
 	}
 
-	// polymorphic move
-	template<class Subclass_t>
-	RefPtr(RefPtr<Subclass_t>&& other)
-	: RefPtrBase(other._object)
+	// move
+	template<class U>
+	RefPtr(RefPtr<U>&& other)
+	: _ctrl(other.get_ctrl())
+	, _deleter(other.get_deleter())
 	{
-		static_assert(std::is_base_of<T, Subclass_t>::value,
-			"the RefPtr passed to the casting move constructor of RefPtr must hold a type "
-			"that is a subclass of the held type");
-
-		// This is IWhatever, other is class Whatever : public IWhatever. ya feel?
-		auto otherDel = other._get_deleter();
-		if (otherDel)
-		{
-			// what has science done?
-			_deleter = [del = otherDel](T* ptr) {
-				if (ptr)
-					// so in order to call the other deleter what the superclass defined, we need to wrap it in our own
-					// that supports our needs.
-					del(reinterpret_cast<Subclass_t*>(ptr));
-			};
-		}
-
-		// assumes ownership
-		other._object = nullptr;
-		other._deleter = nullptr;
-	}
-
-	RefPtr(RefPtr<T>&& other)
-	: RefPtrBase(other._object)
-	{
-		_object = std::move(other._object);
-		_deleter = std::move(other._deleter);
-
-		// assumes ownership
-		other.set_ptr(nullptr);
-		other._deleter = nullptr;
+		static_assert(
+			std::is_base_of<T, RefPtr<U>::element_type>::value ||
+			std::is_same<T, RefPtr<U>::element_type>::value,
+			"invalid types passed");
+		other.set_ctrl(nullptr);
+		other.set_deleter(nullptr);
 	}
 
 	~RefPtr()
 	{
-		if(get_ptr<T>())
-			get_ptr<T>()->DelRef();
-		DoCleanup();
+		del_ref();
 	}
 
-	RefPtr<T>& operator=(const RefPtr<T>& other)
+	/*RefPtr<T>& operator=(const RefPtr<T>& other)
 	{
 		if(this != &other)
 		{
 			// decrement the strong count of the existing counter.
-			if (get_ptr<T>())
-				get_ptr<T>()->DelRef();
-			DoCleanup();
-			// any weak pointers that still hold the control block from this RefPtr will clean them up as
-			// expected.
+			del_ref();
 
 			// copy over the stuff.
-			set_ptr<T>(other._object);
-			_deleter = other._deleter;
+			_ctrl = other.get_ctrl();
+			_deleter = other.get_deleter();
 
 			// add a reference for the new counter.
-			if(get_ptr<T>())
-				get_ptr<T>()->AddRef();
+			add_ref();
+		}
+		return *this;
+	}*/
+
+	/*RefPtr<T>& operator=(RefPtr<T>&& other)
+	{
+		if(this != &other)
+		{
+			// decrement the strong count of the existing counter.
+			del_ref();
+
+			// copy over the stuff.
+			_ctrl = other.get_ctrl();
+			_deleter = other.get_deleter();
+
+			other.set_ctrl(nullptr);
+			other.set_deleter(nullptr);
+		}
+		return *this;
+	}*/
+
+	template<class U>
+	RefPtr<T>& operator=(const RefPtr<U>& other)
+	{
+		static_assert(
+			std::is_base_of<T, RefPtr<U>::element_type>::value ||
+			std::is_same<T, RefPtr<U>::element_type>::value,
+			"invalid types passed");
+		if (this != &other)
+		{
+			// decrement the strong count of the existing counter.
+			del_ref();
+
+			// copy over the stuff.
+			_ctrl = other.get_ctrl();
+			_deleter = other.get_deleter();
+
+			// add a reference for the new counter.
+			add_ref();
+		}
+		return *this;
+	}
+
+	template<class U>
+	RefPtr<T>& operator=(RefPtr<U>&& other)
+	{
+		static_assert(
+			std::is_base_of<T, RefPtr<U>::element_type>::value ||
+			std::is_same<T, RefPtr<U>::element_type>::value,
+			"invalid types passed");
+		if (this != &other)
+		{
+			// decrement the strong count of the existing counter.
+			del_ref();
+
+			// copy over the stuff.
+			_ctrl = other.get_ctrl();
+			_deleter = other.get_deleter();
+
+			other.set_ctrl(nullptr);
+			other.set_deleter(nullptr);
 		}
 		return *this;
 	}
 
 	RefPtr<T>& operator=(std::nullptr_t)
 	{
-		if(_object)
-			_object->DelRef();
-		set_ptr<T>(nullptr);
+		del_ref();
+
+		// _ctrl->set_ptr(nullptr);
 		_deleter = nullptr;
-		return *this;
-	}
-
-	RefPtr<T>& operator=(RefPtr<T>&& other)
-	{
-		if(this != &other)
-		{
-			if(get_ptr<T>())
-				get_ptr<T>()->DelRef();
-
-			set_ptr<T>(other._object); // we're moving it, so no increment to the ref count.
-
-			other._object = nullptr;
-			other._deleter = nullptr;
-		}
 		return *this;
 	}
 
 	template<class U>
 	RefPtr<U> Upcast()
 	{
-		if(_object == nullptr)
+		static_assert(
+			std::is_base_of<T, U>::value &&
+			!std::is_same<T, U>::value,
+			"invalid types passed");
+
+		if (_ctrl == nullptr)
 			return nullptr;
 
-		RefPtr<U> out(static_cast<U*>(_object));
-		if (out._get_deleter())
-			out._set_deleter([del = _deleter](U* ptr) {
+		RefPtr<U> out(get_ctrl());
+		auto deleter = get_deleter();
+		if (deleter)
+			out.set_deleter([del = deleter](U* ptr) {
 			// the original will still work, but the output RefPtr deleter needs to have the signature of the
 			// proper type.
 			del(ptr);
 		});
-		// increment the ref count.
+
 		return out;
 	}
 
-	T* Get() const { return get_ptr<T>(); }
-	T* operator->() { return get_ptr<T>(); }
+	T* Get() const { return _ctrl->get_ptr<T>(); }
 
-	const T* operator->() const { return get_ptr<T>(); }
+	T* operator->() { return _ctrl->get_ptr<T>(); }
+	const T* operator->() const { return _ctrl->get_ptr<T>(); }
 
-	bool operator==(const RefPtr<T>& other) const
+	template<class U>
+	bool operator==(const RefPtr<U>& other) const
 	{
-		return get_ptr<T>() == other.get_ptr<T>();
+		static_assert(
+			std::is_base_of<T, RefPtr<U>::element_type>::value ||
+			std::is_same<T, RefPtr<U>::element_type>::value,
+			"invalid types passed");
+		return _ctrl == other.get_ctrl();
 	}
 
 	bool operator==(std::nullptr_t) const
 	{
-		return get_ptr<T>() == nullptr;
+		return _ctrl && _ctrl->get_ptr<T>() == nullptr;
 	}
 
-	bool operator!=(const RefPtr<T>& other) const
+	template<class U>
+	bool operator!=(const RefPtr<U>& other) const
 	{
-		return get_ptr<T>() != other._object;
+		static_assert(
+			std::is_base_of<T, RefPtr<U>::element_type>::value ||
+			std::is_same<T, RefPtr<U>::element_type>::value,
+			"invalid types passed");
+		return _ctrl != other.get_ctrl();
 	}
 
 	bool operator!=(std::nullptr_t) const
 	{
-		return get_ptr<T>() != nullptr;
+		if (_ctrl)
+		{
+			auto ptr = _ctrl->get_ptr<T>();
+			return ptr != nullptr;
+		}
+		return true;
+		//return _ctrl && _ctrl->get_ptr<T>() != nullptr;
 	}
 
 	operator bool() const
 	{
-		return get_ptr<T>() != nullptr;
+		return _ctrl != nullptr;
 	}
 
-	uint32_t GetCount() const
+	size_t GetCount() const
 	{
-		return get_ptr<T>() ? get_ptr<T>()->_refCount : 0;
+		return _ctrl ? _ctrl->get_strong_count() : 0;
 	}
 
-	DeleteExpr _get_deleter() const { return _deleter; }
+	size_t GetWeakCount() const
+	{
+		return _ctrl ? _ctrl->get_weak_count() : 0;
+	}
 
-	template<class Del>
-	void _set_deleter(Del del) { _deleter = del; }
+	PtrControlBlock* get_ctrl() const
+	{
+		return _ctrl;
+	}
+
+	void set_ctrl(PtrControlBlock* ctrl)
+	{
+		_ctrl = ctrl;
+	}
+
+	DeleteExpr get_deleter() const
+	{
+		return _deleter;
+	}
+
+	void set_deleter(deleter_type deleter)
+	{
+		if (deleter)
+			_deleter = deleter;
+	}
+
+	template<class Deleter>
+	void set_deleter(Deleter deleter)
+	{
+		_deleter = deleter;
+	}
+
+	void set_deleter(std::nullptr_t)
+	{
+		_deleter = nullptr;
+	}
+
+	// used by the WeakPtr and Upcast
+	RefPtr(PtrControlBlock* ctrl)
+	: _ctrl(ctrl)
+	, _deleter(nullptr)
+	{
+		FIRE_ASSERT_MSG(_ctrl != nullptr, "the control block passed to RefPtr was nullptr");
+		add_ref();
+	}
 
 private:
-	void DoCleanup()
+	void add_ref()
 	{
-		// if there are no more strong references...
-		if(get_ptr<T>() && get_ptr<T>()->_refCount == 0)
-		{
-			delete_ptr<T>(_deleter);
+		if(_ctrl)
+			_ctrl->add_strong_ref();
+	}
 
-			// and null out the counter's pointer as well.
-			set_ptr<T>(nullptr);
+	void del_ref()
+	{
+		if(_ctrl)
+		{
+			_ctrl->del_strong_ref();
+
+			if(_ctrl->get_strong_count() == 0)
+			{
+				_ctrl->delete_ptr<T>(get_deleter());
+				_ctrl->set_ptr<T>(nullptr);
+
+				if(_ctrl->get_weak_count() == 0)
+				{
+					ctrl_type::return_block(_ctrl);
+					_ctrl = nullptr;
+				}
+			}
 		}
 	}
-
-	T*         _object{ nullptr };
-	DeleteExpr _deleter{ nullptr };
-};
-
-template <class T>
-class WeakPtr final
-{
-public:
-	typedef T* T_ptr;
-
-	WeakPtr(std::nullptr_t) : _ptr(RefPtrBase(nullptr)) {}
-	WeakPtr(const RefPtrBase& ptr)
-	: _ptr(ptr)
-	{
-	}
-
-	WeakPtr(const WeakPtr<T>& ptr)
-	: _ptr(ptr._object)
-	{
-	}
-
-	template <class Subclass_t>
-	WeakPtr(const RefPtr<Subclass_t>& ptr)
-		: _ptr(ptr)
-	{
-		FIRE_ASSERT(_count);
-		static_assert(std::is_base_of<T, Subclass_t>::value,
-			"the pointer passed to the casting constructor must be a subclass of the type held by the WeakPtr");
-	}
-
-	bool operator==(WeakPtr<T>& other)
-	{
-		return other._ptr.get_ptr<T>() == _ptr.get_ptr<T>();
-	}
-
-	bool operator==(RefPtr<T>& other)
-	{
-		return other.get_ptr<T>() == _ptr.get_ptr<T>();
-	}
-
-	bool operator==(std::nullptr_t) const
-	{
-		return _ptr.get_ptr<T>() && _ptr.get_ptr<T>() == nullptr;
-	}
-
-	bool operator!=(std::nullptr_t) const
-	{
-		return _ptr.get_ptr<T>() && _ptr.get_ptr<T>() == nullptr;
-	}
-
-	template <class Subclass_t>
-	WeakPtr<T>& operator=(const RefPtr<Subclass_t>& ptr)
-	{
-		static_assert(std::is_base_of<T, Subclass_t>::value,
-			"the RefPtr passed to the casting constructor must hold an instance of a subclass of the type held by the WeakPtr");
-
-		_object = static_cast<T*>(ptr._object);
-		return *this;
-	}
-
-	WeakPtr<T>& operator=(const RefPtr<T>& obj)
-	{
-		_object = obj._object;
-		return *this;
-	}
-
-	RefPtr<T> Lock() const
-	{
-		return RefPtr<T>(_object);
-	}
-
-	operator bool() const
-	{
-		return _object != nullptr;
-	}
-private:
-	T* & _object;
 };
 
 CLOSE_NAMESPACE(Firestorm);

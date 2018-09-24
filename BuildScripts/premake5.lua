@@ -21,7 +21,7 @@ include("Options")
 
 -- All projects will have the following build targets available to them.
 configurations({
-    "Debug", 
+    "Debug",
     "Release",
     "Final",
 })
@@ -81,7 +81,7 @@ build("libCore")
 build("libExistence")
 build("libHarnessed")
 build("libIO")
-build("libJson")
+-- build("libJson")
 build("libMath")
 build("libMirror")
 build("libScene")

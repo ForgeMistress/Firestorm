@@ -19,7 +19,6 @@ addDependencies({
     "libMirror",
     "libMath",
     "libIO",
-    "libJson",
     "libExistence"
 })
 

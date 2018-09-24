@@ -136,7 +136,7 @@ void ResourceMgr::ThreadRun()
 
 			try
 			{
-				auto& result = loader->Load(this, *oper.ref);
+				auto result = loader->Load(this, *oper.ref);
 				oper.ref->SetResult(result);
 			}
 			catch(std::exception& e)

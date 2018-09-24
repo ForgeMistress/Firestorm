@@ -48,7 +48,7 @@ AssertionException::AssertionException(const char*   expression,
 	ostream << " failed in file '" << file << "' line# " << line;
 	_report = ostream.str();
 
-	FIRE_LOG_ERROR(_report);
+	FIRE_LOG_ERROR(_report.c_str());
 }
 
 

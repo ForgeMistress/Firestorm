@@ -26,6 +26,13 @@ local DIVIDER =
 
 local WINDOWS_SDK_VERSION = "10.0.171340"
 
+local ENGINE_IGNORES = {
+    libHarnessed = true,
+    libJson = true
+}
+local LIB_IGNORES = {
+    libJson = true
+}
 
 -- gather the names of all of the first party static library projects.
 do
@@ -33,10 +40,12 @@ do
     for _, dirPath in pairs(libraryDirectories) do
         local libname = path.getname(dirPath)
 
-        if libname ~= "libHarnessed" then
+        if not ENGINE_IGNORES[libname] then
             table.insert(ENGINE_GAME_LIBS, libname)
         end
-        table.insert(ENGINE_LIBS, libname)
+        if not LIB_IGNORES[libname] then
+            table.insert(ENGINE_LIBS, libname)
+        end
     end
 end
 

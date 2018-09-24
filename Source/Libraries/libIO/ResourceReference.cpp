@@ -59,6 +59,7 @@ String ResourceReference::GetPathTo() const
 
 bool ResourceReference::IsReady() const
 {
+	std::scoped_lock lock(_lock);
 	return _isReady;
 }
 
@@ -85,7 +86,8 @@ bool ResourceReference::HasResource() const
 	return false;
 }
 
-RefPtr<IResourceObject> ResourceReference::GetResource() const
+#pragma optimize("", off)
+RefPtr<IResourceObject> ResourceReference::GetResourceBase() const
 {
 	if(IsReady())
 	{
@@ -93,6 +95,7 @@ RefPtr<IResourceObject> ResourceReference::GetResource() const
 	}
 	return nullptr;
 }
+#pragma optimize("", on)
 
 Error ResourceReference::GetError() const
 {
@@ -127,11 +130,11 @@ void ResourceReference::SetResult(const ResourceLoader::LoadResult& result)
 	std::scoped_lock<Mutex> lock(_lock);
 	if(result.has_value())
 	{
-		_resource = result.value();
+		_resource = std::move(result.value());
 	}
 	else
 	{
-		_error = result.error();
+		_error = std::move(result.error());
 		_errorSet = true;
 	}
 	_isReady = true;

@@ -12,6 +12,5 @@ configureEngineLib("libIO")
 addDependencies({
     "libCore",
     "libMirror",
-    "libJson"
 })
 dependson({"physfs"})

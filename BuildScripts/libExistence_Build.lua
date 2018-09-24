@@ -18,7 +18,6 @@ addDependencies({
     "libCore",
     "libMirror",
     "libIO",
-    "libJson"
 })
 
 dependson({ "rttr", "jsoncpp" })

@@ -14,6 +14,7 @@
 #include <libCore/RefPtr.h>
 #include <libMirror/IInspectableObject.h>
 #include <libCore/IRefCounted.h>
+#include <libCore/WeakPtr.h>
 
 OPEN_NAMESPACE(Firestorm);
 

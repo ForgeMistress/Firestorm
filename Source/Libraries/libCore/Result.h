@@ -52,6 +52,7 @@ private:
 template <typename Expected_t, typename Unexpected_t> 
 using Result = tl::expected<Expected_t, Unexpected_t>;
 
+
 #define FIRE_ERROR( ERROR_CODE, ... ) \
 	tl::make_unexpected( Error( ERROR_CODE, __VA_ARGS__ ) )
 

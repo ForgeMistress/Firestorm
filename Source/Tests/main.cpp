@@ -5,7 +5,6 @@
 #include <libExistence/libExistence.h>
 #include <libHarnessed/libHarnessed.h>
 #include <libIO/libIO.h>
-#include <libJson/libJson.h>
 #include <libMath/libMath.h>
 #include <libMirror/libMirror.h>
 #include <libScene/libScene.h>
@@ -34,7 +33,6 @@ int main(int ac, char** av)
     Library<::Firestorm::libExistence>::Initialize(ac,av);
     Library<::Firestorm::libHarnessed>::Initialize(ac,av);
     Library<::Firestorm::libIO>::Initialize(ac,av);
-    Library<::Firestorm::libJson>::Initialize(ac,av);
     Library<::Firestorm::libMath>::Initialize(ac,av);
     Library<::Firestorm::libMirror>::Initialize(ac,av);
     Library<::Firestorm::libScene>::Initialize(ac,av);

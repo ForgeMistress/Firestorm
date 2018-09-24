@@ -12,6 +12,7 @@
 #pragma once
 
 #include <libCore/RefPtr.h>
+#include <libCore/WeakPtr.h>
 #include "Object.h"
 #include <libCore/IRefCounted.h>
 
@@ -35,6 +36,8 @@ class EDReceipt : public IRefCounted
 {
 	friend class EventDispatcher;
 	template <class T> friend class RefPtr;
+	template <class T> friend class WeakPtr;
+	friend class PtrControlBlock;
 private:
 	EDReceipt(EventDispatcher* dispatcher, IEvent* event);
 	~EDReceipt();

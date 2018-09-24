@@ -20,29 +20,16 @@ OPEN_NAMESPACE(Mirror);
 class Object;
 CLOSE_NAMESPACE(Mirror);
 
-class IDocument : public IRefCounted
+class IDocument
 {
 public:
-	virtual ~IDocument() {}
-
-	static const ErrorCode* ERROR;
-	static const ErrorCode* READ_DOCUMENT_FAILED;
-	static const ErrorCode* READ_VALUE_FAILED;
-	static const ErrorCode* SUBSECTION_NOT_FOUND;
-	static const ErrorCode* FIND_SUBSECTION_FAILED;
-	static const ErrorCode* ENTER_SUBSECTION_FAILED;
-	static const ErrorCode* GET_TYPE_FAILED;
-
-	/*enum Codes : uint8_t
-	{
-		ERROR, // generic
-		READ_DOCUMENT_FAILED,
-		READ_VALUE_FAILED,
-		SUBSECTION_NOT_FOUND,
-		FIND_SUBSECTION_FAILED,
-		ENTER_SUBSECTION_FAILED,
-		GET_TYPE_FAILED
-	};*/
+	FIRE_ERRORCODE(ERROR);
+	FIRE_ERRORCODE(READ_DOCUMENT_FAILED);
+	FIRE_ERRORCODE(READ_VALUE_FAILED);
+	FIRE_ERRORCODE(SUBSECTION_NOT_FOUND);
+	FIRE_ERRORCODE(FIND_SUBSECTION_FAILED);
+	FIRE_ERRORCODE(ENTER_SUBSECTION_FAILED);
+	FIRE_ERRORCODE(GET_TYPE_FAILED);
 
 	virtual bool InitializeAsIfNew() = 0;
 

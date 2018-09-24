@@ -124,6 +124,8 @@ private:
 
 CLOSE_NAMESPACE(Firestorm);
 
+// InitializeLib<::Firestorm::libJson>(ac, av);
+
 #define FIRE_RUN_APPLICATION(CLASS_NAME)                                           \
 	template <class T>                                                             \
 	static void InitializeLib(int ac, char** av)                                   \
@@ -145,7 +147,6 @@ CLOSE_NAMESPACE(Firestorm);
 		InitializeLib<::Firestorm::libCore>(ac,av);           			           \
 		InitializeLib<::Firestorm::libExistence>(ac,av);           			       \
 		InitializeLib<::Firestorm::libIO>(ac,av);           			           \
-		InitializeLib<::Firestorm::libJson>(ac,av);           			           \
 		InitializeLib<::Firestorm::libMath>(ac,av);           			           \
 		InitializeLib<::Firestorm::libMirror>(ac,av);           			       \
 		InitializeLib<::Firestorm::libScene>(ac,av);           			           \

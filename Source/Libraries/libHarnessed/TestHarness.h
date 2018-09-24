@@ -24,7 +24,7 @@ public:
 	typedef Function<void(TestCase&)> TestFunction_t;
 
 	TestHarness(const String& name, bool quietly = false);
-	virtual ~TestHarness() {}
+	virtual ~TestHarness();
 
 	// Run before every test case.
 	virtual void Before() {}
