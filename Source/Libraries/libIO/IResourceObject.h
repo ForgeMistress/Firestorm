@@ -20,8 +20,16 @@ class IDocument;
 
 class IResourceObject : public IRefCounted
 {
+	friend class ResourcePtr;
 public:
 	virtual ~IResourceObject() {}
+
+private:
+	size_t AddRef() { return ++_refCount; }
+	size_t DelRef() { return --_refCount; }
+	size_t GetRefCount() const { return _refCount; }
+
+	size_t _refCount{ 0 };
 };
 
 CLOSE_NAMESPACE(Firestorm);

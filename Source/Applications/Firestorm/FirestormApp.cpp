@@ -36,7 +36,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 {
 	RegisterResourceTypes();
 
-	EnableWindowResizing(true);
+	EnableWindowResizing(true);	
 
 	FIRE_ASSERT(libIO::FileExists("/Shaders/Triangle.shader"));
 	FIRE_ASSERT(libIO::FileExists("/Models/base-female.gltf"));

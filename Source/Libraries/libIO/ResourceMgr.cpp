@@ -137,7 +137,15 @@ void ResourceMgr::ThreadRun()
 			try
 			{
 				auto result = loader->Load(this, *oper.ref);
-				oper.ref->SetResult(result);
+				if(result.has_value())
+				{
+					auto resultValue = result.value();
+					oper.ref->SetResource(resultValue.first, resultValue.second);
+				}
+				else
+				{
+					oper.ref->SetError(result.error());
+				}
 			}
 			catch(std::exception& e)
 			{

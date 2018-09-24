@@ -100,8 +100,8 @@ public:
 
 	size_t del_weak_ref()
 	{
-		if(_weakCount > 0)
-			--_weakCount;
+		FIRE_ASSERT_MSG(_weakCount != 0, "can not del_weak_ref. _weakCount is already 0.");
+		--_weakCount;
 		return _weakCount;
 	}
 
@@ -118,8 +118,8 @@ public:
 
 	size_t del_strong_ref()
 	{
-		if(_strongCount > 0)
-			--_strongCount;
+		FIRE_ASSERT_MSG(_strongCount != 0, "can not del_strong_ref. _strongCount is already 0.");
+		--_strongCount;
 		return _strongCount;
 	}
 

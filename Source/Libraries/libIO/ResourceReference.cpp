@@ -31,8 +31,8 @@ ResourceReference::ResourceReference(const String& path)
 ResourceReference::ResourceReference(ResourceReference&& other)
 : _resource(std::move(other._resource))
 , _error(std::move(other._error))
-, _errorSet(other._errorSet)
-, _isReady(other._isReady)
+, _errorSet(std::move(other._errorSet))
+, _isReady(std::move(other._isReady))
 , _resourcePath(std::move(other._resourcePath))
 {
 	other._resource = nullptr;
@@ -52,13 +52,15 @@ String ResourceReference::GetPathTo() const
 	auto split = SplitString(_resourcePath, '/');
 	split.pop_back();
 	String out;
-	for (auto str : split)
+	for(auto str : split)
 		out += str + "/";
 	return out;
 }
 
 bool ResourceReference::IsReady() const
 {
+	// since IsReady is meant to be called from a different thread than the SetError and SetResource
+	// calls, we need to lock on the same mutex in order to ensure that there is no collision.
 	std::scoped_lock lock(_lock);
 	return _isReady;
 }
@@ -86,16 +88,15 @@ bool ResourceReference::HasResource() const
 	return false;
 }
 
-#pragma optimize("", off)
-RefPtr<IResourceObject> ResourceReference::GetResourceBase() const
+const RefPtr<IResourceObject>& ResourceReference::GetResourceBase() const
 {
 	if(IsReady())
 	{
+		std::scoped_lock lock(_lock);
 		return _resource;
 	}
 	return nullptr;
 }
-#pragma optimize("", on)
 
 Error ResourceReference::GetError() const
 {
@@ -107,8 +108,7 @@ Error ResourceReference::GetError() const
 		}
 		else
 		{
-			if(_resource)
-				return Error(Errors::THERE_IS_NO_ERROR, "there was no error to report. the resource is set and ready to go.");
+			return Error(Errors::THERE_IS_NO_ERROR, "there was no error to report. the resource is set and ready to go.");
 		}
 	}
 	return Error(Errors::UNKNOWN_STATE, "no error to retrieve just yet");
@@ -116,8 +116,7 @@ Error ResourceReference::GetError() const
 
 void ResourceReference::Release()
 {
-	if(_resource)
-		_resource = nullptr;
+	_resource = nullptr;
 }
 
 void ResourceReference::SetResourcePath(const String& path)
@@ -125,19 +124,40 @@ void ResourceReference::SetResourcePath(const String& path)
 	_resourcePath = path;
 }
 
-void ResourceReference::SetResult(const ResourceLoader::LoadResult& result)
+void ResourceReference::SetResource(IResourceObject* resource, PointerHandlerExpr handler)
+{
+	std::scoped_lock lock(_lock);
+	_resource = std::move(resource);
+	_resourceHandler = std::move(handler);
+	_isReady = true;
+	_errorSet = false;
+}
+
+void ResourceReference::SetError(Error error)
+{
+	std::scoped_lock lock(_lock);
+	_error = std::move(error);
+	_isReady = true;
+	_errorSet = true;
+}
+
+/*void ResourceReference::SetResult(ResourceLoader::LoadResult&& result)
 {
 	std::scoped_lock<Mutex> lock(_lock);
 	if(result.has_value())
 	{
-		_resource = std::move(result.value());
+		// the LoadResult will del_ref, so to preserve the refcount, we need to add our own reference
+		// to compensate.
+		// TODO: THIS SHOULD NOT BE NECESSARY!
+		result.value().add_ref();
+		_resource = result.value();
 	}
 	else
 	{
-		_error = std::move(result.error());
+		_error = result.error();
 		_errorSet = true;
 	}
 	_isReady = true;
-}
+}*/
 
 CLOSE_NAMESPACE(Firestorm);

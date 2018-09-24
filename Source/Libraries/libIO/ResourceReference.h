@@ -13,8 +13,8 @@
 
 #include "IResourceObject.h"
 #include "ResourceLoader.h"
-#include <future>
 #include <libCore/IRefCounted.h>
+#include <libMirror/Object.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -23,20 +23,22 @@ OPEN_NAMESPACE(Firestorm);
 
 	This class instance does not contain any data. Instead, it merely defines a reference to a resource.
  **/
-class ResourceReference final : public Mirror::Object,
-                                public IRefCounted
+class ResourceReference final : public Mirror::Object
 {
 	FIRE_MIRROR_DECLARE(ResourceReference, Mirror::Object);
 public:
 	struct Errors
 	{
 		FIRE_ERRORCODE(UNKNOWN_STATE);        // set when the state is unknown.
-		FIRE_ERRORCODE(THERE_IS_NO_ERROR);             // returned when there's no error set.
+		FIRE_ERRORCODE(THERE_IS_NO_ERROR);    // returned when there's no error set.
 		FIRE_ERRORCODE(NOT_FINISHED_LOADING); // returned when the resource has not finished loading yet.
 	};
 
+	using PointerHandlerExpr = std::function<void(IResourceObject*)>;
+
 	ResourceReference(const String& path = "");
 	ResourceReference(ResourceReference&& other);
+	ResourceReference(const ResourceReference&) = delete;
 	virtual ~ResourceReference();
 
 	/**
@@ -76,7 +78,7 @@ public:
 	/**
 		Retrieve the resource if it is finished loading.
 	 **/
-	RefPtr<IResourceObject> GetResourceBase() const;
+	const RefPtr<IResourceObject>& GetResourceBase() const;
 
 	/**
 		Retrieve the error if it is reported that there is an error.
@@ -98,15 +100,16 @@ private:
 	friend class ResourceMgr;
 	void SetResourcePath(const String& path);
 
-	// void SetFuture(std::future<Result<RefPtr<IResourceObject>, Error>>&& future);
-	void SetResult(const ResourceLoader::LoadResult& result);
+	void SetResource(IResourceObject* resource, PointerHandlerExpr handler);
+	void SetError(Error error);
 
 	// so much mutable...
-	mutable Mutex _lock;
-	mutable RefPtr<IResourceObject> _resource;
-	mutable Error _error;
-	mutable bool _errorSet{ false };
-	mutable bool _isReady{ false };
+	mutable Mutex              _lock;
+	mutable IResourceObject*   _resource;
+	mutable PointerHandlerExpr _resourceHandler;
+	mutable Error              _error;
+	mutable bool               _errorSet{ false };
+	mutable bool               _isReady{ false };
 
 	String _resourcePath;
 };

@@ -75,7 +75,8 @@ public:
 	template<class... Args_t>
 	PoolPtr<T> GetManaged(Args_t&&... args);
 
-	void Return(T* ptr);
+	template<class U>
+	void Return(U* ptr);
 
 private:
 	std::forward_list<T> _pool;
@@ -152,11 +153,18 @@ PoolPtr<T> ObjectPool<T>::GetManaged(Args_t&&... args)
 }
 
 template<class T>
-void ObjectPool<T>::Return(T* ptr)
+template<class U>
+void ObjectPool<T>::Return(U* ptr)
 {
+	static_assert(
+		std::is_same<T, U>::value ||
+		std::is_convertible<T, U>::value,
+		"invalid type passed to ObjectPool::Return"
+	);
 	FIRE_ASSERT(ptr != nullptr);
-	ptr->~T();
-	_recycle.push_back(ptr);
+	T* ptrT = static_cast<T*>(ptr);
+	ptrT->~T();
+	_recycle.push_back(ptrT);
 }
 
 CLOSE_NAMESPACE(Firestorm);

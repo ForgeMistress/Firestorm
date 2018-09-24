@@ -55,9 +55,10 @@ MeshLoader::LoadResult MeshLoader::Load(ResourceMgr* resourceMgr, const Resource
 		{
 			MeshResource* resource = _pool.Get(_renderMgr);
 			resource->_data = result.value();
-			return RefPtr<IResourceObject>(resource, [this](IResourceObject* ptr) {
-				_pool.Return(reinterpret_cast<MeshResource*>(ptr));
-			});
+			auto dest = [this](IResourceObject* ptr) {
+				_pool.Return(ptr);
+			};
+			return FIRE_RESULT(std::make_pair(resource, dest));
 		}
 		return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "reading file '" + path + "'\nDetails: "+((String)result.error()));
 	}

@@ -103,10 +103,10 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 					});
 				}
 			}
-
-			return RefPtr<IResourceObject>(resource, [this](IResourceObject* ptr) {
-				_pool.Return(reinterpret_cast<SceneGraphResource*>(ptr));
-			});
+			auto dest = [this](IResourceObject* ptr) {
+				_pool.Return(ptr);
+			};
+			return FIRE_RESULT(std::make_pair(resource, dest));
 		}
 		return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, (String)result.error());
 	}

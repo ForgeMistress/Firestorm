@@ -65,12 +65,13 @@ private:
 		LoadOp(ResourceLoader* loader, ResourceReference* ref);
 		~LoadOp();
 
-		ResourceLoader*                    loader;
-		ResourceReference*                 ref;
+		ResourceLoader*    loader;
+		ResourceReference* ref;
 #ifndef FIRE_FINAL
 		String             filename;
 #endif
 	};
+	void Load(LoadOp&& loadOp);
 public:
 	ResourceMgr();
 	~ResourceMgr();
@@ -82,7 +83,6 @@ public:
 		FIRE_ASSERT_MSG(loader, "no loader installed for this resource type");
 		Load(std::move(LoadOp(loader, &ref)));
 	}
-	void Load(LoadOp&& loadOp);
 
 	template<class ResourceType_t, class... Args_t>
 	bool InstallLoader(Args_t&&... args)

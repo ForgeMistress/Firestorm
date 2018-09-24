@@ -184,10 +184,11 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 				FIRE_ASSERT(false && "direct3D support is not yet implemented");
 			}
 
-			// return the shader resource now, because the shader has to be actually vompiled on the main thread.
-			return RefPtr<IResourceObject>(shaderResource, [this](IResourceObject* ptr) {
-				_shaderPool.Return(reinterpret_cast<ShaderResource*>(ptr));
-			});
+			auto dest = [this](IResourceObject* ptr) {
+				_shaderPool.Return(ptr);
+			};
+			// return the shader resource now, because the shader has to be actually compiled on the main thread.
+			return FIRE_RESULT(std::make_pair(shaderResource, dest));
 		}
 		return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, ((String)result.error()));
 	}

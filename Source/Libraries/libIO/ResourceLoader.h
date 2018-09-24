@@ -22,7 +22,8 @@ class ResourceMgr;
 class ResourceLoader
 {
 public:
-	using LoadResult = Result<RefPtr<IResourceObject>, Error>;
+	using PtrHandler = std::function<void(IResourceObject*)>;
+	using LoadResult = Result<std::pair<IResourceObject*, PtrHandler>, Error>;
 
 	ResourceLoader();
 	virtual ~ResourceLoader();

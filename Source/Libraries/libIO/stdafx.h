@@ -22,9 +22,6 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-class IResourceObject;
-using ResourceMgrResult = Result<RefPtr<IResourceObject>, Error>;
-
 CLOSE_NAMESPACE(Firestorm);
 
 #endif

@@ -23,6 +23,13 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+#define REFPTR_TYPECHECK( BASE, SUPER )        \
+static_assert(								   \
+	std::is_base_of<BASE, SUPER>::value ||	   \
+	std::is_same<BASE, SUPER>::value, 		   \
+	"invalid types passed");
+
+
 template<class T>
 class RefPtr final
 {
@@ -64,10 +71,7 @@ public:
 	: _ctrl(ctrl_type::make_block(object))
 	, _deleter(nullptr)
 	{
-		static_assert(
-			std::is_base_of<T, Ptr_t>::value ||
-			std::is_same<T, Ptr_t>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, Ptr_t);
 		add_ref();
 	}
 
@@ -77,10 +81,7 @@ public:
 	: _ctrl(ctrl_type::make_block<Ptr_t>(object))
 	, _deleter(deleter)
 	{
-		static_assert(
-			std::is_base_of<T, Ptr_t>::value ||
-			std::is_same<T, Ptr_t>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, Ptr_t);
 		add_ref();
 	}
 
@@ -89,10 +90,7 @@ public:
 	RefPtr(const RefPtr<U>& other)
 		: _ctrl(other.get_ctrl())
 	{
-		static_assert(
-			std::is_base_of<T, RefPtr<U>::element_type>::value ||
-			std::is_same<T, RefPtr<U>::element_type>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, U);
 		auto otherDel = other.get_deleter();
 		if (otherDel)
 			set_deleter(otherDel);
@@ -106,10 +104,7 @@ public:
 	: _ctrl(other.get_ctrl())
 	, _deleter(deleter)
 	{
-		static_assert(
-			std::is_base_of<T, RefPtr<U>::element_type>::value ||
-			std::is_same<T, RefPtr<U>::element_type>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, U);
 		add_ref();
 	}
 
@@ -119,10 +114,7 @@ public:
 	: _ctrl(other.get_ctrl())
 	, _deleter(other.get_deleter())
 	{
-		static_assert(
-			std::is_base_of<T, RefPtr<U>::element_type>::value ||
-			std::is_same<T, RefPtr<U>::element_type>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, U);
 		other.set_ctrl(nullptr);
 		other.set_deleter(nullptr);
 	}
@@ -132,47 +124,10 @@ public:
 		del_ref();
 	}
 
-	/*RefPtr<T>& operator=(const RefPtr<T>& other)
-	{
-		if(this != &other)
-		{
-			// decrement the strong count of the existing counter.
-			del_ref();
-
-			// copy over the stuff.
-			_ctrl = other.get_ctrl();
-			_deleter = other.get_deleter();
-
-			// add a reference for the new counter.
-			add_ref();
-		}
-		return *this;
-	}*/
-
-	/*RefPtr<T>& operator=(RefPtr<T>&& other)
-	{
-		if(this != &other)
-		{
-			// decrement the strong count of the existing counter.
-			del_ref();
-
-			// copy over the stuff.
-			_ctrl = other.get_ctrl();
-			_deleter = other.get_deleter();
-
-			other.set_ctrl(nullptr);
-			other.set_deleter(nullptr);
-		}
-		return *this;
-	}*/
-
 	template<class U>
 	RefPtr<T>& operator=(const RefPtr<U>& other)
 	{
-		static_assert(
-			std::is_base_of<T, RefPtr<U>::element_type>::value ||
-			std::is_same<T, RefPtr<U>::element_type>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, U);
 		if (this != &other)
 		{
 			// decrement the strong count of the existing counter.
@@ -191,10 +146,7 @@ public:
 	template<class U>
 	RefPtr<T>& operator=(RefPtr<U>&& other)
 	{
-		static_assert(
-			std::is_base_of<T, RefPtr<U>::element_type>::value ||
-			std::is_same<T, RefPtr<U>::element_type>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, U);
 		if (this != &other)
 		{
 			// decrement the strong count of the existing counter.
@@ -220,24 +172,26 @@ public:
 	}
 
 	template<class U>
-	RefPtr<U> Upcast()
+	RefPtr<U> Upcast() const
 	{
 		static_assert(
 			std::is_base_of<T, U>::value &&
 			!std::is_same<T, U>::value,
 			"invalid types passed");
 
-		if (_ctrl == nullptr)
+		if(_ctrl == nullptr)
 			return nullptr;
 
 		RefPtr<U> out(get_ctrl());
 		auto deleter = get_deleter();
-		if (deleter)
+		if(deleter)
+		{
 			out.set_deleter([del = deleter](U* ptr) {
-			// the original will still work, but the output RefPtr deleter needs to have the signature of the
-			// proper type.
-			del(ptr);
-		});
+				// the original will still work, but the output RefPtr deleter needs to have the signature of the
+				// proper type.
+				del(ptr);
+			});
+		}
 
 		return out;
 	}
@@ -250,10 +204,7 @@ public:
 	template<class U>
 	bool operator==(const RefPtr<U>& other) const
 	{
-		static_assert(
-			std::is_base_of<T, RefPtr<U>::element_type>::value ||
-			std::is_same<T, RefPtr<U>::element_type>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, RefPtr<U>::element_type);
 		return _ctrl == other.get_ctrl();
 	}
 
@@ -265,10 +216,7 @@ public:
 	template<class U>
 	bool operator!=(const RefPtr<U>& other) const
 	{
-		static_assert(
-			std::is_base_of<T, RefPtr<U>::element_type>::value ||
-			std::is_same<T, RefPtr<U>::element_type>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, RefPtr<U>::element_type);
 		return _ctrl != other.get_ctrl();
 	}
 
@@ -339,7 +287,6 @@ public:
 		add_ref();
 	}
 
-private:
 	void add_ref()
 	{
 		if(_ctrl)

@@ -26,7 +26,7 @@ ResourceLoader::~ResourceLoader()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceMgrResult ResourceLoader::Load(ResourceMgr*,const ResourceReference&)
+ResourceLoader::LoadResult ResourceLoader::Load(ResourceMgr*,const ResourceReference&)
 {
 	return FIRE_ERROR(ResourceIOErrors::DEFAULT_LOADER);
 }
