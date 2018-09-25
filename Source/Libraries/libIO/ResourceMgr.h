@@ -63,35 +63,31 @@ private:
 
 	struct LoadOp final
 	{
-		LoadOp(ResourceLoader* loader, ResourceReference* ref);
+		LoadOp(ResourceLoader* loader, ResourceReference* ref, ResourceHandle handle);
 		~LoadOp();
 
 		ResourceLoader*    loader;
 		ResourceReference* ref;
+		ResourceHandle     handle;
 #ifndef FIRE_FINAL
 		String             filename;
 #endif
 	};
-	void Load(ResourceLoader* loader, ResourceReference* ref);
+	ResourceHandle Load(ResourceLoader* loader, ResourceReference* ref);
 public:
 	ResourceMgr();
 	~ResourceMgr();
 
+	/**
+		Load up a resource. The load status of said resource can be checked using the
+		returned ResourceHandleObject instance.
+	 **/
 	template <class ResourceType_t>
-	void Load(ResourceReference& ref)
+	ResourceHandleObject Load(ResourceReference& ref)
 	{
-		// retrieve the resource from the cache first if it exists.
-		const auto& path = ref.GetResourcePath();
-		if(_cache.HasResource(path))
-		{
-			// and set the resource right now.
-			ref.SetResource(_cache.GetResource(path));
-			return;
-		}
-		// otherwise we're gonna have to load this sucker.
 		ResourceLoader* loader = GetLoader(ResourceType_t::MyResourceType());
 		FIRE_ASSERT_MSG(loader, "no loader installed for this resource type");
-		Load(loader, &ref);
+		return Load(loader, &ref);
 	}
 
 	template<class ResourceType_t, class... Args_t>

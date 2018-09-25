@@ -27,6 +27,8 @@ public:
 
 	bool operator==(const Error& e) const;
 
+	const ErrorCode* GetCode() const { return _code; }
+
 private:
 	const ErrorCode* _code;
 	String _details;

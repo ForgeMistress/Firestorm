@@ -83,9 +83,9 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 					// resolve the location of the uri.
 					ResourceReference meshRef(ref.GetPathTo() + buffers[i]["uri"].asString());
 					// kick off a deferred load of the mesh.
-					//resourceMgr->Load<MeshResource>(meshRef);
+					ResourceHandle handle = resourceMgr->Load<MeshResource>(meshRef);
 					resource->_buffers.push_back(SceneGraphResource::Buffer{
-						std::move(meshRef)
+						handle
 					});
 				}
 			}

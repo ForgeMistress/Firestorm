@@ -18,49 +18,103 @@ OPEN_NAMESPACE(Firestorm);
 
 class ResourceCache;
 
-class ResourceHandle final
+/**
+	Defines a reference counted smart pointer to an IResourceObject. The load status of the handle
+	can be checked using the provided functions.
+ **/
+class ResourceHandleObject final
 {
 	friend class ResourceCache;
+	friend class ResourceMgr;
 public:
-	ResourceHandle();
-	ResourceHandle(std::nullptr_t);
-	ResourceHandle(const String& name, IResourceObject* obj);
-	ResourceHandle(const ResourceHandle& other);
-	ResourceHandle(ResourceHandle&& other);
+	/**
+		Defines the states that the ResourceHandleObject can be in at any given time.
+	 **/
+	enum struct State
+	{
+		kEmpty,          //< The ResourceHandleObject contains no valid pointer to an IResourceObject.
+		kWaitingForLoad, //< The ResourceHandleObject is currently in the load queue and waiting to be loaded.
+		kLoading,        //< The ResourceHandleObject is currently being loaded by one of the worker threads.
+		kLoaded,         //< The ResourceHandleObject finished loading with no errors.
+		kLoadError       //< The ResourceHandleObject finished loading with errors.
+	};
+
+	ResourceHandleObject(ResourceCache* cache);
+	ResourceHandleObject(std::nullptr_t);
+	ResourceHandleObject(ResourceCache* cache, IResourceObject* obj);
+	ResourceHandleObject(const ResourceHandleObject& other);
+	ResourceHandleObject(ResourceHandleObject&& other);
 	
-	~ResourceHandle();
+	~ResourceHandleObject();
 
-	ResourceHandle& operator=(const ResourceHandle& handle);
-	ResourceHandle& operator=(ResourceHandle&& handle);
+	ResourceHandleObject& operator=(const ResourceHandleObject& handle);
+	ResourceHandleObject& operator=(ResourceHandleObject&& handle);
 
-	bool operator==(const ResourceHandle& other);
-
-	const String& GetName() const;
+	bool operator==(const ResourceHandleObject& other);
 
 	template<class T>
-	T* Get()
+	const T* Get()
 	{
-		return static_cast<T*>(_obj);
+		return static_cast<const T*>(_obj);
 	}
 
-private:
-	void Set(const String& name, IResourceObject* obj);
+	const IResourceObject* operator->() const;
 
-	String           _name;
-	IResourceObject* _obj{nullptr};
+	template<class T>
+	const T* operator->() const
+	{
+		return static_cast<T*>();
+	}
+
+	/**
+		Retrieve the present state of this ResourceHandleObject.
+		\return state One of #ResourceHandleObject::State
+	 **/
+	State GetState() const;
+
+	/**
+		Release the resource from this handle as well as the active error.
+	 **/
+	void Release();
+
+private:
+	void SetState(State state);
+
+	// Calling this will remove whatever the active ErrorCode is.
+	void SetResourcePointer(IResourceObject* obj);
+
+	// Calling this will remove whatever the active object is.
+	void SetError(const ErrorCode* error);
+
+	void AddRef();
+	void DelRef();
+
+	mutable Mutex _pointerLock;
+
+	const ErrorCode* _error{ nullptr };
+	ResourceCache* _cache{ nullptr };
+	IResourceObject* _obj{ nullptr };
+	std::atomic<State> _state{ State::kEmpty };
 };
+
+typedef ResourceHandleObject* ResourceHandle;
 
 
 class ResourceCache
 {
+	friend class ResourceMgr;
 public:
 	ResourceCache();
 	~ResourceCache();
 
-	bool AddResource(const String& name, IResourceObject* resourceObject, ResourceHandle& outHandle);
-
 	bool HasResource(const String& name);
 
+	bool AddResource(const String& name, IResourceObject* object);
+
+	/**
+		Retrieve a resource from the cache and return a handle to that resource.
+		If the resource does not exist, then the handle will be an empty and invalid handle.
+	 **/
 	ResourceHandle GetResource(const String& name) const;
 
 	void ClearOrphanedResources();
@@ -68,13 +122,15 @@ public:
 private:
 	IResourceObject* FindResource(const String& name) const;
 
-	Mutex _lock;
 	struct CacheEntry
 	{
 		String           name;
 		IResourceObject* object;
 	};
 	Vector<CacheEntry> _cache;
+	mutable ObjectPool<ResourceHandleObject> _handlePool;
+
+	mutable Mutex _lock;
 };
 
 CLOSE_NAMESPACE(Firestorm);

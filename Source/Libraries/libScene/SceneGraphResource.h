@@ -52,8 +52,8 @@ public:
 
 	struct Buffer
 	{
-		// MeshResource
-		ResourceReference Resource;
+		// Handle to the MeshResource it holds.
+		ResourceHandle ResourceHandle;
 	};
 
 	struct BufferView

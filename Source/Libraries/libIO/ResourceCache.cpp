@@ -13,47 +13,52 @@
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ResourceHandle::ResourceHandle()
-: _obj(nullptr)
+ResourceHandleObject::ResourceHandleObject()
+: _error(nullptr)
+, _cache(nullptr)
+, _obj(nullptr)
 {
 }
 
-ResourceHandle::ResourceHandle(std::nullptr_t)
-: _obj(nullptr)
+ResourceHandleObject::ResourceHandleObject(std::nullptr_t)
+: _error(nullptr)
+, _cache(nullptr)
+, _obj(nullptr)
 {
 
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceHandle::ResourceHandle(const String& name, IResourceObject* obj)
-: _name(name)
-, _obj(obj)
-{
-	_obj->AddRef();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle::ResourceHandle(const ResourceHandle& other)
-: _name(other._name)
-, _obj(other._obj)
+ResourceHandleObject::ResourceHandleObject(IResourceObject* obj)
+: _error(nullptr)
+, _cache(nullptr)
+, _obj(nullptr)
 {
-	_obj->AddRef();
+	if(_obj)
+		_obj->AddRef();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle::ResourceHandle(ResourceHandle&& other)
-: _name(std::move(other._name))
-, _obj(other._obj)
+ResourceHandleObject::ResourceHandleObject(const ResourceHandleObject& other)
+: _obj(other._obj)
+{
+	if(_obj)
+		_obj->AddRef();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceHandleObject::ResourceHandleObject(ResourceHandleObject&& other)
+: _obj(other._obj)
 {
 	other._obj = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle::~ResourceHandle()
+ResourceHandleObject::~ResourceHandleObject()
 {
 	if(_obj)
 		_obj->DelRef();
@@ -61,11 +66,10 @@ ResourceHandle::~ResourceHandle()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle& ResourceHandle::operator=(const ResourceHandle& other)
+ResourceHandleObject& ResourceHandleObject::operator=(const ResourceHandleObject& other)
 {
 	if(this != &other)
 	{
-		_name = other._name;
 		_obj = other._obj;
 		_obj->AddRef();
 	}
@@ -73,11 +77,10 @@ ResourceHandle& ResourceHandle::operator=(const ResourceHandle& other)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle& ResourceHandle::operator=(ResourceHandle&& other)
+ResourceHandleObject& ResourceHandleObject::operator=(ResourceHandleObject&& other)
 {
 	if(this != &other)
 	{
-		_name = std::move(other._name);
 		_obj = other._obj;
 
 		other._obj = nullptr;
@@ -86,29 +89,86 @@ ResourceHandle& ResourceHandle::operator=(ResourceHandle&& other)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceHandle::operator==(const ResourceHandle& other)
+bool ResourceHandleObject::operator==(const ResourceHandleObject& other)
 {
 	return _obj == other._obj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const String& ResourceHandle::GetName() const
+const IResourceObject* ResourceHandleObject::operator->() const
 {
-	return _name;
+	return _obj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandle::Set(const String& name, IResourceObject* obj)
+ResourceHandleObject::State ResourceHandleObject::GetState() const
 {
+	return _state;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceHandleObject::Release()
+{
+	DelRef();
+	_obj = nullptr;
+	_error = nullptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceHandleObject::SetState(State state)
+{
+	_state = state;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceHandleObject::SetResourcePointer(IResourceObject* obj)
+{
+	DelRef();
+	{
+		std::scoped_lock lock(_pointerLock);
+		_obj = obj;
+		_error = nullptr;
+	}
+	AddRef();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceHandleObject::SetError(const ErrorCode* error)
+{
+	DelRef();
+
+	std::scoped_lock lock(_pointerLock);
+	_error = error;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceHandleObject::AddRef()
+{
+	std::scoped_lock lock(_pointerLock);
 	if(_obj)
-		_obj->DelRef();
+		_obj->AddRef();
+}
 
-	_name = name;
-	_obj = obj;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	_obj->AddRef();
+void ResourceHandleObject::DelRef()
+{
+	std::scoped_lock lock(_pointerLock);
+	if(_obj)
+	{
+		if(_obj->DelRef() == 0)
+		{
+			// TODO: Decide what to do here, otherwise the DelRef should be enough for now.
+			_obj = nullptr; // Since the ResourceCache holds ownership, we shouldn't delete. We'll just null it out.
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +192,7 @@ ResourceCache::~ResourceCache()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceCache::AddResource(const String& name, IResourceObject* resourceObject, ResourceHandle& outHandle)
+bool ResourceCache::AddResource(const String& name, IResourceObject* resourceObject)
 {
 	std::scoped_lock lock(_lock);
 	FIRE_ASSERT_MSG(resourceObject->GetRefCount() == 0,
@@ -146,8 +206,6 @@ bool ResourceCache::AddResource(const String& name, IResourceObject* resourceObj
 		name,
 		resourceObject
 	});
-	outHandle._name = name;
-	outHandle._obj = resourceObject;
 	return true;
 }
 
@@ -169,10 +227,7 @@ bool ResourceCache::HasResource(const String& name)
 
 ResourceHandle ResourceCache::GetResource(const String& resource) const
 {
-	return ResourceHandle {
-		resource,
-		FindResource(resource)
-	};
+	return _handlePool.Get(FindResource(resource));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
