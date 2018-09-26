@@ -19,7 +19,7 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceMgr::LoadOp::LoadOp(ResourceLoader* loader, ResourceReference* ref, ResourceHandleObject* handle)
+ResourceMgr::LoadOp::LoadOp(ResourceLoader* loader, ResourceReference* ref, ResourceHandle handle)
 : loader(loader)
 , ref(ref)
 , handle(handle)
@@ -72,11 +72,11 @@ ResourceHandle ResourceMgr::Load(ResourceLoader* loader, ResourceReference* ref)
 	ResourceHandle outHandle = _cache.GetResource(path);
 	// otherwise we're gonna have to load this sucker.
 
-	LoadOp loadOp(loader, ref, &outHandle);
+	LoadOp loadOp(loader, ref, outHandle);
 
 	std::unique_lock<Mutex> lock(_lock);
 
-	outHandle.SetState(ResourceHandleObject::State::kWaitingForLoad);
+	outHandle->SetState(ResourceHandleObject::State::kWaitingForLoad);
 
 	_queue.push(std::move(loadOp));
 
