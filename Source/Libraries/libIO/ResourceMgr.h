@@ -63,12 +63,13 @@ private:
 
 	struct LoadOp final
 	{
-		LoadOp(ResourceLoader* loader, ResourceReference* ref, ResourceHandle handle);
+		LoadOp(ResourceLoader* loader, ResourceReference* ref, ResourceHandle* handle);
+		LoadOp(const LoadOp& other);
 		~LoadOp();
 
 		ResourceLoader*    loader;
 		ResourceReference* ref;
-		ResourceHandle     handle;
+		ResourceHandle*    handle;
 #ifndef FIRE_FINAL
 		String             filename;
 #endif
@@ -80,10 +81,10 @@ public:
 
 	/**
 		Load up a resource. The load status of said resource can be checked using the
-		returned ResourceHandleObject instance.
+		returned ResourceHandle_ instance.
 	 **/
 	template <class ResourceType_t>
-	ResourceHandleObject Load(ResourceReference& ref)
+	ResourceHandle Load(ResourceReference& ref)
 	{
 		ResourceLoader* loader = GetLoader(ResourceType_t::MyResourceType());
 		FIRE_ASSERT_MSG(loader, "no loader installed for this resource type");

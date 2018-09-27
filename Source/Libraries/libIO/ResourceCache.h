@@ -12,65 +12,78 @@
 #pragma once
 
 #include <libCore/libCore.h>
+#include <libCore/Result.h>
 #include "IResourceObject.h"
+
 
 OPEN_NAMESPACE(Firestorm);
 
 class ResourceCache;
 
 /**
+	Defines the states that the ResourceHandle can be in at any given time.
+**/
+enum struct ResourceHandleState
+{
+	kEmpty,          //< The ResourceHandle contains no valid pointer to an IResourceObject.
+	kWaitingForLoad, //< The ResourceHandle is currently in the load queue and waiting to be loaded.
+	kLoading,        //< The ResourceHandle is currently being loaded by one of the worker threads.
+	kLoaded,         //< The ResourceHandle finished loading with no errors.
+	kLoadError       //< The ResourceHandle finished loading with errors.
+};
+
+/**
 	Defines a reference counted smart pointer to an IResourceObject. The load status of the handle
 	can be checked using the provided functions.
  **/
-class ResourceHandleObject final
+class ResourceHandle_ final
 {
 	friend class ResourceCache;
 	friend class ResourceMgr;
 public:
-	/**
-		Defines the states that the ResourceHandleObject can be in at any given time.
-	 **/
-	enum struct State
-	{
-		kEmpty,          //< The ResourceHandleObject contains no valid pointer to an IResourceObject.
-		kWaitingForLoad, //< The ResourceHandleObject is currently in the load queue and waiting to be loaded.
-		kLoading,        //< The ResourceHandleObject is currently being loaded by one of the worker threads.
-		kLoaded,         //< The ResourceHandleObject finished loading with no errors.
-		kLoadError       //< The ResourceHandleObject finished loading with errors.
-	};
-
-	ResourceHandleObject(ResourceCache* cache);
-	ResourceHandleObject(std::nullptr_t);
-	ResourceHandleObject(ResourceCache* cache, IResourceObject* obj);
-	ResourceHandleObject(const ResourceHandleObject& other);
-	ResourceHandleObject(ResourceHandleObject&& other);
+	//ResourceHandle_(std::nullptr_t);
+	ResourceHandle_(ResourceCache* cache, IResourceObject* obj);
 	
-	~ResourceHandleObject();
+	~ResourceHandle_();
 
-	ResourceHandleObject& operator=(const ResourceHandleObject& handle);
-	ResourceHandleObject& operator=(ResourceHandleObject&& handle);
-
-	bool operator==(const ResourceHandleObject& other);
+	// Meant to be used with a RefPtr.
+	ResourceHandle_(const ResourceHandle_& other) = delete;
+	ResourceHandle_(ResourceHandle_&& other) = delete;
+	ResourceHandle_& operator=(const ResourceHandle_& handle) = delete;
+	ResourceHandle_& operator=(ResourceHandle_&& handle) = delete;
 
 	template<class T>
-	const T* Get()
+	const T* Get() const
 	{
 		return static_cast<const T*>(_obj);
 	}
 
-	const IResourceObject* operator->() const;
-
 	template<class T>
-	const T* operator->() const
+	T* Get()
 	{
-		return static_cast<T*>();
+		return static_cast<T*>(_obj);
 	}
 
 	/**
-		Retrieve the present state of this ResourceHandleObject.
-		\return state One of #ResourceHandleObject::State
+		Retrieve the error.
 	 **/
-	State GetState() const;
+	Error GetError() const;
+
+	/**
+		Retrieve whether or not this ResourceHandle holds a valid pointer to a resource object.
+	 **/
+	bool IsReady() const;
+
+	/**
+		Retrieve whether or not the ResourceHandle is reporting an error.
+	 **/
+	bool HasError() const;
+
+	/**
+		Retrieve the present state of this ResourceHandle_.
+		\return state One of #ResourceHandle_::State
+	 **/
+	ResourceHandleState GetState() const;
 
 	/**
 		Release the resource from this handle as well as the active error.
@@ -78,13 +91,17 @@ public:
 	void Release();
 
 private:
-	void SetState(State state);
+	void SetState(ResourceHandleState state);
 
 	// Calling this will remove whatever the active ErrorCode is.
 	void SetResourcePointer(IResourceObject* obj);
 
 	// Calling this will remove whatever the active object is.
 	void SetError(const ErrorCode* error);
+
+#ifndef FIRE_FINAL
+	void SetFilename(const String& filename);
+#endif
 
 	void AddRef();
 	void DelRef();
@@ -94,11 +111,14 @@ private:
 	const ErrorCode* _error{ nullptr };
 	ResourceCache* _cache{ nullptr };
 	IResourceObject* _obj{ nullptr };
-	std::atomic<State> _state{ State::kEmpty };
+	std::atomic<ResourceHandleState> _state{ ResourceHandleState::kEmpty };
+
+#ifndef FIRE_FINAL
+	String _filename;
+#endif
 };
 
-typedef ResourceHandleObject* ResourceHandle;
-
+using ResourceHandle = RefPtr<ResourceHandle_>;
 
 class ResourceCache
 {
@@ -107,9 +127,10 @@ public:
 	ResourceCache();
 	~ResourceCache();
 
+	/**
+		Retrieve whether or not the resource cache has the particular resource loaded.
+	 **/
 	bool HasResource(const String& name);
-
-	bool AddResource(const String& name, IResourceObject* object);
 
 	/**
 		Retrieve a resource from the cache and return a handle to that resource.
@@ -120,6 +141,7 @@ public:
 	void ClearOrphanedResources();
 
 private:
+	bool AddResource(const String& name, IResourceObject* object);
 	IResourceObject* FindResource(const String& name) const;
 
 	struct CacheEntry
@@ -128,7 +150,7 @@ private:
 		IResourceObject* object;
 	};
 	Vector<CacheEntry> _cache;
-	mutable ObjectPool<ResourceHandleObject> _handlePool;
+	mutable ObjectPool<ResourceHandle_> _handlePool;
 
 	mutable Mutex _lock;
 };

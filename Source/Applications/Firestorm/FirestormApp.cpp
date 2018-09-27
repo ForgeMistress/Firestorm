@@ -16,16 +16,11 @@
 
 FirestormApp::FirestormApp(std::thread::id mainThreadID)
 : Application(mainThreadID)
-, _shaderResource("/Shaders/Triangle.shader")
-, _meshResource("/Models/base-female.gltf")
 {
 }
 
 FirestormApp::~FirestormApp()
 {
-	_shaderResource.Release();
-	_meshResource.Release();
-
 	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
 	renderMgr.System->Release(*_commandBuffer);
 	renderMgr.System->Release(*_pipeline);
@@ -71,34 +66,36 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	_vertexBuffer = renderer->CreateBuffer(vertexBufferDesc, vertices);
 
 	auto& resourceMgr = GetSystems().GetResourceMgr();
-	resourceMgr.Load<ShaderResource>(_shaderResource);
-	resourceMgr.Load<SceneGraphResource>(_meshResource);
 
-	while(!_shaderResource.IsReady() && !_meshResource.IsReady())
+	ResourceReference shaderRef("/Shaders/Triangle.shader");
+	ResourceReference meshRef("/Models/base-female.gltf");
+
+	_shaderResource = resourceMgr.Load<ShaderResource>(shaderRef);
+	_meshResource = resourceMgr.Load<SceneGraphResource>(meshRef);
+
+	while(!_shaderResource->IsReady() && !_meshResource->IsReady())
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
-	if(!_shaderResource.HasResource())
+	if(_shaderResource->HasError())
 	{
-		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource.GetError());
-		FIRE_ASSERT(_shaderResource.HasError());
+		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource->GetError());
+		FIRE_ASSERT(_shaderResource->HasError());
 	}
 
-	if(!_meshResource.HasResource())
+	if(_meshResource->HasError())
 	{
-		FIRE_LOG_ERROR("Error Loading Mesh: %s", (String)_meshResource.GetError());
-		FIRE_ASSERT(_meshResource.HasError());
+		FIRE_LOG_ERROR("Error Loading Mesh: %s", (String)_meshResource->GetError());
+		FIRE_ASSERT(_meshResource->HasError());
 	}
 
-	RefPtr<ShaderResource> resource = _shaderResource.GetResource<ShaderResource>();
-	FIRE_ASSERT_MSG(resource, "it's probably the upcast operation in GetResource that fucked it up");
-	bool result = resource->Compile();
+	bool result = _shaderResource->Get<ShaderResource>()->Compile();
 	FIRE_ASSERT_MSG(result, "shader failed to compile");
 
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;
 	{
-		pipelineDesc.shaderProgram = resource->GetProgram();
+		pipelineDesc.shaderProgram = _shaderResource->Get<ShaderResource>()->GetProgram();
 		pipelineDesc.renderPass = renderMgr.Context->GetRenderPass();
 	}
 	_pipeline = renderer->CreateGraphicsPipeline(pipelineDesc);

@@ -13,27 +13,20 @@
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ResourceHandleObject::ResourceHandleObject()
+
+/*ResourceHandle_::ResourceHandle_(std::nullptr_t)
 : _error(nullptr)
 , _cache(nullptr)
 , _obj(nullptr)
 {
-}
-
-ResourceHandleObject::ResourceHandleObject(std::nullptr_t)
-: _error(nullptr)
-, _cache(nullptr)
-, _obj(nullptr)
-{
-
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandleObject::ResourceHandleObject(IResourceObject* obj)
+ResourceHandle_::ResourceHandle_(ResourceCache* cache, IResourceObject* obj)
 : _error(nullptr)
-, _cache(nullptr)
-, _obj(nullptr)
+, _cache(cache)
+, _obj(obj)
 {
 	if(_obj)
 		_obj->AddRef();
@@ -41,43 +34,44 @@ ResourceHandleObject::ResourceHandleObject(IResourceObject* obj)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandleObject::ResourceHandleObject(const ResourceHandleObject& other)
-: _obj(other._obj)
+/*ResourceHandle_::ResourceHandle_(const ResourceHandle_& other)
+: _error(other._error)
+, _cache(other._cache)
+, _obj(other._obj)
 {
 	if(_obj)
 		_obj->AddRef();
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandleObject::ResourceHandleObject(ResourceHandleObject&& other)
+/*ResourceHandle_::ResourceHandle_(ResourceHandle_&& other)
 : _obj(other._obj)
 {
 	other._obj = nullptr;
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandleObject::~ResourceHandleObject()
+ResourceHandle_::~ResourceHandle_()
 {
-	if(_obj)
-		_obj->DelRef();
+	Release();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandleObject& ResourceHandleObject::operator=(const ResourceHandleObject& other)
+/*ResourceHandle_& ResourceHandle_::operator=(const ResourceHandle_& other)
 {
 	if(this != &other)
 	{
 		_obj = other._obj;
 		_obj->AddRef();
 	}
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandleObject& ResourceHandleObject::operator=(ResourceHandleObject&& other)
+/*ResourceHandle_& ResourceHandle_::operator=(ResourceHandle_&& other)
 {
 	if(this != &other)
 	{
@@ -85,32 +79,46 @@ ResourceHandleObject& ResourceHandleObject::operator=(ResourceHandleObject&& oth
 
 		other._obj = nullptr;
 	}
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceHandleObject::operator==(const ResourceHandleObject& other)
+/*bool ResourceHandle_::operator==(const ResourceHandle_& other)
 {
 	return _obj == other._obj;
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const IResourceObject* ResourceHandleObject::operator->() const
+Error ResourceHandle_::GetError() const
 {
-	return _obj;
+	return Error(_error);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandleObject::State ResourceHandleObject::GetState() const
+bool ResourceHandle_::IsReady() const
+{
+	return _obj != nullptr && _state == ResourceHandleState::kLoaded;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ResourceHandle_::HasError() const
+{
+	return _error != nullptr && _state == ResourceHandleState::kLoadError;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceHandleState ResourceHandle_::GetState() const
 {
 	return _state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandleObject::Release()
+void ResourceHandle_::Release()
 {
 	DelRef();
 	_obj = nullptr;
@@ -119,14 +127,14 @@ void ResourceHandleObject::Release()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandleObject::SetState(State state)
+void ResourceHandle_::SetState(ResourceHandleState state)
 {
 	_state = state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandleObject::SetResourcePointer(IResourceObject* obj)
+void ResourceHandle_::SetResourcePointer(IResourceObject* obj)
 {
 	DelRef();
 	{
@@ -139,7 +147,7 @@ void ResourceHandleObject::SetResourcePointer(IResourceObject* obj)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandleObject::SetError(const ErrorCode* error)
+void ResourceHandle_::SetError(const ErrorCode* error)
 {
 	DelRef();
 
@@ -149,7 +157,14 @@ void ResourceHandleObject::SetError(const ErrorCode* error)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandleObject::AddRef()
+void ResourceHandle_::SetFilename(const String& filename)
+{
+	_filename = filename;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ResourceHandle_::AddRef()
 {
 	std::scoped_lock lock(_pointerLock);
 	if(_obj)
@@ -158,7 +173,7 @@ void ResourceHandleObject::AddRef()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandleObject::DelRef()
+void ResourceHandle_::DelRef()
 {
 	std::scoped_lock lock(_pointerLock);
 	if(_obj)
@@ -227,7 +242,10 @@ bool ResourceCache::HasResource(const String& name)
 
 ResourceHandle ResourceCache::GetResource(const String& resource) const
 {
-	return _handlePool.Get(FindResource(resource));
+	ResourceHandle_* handle = _handlePool.Get(const_cast<ResourceCache*>(this), FindResource(resource));
+	return ResourceHandle(handle, [this](ResourceHandle_* handle){
+		_handlePool.Return(handle);
+	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

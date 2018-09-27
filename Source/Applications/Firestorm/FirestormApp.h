@@ -25,8 +25,8 @@ private:
 	LLGL::VertexFormat _vertFormat;
 
 	LLGL::Buffer* _vertexBuffer{ nullptr };
-	ResourceReference _shaderResource;
-	ResourceReference _meshResource;
+	ResourceHandle _shaderResource;
+	ResourceHandle _meshResource;
 	LLGL::GraphicsPipeline* _pipeline{ nullptr };
 	LLGL::CommandQueue* _commandQueue{ nullptr };
 	LLGL::CommandBuffer* _commandBuffer{ nullptr };

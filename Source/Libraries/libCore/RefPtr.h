@@ -29,13 +29,64 @@ static_assert(								   \
 	std::is_same<BASE, SUPER>::value, 		   \
 	"invalid types passed");
 
+OPEN_NAMESPACE(detail);
+
+template<class Base, class Derived>
+struct is_same_or_base
+{
+	static constexpr bool value =
+		std::is_same<Base, Derived>::value ||
+		std::is_base_of<Base, Derived>::value;
+};
+
+template<class T, typename PointerT = typename std::remove_pointer<T>::type>
+struct deleter_sig
+{
+	using arg_type = PointerT*;
+	using func_type = std::function<void(arg_type)>;
+	using element_type = PointerT;
+};
+
+struct base_tag {};
+struct same_tag {};
+struct conv_tag {};
+
+template<class Base, class Derived, typename t>
+struct relation_tag_base
+{
+	using tag = t;
+};
+
+// exact same type
+/*template<class Base, class Derived>
+struct relation_tag : public relation_tag_base<
+	Base, 
+	Derived, 
+	std::enable_if<
+		std::is_same_v<Base, Derived>,
+		same_tag
+	>::type>
+{
+};
+
+template<class Base, class Derived>
+struct relation_tag : public relation_tag_base<Base, Derived,
+	std::enable_if<
+		!std::is_same_v<Base, Derived> &&
+		std::is_convertible_v<Derived*, Base*>,
+		base_tag
+	>::type>
+{
+};*/
+
+CLOSE_NAMESPACE(detail);
 
 template<class T>
 class RefPtr final
 {
 	template <class T> friend class WeakPtr;
 public:
-	using DeleteExpr = std::function<void(T*)>;
+	using DeleteExpr = typename detail::deleter_sig<T>::func_type;
 
 private:
 	DeleteExpr _deleter{ nullptr };
@@ -45,7 +96,6 @@ public:
 	using element_type = T;
 	using pointer_type = T*;
 	using ctrl_type = PtrControlBlock;
-	using deleter_type = std::function<void(T*)>;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Same Type Constructors
@@ -54,24 +104,24 @@ public:
 	// default
 	RefPtr()
 	: _ctrl(ctrl_type::make_block(nullptr))
-	, _deleter(nullptr)
 	{
+		set_deleter(nullptr);
 	}
 
 	// nullptr
 	RefPtr(std::nullptr_t)
 	: _ctrl(ctrl_type::make_block(nullptr))
-	, _deleter(nullptr)
 	{
+		set_deleter(nullptr);
 	}
 
 	// raw pointer with no deleter
 	template<class Ptr_t>
 	RefPtr(Ptr_t* object)
 	: _ctrl(ctrl_type::make_block(object))
-	, _deleter(nullptr)
 	{
 		REFPTR_TYPECHECK(T, Ptr_t);
+		set_deleter(nullptr);
 		add_ref();
 	}
 
@@ -79,42 +129,49 @@ public:
 	template<class Ptr_t, class Deleter>
 	RefPtr(Ptr_t* object, Deleter deleter)
 	: _ctrl(ctrl_type::make_block<Ptr_t>(object))
-	, _deleter(deleter)
 	{
 		REFPTR_TYPECHECK(T, Ptr_t);
+		set_deleter(deleter);
 		add_ref();
 	}
 
 	// copy
-	template <class U>
-	RefPtr(const RefPtr<U>& other)
-		: _ctrl(other.get_ctrl())
-	{
-		REFPTR_TYPECHECK(T, U);
-		auto otherDel = other.get_deleter();
-		if (otherDel)
-			set_deleter(otherDel);
-
-		add_ref();
-	}
-
-	// copy with provided deleter
-	template <class U, class Del>
-	RefPtr(const RefPtr<U>& other, Del deleter)
+	RefPtr(const RefPtr<T>& other)
 	: _ctrl(other.get_ctrl())
-	, _deleter(deleter)
 	{
-		REFPTR_TYPECHECK(T, U);
+		set_deleter(other.get_deleter());
+
 		add_ref();
 	}
+
+	template<class U>
+	RefPtr(const RefPtr<U>& other)
+	: _ctrl(other.get_ctrl())
+	{
+		REFPTR_TYPECHECK(T, U);
+		if(other.get_deleter())
+			set_deleter([del = other.get_deleter()](T* ptr){
+				if(del) del(reinterpret_cast<U*>(ptr));
+			});
+		add_ref();
+	}
+
+	// copy with provided deleter polymorph
+	/*template <class U, class Deleter>
+	RefPtr(const RefPtr<U>& other, Deleter deleter)
+	: _ctrl(other.get_ctrl())
+	{
+		REFPTR_TYPECHECK(T, U);
+		set_deleter(deleter);
+		add_ref();
+	}*/
 
 	// move
-	template<class U>
-	RefPtr(RefPtr<U>&& other)
+	RefPtr(RefPtr<T>&& other)
 	: _ctrl(other.get_ctrl())
-	, _deleter(other.get_deleter())
 	{
-		REFPTR_TYPECHECK(T, U);
+		set_deleter(other.get_deleter());
+
 		other.set_ctrl(nullptr);
 		other.set_deleter(nullptr);
 	}
@@ -124,18 +181,16 @@ public:
 		del_ref();
 	}
 
-	template<class U>
-	RefPtr<T>& operator=(const RefPtr<U>& other)
+	RefPtr<T>& operator=(const RefPtr<T>& other)
 	{
-		REFPTR_TYPECHECK(T, U);
-		if (this != &other)
+		if(this != &other)
 		{
 			// decrement the strong count of the existing counter.
 			del_ref();
 
 			// copy over the stuff.
-			_ctrl = other.get_ctrl();
-			_deleter = other.get_deleter();
+			set_ctrl(other.get_ctrl());
+			set_deleter(other.get_deleter());
 
 			// add a reference for the new counter.
 			add_ref();
@@ -143,19 +198,18 @@ public:
 		return *this;
 	}
 
-	template<class U>
-	RefPtr<T>& operator=(RefPtr<U>&& other)
+	RefPtr<T>& operator=(RefPtr<T>&& other)
 	{
-		REFPTR_TYPECHECK(T, U);
-		if (this != &other)
+		if(this != &other)
 		{
 			// decrement the strong count of the existing counter.
 			del_ref();
 
-			// copy over the stuff.
-			_ctrl = other.get_ctrl();
-			_deleter = other.get_deleter();
+			// move over the stuff.
+			set_ctrl(other.get_ctrl());
+			set_deleter(other.get_deleter());
 
+			// take ownership
 			other.set_ctrl(nullptr);
 			other.set_deleter(nullptr);
 		}
@@ -165,35 +219,19 @@ public:
 	RefPtr<T>& operator=(std::nullptr_t)
 	{
 		del_ref();
-
-		// _ctrl->set_ptr(nullptr);
-		_deleter = nullptr;
+		set_deleter(nullptr);
 		return *this;
 	}
 
 	template<class U>
 	RefPtr<U> Upcast() const
 	{
-		static_assert(
-			std::is_base_of<T, U>::value &&
-			!std::is_same<T, U>::value,
-			"invalid types passed");
+		REFPTR_TYPECHECK(T, U);
 
 		if(_ctrl == nullptr)
 			return nullptr;
 
-		RefPtr<U> out(get_ctrl());
-		auto deleter = get_deleter();
-		if(deleter)
-		{
-			out.set_deleter([del = deleter](U* ptr) {
-				// the original will still work, but the output RefPtr deleter needs to have the signature of the
-				// proper type.
-				del(ptr);
-			});
-		}
-
-		return out;
+		return RefPtr<U>(get_ctrl(), get_deleter());
 	}
 
 	T* Get() const { return _ctrl->get_ptr<T>(); }
@@ -201,10 +239,8 @@ public:
 	T* operator->() { return _ctrl->get_ptr<T>(); }
 	const T* operator->() const { return _ctrl->get_ptr<T>(); }
 
-	template<class U>
-	bool operator==(const RefPtr<U>& other) const
+	bool operator==(const RefPtr<T>& other) const
 	{
-		REFPTR_TYPECHECK(T, RefPtr<U>::element_type);
 		return _ctrl == other.get_ctrl();
 	}
 
@@ -213,22 +249,19 @@ public:
 		return _ctrl && _ctrl->get_ptr<T>() == nullptr;
 	}
 
-	template<class U>
-	bool operator!=(const RefPtr<U>& other) const
+	bool operator!=(const RefPtr<T>& other) const
 	{
-		REFPTR_TYPECHECK(T, RefPtr<U>::element_type);
 		return _ctrl != other.get_ctrl();
 	}
 
 	bool operator!=(std::nullptr_t) const
 	{
-		if (_ctrl)
+		if(_ctrl)
 		{
 			auto ptr = _ctrl->get_ptr<T>();
 			return ptr != nullptr;
 		}
 		return true;
-		//return _ctrl && _ctrl->get_ptr<T>() != nullptr;
 	}
 
 	operator bool() const
@@ -261,19 +294,17 @@ public:
 		return _deleter;
 	}
 
-	void set_deleter(deleter_type deleter)
+	// default
+	template<class Deleter=DeleteExpr>
+	void set_deleter(Deleter deleter)
 	{
-		if (deleter)
+		if(_deleter)
 			_deleter = deleter;
 	}
 
-	template<class Deleter>
-	void set_deleter(Deleter deleter)
-	{
-		_deleter = deleter;
-	}
-
-	void set_deleter(std::nullptr_t)
+	// nullptr set
+	template<>
+	void set_deleter<std::nullptr_t>(std::nullptr_t)
 	{
 		_deleter = nullptr;
 	}

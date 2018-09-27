@@ -20,7 +20,7 @@ class IDocument;
 
 class IResourceObject : public IRefCounted
 {
-	friend class ResourceHandleObject;
+	friend class ResourceHandle_;
 	friend class ResourceCache;
 public:
 	virtual ~IResourceObject() {}
