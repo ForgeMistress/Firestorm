@@ -10,11 +10,13 @@
 #include "stdafx.h"
 #include "ResourceCache.h"
 
+#include <libCore/RefPtr.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*ResourceHandle_::ResourceHandle_(std::nullptr_t)
+/*ResourceHandle::ResourceHandle(std::nullptr_t)
 : _error(nullptr)
 , _cache(nullptr)
 , _obj(nullptr)
@@ -23,131 +25,74 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle_::ResourceHandle_(ResourceCache* cache, IResourceObject* obj)
+ResourceHandle::ResourceHandle(ResourceCache* cache, RefPtr<IResourceObject> obj)
 : _error(nullptr)
 , _cache(cache)
 , _obj(obj)
 {
-	if(_obj)
-		_obj->AddRef();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*ResourceHandle_::ResourceHandle_(const ResourceHandle_& other)
-: _error(other._error)
-, _cache(other._cache)
-, _obj(other._obj)
-{
-	if(_obj)
-		_obj->AddRef();
-}*/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*ResourceHandle_::ResourceHandle_(ResourceHandle_&& other)
-: _obj(other._obj)
-{
-	other._obj = nullptr;
-}*/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceHandle_::~ResourceHandle_()
+ResourceHandle::~ResourceHandle()
 {
 	Release();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*ResourceHandle_& ResourceHandle_::operator=(const ResourceHandle_& other)
-{
-	if(this != &other)
-	{
-		_obj = other._obj;
-		_obj->AddRef();
-	}
-}*/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*ResourceHandle_& ResourceHandle_::operator=(ResourceHandle_&& other)
-{
-	if(this != &other)
-	{
-		_obj = other._obj;
-
-		other._obj = nullptr;
-	}
-}*/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*bool ResourceHandle_::operator==(const ResourceHandle_& other)
-{
-	return _obj == other._obj;
-}*/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-Error ResourceHandle_::GetError() const
+Error ResourceHandle::GetError() const
 {
 	return Error(_error);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceHandle_::IsReady() const
+bool ResourceHandle::IsReady() const
 {
 	return _obj != nullptr && _state == ResourceHandleState::kLoaded;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceHandle_::HasError() const
+bool ResourceHandle::HasError() const
 {
 	return _error != nullptr && _state == ResourceHandleState::kLoadError;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandleState ResourceHandle_::GetState() const
+ResourceHandleState ResourceHandle::GetState() const
 {
 	return _state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandle_::Release()
+void ResourceHandle::Release()
 {
-	DelRef();
 	_obj = nullptr;
 	_error = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandle_::SetState(ResourceHandleState state)
+void ResourceHandle::SetState(ResourceHandleState state)
 {
 	_state = state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandle_::SetResourcePointer(IResourceObject* obj)
+void ResourceHandle::SetResourcePointer(RefPtr<IResourceObject> obj)
 {
-	DelRef();
-	{
-		std::scoped_lock lock(_pointerLock);
-		_obj = obj;
-		_error = nullptr;
-	}
-	AddRef();
+	_obj = obj;
+	_error = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandle_::SetError(const ErrorCode* error)
+void ResourceHandle::SetError(const ErrorCode* error)
 {
 	DelRef();
 
@@ -157,33 +102,9 @@ void ResourceHandle_::SetError(const ErrorCode* error)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandle_::SetFilename(const String& filename)
+void ResourceHandle::SetFilename(const String& filename)
 {
 	_filename = filename;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceHandle_::AddRef()
-{
-	std::scoped_lock lock(_pointerLock);
-	if(_obj)
-		_obj->AddRef();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceHandle_::DelRef()
-{
-	std::scoped_lock lock(_pointerLock);
-	if(_obj)
-	{
-		if(_obj->DelRef() == 0)
-		{
-			// TODO: Decide what to do here, otherwise the DelRef should be enough for now.
-			_obj = nullptr; // Since the ResourceCache holds ownership, we shouldn't delete. We'll just null it out.
-		}
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,21 +118,14 @@ ResourceCache::ResourceCache()
 ResourceCache::~ResourceCache()
 {
 	std::scoped_lock lock(_lock);
-	for(size_t i = 0; i < _cache.size(); ++i)
-	{
-		auto entry = _cache[i];
-		delete entry.object;
-	}
 	_cache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceCache::AddResource(const String& name, IResourceObject* resourceObject)
+bool ResourceCache::AddResource(const String& name, RefPtr<IResourceObject>&& resourceObject)
 {
 	std::scoped_lock lock(_lock);
-	FIRE_ASSERT_MSG(resourceObject->GetRefCount() == 0,
-					"the resource object was owned by something when it was added to the cache");
 	for(size_t i = 0; i < _cache.size(); ++i)
 	{
 		if(_cache[i].name == name)
@@ -219,7 +133,7 @@ bool ResourceCache::AddResource(const String& name, IResourceObject* resourceObj
 	}
 	_cache.push_back(CacheEntry{
 		name,
-		resourceObject
+		std::move(resourceObject)
 	});
 	return true;
 }
@@ -240,12 +154,19 @@ bool ResourceCache::HasResource(const String& name)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle ResourceCache::GetResource(const String& resource) const
+RefPtr<ResourceHandle> ResourceCache::GetResource(const String& resource) const
 {
-	ResourceHandle_* handle = _handlePool.Get(const_cast<ResourceCache*>(this), FindResource(resource));
-	return ResourceHandle(handle, [this](ResourceHandle_* handle){
-		_handlePool.Return(handle);
-	});
+	ResourceHandle* handlePtr = nullptr;
+	RefPtr<IResourceObject> resourcePtr = FindResource(resource);
+	{
+		std::scoped_lock lock(_handlePoolLock);
+		handlePtr = _handlePool.Get(const_cast<ResourceCache*>(this), resourcePtr);
+	}
+	auto deleter = [this](ResourceHandle* h) { 
+		_handlePool.Return(h);
+	};
+
+	return RefPtr<ResourceHandle>(handlePtr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -258,9 +179,8 @@ void ResourceCache::ClearOrphanedResources()
 	{
 		auto& entry = (*iter);
 		// orphaned
-		if(entry.object && entry.object->GetRefCount() == 0)
+		if(entry.object && entry.object.use_count() == 0)
 		{
-			delete entry.object;
 			entry.object = nullptr;
 			iter = _cache.erase(iter);
 		}

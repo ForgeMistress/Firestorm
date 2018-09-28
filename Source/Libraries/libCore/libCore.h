@@ -32,10 +32,7 @@ OPEN_NAMESPACE(Firestorm);
 using std::cout;
 using std::endl;
 
-using std::function;
-template <class _Fty> using Function = std::function<_Fty>;
-
-using std::pair;
+template <class F> using Function = std::function<F>;
 template <class L, class R> using Pair = std::pair<L, R>;
 
 template<

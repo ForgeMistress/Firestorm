@@ -35,11 +35,9 @@ class EventDispatcher;
 class EDReceipt : public IRefCounted
 {
 	friend class EventDispatcher;
-	template <class T> friend class RefPtr;
-	template <class T> friend class WeakPtr;
-	friend class PtrControlBlock;
 private:
 	EDReceipt(EventDispatcher* dispatcher, IEvent* event);
+public:
 	~EDReceipt();
 
 	void DispatcherDeleted();

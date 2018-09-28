@@ -13,6 +13,7 @@
 
 #include "ResourceLoader.h"
 #include "ResourceCache.h"
+#include "ResourceReference.h"
 #include "IResourceObject.h"
 
 #include <libCore/Result.h>
@@ -57,38 +58,35 @@ private:
 class ResourceMgr final
 {
 private:
-	using Task_t = std::function<ResourceLoader::LoadResult(const ResourceReference&)>;
-	using Future_t = std::future<ResourceLoader::LoadResult>;
-	using Promise_t = std::promise<ResourceLoader::LoadResult>;
-
 	struct LoadOp final
 	{
-		LoadOp(ResourceLoader* loader, ResourceReference* ref, ResourceHandle* handle);
-		LoadOp(const LoadOp& other);
+		LoadOp(ResourceLoader* loader, ResourceReference ref, RefPtr<ResourceHandle> handle);
 		~LoadOp();
 
-		ResourceLoader*    loader;
-		ResourceReference* ref;
-		ResourceHandle*    handle;
+		ResourceLoader*         loader;
+		ResourceReference       ref;
+		RefPtr<ResourceHandle>  handle;
 #ifndef FIRE_FINAL
-		String             filename;
+		String filename;
 #endif
 	};
-	ResourceHandle Load(ResourceLoader* loader, ResourceReference* ref);
+
+	RefPtr<ResourceHandle> Load(ResourceLoader* loader, ResourceReference ref);
+
 public:
 	ResourceMgr();
 	~ResourceMgr();
 
 	/**
 		Load up a resource. The load status of said resource can be checked using the
-		returned ResourceHandle_ instance.
+		returned ResourceHandle instance.
 	 **/
 	template <class ResourceType_t>
-	ResourceHandle Load(ResourceReference& ref)
+	RefPtr<ResourceHandle> Load(ResourceReference& ref)
 	{
 		ResourceLoader* loader = GetLoader(ResourceType_t::MyResourceType());
 		FIRE_ASSERT_MSG(loader, "no loader installed for this resource type");
-		return Load(loader, &ref);
+		return Load(loader, ref);
 	}
 
 	template<class ResourceType_t, class... Args_t>
@@ -115,7 +113,7 @@ private:
 	std::condition_variable _cv;
 	bool _quit{ false };
 
-	Vector<std::pair<const ResourceTypeID*, ResourceLoader*>> _loaders;
+	Vector<std::pair<const ResourceTypeID*, std::unique_ptr<ResourceLoader>>> _loaders;
 
 	ResourceCache _cache;
 

@@ -16,8 +16,6 @@ OPEN_NAMESPACE(Firestorm);
 
 class IRefCounted
 {
-	template <class T> friend class RefPtr;
-	template <class T> friend class WeakPtr;
 public:
 	IRefCounted() {}
 	virtual ~IRefCounted() {}

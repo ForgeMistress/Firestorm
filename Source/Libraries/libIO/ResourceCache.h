@@ -13,8 +13,9 @@
 
 #include <libCore/libCore.h>
 #include <libCore/Result.h>
-#include "IResourceObject.h"
+#include <libCore/RefPtr.h>
 
+#include "IResourceObject.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -36,30 +37,29 @@ enum struct ResourceHandleState
 	Defines a reference counted smart pointer to an IResourceObject. The load status of the handle
 	can be checked using the provided functions.
  **/
-class ResourceHandle_ final
+class ResourceHandle final
 {
 	friend class ResourceCache;
 	friend class ResourceMgr;
 public:
-	//ResourceHandle_(std::nullptr_t);
-	ResourceHandle_(ResourceCache* cache, IResourceObject* obj);
+	ResourceHandle(ResourceCache* cache, RefPtr<IResourceObject> obj);
 	
-	~ResourceHandle_();
+	~ResourceHandle();
 
 	// Meant to be used with a RefPtr.
-	ResourceHandle_(const ResourceHandle_& other) = delete;
-	ResourceHandle_(ResourceHandle_&& other) = delete;
-	ResourceHandle_& operator=(const ResourceHandle_& handle) = delete;
-	ResourceHandle_& operator=(ResourceHandle_&& handle) = delete;
+	ResourceHandle(const ResourceHandle& other) = delete;
+	ResourceHandle(ResourceHandle&& other) = delete;
+	ResourceHandle& operator=(const ResourceHandle& handle) = delete;
+	ResourceHandle& operator=(ResourceHandle&& handle) = delete;
 
 	template<class T>
-	const T* Get() const
+	const WeakPtr<T> Get() const
 	{
-		return static_cast<const T*>(_obj);
+		// return static_cast<const T*>(_obj);
 	}
 
 	template<class T>
-	T* Get()
+	WeakPtr<T> Get()
 	{
 		return static_cast<T*>(_obj);
 	}
@@ -80,8 +80,8 @@ public:
 	bool HasError() const;
 
 	/**
-		Retrieve the present state of this ResourceHandle_.
-		\return state One of #ResourceHandle_::State
+		Retrieve the present state of this ResourceHandle.
+		\return state One of #ResourceHandle::State
 	 **/
 	ResourceHandleState GetState() const;
 
@@ -94,7 +94,7 @@ private:
 	void SetState(ResourceHandleState state);
 
 	// Calling this will remove whatever the active ErrorCode is.
-	void SetResourcePointer(IResourceObject* obj);
+	void SetResourcePointer(RefPtr<IResourceObject> obj);
 
 	// Calling this will remove whatever the active object is.
 	void SetError(const ErrorCode* error);
@@ -110,15 +110,13 @@ private:
 
 	const ErrorCode* _error{ nullptr };
 	ResourceCache* _cache{ nullptr };
-	IResourceObject* _obj{ nullptr };
+	WeakPtr<IResourceObject> _obj{ nullptr };
 	std::atomic<ResourceHandleState> _state{ ResourceHandleState::kEmpty };
 
 #ifndef FIRE_FINAL
 	String _filename;
 #endif
 };
-
-using ResourceHandle = RefPtr<ResourceHandle_>;
 
 class ResourceCache
 {
@@ -136,23 +134,24 @@ public:
 		Retrieve a resource from the cache and return a handle to that resource.
 		If the resource does not exist, then the handle will be an empty and invalid handle.
 	 **/
-	ResourceHandle GetResource(const String& name) const;
+	RefPtr<ResourceHandle> GetResource(const String& name) const;
 
 	void ClearOrphanedResources();
 
 private:
-	bool AddResource(const String& name, IResourceObject* object);
-	IResourceObject* FindResource(const String& name) const;
+	bool AddResource(const String& name, RefPtr<IResourceObject>&& object);
+	RefPtr<IResourceObject> FindResource(const String& name) const;
 
 	struct CacheEntry
 	{
-		String           name;
-		IResourceObject* object;
+		String                  name;
+		RefPtr<IResourceObject> object;
 	};
 	Vector<CacheEntry> _cache;
-	mutable ObjectPool<ResourceHandle_> _handlePool;
+	mutable ObjectPool<ResourceHandle> _handlePool;
 
 	mutable Mutex _lock;
+	mutable Mutex _handlePoolLock;
 };
 
 CLOSE_NAMESPACE(Firestorm);

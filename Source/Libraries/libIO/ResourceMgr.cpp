@@ -19,29 +19,17 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceMgr::LoadOp::LoadOp(ResourceLoader* loader, ResourceReference* ref, ResourceHandle* handle)
-: loader(loader)
-, ref(ref)
-, handle(handle)
+ResourceMgr::LoadOp::LoadOp(ResourceLoader* l, ResourceReference r, RefPtr<ResourceHandle> h)
+: loader(l)
+, ref(r)
+, handle(h)
 #ifndef FIRE_FINAL
-, filename(ref->GetResourcePath())
+, filename(ref.GetResourcePath())
 #endif
 {
 #ifndef FIRE_FINAL
-	handle->Get()->SetFilename(ref->GetResourcePath());
+	handle->SetFilename(ref.GetResourcePath());
 #endif
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceMgr::LoadOp::LoadOp(const LoadOp& other)
-: loader(loader)
-, ref(ref)
-, handle(handle)
-#ifndef FIRE_FINAL
-, filename(other.filename)
-#endif
-{
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,27 +63,24 @@ ResourceMgr::~ResourceMgr()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle ResourceMgr::Load(ResourceLoader* loader, ResourceReference* ref)
+RefPtr<ResourceHandle> ResourceMgr::Load(ResourceLoader* loader, ResourceReference ref)
 {
 	// retrieve the resource from the cache first if it exists.
-	const auto& path = ref->GetResourcePath();
+	const auto& path = ref.GetResourcePath();
 	if(_cache.HasResource(path))
 	{
 		// and set the resource right now.
 		return _cache.GetResource(path);
 	}
-	ResourceHandle outHandle = _cache.GetResource(path);
 	// otherwise we're gonna have to load this sucker.
 
 	std::unique_lock<Mutex> lock(_lock);
-	_queue.push(LoadOp(loader, ref, &outHandle));
-
-	outHandle->SetState(ResourceHandleState::kWaitingForLoad);
+	_queue.push(LoadOp(loader, ref, std::move(_cache.GetResource(path))));
 
 	lock.unlock();
 	_cv.notify_all();
 
-	return outHandle;
+	return _queue.back().handle;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,10 +97,6 @@ void ResourceMgr::Shutdown()
 			_threads[i].join();
 		}
 	}
-	for(size_t i = 0; i < _loaders.size(); ++i)
-	{
-		delete _loaders[i].second;
-	}
 	_loaders.clear();
 }
 
@@ -128,7 +109,7 @@ bool ResourceMgr::InstallLoader(const ResourceTypeID* type, ResourceLoader* load
 		if(_loaders[i].first == type)
 			return false;
 	}
-	_loaders.push_back(std::make_pair(type, loader));
+	_loaders.push_back(std::make_pair(type, std::make_unique<ResourceLoader>(loader)));
 	return true;
 }
 
@@ -139,7 +120,7 @@ ResourceLoader* ResourceMgr::GetLoader(const ResourceTypeID* type)
 	for (size_t i = 0; i < _loaders.size(); ++i)
 	{
 		if(_loaders[i].first == type)
-			return _loaders[i].second;
+			return _loaders[i].second.get();
 	}
 	return nullptr;
 }
@@ -160,7 +141,7 @@ void ResourceMgr::ThreadRun()
 			auto& oper = std::move(_queue.front());
 			_queue.pop();
 
-			oper.handle->Get()->SetState(ResourceHandleState::kLoading);
+			oper.handle->SetState(ResourceHandleState::kLoading);
 
 			FIRE_LOG_DEBUG("Loading %s", oper.filename);
 

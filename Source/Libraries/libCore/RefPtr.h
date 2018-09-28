@@ -20,10 +20,11 @@
 #include "PtrControlBlock.h"
 #include <functional>
 #include <rttr/wrapper_mapper.h>
+#include <memory>
 
 OPEN_NAMESPACE(Firestorm);
 
-#define REFPTR_TYPECHECK( BASE, SUPER )        \
+/*#define REFPTR_TYPECHECK( BASE, SUPER )        \
 static_assert(								   \
 	std::is_base_of<BASE, SUPER>::value ||	   \
 	std::is_same<BASE, SUPER>::value, 		   \
@@ -56,28 +57,6 @@ struct relation_tag_base
 {
 	using tag = t;
 };
-
-// exact same type
-/*template<class Base, class Derived>
-struct relation_tag : public relation_tag_base<
-	Base, 
-	Derived, 
-	std::enable_if<
-		std::is_same_v<Base, Derived>,
-		same_tag
-	>::type>
-{
-};
-
-template<class Base, class Derived>
-struct relation_tag : public relation_tag_base<Base, Derived,
-	std::enable_if<
-		!std::is_same_v<Base, Derived> &&
-		std::is_convertible_v<Derived*, Base*>,
-		base_tag
-	>::type>
-{
-};*/
 
 CLOSE_NAMESPACE(detail);
 
@@ -155,16 +134,6 @@ public:
 			});
 		add_ref();
 	}
-
-	// copy with provided deleter polymorph
-	/*template <class U, class Deleter>
-	RefPtr(const RefPtr<U>& other, Deleter deleter)
-	: _ctrl(other.get_ctrl())
-	{
-		REFPTR_TYPECHECK(T, U);
-		set_deleter(deleter);
-		add_ref();
-	}*/
 
 	// move
 	RefPtr(RefPtr<T>&& other)
@@ -393,6 +362,10 @@ struct hash<Firestorm::RefPtr<T>>
 		return std::hash<Firestorm::RefPtr<T>::pointer_type>()(ptr.Get());
 	}
 };
-CLOSE_NAMESPACE(std);
+CLOSE_NAMESPACE(std);*/
+
+template<class T> using RefPtr = std::shared_ptr<T>;
+
+CLOSE_NAMESPACE(Firestorm);
 
 #endif

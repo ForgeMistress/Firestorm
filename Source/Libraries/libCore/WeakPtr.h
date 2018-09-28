@@ -11,12 +11,13 @@
 #define LIBCORE_WEAKPTR_H_
 #pragma once
 
-#include "RefPtr.h"
-#include "PtrControlBlock.h"
+//#include "RefPtr.h"
+//#include "PtrControlBlock.h"
+#include <memory>
 
 OPEN_NAMESPACE(Firestorm);
 
-template <class T>
+/*template <class T>
 class WeakPtr final
 {
 public:
@@ -132,7 +133,10 @@ private:
 		}
 	}
 	PtrControlBlock* _ctrl{ nullptr };
-};
+};*/
+
+template<class T>
+using WeakPtr = std::weak_ptr<T>;
 
 CLOSE_NAMESPACE(Firestorm);
 #endif
