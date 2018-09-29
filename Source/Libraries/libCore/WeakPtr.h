@@ -135,8 +135,5 @@ private:
 	PtrControlBlock* _ctrl{ nullptr };
 };*/
 
-template<class T>
-using WeakPtr = std::weak_ptr<T>;
-
 CLOSE_NAMESPACE(Firestorm);
 #endif

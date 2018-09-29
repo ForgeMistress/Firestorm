@@ -32,22 +32,6 @@ public:
 
 class EventDispatcher;
 
-class EDReceipt : public IRefCounted
-{
-	friend class EventDispatcher;
-private:
-	EDReceipt(EventDispatcher* dispatcher, IEvent* event);
-public:
-	~EDReceipt();
-
-	void DispatcherDeleted();
-
-private:
-	EventDispatcher* _dispatcher;
-	IEvent* _event;
-	bool _hasDispatcher;
-};
-
 template <class Arg_t>
 class Event : public IEvent
 {
@@ -78,11 +62,27 @@ private:
 class EventDispatcher
 {
 	friend class EDReceipt;
+private:
+	class EDReceipt final
+	{
+		friend class EventDispatcher;
+	public:
+		EDReceipt(EventDispatcher* dispatcher, IEvent* event);
+		~EDReceipt();
+
+		void DispatcherDeleted();
+
+	private:
+		EventDispatcher* _dispatcher;
+		IEvent* _event;
+		bool _hasDispatcher;
+	};
+
 public:
 	using EventList = List<IEvent*>;
 	using EventMap = UnorderedMap<Mirror::Type, EventList>;
 	using Receipt = RefPtr<EDReceipt>;
-	using ReceiptPtrList = List<EDReceipt*>;
+	using ReceiptPtrList = List<WeakPtr<EDReceipt>>;
 
 	EventDispatcher();
 	~EventDispatcher();
@@ -122,7 +122,7 @@ public:
 		_mutex.lock();
 		_events[argType].push_back(event);
 
-		EDReceipt* r = new EDReceipt(const_cast<EventDispatcher*>(this), event);
+		Receipt r = std::make_shared<EDReceipt>(const_cast<EventDispatcher*>(this), event);
 		_receipts.push_back(r);
 		_numRegisteredEvents++;
 		_mutex.unlock();

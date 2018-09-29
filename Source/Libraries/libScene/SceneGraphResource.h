@@ -53,7 +53,7 @@ public:
 	struct Buffer
 	{
 		// Handle to the MeshResource it holds.
-		ResourceHandle ResourceHandle;
+		Future<ResourceLoader::LoadResult> Resource;
 	};
 
 	struct BufferView

@@ -20,7 +20,7 @@ OPEN_NAMESPACE(Firestorm);
 
 class PtrControlBlock final
 {
-	template <class T> friend class WeakPtr;
+	//template <class T> friend class WeakPtr;
 private:
 	static ObjectPool<PtrControlBlock> _s_pool;
 

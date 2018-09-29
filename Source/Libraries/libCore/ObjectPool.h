@@ -12,6 +12,7 @@
 #pragma once
 
 #include "Assert.h"
+#include <mutex>
 #include <forward_list>
 
 OPEN_NAMESPACE(Firestorm);
@@ -70,17 +71,19 @@ class ObjectPool final
 {
 public:
 	template<class... Args_t>
-	T* Get(Args_t&&... args);
+	T* Get(Args_t&&... args) const;
 
 	template<class... Args_t>
-	PoolPtr<T> GetManaged(Args_t&&... args);
+	PoolPtr<T> GetManaged(Args_t&&... args) const;
 
 	template<class U>
 	void Return(U* ptr);
 
 private:
-	std::forward_list<T> _pool;
-	Vector<T*> _recycle;
+	mutable std::mutex _poolLock;
+	mutable std::forward_list<T> _pool;
+	mutable std::mutex _recycleLock;
+	mutable Vector<T*> _recycle;
 };
 
 template<class T>
@@ -93,15 +96,15 @@ PoolPtr<T>::PoolPtr(T* ptr, ObjectPool<T>& pool)
 template<class T>
 PoolPtr<T>::~PoolPtr()
 {
-	if (_ptr)
+	if(_ptr)
 		_pool.Return(_ptr);
 	_ptr = nullptr;
 }
 
 template<class T>
 PoolPtr<T>::PoolPtr(PoolPtr&& other)
-	: _ptr(other._ptr)
-	, _pool(other._pool)
+: _ptr(other._ptr)
+, _pool(other._pool)
 {
 	other._ptr = nullptr;
 }
@@ -132,22 +135,25 @@ bool PoolPtr<T>::IsValid() const
 
 template<class T>
 template<class... Args_t>
-T* ObjectPool<T>::Get(Args_t&&... args)
+T* ObjectPool<T>::Get(Args_t&&... args) const
 {
+	std::unique_lock<Mutex> recycleLock(_recycleLock);
 	if(_recycle.empty())
 	{
+		std::unique_lock<Mutex> poolLock(_poolLock);
 		T& item = _pool.emplace_front(std::forward<Args_t>(args)...);
 		return &item;
 	}
 	auto item = _recycle.back();
 	_recycle.pop_back();
+	recycleLock.unlock();
 	new (item) T(std::forward<Args_t>(args)...);
 	return item;
 }
 
 template<class T>
 template<class... Args_t>
-PoolPtr<T> ObjectPool<T>::GetManaged(Args_t&&... args)
+PoolPtr<T> ObjectPool<T>::GetManaged(Args_t&&... args) const
 {
 	return PoolPtr<T>{ Get(args), *this };
 }
@@ -162,8 +168,11 @@ void ObjectPool<T>::Return(U* ptr)
 		"invalid type passed to ObjectPool::Return"
 	);
 	FIRE_ASSERT(ptr != nullptr);
+
 	T* ptrT = static_cast<T*>(ptr);
 	ptrT->~T();
+
+	std::unique_lock<Mutex> lock(_recycleLock);
 	_recycle.push_back(ptrT);
 }
 

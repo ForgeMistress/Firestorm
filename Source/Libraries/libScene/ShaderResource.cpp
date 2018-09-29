@@ -129,10 +129,13 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 			JSONCPP_STRING errors;
 			if(!_reader->parse(&data[0], &data[data.size() - 1], &root, &errors))
 			{
-				return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, errors);
+				return FIRE_LOAD_FAIL(
+					ResourceIOErrors::PARSING_ERROR,
+					errors);
 			}
 
-			ShaderResource* shaderResource = _shaderPool.Get(_renderMgr);
+			RefPtr<ShaderResource> shaderResource(std::make_shared<ShaderResource>(_renderMgr));
+
 			std::unordered_map<LLGL::ShaderType, LLGL::Shader*> shaders;
 
 			if(_renderMgr.IsUsingRenderer(Renderers::OpenGL))
@@ -148,7 +151,9 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 						Result<Vector<char>, Error> result = libIO::LoadFile(value);
 						if(!result.has_value())
 						{
-							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "fragment shader could not be loaded");
+							return FIRE_LOAD_FAIL(
+								ResourceIOErrors::FILE_READ_ERROR, 
+								"fragment shader could not be loaded");
 						}
 						shaderResource->_shaderData[LLGL::ShaderType::Vertex] = result.value();
 					}
@@ -160,7 +165,9 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 						Result<Vector<char>, Error> result = libIO::LoadFile(value);
 						if(!result.has_value())
 						{
-							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "fragment shader could not be loaded");
+							return FIRE_LOAD_FAIL(
+								ResourceIOErrors::FILE_READ_ERROR,
+								"fragment shader could not be loaded");
 						}
 
 						shaderResource->_shaderData[LLGL::ShaderType::Fragment] = result.value();
@@ -173,7 +180,9 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 						Result<Vector<char>, Error> result = libIO::LoadFile(value);
 						if(!result.has_value())
 						{
-							return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "geometry shader could not be loaded");
+							return FIRE_LOAD_FAIL(
+								ResourceIOErrors::FILE_READ_ERROR,
+								"geometry shader could not be loaded");
 						}
 						shaderResource->_shaderData[LLGL::ShaderType::Fragment] = result.value();
 					}
@@ -185,11 +194,15 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 			}
 
 			// return the shader resource now, because the shader has to be actually compiled on the main thread.
-			return FIRE_RESULT(shaderResource);
+			return FIRE_LOAD_SUCCESS(shaderResource);
 		}
-		return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, ((String)result.error()));
+		return FIRE_LOAD_FAIL(
+			ResourceIOErrors::FILE_READ_ERROR,
+			((String)result.error()));
 	}
-	return FIRE_ERROR(ResourceIOErrors::FILE_NOT_FOUND_ERROR, filename);
+	return FIRE_LOAD_FAIL(
+		ResourceIOErrors::FILE_NOT_FOUND_ERROR,
+		filename);
 }
 
 LLGL::Shader* ShaderLoader::MakeShader(const Vector<char>& data, LLGL::ShaderType shaderType)

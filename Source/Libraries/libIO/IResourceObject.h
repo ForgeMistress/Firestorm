@@ -11,6 +11,8 @@
 #define LIBIO_RESOURCEOBJECT_H_
 #pragma once
 
+#include <libCore/RefPtr.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 class IResourceObject
@@ -18,6 +20,8 @@ class IResourceObject
 public:
 	virtual ~IResourceObject() {}
 };
+
+using ResourcePtr = RefPtr<IResourceObject>;
 
 CLOSE_NAMESPACE(Firestorm);
 #endif

@@ -32,6 +32,12 @@ OPEN_NAMESPACE(Firestorm);
 using std::cout;
 using std::endl;
 
+template<class T>
+using Future = std::future<T>;
+
+template<class T>
+using Promise = std::promise<T>;
+
 template <class F> using Function = std::function<F>;
 template <class L, class R> using Pair = std::pair<L, R>;
 

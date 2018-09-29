@@ -20,12 +20,18 @@ class ErrorCode;
 class Error
 {
 public:
+	Error();
 	Error(const ErrorCode* errorCode, const String& details="");
-
+	Error(const Error& error);
 	explicit operator String() const;
 	explicit operator uint32_t() const;
 
+	Error& operator=(const Error& e);
 	bool operator==(const Error& e) const;
+
+	void Set(const ErrorCode* code, const String& details);
+
+	operator bool() const;
 
 	const ErrorCode* GetCode() const { return _code; }
 

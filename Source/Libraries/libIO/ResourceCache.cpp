@@ -16,99 +16,6 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*ResourceHandle::ResourceHandle(std::nullptr_t)
-: _error(nullptr)
-, _cache(nullptr)
-, _obj(nullptr)
-{
-}*/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceHandle::ResourceHandle(ResourceCache* cache, RefPtr<IResourceObject> obj)
-: _error(nullptr)
-, _cache(cache)
-, _obj(obj)
-{
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceHandle::~ResourceHandle()
-{
-	Release();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-Error ResourceHandle::GetError() const
-{
-	return Error(_error);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool ResourceHandle::IsReady() const
-{
-	return _obj != nullptr && _state == ResourceHandleState::kLoaded;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool ResourceHandle::HasError() const
-{
-	return _error != nullptr && _state == ResourceHandleState::kLoadError;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceHandleState ResourceHandle::GetState() const
-{
-	return _state;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceHandle::Release()
-{
-	_obj = nullptr;
-	_error = nullptr;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceHandle::SetState(ResourceHandleState state)
-{
-	_state = state;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceHandle::SetResourcePointer(RefPtr<IResourceObject> obj)
-{
-	_obj = obj;
-	_error = nullptr;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceHandle::SetError(const ErrorCode* error)
-{
-	DelRef();
-
-	std::scoped_lock lock(_pointerLock);
-	_error = error;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceHandle::SetFilename(const String& filename)
-{
-	_filename = filename;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 ResourceCache::ResourceCache()
 {
 }
@@ -123,18 +30,15 @@ ResourceCache::~ResourceCache()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceCache::AddResource(const String& name, RefPtr<IResourceObject>&& resourceObject)
+bool ResourceCache::AddResource(const String& name, const RefPtr<IResourceObject>& resourceObject)
 {
 	std::scoped_lock lock(_lock);
-	for(size_t i = 0; i < _cache.size(); ++i)
+	auto found = _cache.find(name);
+	if(found != _cache.end())
 	{
-		if(_cache[i].name == name)
-			return false;
+		return false;
 	}
-	_cache.push_back(CacheEntry{
-		name,
-		std::move(resourceObject)
-	});
+	_cache[name] = resourceObject;
 	return true;
 }
 
@@ -143,30 +47,20 @@ bool ResourceCache::AddResource(const String& name, RefPtr<IResourceObject>&& re
 bool ResourceCache::HasResource(const String& name)
 {
 	std::scoped_lock lock(_lock);
-	for(size_t i = 0; i < _cache.size(); ++i)
-	{
-		auto& entry = _cache[i];
-		if(entry.name == name)
-			return true;
-	}
-	return false;
+	return _cache.find(name) != _cache.end();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RefPtr<ResourceHandle> ResourceCache::GetResource(const String& resource) const
+ResourcePtr ResourceCache::FindResource(const String& name) const
 {
-	ResourceHandle* handlePtr = nullptr;
-	RefPtr<IResourceObject> resourcePtr = FindResource(resource);
+	std::scoped_lock lock(_lock);
+	auto found = _cache.find(name);
+	if(found != _cache.end())
 	{
-		std::scoped_lock lock(_handlePoolLock);
-		handlePtr = _handlePool.Get(const_cast<ResourceCache*>(this), resourcePtr);
+		return found->second;
 	}
-	auto deleter = [this](ResourceHandle* h) { 
-		_handlePool.Return(h);
-	};
-
-	return RefPtr<ResourceHandle>(handlePtr);
+	return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,18 +68,14 @@ RefPtr<ResourceHandle> ResourceCache::GetResource(const String& resource) const
 void ResourceCache::ClearOrphanedResources()
 {
 	std::scoped_lock lock(_lock);
+
 	auto iter = _cache.begin();
 	while(iter != _cache.end())
 	{
-		auto& entry = (*iter);
-		// orphaned
-		if(entry.object && entry.object.use_count() == 0)
-		{
-			entry.object = nullptr;
-			iter = _cache.erase(iter);
-		}
-		// otherwise deallocated
-		else if(!entry.object)
+		auto ptr = iter->second;
+
+		// orphaned, only used by the cache.
+		if(ptr.use_count() == 1)
 		{
 			iter = _cache.erase(iter);
 		}
@@ -197,18 +87,5 @@ void ResourceCache::ClearOrphanedResources()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-IResourceObject* ResourceCache::FindResource(const String& name) const
-{
-	std::scoped_lock lock(_lock);
-	for(size_t i = 0; i < _cache.size(); ++i)
-	{
-		if(_cache[i].name == name)
-		{
-			return _cache[i].object;
-		}
-	}
-	return nullptr;
-}
 
 CLOSE_NAMESPACE(Firestorm);

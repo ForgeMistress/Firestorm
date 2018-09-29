@@ -73,29 +73,42 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	_shaderResource = resourceMgr.Load<ShaderResource>(shaderRef);
 	_meshResource = resourceMgr.Load<SceneGraphResource>(meshRef);
 
-	while(!_shaderResource->IsReady() && !_meshResource->IsReady())
+	while(true)
 	{
+		if(_shaderResource.valid() && _meshResource.valid())
+		{
+			auto shaderStatus = _shaderResource.wait_for(std::chrono::milliseconds(0));
+			bool shaderFinished = shaderStatus == std::future_status::ready;
+			auto meshStatus = _meshResource.wait_for(std::chrono::milliseconds(0));
+			bool meshFinished = meshStatus == std::future_status::ready;
+			if(shaderFinished && meshFinished)
+				break;
+		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
+	auto meshResult = _meshResource.get();
+	auto shaderResult = _shaderResource.get();
 
-	if(_shaderResource->HasError())
+	if(shaderResult.HasError())
 	{
-		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource->GetError());
-		FIRE_ASSERT(_shaderResource->HasError());
+		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)shaderResult.GetError());
+		FIRE_ASSERT(false);
 	}
 
-	if(_meshResource->HasError())
+	if(meshResult.HasError())
 	{
-		FIRE_LOG_ERROR("Error Loading Mesh: %s", (String)_meshResource->GetError());
-		FIRE_ASSERT(_meshResource->HasError());
+		FIRE_LOG_ERROR("Error Loading Mesh: %s", (String)meshResult.GetError());
+		FIRE_ASSERT(false);
 	}
 
-	bool result = _shaderResource->Get<ShaderResource>()->Compile();
+	//auto res = _shaderResource->Get<ShaderResource>();
+	auto resource = shaderResult.GetResource<ShaderResource>();
+	bool result = resource->Compile();
 	FIRE_ASSERT_MSG(result, "shader failed to compile");
 
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;
 	{
-		pipelineDesc.shaderProgram = _shaderResource->Get<ShaderResource>()->GetProgram();
+		pipelineDesc.shaderProgram = resource->GetProgram();//_shaderResource->Get<ShaderResource>()->GetProgram();
 		pipelineDesc.renderPass = renderMgr.Context->GetRenderPass();
 	}
 	_pipeline = renderer->CreateGraphicsPipeline(pipelineDesc);
@@ -110,7 +123,7 @@ void FirestormApp::OnUpdate(double deltaT)
 {
 	try
 	{
-		if (_commandBuffer == nullptr)
+		if(_commandBuffer == nullptr)
 			return;
 
 		auto& renderMgr = GetSystems().GetRenderMgr();

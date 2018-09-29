@@ -62,14 +62,16 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 			Json::Value root;
 			if(!_reader->parse(&data[0], &data[data.size() - 1], &root, &errors))
 			{
-				return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, errors);
+				return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, errors);
 			}
 
 			FIRE_ASSERT_MSG(root.isMember("asset"), "not a valid gltf file. no 'asset' block.");
 
 			// Read the asset block.
 			auto asset = root["asset"];
-			SceneGraphResource* resource = _pool.Get(_renderMgr);
+
+			RefPtr<SceneGraphResource> resource(std::make_shared<SceneGraphResource>(_renderMgr));
+
 			resource->_assetData.Version = asset.get("version", "0.0.0").asString();
 			resource->_assetData.Copyright = asset.get("copyright", "").asString();
 			resource->_assetData.Generator = asset.get("generator", "<unknown>").asString();
@@ -103,11 +105,11 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 				}
 			}
 
-			return FIRE_RESULT(resource);
+			return FIRE_LOAD_SUCCESS(resource);
 		}
-		return FIRE_ERROR(ResourceIOErrors::PARSING_ERROR, (String)result.error());
+		return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, (String)result.error());
 	}
-	return FIRE_ERROR(ResourceIOErrors::FILE_NOT_FOUND_ERROR, path);
+	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, path);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

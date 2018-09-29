@@ -364,7 +364,14 @@ struct hash<Firestorm::RefPtr<T>>
 };
 CLOSE_NAMESPACE(std);*/
 
-template<class T> using RefPtr = std::shared_ptr<T>;
+template<class T>
+using RefPtr = std::shared_ptr<T>;
+
+template<class T, class Deleter = std::default_delete<T>>
+using UniquePtr = std::unique_ptr<T, Deleter>;
+
+template<class T>
+using WeakPtr = std::weak_ptr<T>;
 
 CLOSE_NAMESPACE(Firestorm);
 

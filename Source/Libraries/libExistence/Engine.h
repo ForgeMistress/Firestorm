@@ -44,7 +44,7 @@ public:
 	template <class T>
 	bool AddSystem()
 	{
-		return AddSystem(new T);
+		return AddSystem(std::make_shared<T>());
 	}
 	bool AddSystem(Mirror::Type systemType);
 

@@ -58,7 +58,7 @@ System::~System()
 
 bool System::Filter(const WeakPtr<Entity>& entity) const
 {
-	if(entity)
+	if(!entity.expired())
 	{
 		return OnEntityFilter(entity);
 	}

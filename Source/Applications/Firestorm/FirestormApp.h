@@ -24,12 +24,12 @@ private:
 
 	LLGL::VertexFormat _vertFormat;
 
-	LLGL::Buffer* _vertexBuffer{ nullptr };
-	ResourceHandle _shaderResource;
-	ResourceHandle _meshResource;
-	LLGL::GraphicsPipeline* _pipeline{ nullptr };
-	LLGL::CommandQueue* _commandQueue{ nullptr };
-	LLGL::CommandBuffer* _commandBuffer{ nullptr };
+	LLGL::Buffer*                      _vertexBuffer{ nullptr };
+	Future<ResourceLoader::LoadResult> _shaderResource;
+	Future<ResourceLoader::LoadResult> _meshResource;
+	LLGL::GraphicsPipeline*            _pipeline{ nullptr };
+	LLGL::CommandQueue*                _commandQueue{ nullptr };
+	LLGL::CommandBuffer*               _commandBuffer{ nullptr };
 };
 
 #endif

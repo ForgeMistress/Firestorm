@@ -33,14 +33,12 @@ MeshResource::~MeshResource()
 MeshLoader::MeshLoader(RenderMgr& renderMgr)
 : _renderMgr(renderMgr)
 {
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MeshLoader::~MeshLoader()
 {
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,14 +51,15 @@ MeshLoader::LoadResult MeshLoader::Load(ResourceMgr* resourceMgr, const Resource
 		auto result = libIO::LoadFile(path);
 		if(result.has_value())
 		{
-			MeshResource* resource = _pool.Get(_renderMgr);
+			RefPtr<MeshResource> resource(std::make_shared<MeshResource>(_renderMgr));
 			resource->_data = result.value();
-			return FIRE_RESULT(resource);
+			return FIRE_LOAD_SUCCESS(resource);
 		}
-		return FIRE_ERROR(ResourceIOErrors::FILE_READ_ERROR, "reading file '" + path + "'\nDetails: "+((String)result.error()));
+		return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_READ_ERROR,
+			"reading file '" + path + "'\nDetails: "+((String)result.error()));
 	}
 
-	return FIRE_ERROR(ResourceIOErrors::FILE_NOT_FOUND_ERROR, "could not find file '"+path+"'");
+	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, "could not find file '"+path+"'");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

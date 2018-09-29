@@ -186,9 +186,9 @@ bool Engine::AddEntity(const RefPtr<Entity>& entity)
 // PRIVATE
 bool Engine::RemoveEntity(const WeakPtr<Entity>& entity)
 {
-	if(Exists(_entities, entity.Lock()))
+	if(Exists(_entities, entity.lock()))
 	{
-		_entitiesToRemove.insert(entity.Lock());
+		_entitiesToRemove.insert(entity.lock());
 		return true;
 	}
 	return false;
@@ -278,7 +278,7 @@ WeakPtr<Entity> Engine::GetEntity(size_t index) const
 void Engine::ModifyEntity(Entity* entity)
 {
 	auto findFunction = [&entity](const RefPtr<Entity>& e) {
-		return e.Get() == entity;
+		return e.get() == entity;
 	};
 	auto found = std::find_if(_entities.begin(), _entities.end(), findFunction);
 	FIRE_ASSERT(found != _entities.end());
@@ -364,7 +364,9 @@ void Engine::ManageEntities()
 			if(system->Filter(entity))
 			{
 				Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
-				auto found = std::find(systemEntities.begin(), systemEntities.end(), entity);
+				auto found = std::find_if(systemEntities.begin(), systemEntities.end(), [&entity](const WeakPtr<Entity>& e) {
+					return e.lock() == entity;
+				});
 				if(found == systemEntities.end())
 				{
 					system->_modified = true;
@@ -381,7 +383,9 @@ void Engine::ManageEntities()
 		for(auto system : _systems)
 		{
 			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
-			auto found = std::find(systemEntities.begin(), systemEntities.end(), entity);
+			auto found = std::find_if(systemEntities.begin(), systemEntities.end(), [&entity](const WeakPtr<Entity>& e) {
+				return e.lock() == entity;
+			});
 			if(system->Filter(entity))
 			{
 				if(found == systemEntities.end())
@@ -411,7 +415,12 @@ void Engine::ManageEntities()
 		for(auto system : _systems)
 		{
 			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
-			auto foundInSystem = std::find(systemEntities.begin(), systemEntities.end(), entity);
+
+			auto foundInSystem = std::find_if(systemEntities.begin(), systemEntities.end(), 
+				[&entity](const WeakPtr<Entity>& e) {
+					return e.lock() == entity;
+				});
+
 			if(foundInSystem != systemEntities.end())
 			{
 				system->_modified = true;

@@ -16,7 +16,7 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-EDReceipt::EDReceipt(EventDispatcher* dispatcher, IEvent* event)
+EventDispatcher::EDReceipt::EDReceipt(EventDispatcher* dispatcher, IEvent* event)
 : _dispatcher(dispatcher)
 , _event(event)
 , _hasDispatcher(true)
@@ -25,15 +25,15 @@ EDReceipt::EDReceipt(EventDispatcher* dispatcher, IEvent* event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-EDReceipt::~EDReceipt()
+EventDispatcher::EDReceipt::~EDReceipt()
 {
-	if (_hasDispatcher)
+	if(_hasDispatcher)
 		_dispatcher->Unregister(_event);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EDReceipt::DispatcherDeleted()
+void EventDispatcher::EDReceipt::DispatcherDeleted()
 {
 	_hasDispatcher = false;
 }
@@ -49,11 +49,16 @@ EventDispatcher::EventDispatcher()
 
 EventDispatcher::~EventDispatcher()
 {
-	for (auto r : _receipts)
-		r->DispatcherDeleted();
-	for (auto evtNames : _events)
+	for(auto r : _receipts)
 	{
-		for (auto event : evtNames.second)
+		if(!r.expired())
+		{
+			r.lock()->DispatcherDeleted();
+		}
+	}
+	for(auto evtNames : _events)
+	{
+		for(auto event : evtNames.second)
 		{
 			delete event;
 		}
@@ -91,8 +96,8 @@ void EventDispatcher::Unregister(IEvent* event)
 				_numRegisteredEvents--;
 			}
 		}
-		_receipts.remove_if([&event](const EDReceipt* r){
-			return r->_event == event;
+		_receipts.remove_if([&event](const WeakPtr<EDReceipt>& r){
+			return r.expired() || r.lock()->_event == event;
 		});
 	}
 	FIRE_ASSERT_MSG(_numRegisteredEvents == _receipts.size(), 

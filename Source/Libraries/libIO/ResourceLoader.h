@@ -12,8 +12,13 @@
 #pragma once
 
 #include "IResourceObject.h"
-#include "ResourceCache.h"
 #include <libCore/Result.h>
+
+#define FIRE_LOAD_SUCCESS( PTR ) \
+	::Firestorm::ResourceLoader::LoadResult( PTR )
+
+#define FIRE_LOAD_FAIL( ERROR_CODE, DETAILS ) \
+	::Firestorm::ResourceLoader::LoadResult( ::Firestorm::Error(ERROR_CODE, DETAILS) )
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -24,7 +29,27 @@ class ResourceLoader
 {
 public:
 	using PtrHandler = std::function<void(IResourceObject*)>;
-	using LoadResult = Result<IResourceObject*, Error>;
+	struct LoadResult
+	{
+	public:
+		LoadResult();
+		LoadResult(ResourcePtr&& resource);
+		LoadResult(const Error& error);
+
+		template<class T>
+		RefPtr<T> GetResource() const
+		{
+			return std::dynamic_pointer_cast<T>(_resource);
+		}
+
+		Error GetError() const;
+
+		bool HasError() const;
+
+	private:
+		ResourcePtr  _resource;
+		Error        _error;
+	};
 
 	ResourceLoader();
 	virtual ~ResourceLoader();
