@@ -28,7 +28,6 @@ class ResourceMgr;
 class ResourceLoader
 {
 public:
-	using PtrHandler = std::function<void(IResourceObject*)>;
 	struct LoadResult
 	{
 	public:
@@ -36,12 +35,7 @@ public:
 		LoadResult(ResourcePtr&& resource);
 		LoadResult(const Error& error);
 
-		template<class T>
-		RefPtr<T> GetResource() const
-		{
-			return std::dynamic_pointer_cast<T>(_resource);
-		}
-
+		ResourcePtr GetResource() const;
 		Error GetError() const;
 
 		bool HasError() const;

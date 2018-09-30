@@ -117,17 +117,18 @@ int Application::Run()
 
 	while(static_cast<LLGL::Window&>(renderMgr.Context->GetSurface()).ProcessEvents())
 	{
-		_mainThreadId = std::this_thread::get_id();
+		// _mainThreadId = std::this_thread::get_id();
 
-		timer->MeasureTime();
+		/*timer->MeasureTime();
 		auto end = std::chrono::system_clock::now();
 		if(std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > 0)
 		{
 			std::cout << "Rendertime: " << timer->GetDeltaTime() << ", FPS: " << 1.0 / timer->GetDeltaTime() << '\n';
 			start = end;
-		}
+		}*/
 
 		OnUpdate(deltaT);
+		OnRender();
 
 		//_surface->SwapBuffers();
 

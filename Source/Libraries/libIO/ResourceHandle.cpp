@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  ResourceHandle
+//  Resource
 //
-//  A weak handle to a resource object.
+//  A handle to a resource object.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Firestorm 2018
@@ -17,84 +17,117 @@ OPEN_NAMESPACE(Firestorm);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 FIRE_ERRORCODE_DEF(ResourceHandleErrors::NULL_RESOURCE,
-	"a null resource was passed to the constructor of the ResourceHandle");
+				   "a null resource was passed to the constructor of the Resource");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle::ResourceHandle()
+Resource::Resource()
 : _obj(nullptr)
+, _hasFuture(false)
+, _isFinished(false)
+, _futurePulled(false)
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle::ResourceHandle(std::future<ResourceLoader::LoadResult>&& future)
+Resource::Resource(Future<ResourceLoader::LoadResult>&& future)
 : _obj(nullptr)
 , _future(std::move(future))
+, _hasFuture(true)
+, _isFinished(false)
+, _futurePulled(false)
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle::ResourceHandle(const RefPtr<IResourceObject>& obj)
-: _error(nullptr)
-, _obj(obj)
-, _futurePulled(true)
-{
-	if(!_obj)
-	{
-		_error = Error(ResourceHandleErrors::NULL_RESOURCE);
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ResourceHandle::ResourceHandle(ResourceHandle&& other)
-: _error(other._error)
-, _obj(other._obj)
+Resource::Resource(Resource&& other)
+: _error(std::move(other._error))
+, _obj(std::move(other._obj))
 , _future(std::move(other._future))
+, _hasFuture(std::move(other._hasFuture))
+, _isFinished(std::move(other._isFinished))
+, _futurePulled(std::move(other._futurePulled))
 {
-	other._error = nullptr;
-	other._obj = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceHandle::~ResourceHandle()
+Resource::~Resource()
 {
 	Release();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Error ResourceHandle::GetError() const
+Resource& Resource::operator=(Resource&& other)
 {
-	PullFutureData();
+	if(this != &other)
+	{
+		_error = std::move(other._error);
+		_obj = std::move(other._obj);
+		_future = std::move(other._future);
+		_hasFuture = std::move(other._hasFuture);
+		_isFinished = std::move(other._isFinished);
+		_futurePulled = std::move(other._futurePulled);
+	}
+	return *this;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Error Resource::GetError() const
+{
 	return _error;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceHandle::IsFinished() const
+bool Resource::IsValid() const
 {
-	PullFutureData();
-	if(!_future.valid())
-	{
-		return false;
-	}
-	return _future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready;
+	return _hasFuture;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceHandle::HasError() const
+bool Resource::IsFinished() const
+{
+	if(!_isFinished)
+	{
+		try
+		{
+			if(_hasFuture)
+			{
+				if(!_futurePulled)
+				{
+					// check the status of the future.
+					auto status = _future.wait_for(std::chrono::milliseconds(0));
+					if(status == std::future_status::ready)
+					{
+						_isFinished = true;
+					}
+				}
+			}
+		}
+		catch(std::exception& e)
+		{
+			FIRE_LOG_ERROR("Exception in Resource::IsFinished: %s", e.what());
+		}
+	}
+	return _isFinished;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Resource::HasError() const
 {
 	return _error.GetCode() != nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandle::Release()
+void Resource::Release()
 {
 	_obj = nullptr;
 	_error = nullptr;
@@ -102,42 +135,29 @@ void ResourceHandle::Release()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceHandle::SetFuture(std::future<ResourceLoader::LoadResult>&& future)
+ResourcePtr Resource::PullData() const
 {
-	_future = std::move(future);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// my life is pain...
-void ResourceHandle::PullFutureData() const
-{
-	if(!_futurePulled)
+	if(_hasFuture)
 	{
-		try
+		if(_future.valid())
 		{
-			if(_future.valid())
+			if(!_futurePulled)
 			{
-				if(_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+				auto status = _future.wait_for(std::chrono::milliseconds(0));
+				if(status == std::future_status::ready)
 				{
-					ResourceLoader::LoadResult result = _future.get();
+					auto loadResult = _future.get();
+					_obj = loadResult.GetResource();
+					_error = loadResult.GetError();
+
 					_futurePulled = true;
 				}
 			}
 		}
-		catch(std::exception& e)
-		{
-			FIRE_LOG_ERROR("Error Pulling Resource: %s", e.what());
-			throw e;
-		}
+
+		return _obj;
 	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ResourceHandle::SetFilename(const String& filename)
-{
-	_filename = filename;
+	return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

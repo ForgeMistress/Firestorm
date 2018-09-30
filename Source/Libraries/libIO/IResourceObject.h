@@ -19,6 +19,11 @@ class IResourceObject
 {
 public:
 	virtual ~IResourceObject() {}
+
+	/**
+		This should return whether or not the resource is ready for use.
+	 **/
+	virtual bool IsReady() const = 0;
 };
 
 using ResourcePtr = RefPtr<IResourceObject>;

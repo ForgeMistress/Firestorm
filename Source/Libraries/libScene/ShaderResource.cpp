@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  ShaderResource
+//  ShaderProgramResource
 //
 //  Loads up and stores Shader data.
 //
@@ -17,106 +17,21 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ShaderResource::ShaderResource(RenderMgr& renderMgr)
-: _renderMgr(renderMgr)
-{
-	FIRE_ASSERT(_renderMgr.System != nullptr);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ShaderResource::~ShaderResource()
-{
-	PurgeCompiledShaders();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-LLGL::ShaderProgram* ShaderResource::GetProgram() const
-{
-	FIRE_ASSERT(_isCompiled);
-	return _shaderProgram;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool ShaderResource::Compile()
-{
-	FIRE_LOG_DEBUG("Compiling Shader...");
-	// create the shaders...
-	for(auto shaderData : _shaderData)
-	{
-		auto type = shaderData.first;
-		auto data = shaderData.second;
-		data.push_back('\0');
-		LLGL::ShaderDescriptor desc;
-		desc.type = type;
-		desc.source = &data[0];
-		desc.sourceSize = data.size();
-		desc.sourceType = LLGL::ShaderSourceType::CodeString;
-		_shaders[type] = _renderMgr.System->CreateShader(desc);
-		if (_shaders[type]->HasErrors())
-		{
-			FIRE_LOG_ERROR("Error Creating Shader: %s", _shaders[type]->QueryInfoLog());
-			PurgeCompiledShaders();
-			return false;
-		}
-	}
-
-	LLGL::ShaderProgramDescriptor desc;
-	if(_shaders.find(LLGL::ShaderType::Vertex) != _shaders.end())
-	{
-		desc.vertexShader = _shaders[LLGL::ShaderType::Vertex];
-	}
-	if(_shaders.find(LLGL::ShaderType::Fragment) != _shaders.end())
-	{
-		desc.fragmentShader = _shaders[LLGL::ShaderType::Fragment];
-	}
-	if(_shaders.find(LLGL::ShaderType::Geometry) != _shaders.end())
-	{
-		desc.geometryShader = _shaders[LLGL::ShaderType::Geometry];
-	}
-
-	_shaderProgram = _renderMgr.System->CreateShaderProgram(desc);
-	if(_shaderProgram->HasErrors())
-	{
-		FIRE_LOG_ERROR("Error Compiling Shader Program: %s", _shaderProgram->QueryInfoLog());
-		_renderMgr.System->Release(*_shaderProgram);
-		PurgeCompiledShaders();
-		return false;
-	}
-	_isCompiled = true;
-	return true;
-}
-
-void ShaderResource::PurgeCompiledShaders()
-{
-	for(auto shader : _shaders)
-	{
-		if(shader.second)
-			_renderMgr.System->Release(*shader.second);
-	}
-	if(_shaderProgram)
-		_renderMgr.System->Release(*_shaderProgram);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-ShaderLoader::ShaderLoader(RenderMgr& renderMgr)
-: _renderMgr(renderMgr)
+ShaderProgramLoader::ShaderProgramLoader(RenderMgr& renderMgr)
+	: _renderMgr(renderMgr)
 {
 	_builder["collectComments"] = false;
 	_reader = _builder.newCharReader();
 }
 
-ShaderLoader::~ShaderLoader()
+ShaderProgramLoader::~ShaderProgramLoader()
 {
 	delete _reader;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
+ShaderProgramLoader::LoadResult ShaderProgramLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
 {
 	const String& filename = ref.GetResourcePath();
 	if(libIO::FileExists(filename))
@@ -134,9 +49,7 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 					errors);
 			}
 
-			RefPtr<ShaderResource> shaderResource(std::make_shared<ShaderResource>(_renderMgr));
-
-			std::unordered_map<LLGL::ShaderType, LLGL::Shader*> shaders;
+			RefPtr<ShaderProgramResource> shaderResource(std::make_shared<ShaderProgramResource>(_renderMgr));
 
 			if(_renderMgr.IsUsingRenderer(Renderers::OpenGL))
 			{
@@ -148,21 +61,21 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 					{
 						auto value = openGL["vertex"].asString();
 						FIRE_LOG_DEBUG("    :: Loading Vertex Shader %s", value);
-						Result<Vector<char>, Error> result = libIO::LoadFile(value);
+						Result<String, Error> result = libIO::LoadFileString(value);
 						if(!result.has_value())
 						{
 							return FIRE_LOAD_FAIL(
 								ResourceIOErrors::FILE_READ_ERROR, 
 								"fragment shader could not be loaded");
 						}
-						shaderResource->_shaderData[LLGL::ShaderType::Vertex] = result.value();
+						shaderResource->AddShaderData(LLGL::ShaderType::Vertex, result.value());
 					}
 
 					if(openGL.isMember("fragment"))
 					{
 						auto value = openGL["fragment"].asString();
 						FIRE_LOG_DEBUG("    :: Loading Fragment Shader %s", value);
-						Result<Vector<char>, Error> result = libIO::LoadFile(value);
+						Result<String, Error> result = libIO::LoadFileString(value);
 						if(!result.has_value())
 						{
 							return FIRE_LOAD_FAIL(
@@ -170,27 +83,27 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 								"fragment shader could not be loaded");
 						}
 
-						shaderResource->_shaderData[LLGL::ShaderType::Fragment] = result.value();
+						shaderResource->AddShaderData(LLGL::ShaderType::Fragment, result.value());
 					}
 
 					if(openGL.isMember("geometry"))
 					{
 						auto value = openGL["geometry"].asString();
 						FIRE_LOG_DEBUG("    :: Loading Geometry Shader %s", value);
-						Result<Vector<char>, Error> result = libIO::LoadFile(value);
+						Result<String, Error> result = libIO::LoadFileString(value);
 						if(!result.has_value())
 						{
 							return FIRE_LOAD_FAIL(
 								ResourceIOErrors::FILE_READ_ERROR,
 								"geometry shader could not be loaded");
 						}
-						shaderResource->_shaderData[LLGL::ShaderType::Fragment] = result.value();
+						shaderResource->AddShaderData(LLGL::ShaderType::Geometry, result.value());
 					}
 				}
 			}
 			else if(_renderMgr.IsUsingRenderer(Renderers::Direct3D))
 			{
-				FIRE_ASSERT(false && "direct3D support is not yet implemented");
+				FIRE_ASSERT_MSG(false, "direct3D support is not yet implemented");
 			}
 
 			// return the shader resource now, because the shader has to be actually compiled on the main thread.
@@ -205,13 +118,210 @@ ShaderLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const Reso
 		filename);
 }
 
-LLGL::Shader* ShaderLoader::MakeShader(const Vector<char>& data, LLGL::ShaderType shaderType)
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ShaderLoader::ShaderLoader(RenderMgr& renderMgr)
+: _renderMgr(renderMgr)
 {
-	LLGL::ShaderDescriptor desc;
-	desc.source = &data[0];
-	desc.sourceSize = data.size();
-	desc.type = shaderType;
-	return _renderMgr.System->CreateShader(desc);
+}
+
+ShaderLoader::~ShaderLoader()
+{
+}
+
+ResourceLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
+{
+
+}
+
+ShaderResource(RenderMgr& renderMgr, LLGL::ShaderType shaderType)
+: _renderMgr(renderMgr)
+, _shaderType(shaderType)
+{
+
+}
+ShaderResource::~ShaderResource()
+{
+	if(_shader)
+		_renderMgr.System->
+}
+
+bool ShaderResource::IsReady() const
+{
+
+}
+
+LLGL::Shader* GetShader() const
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ShaderProgramResource::ShaderProgramResource(RenderMgr& renderMgr)
+: _renderMgr(renderMgr)
+{
+	FIRE_ASSERT(_renderMgr.System != nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ShaderProgramResource::~ShaderProgramResource()
+{
+	PurgeCompiledShaders();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ShaderProgramResource::IsReady() const
+{
+	for(auto dependency : _dependencies)
+	{
+		if(!dependency.IsReady())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+LLGL::ShaderProgram* ShaderProgramResource::GetProgram() const
+{
+	FIRE_ASSERT(_isCompiled);
+	return _shaderProgram;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+LLGL::ShaderProgram* ShaderProgramResource::Compile(std::initializer_list<LLGL::VertexFormat> vertexFormats)
+{
+	if(_isCompiled)
+		return _shaderProgram;
+
+	FIRE_LOG_DEBUG("Compiling Shader...");
+	// create the shaders...
+	for(auto shaderData : _shaderData)
+	{
+		auto type = shaderData.first;
+		if(!CompileShader(type))
+		{
+			PurgeCompiledShaders();
+			return nullptr;
+		}
+	}
+
+	LLGL::ShaderProgramDescriptor desc;
+	if(_shaders.find(LLGL::ShaderType::Vertex) != _shaders.end())
+	{
+		desc.vertexShader = _shaders[LLGL::ShaderType::Vertex];
+	}
+	if(_shaders.find(LLGL::ShaderType::Fragment) != _shaders.end())
+	{
+		desc.fragmentShader = _shaders[LLGL::ShaderType::Fragment];
+	}
+	if(_shaders.find(LLGL::ShaderType::Geometry) != _shaders.end())
+	{
+		desc.geometryShader = _shaders[LLGL::ShaderType::Geometry];
+	}
+
+	desc.vertexFormats.reserve(vertexFormats.size());
+	for(auto format : vertexFormats)
+	{
+		desc.vertexFormats.push_back(format);
+	}
+
+	_shaderProgram = _renderMgr.System->CreateShaderProgram(desc);
+	auto infoLog = _shaderProgram->QueryInfoLog();
+	if(!infoLog.empty())
+	{
+		FIRE_LOG_ERROR("Error Creating Shader Program: %s", infoLog);
+		PurgeCompiledShaders();
+		return nullptr;
+	}
+
+	if(_shaderProgram->HasErrors())
+	{
+		FIRE_LOG_ERROR("Error Compiling Shader Program: %s", infoLog);
+		PurgeCompiledShaders();
+		return nullptr;
+	}
+	_isCompiled = true;
+	FIRE_LOG_DEBUG("Shader Compiled Successfully!");
+	return _shaderProgram;
+}
+
+void ShaderProgramResource::PurgeCompiledShaders()
+{
+	for(auto shader : _shaders)
+	{
+		if(shader.second)
+			_renderMgr.System->Release(*shader.second);
+	}
+	if(_shaderProgram)
+		_renderMgr.System->Release(*_shaderProgram);
+}
+
+LLGL::Shader* ShaderProgramResource::MakeShader(LLGL::ShaderType shaderType)
+{
+	auto found = _shaderData.find(shaderType);
+	if(found != _shaderData.end())
+	{
+		LLGL::ShaderDescriptor desc;
+		desc.source = found->second.c_str();
+		desc.sourceSize = 0;
+		desc.type = shaderType;
+		desc.sourceType = LLGL::ShaderSourceType::CodeString;
+		desc.flags = LLGL::ShaderCompileFlags::WarnError;
+		return _renderMgr.System->CreateShader(desc);
+	}
+	return nullptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*bool ShaderProgramResource::AddShaderData(LLGL::ShaderType type, const String& data)
+{
+	if(_shaderData.find(type) != _shaderData.end())
+	{
+		return false;
+	}
+	_shaderData[type] = data;
+	return true;
+}*/
+
+void ShaderProgramResource::AddDependency(Resource&& resource)
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ShaderProgramResource::CompileShader(LLGL::ShaderType type)
+{
+	if(_shaderData.find(type) != _shaderData.end())
+	{
+		LLGL::Shader* shader = MakeShader(type);
+		if(shader != nullptr)
+		{
+			_shaderData.erase(type);
+			String log = shader->QueryInfoLog();
+			if(log.empty())
+			{
+				if(!shader->HasErrors())
+				{
+					_shaders[type] = shader;
+					return true;
+				}
+			}
+			_renderMgr.System->Release(*shader);
+		}
+		PurgeCompiledShaders();
+		FIRE_LOG_ERROR("Could not compile shader. Shader returned from MakeShader was nullptr...");
+		return false;
+	}
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

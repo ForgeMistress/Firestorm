@@ -31,9 +31,12 @@ class ResourceReference;
 
 struct ResourceTypeID
 {
+#ifndef FIRE_FINAL
 	const char* Name;
+#endif
 };
 
+#ifndef FIRE_FINAL
 #define FIRE_RESOURCE_TYPE( CLASS, LOADER )         \
 public:											    \
 	friend class ResourceMgr;						\
@@ -49,32 +52,29 @@ public:											    \
 		return id;									\
 	}                                               \
 private:
+#else
+#define FIRE_RESOURCE_TYPE( CLASS, LOADER )         \
+public:											    \
+	friend class ResourceMgr;						\
+	friend class LOADER;                            \
+	using LoaderType = LOADER;						\
+	static const ResourceTypeID* MyResourceType() { \
+		static const ResourceTypeID* id = nullptr;	\
+		if(id == nullptr)							\
+			id = new ResourceTypeID{};				\
+		return id;									\
+	}                                               \
+private:
+#endif
 
 
 /**
-	\class ResourceMgr
-
 	Manages the asynchronous loading of resources.
  **/
 class ResourceMgr final
 {
 private:
 	using PromiseT = std::promise<ResourceLoader::LoadResult>;
-	struct LoadOp final
-	{
-		LoadOp(ResourceLoader* loader, ResourceReference* ref, PromiseT* promise);
-		LoadOp(LoadOp&& other);
-		~LoadOp();
-
-		ResourceLoader*     loader;
-		ResourceReference*  ref;
-		PromiseT*           promise;
-#ifndef FIRE_FINAL
-		String filename;
-#endif
-	};
-
-	Future<ResourceLoader::LoadResult> Load(ResourceLoader* loader, ResourceReference* ref);
 
 public:
 	ResourceMgr();
@@ -82,52 +82,54 @@ public:
 
 	/**
 		Load up a resource. The load status of said resource can be checked using the
-		returned ResourceHandle instance.
+		returned Resource instance.
 	 **/
-	template <class ResourceType_t>
-	Future<ResourceLoader::LoadResult> Load(ResourceReference& ref)
+	template <class ResourceType>
+	Resource Load(const ResourceReference& ref)
 	{
-		ResourceLoader* loader = GetLoader(ResourceType_t::MyResourceType());
+		ResourceLoader* loader = GetLoader(ResourceType::MyResourceType());
 		FIRE_ASSERT_MSG(loader, "no loader installed for this resource type");
-		return std::move(Load(loader, &ref));
+		return std::move(Load(loader, ref));
 	}
 
-	template<class ResourceType_t, class... Args_t>
+	/**
+		Install a resource loader to the ResourceMgr. The ResourceType passed into the template
+		argument must provide the loader type under an alias (typedef or using declared) called LoaderType.
+	 **/
+	template<class ResourceType, class... Args_t>
 	bool InstallLoader(Args_t&&... args)
 	{
-		ResourceLoader* loader = new typename ResourceType_t::LoaderType(std::forward<Args_t>(args)...);
-		return InstallLoader(ResourceType_t::MyResourceType(), loader);
+		ResourceLoader* loader = new typename ResourceType::LoaderType(std::forward<Args_t>(args)...);
+		return InstallLoader(ResourceType::MyResourceType(), loader);
 	}
 
+	/**
+		Signal to the ResourceMgr that it's time to shut down. This will hang the calling thread until all
+		worker threads have been joined.
+	 **/
 	void Shutdown();
 
 private:
-	bool InstallLoader(const ResourceTypeID*, ResourceLoader* loader);
+	bool InstallLoader(const ResourceTypeID* resourceType, ResourceLoader* loader);
 	ResourceLoader* GetLoader(const ResourceTypeID* type);
+	Resource Load(ResourceLoader* loader, const ResourceReference& ref);
 
-	// retrieve either a resource handle to an existing resource or an empty handle if the resource
-	// is not loaded.
-	RefPtr<ResourceHandle> GetResourceHandle(const String& name) const;
-
-	static const char _numThreads{ 2 };
+	static const char _numThreads{ 4 };
 
 	String _name;
-	Mutex _lock;
+	Mutex _queueLock;
 
 	Thread _threads[_numThreads];
 
-	std::queue<UniquePtr<LoadOp>> _queue;
+	std::queue<Function<void(void)>> _queue;
 	std::condition_variable _cv;
 	bool _quit{ false };
 
 	UnorderedMap<const ResourceTypeID*, UniquePtr<ResourceLoader>> _loaders;
 
-	mutable
-	ObjectPool<ResourceHandle> _handlePool;
-
 	ResourceCache _cache;
 
-	// void ThreadRun();
+	void ThreadRun();
 };
 
 CLOSE_NAMESPACE(Firestorm);

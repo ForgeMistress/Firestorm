@@ -65,7 +65,7 @@ public:
 private:
 	IMaker* GetMaker(Mirror::Type type) const;
 	UnorderedMap<Mirror::Type, IMaker*> _makers;
-	mutable Mutex _lock;
+	mutable Mutex _s_allLock;
 };
 
 CLOSE_NAMESPACE(Firestorm);

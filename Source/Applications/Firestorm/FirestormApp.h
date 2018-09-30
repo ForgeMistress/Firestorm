@@ -13,7 +13,8 @@ public:
 	virtual ~FirestormApp();
 
 	virtual void OnInitialize(int ac, char** av);
-	virtual void OnUpdate(double deltaT);
+	virtual void OnUpdate(double deltaT){}
+	virtual void OnRender();
 	virtual void OnClose();
 	virtual int  OnShutdown();
 
@@ -24,12 +25,12 @@ private:
 
 	LLGL::VertexFormat _vertFormat;
 
-	LLGL::Buffer*                      _vertexBuffer{ nullptr };
-	Future<ResourceLoader::LoadResult> _shaderResource;
-	Future<ResourceLoader::LoadResult> _meshResource;
-	LLGL::GraphicsPipeline*            _pipeline{ nullptr };
-	LLGL::CommandQueue*                _commandQueue{ nullptr };
-	LLGL::CommandBuffer*               _commandBuffer{ nullptr };
+	LLGL::Buffer*           _vertexBuffer{ nullptr };
+	Resource                _shaderResource;
+	Resource                _meshResource;
+	LLGL::GraphicsPipeline* _pipeline{ nullptr };
+	LLGL::CommandQueue*     _commandQueue{ nullptr };
+	LLGL::CommandBuffer*    _commandBuffer{ nullptr };
 };
 
 #endif

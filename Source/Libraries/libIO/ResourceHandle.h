@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  ResourceHandle
+//  Resource
 //
 //  A weak handle to a resource object.
 //
@@ -24,55 +24,62 @@ struct ResourceHandleErrors
 };
 
 /**
-	Defines a reference counted smart pointer to an IResourceObject. The load status of the handle
-	can be checked using the provided functions.
+	Defines a handle to a resource. A valid instance of this is only retrievable by a call to
+	#ResourceMgr::Load. Instances can be stored in client classes, however this is done with
+	the understanding that they will eventually be assigned to an instance
  **/
-class ResourceHandle final
+class Resource final
 {
 	friend class ResourceCache;
 	friend class ResourceMgr;
 public:
 	// make an empty handle that's waiting for a resource.
-	ResourceHandle();
-	ResourceHandle(std::future<ResourceLoader::LoadResult>&& future);
+	Resource();
+	Resource(Future<ResourceLoader::LoadResult>&& future);
 
-	// pass a resource pointer to the object.
-	ResourceHandle(const RefPtr<IResourceObject>& obj);
-	ResourceHandle(ResourceHandle&& other);
+	// move only
+	Resource(Resource&& other);
+	Resource(const Resource& other) = delete;
 
-	~ResourceHandle();
+	~Resource();
 
-	// Meant to be used with a RefPtr.
-	ResourceHandle(const ResourceHandle& other) = delete;
-	ResourceHandle& operator=(const ResourceHandle& handle) = delete;
-	ResourceHandle& operator=(ResourceHandle&& handle) = delete;
+	// move only
+	Resource& operator=(const Resource& handle) = delete;
+	Resource& operator=(Resource&& handle);
 
 	template<class T>
 	const RefPtr<T> Get() const
 	{
-		return std::dynamic_pointer_cast<T>(_obj);
+		return std::dynamic_pointer_cast<T>(PullData());
 	}
 
 	template<class T>
 	RefPtr<T> Get()
 	{
-		return std::dynamic_pointer_cast<T>(_obj);
+		return std::dynamic_pointer_cast<T>(PullData());
 	}
 
 	/**
-		Retrieve the error.
+		Check whether or not this instance of the Resource is valid.
+		\note A Resource is valid when the following conditions are met.
+		- A Future object was passed to the instance either through an assignment or construction (or both).
 	 **/
-	Error GetError() const;
+	bool IsValid() const;
 
 	/**
-		Retrieve whether or not this ResourceHandle has been passed through the loader and has some kind of state.
+		Retrieve whether or not this Resource has been passed through the loader and has some kind of state.
 	 **/
 	bool IsFinished() const;
 
 	/**
-		Retrieve whether or not the ResourceHandle is reporting an error.
+		Retrieve whether or not the Resource is reporting an error.
 	 **/
 	bool HasError() const;
+
+	/**
+		Retrieve the error.
+	**/
+	Error GetError() const;
 
 	/**
 		Release the resource from this handle as well as the active error.
@@ -80,24 +87,15 @@ public:
 	void Release();
 
 private:
-	void SetFuture(std::future<ResourceLoader::LoadResult>&& future);
-
-	void PullFutureData() const; // this physically hurts me...
-
-	ResourcePtr DoGet() const;
-
-#ifndef FIRE_FINAL
-	void SetFilename(const String& filename);
-#endif
+	ResourcePtr PullData() const;
 
 	mutable Error                                   _error;
 	mutable std::future<ResourceLoader::LoadResult> _future;
 	mutable ResourcePtr                             _obj;
 	mutable bool                                    _futurePulled{ false };
+	mutable bool                                    _isFinished{ false };
 
-#ifndef FIRE_FINAL
-	String _filename;
-#endif
+	bool _hasFuture{ false };
 };
 
 CLOSE_NAMESPACE(Firestorm);

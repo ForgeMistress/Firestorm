@@ -24,7 +24,7 @@ ResourceCache::ResourceCache()
 
 ResourceCache::~ResourceCache()
 {
-	std::scoped_lock lock(_lock);
+	std::scoped_lock lock(_cacheLock);
 	_cache.clear();
 }
 
@@ -32,7 +32,7 @@ ResourceCache::~ResourceCache()
 
 bool ResourceCache::AddResource(const String& name, const RefPtr<IResourceObject>& resourceObject)
 {
-	std::scoped_lock lock(_lock);
+	std::scoped_lock lock(_cacheLock);
 	auto found = _cache.find(name);
 	if(found != _cache.end())
 	{
@@ -46,7 +46,7 @@ bool ResourceCache::AddResource(const String& name, const RefPtr<IResourceObject
 
 bool ResourceCache::HasResource(const String& name)
 {
-	std::scoped_lock lock(_lock);
+	std::scoped_lock lock(_cacheLock);
 	return _cache.find(name) != _cache.end();
 }
 
@@ -54,11 +54,11 @@ bool ResourceCache::HasResource(const String& name)
 
 ResourcePtr ResourceCache::FindResource(const String& name) const
 {
-	std::scoped_lock lock(_lock);
+	std::scoped_lock lock(_cacheLock);
 	auto found = _cache.find(name);
 	if(found != _cache.end())
 	{
-		return found->second;
+		return found->second.lock();
 	}
 	return nullptr;
 }
@@ -67,15 +67,13 @@ ResourcePtr ResourceCache::FindResource(const String& name) const
 
 void ResourceCache::ClearOrphanedResources()
 {
-	std::scoped_lock lock(_lock);
+	std::scoped_lock lock(_cacheLock);
 
 	auto iter = _cache.begin();
 	while(iter != _cache.end())
 	{
 		auto ptr = iter->second;
-
-		// orphaned, only used by the cache.
-		if(ptr.use_count() == 1)
+		if(ptr.expired())
 		{
 			iter = _cache.erase(iter);
 		}
@@ -83,6 +81,15 @@ void ResourceCache::ClearOrphanedResources()
 		{
 			++iter;
 		}
+		// orphaned, only used by the cache.
+		/*if(ptr.use_count() == 1)
+		{
+			iter = _cache.erase(iter);
+		}
+		else
+		{
+			++iter;
+		}*/
 	}
 }
 

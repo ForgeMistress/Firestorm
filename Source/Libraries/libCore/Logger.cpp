@@ -16,14 +16,11 @@ Logger Logger::DEBUG_LOGGER(std::cout);
 Logger Logger::WARN_LOGGER(std::cout);
 Logger Logger::ERROR_LOGGER(std::cerr);
 
-Logger::Logger(std::ostream& ostream)
-: m_ostream(ostream)
-{
-}
+std::mutex Logger::_s_allLock;
 
-void Logger::DoWrite()
+Logger::Logger(std::ostream& ostream)
+: _ostream(ostream)
 {
-	m_ostream << std::endl << std::flush;
 }
 
 CLOSE_NAMESPACE(Firestorm);

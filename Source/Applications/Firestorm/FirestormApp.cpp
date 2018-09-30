@@ -42,18 +42,19 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	struct Vertex
 	{
 		Vector2 position;
-		Vector3 color;
+		Vector4 color;
 	};
 
+	const float s = 0.5f;
 	Vertex vertices[] = {
-		{ {  0,  1 }, { 1, 0, 0 } },
-		{ {  1, -1 }, { 0, 1, 0 } },
-		{ { -1, -1 }, { 0, 0, 1 } }
+		{ {  0,  s }, { 1, 0, 0, 1 } },
+		{ {  s, -s }, { 0, 1, 0, 1 } },
+		{ { -s, -s }, { 0, 0, 1, 1 } }
 	};
 
 	LLGL::VertexFormat vertexFormat;
 	vertexFormat.AppendAttribute({ "position", LLGL::Format::RG32Float  });
-	vertexFormat.AppendAttribute({ "color",    LLGL::Format::RGB32Float });
+	vertexFormat.AppendAttribute({ "color",    LLGL::Format::RGBA32Float });
 	vertexFormat.stride = sizeof(Vertex);
 
 	LLGL::BufferDescriptor vertexBufferDesc;
@@ -62,64 +63,59 @@ void FirestormApp::OnInitialize(int ac, char** av)
 		vertexBufferDesc.size = sizeof(vertices);
 		vertexBufferDesc.vertexBuffer.format = vertexFormat;
 	}
-	LLGL::RenderSystem* renderer = renderMgr.System.get();
-	_vertexBuffer = renderer->CreateBuffer(vertexBufferDesc, vertices);
+	_vertexBuffer = renderMgr.System->CreateBuffer(vertexBufferDesc, vertices);
 
 	auto& resourceMgr = GetSystems().GetResourceMgr();
 
 	ResourceReference shaderRef("/Shaders/Triangle.shader");
-	ResourceReference meshRef("/Models/base-female.gltf");
+	ResourceReference meshRef("/Models/female-base.gltf");
 
-	_shaderResource = resourceMgr.Load<ShaderResource>(shaderRef);
-	_meshResource = resourceMgr.Load<SceneGraphResource>(meshRef);
+	_shaderResource = resourceMgr.Load<ShaderProgramResource>(shaderRef);
+	_meshResource = resourceMgr.Load<MeshResource>(meshRef);
 
 	while(true)
 	{
-		if(_shaderResource.valid() && _meshResource.valid())
+		if(_shaderResource.IsFinished() && _meshResource.IsFinished())
 		{
-			auto shaderStatus = _shaderResource.wait_for(std::chrono::milliseconds(0));
+			/*auto shaderStatus = _shaderResource.wait_for(std::chrono::milliseconds(0));
 			bool shaderFinished = shaderStatus == std::future_status::ready;
-			auto meshStatus = _meshResource.wait_for(std::chrono::milliseconds(0));
-			bool meshFinished = meshStatus == std::future_status::ready;
-			if(shaderFinished && meshFinished)
-				break;
+			if(shaderFinished)
+				break;*/
+			break;
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-	auto meshResult = _meshResource.get();
-	auto shaderResult = _shaderResource.get();
 
-	if(shaderResult.HasError())
+	/*if(_shaderResource.HasError())
 	{
-		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)shaderResult.GetError());
+		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource.GetError());
 		FIRE_ASSERT(false);
-	}
+	}*/
 
-	if(meshResult.HasError())
+	FIRE_ASSERT_MSG(!_shaderResource.HasError(), Format("Error Loading Shader: %s", (String)_shaderResource.GetError()));
+	FIRE_ASSERT_MSG(!_meshResource.HasError(), Format("Error Loading Mesh: %s", (String)_meshResource.GetError()));
+	/*if(_meshResource.HasError())
 	{
-		FIRE_LOG_ERROR("Error Loading Mesh: %s", (String)meshResult.GetError());
+		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource.GetError());
 		FIRE_ASSERT(false);
-	}
+	}*/
 
-	//auto res = _shaderResource->Get<ShaderResource>();
-	auto resource = shaderResult.GetResource<ShaderResource>();
-	bool result = resource->Compile();
-	FIRE_ASSERT_MSG(result, "shader failed to compile");
-
+	auto resource = _shaderResource.Get<ShaderProgramResource>();
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;
 	{
-		pipelineDesc.shaderProgram = resource->GetProgram();//_shaderResource->Get<ShaderResource>()->GetProgram();
+		pipelineDesc.shaderProgram = resource->Compile({vertexFormat});
 		pipelineDesc.renderPass = renderMgr.Context->GetRenderPass();
 	}
-	_pipeline = renderer->CreateGraphicsPipeline(pipelineDesc);
+	_pipeline = renderMgr.System->CreateGraphicsPipeline(pipelineDesc);
 
-	_commandQueue = renderer->GetCommandQueue();
+	_commandQueue = renderMgr.System->GetCommandQueue();
 	FIRE_ASSERT(_commandQueue != nullptr);
-	_commandBuffer = renderer->CreateCommandBuffer();
+
+	_commandBuffer = renderMgr.System->CreateCommandBuffer();
 	FIRE_ASSERT(_commandBuffer != nullptr);
 }
 
-void FirestormApp::OnUpdate(double deltaT)
+void FirestormApp::OnRender()
 {
 	try
 	{
@@ -133,7 +129,7 @@ void FirestormApp::OnUpdate(double deltaT)
 			Vector2 res(GetResolution());
 			_commandBuffer->SetViewport(LLGL::Viewport{
 				LLGL::Offset2D{0,0},
-				LLGL::Extent2D{800,600 }
+				LLGL::Extent2D{800,600}
 			});
 
 			_commandBuffer->SetGraphicsPipeline(*_pipeline);
@@ -178,7 +174,7 @@ void FirestormApp::RegisterResourceTypes()
 	auto& renderMgr = systems.GetRenderMgr();
 	auto& resourceMgr = systems.GetResourceMgr();
 
-	resourceMgr.InstallLoader<ShaderResource>(renderMgr);
+	resourceMgr.InstallLoader<ShaderProgramResource>(renderMgr);
 	resourceMgr.InstallLoader<MeshResource>(renderMgr);
 	resourceMgr.InstallLoader<SceneGraphResource>(renderMgr);
 }

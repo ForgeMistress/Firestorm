@@ -32,19 +32,24 @@ public:
 	 **/
 	bool HasResource(const String& name);
 
+	/**
+		Retrieve a pointer to a loaded resource, or nullptr if the resource does
+		not exist in the cache.
+	 **/
 	ResourcePtr FindResource(const String& name) const;
 
+	/**
+		Clear the cache of any resources that are no longer being referenced
+		by anything.
+	 **/
 	void ClearOrphanedResources();
 
 private:
 	friend class ResourceMgr;
 	bool AddResource(const String& name, const RefPtr<IResourceObject>& object);
 
-	UnorderedMap<String, RefPtr<IResourceObject>> _cache;
-	mutable ObjectPool<ResourceHandle>            _handlePool;
-
-	mutable Mutex _lock;
-	mutable Mutex _handlePoolLock;
+	mutable Mutex _cacheLock;
+	UnorderedMap<String, WeakPtr<IResourceObject>> _cache;
 };
 
 CLOSE_NAMESPACE(Firestorm);

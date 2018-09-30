@@ -46,6 +46,8 @@ public:
 	const String& GetVendor() const;
 	const String& GetShadingLanguageName() const;
 
+	LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& desc);
+
 public:
 	std::unique_ptr<LLGL::RenderSystem> System{ nullptr };
 	LLGL::RenderContext* Context{ nullptr };
