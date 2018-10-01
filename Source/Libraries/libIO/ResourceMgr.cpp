@@ -98,7 +98,7 @@ Resource ResourceMgr::Load(ResourceLoader* loader, const ResourceReference& ref)
 		{
 			_cache.AddResource(path, result.GetResource());
 		}
-		promise->set_value(result);
+		promise->set_value(std::move(result));
 		delete promise;
 	};
 

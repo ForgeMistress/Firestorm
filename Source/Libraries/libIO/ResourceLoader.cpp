@@ -18,15 +18,30 @@ OPEN_NAMESPACE(Firestorm);
 
 ResourceLoader::LoadResult::LoadResult()
 : _resource(nullptr)
-, _error(nullptr)
 {
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceLoader::LoadResult::LoadResult(const LoadResult& other)
+: _resource(other._resource)
+, _error(other._error)
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceLoader::LoadResult::LoadResult(LoadResult&& other)
+: _resource(std::move(other._resource))
+, _error(std::move(other._error))
+{
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ResourceLoader::LoadResult::LoadResult(ResourcePtr&& resource)
 : _resource(std::move(resource))
-, _error(nullptr)
 {
 }
 
@@ -36,6 +51,29 @@ ResourceLoader::LoadResult::LoadResult(const Error& error)
 : _resource(nullptr)
 , _error(error)
 {
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceLoader::LoadResult& ResourceLoader::LoadResult::operator=(LoadResult&& other)
+{
+	if(this != &other)
+	{
+		_resource = std::move(other._resource);
+		_error = std::move(other._error);
+	}
+	return *this;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceLoader::LoadResult& ResourceLoader::LoadResult::operator=(const LoadResult& other)
+{
+	if(this != &other)
+	{
+		_resource = other._resource;
+		_error = other._error;
+	}
+	return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +113,7 @@ ResourceLoader::~ResourceLoader()
 
 ResourceLoader::LoadResult ResourceLoader::Load(ResourceMgr*,const ResourceReference&)
 {
-	return LoadResult(ResourceIOErrors::DEFAULT_LOADER);
+	return FIRE_LOAD_FAIL(ResourceIOErrors::DEFAULT_LOADER, "can not use default loader");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -106,6 +106,11 @@ bool Resource::IsFinished() const
 					if(status == std::future_status::ready)
 					{
 						_isFinished = true;
+						auto loadResult = _future.get();
+						_obj = loadResult.GetResource();
+						_error = loadResult.GetError();
+
+						_futurePulled = true;
 					}
 				}
 			}
@@ -136,7 +141,7 @@ bool Resource::HasError() const
 void Resource::Release()
 {
 	_obj = nullptr;
-	_error = nullptr;
+	_error.Set(nullptr, "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

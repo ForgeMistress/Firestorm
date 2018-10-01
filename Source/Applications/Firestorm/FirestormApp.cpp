@@ -68,37 +68,22 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	auto& resourceMgr = GetSystems().GetResourceMgr();
 
 	ResourceReference shaderRef("/Shaders/Triangle.shader");
-	ResourceReference meshRef("/Models/female-base.gltf");
+	ResourceReference sceneRef("/Models/base-female.gltf");
 
 	_shaderResource = resourceMgr.Load<ShaderProgramResource>(shaderRef);
-	_meshResource = resourceMgr.Load<MeshResource>(meshRef);
+	_sceneGraphResource = resourceMgr.Load<SceneGraphResource>(sceneRef);
 
 	while(true)
 	{
-		if(_shaderResource.IsFinished() && _meshResource.IsFinished())
+		if(_shaderResource.IsFinished() && _sceneGraphResource.IsFinished())
 		{
-			/*auto shaderStatus = _shaderResource.wait_for(std::chrono::milliseconds(0));
-			bool shaderFinished = shaderStatus == std::future_status::ready;
-			if(shaderFinished)
-				break;*/
 			break;
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
-	/*if(_shaderResource.HasError())
-	{
-		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource.GetError());
-		FIRE_ASSERT(false);
-	}*/
-
 	FIRE_ASSERT_MSG(!_shaderResource.HasError(), Format("Error Loading Shader: %s", (String)_shaderResource.GetError()));
-	FIRE_ASSERT_MSG(!_meshResource.HasError(), Format("Error Loading Mesh: %s", (String)_meshResource.GetError()));
-	/*if(_meshResource.HasError())
-	{
-		FIRE_LOG_ERROR("Error Loading Shader: %s", (String)_shaderResource.GetError());
-		FIRE_ASSERT(false);
-	}*/
+	FIRE_ASSERT_MSG(!_sceneGraphResource.HasError(), Format("Error Loading Mesh: %s", (String)_sceneGraphResource.GetError()));
 
 	auto resource = _shaderResource.Get<ShaderProgramResource>();
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;

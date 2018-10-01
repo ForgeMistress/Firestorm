@@ -27,7 +27,7 @@ private:
 
 	LLGL::Buffer*           _vertexBuffer{ nullptr };
 	Resource                _shaderResource;
-	Resource                _meshResource;
+	Resource                _sceneGraphResource;
 	LLGL::GraphicsPipeline* _pipeline{ nullptr };
 	LLGL::CommandQueue*     _commandQueue{ nullptr };
 	LLGL::CommandBuffer*    _commandBuffer{ nullptr };

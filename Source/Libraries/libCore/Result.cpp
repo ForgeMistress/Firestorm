@@ -38,6 +38,13 @@ Error::Error(const Error& error)
 {
 }
 
+Error::Error(Error&& other)
+: _code(other._code)
+, _details(std::move(other._details))
+{
+	other._code = nullptr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Error::operator String() const

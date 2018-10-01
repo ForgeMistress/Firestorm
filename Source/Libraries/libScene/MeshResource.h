@@ -34,7 +34,6 @@ private:
 	RenderMgr&                     _renderMgr;
 	Json::CharReaderBuilder        _builder;
 	Json::CharReader*              _reader;
-	ObjectPool<class MeshResource> _pool;
 };
 
 

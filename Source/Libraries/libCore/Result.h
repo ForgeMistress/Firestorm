@@ -21,8 +21,9 @@ class Error
 {
 public:
 	Error();
-	Error(const ErrorCode* errorCode, const String& details="");
+	Error(const ErrorCode* errorCode, const String& details);
 	Error(const Error& error);
+	Error(Error&& other);
 	explicit operator String() const;
 	explicit operator uint32_t() const;
 

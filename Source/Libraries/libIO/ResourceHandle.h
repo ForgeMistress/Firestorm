@@ -44,8 +44,8 @@ public:
 	~Resource();
 
 	// move only
-	Resource& operator=(const Resource& handle) = delete;
 	Resource& operator=(Resource&& handle);
+	Resource& operator=(const Resource& handle) = delete;
 
 	template<class T>
 	const RefPtr<T> Get() const
@@ -96,6 +96,7 @@ private:
 	mutable bool                                    _isFinished{ false };
 
 	bool _hasFuture{ false };
+	bool _hasError{ false };
 };
 
 CLOSE_NAMESPACE(Firestorm);

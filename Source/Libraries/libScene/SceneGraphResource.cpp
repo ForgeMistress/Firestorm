@@ -35,6 +35,13 @@ SceneGraphResource::~SceneGraphResource()
 
 bool SceneGraphResource::IsReady() const
 {
+	for(size_t i = 0; i < _buffers.size(); ++i)
+	{
+		if(!_buffers[i].MeshResource.IsFinished())
+		{
+			return false;
+		}
+	}
 	return true;
 }
 
@@ -89,11 +96,12 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 				auto buffers = root["buffers"];
 				for(size_t i = 0; i < buffers.size(); ++i)
 				{
-					// resolve the location of the uri.
-					ResourceReference meshRef(ref.GetPathTo() + buffers[i]["uri"].asString());
-					// kick off a deferred load of the mesh.
+					String meshResource(ref.GetPathTo() + buffers[i]["uri"].asString());
+					Resource mesh = resourceMgr->Load<MeshResource>(meshResource);
+					// kick off a load of the mesh.
 					resource->_buffers.push_back(SceneGraphResource::Buffer{
-						resourceMgr->Load<MeshResource>(meshRef)
+						// resolve the location of the uri.
+						std::move(mesh)
 					});
 				}
 			}
