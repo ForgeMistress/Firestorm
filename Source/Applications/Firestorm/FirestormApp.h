@@ -2,7 +2,7 @@
 #define FIRESTORM_FIRESTORMAPP_H_
 #pragma once
 
-#include <libScene/ShaderResource.h>
+#include <libIO/ResourceHandle.h>
 
 using namespace Firestorm;
 

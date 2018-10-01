@@ -49,7 +49,7 @@ private:
 	bool AddResource(const String& name, const RefPtr<IResourceObject>& object);
 
 	mutable Mutex _cacheLock;
-	UnorderedMap<String, WeakPtr<IResourceObject>> _cache;
+	UnorderedMap<String, RefPtr<IResourceObject>> _cache;
 };
 
 CLOSE_NAMESPACE(Firestorm);

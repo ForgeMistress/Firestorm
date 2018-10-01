@@ -45,6 +45,8 @@ public:
 	MeshResource(RenderMgr& renderMgr);
 	virtual ~MeshResource();
 
+	virtual bool IsReady() const;
+
 private:
 	RenderMgr& _renderMgr;
 	Vector<char> _data;

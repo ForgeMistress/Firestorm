@@ -8,7 +8,7 @@
 // Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "ShaderResource.h"
+#include "ShaderProgramResource.h"
 
 #include <libIO/libIO.h>
 #include <libIO/ResourceIOErrors.h>
@@ -120,44 +120,6 @@ ShaderProgramLoader::LoadResult ShaderProgramLoader::Load(ResourceMgr* resourceM
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ShaderLoader::ShaderLoader(RenderMgr& renderMgr)
-: _renderMgr(renderMgr)
-{
-}
-
-ShaderLoader::~ShaderLoader()
-{
-}
-
-ResourceLoader::LoadResult ShaderLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
-{
-
-}
-
-ShaderResource(RenderMgr& renderMgr, LLGL::ShaderType shaderType)
-: _renderMgr(renderMgr)
-, _shaderType(shaderType)
-{
-
-}
-ShaderResource::~ShaderResource()
-{
-	if(_shader)
-		_renderMgr.System->
-}
-
-bool ShaderResource::IsReady() const
-{
-
-}
-
-LLGL::Shader* GetShader() const
-{
-
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 ShaderProgramResource::ShaderProgramResource(RenderMgr& renderMgr)
 : _renderMgr(renderMgr)
 {
@@ -175,13 +137,6 @@ ShaderProgramResource::~ShaderProgramResource()
 
 bool ShaderProgramResource::IsReady() const
 {
-	for(auto dependency : _dependencies)
-	{
-		if(!dependency.IsReady())
-		{
-			return false;
-		}
-	}
 	return true;
 }
 
@@ -204,13 +159,21 @@ LLGL::ShaderProgram* ShaderProgramResource::Compile(std::initializer_list<LLGL::
 	// create the shaders...
 	for(auto shaderData : _shaderData)
 	{
-		auto type = shaderData.first;
-		if(!CompileShader(type))
+		LLGL::ShaderDescriptor desc;
+		desc.source = shaderData.second.c_str();
+		desc.sourceSize = 0;
+		desc.type = shaderData.first;
+		desc.sourceType = LLGL::ShaderSourceType::CodeString;
+		desc.flags = LLGL::ShaderCompileFlags::WarnError;
+		LLGL::Shader* shader = _renderMgr.System->CreateShader(desc);
+		if(!shader)
 		{
 			PurgeCompiledShaders();
 			return nullptr;
 		}
+		_shaders[shaderData.first] = shader;
 	}
+	_shaderData.clear();
 
 	LLGL::ShaderProgramDescriptor desc;
 	if(_shaders.find(LLGL::ShaderType::Vertex) != _shaders.end())
@@ -252,6 +215,8 @@ LLGL::ShaderProgram* ShaderProgramResource::Compile(std::initializer_list<LLGL::
 	return _shaderProgram;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void ShaderProgramResource::PurgeCompiledShaders()
 {
 	for(auto shader : _shaders)
@@ -262,6 +227,8 @@ void ShaderProgramResource::PurgeCompiledShaders()
 	if(_shaderProgram)
 		_renderMgr.System->Release(*_shaderProgram);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 LLGL::Shader* ShaderProgramResource::MakeShader(LLGL::ShaderType shaderType)
 {
@@ -281,7 +248,7 @@ LLGL::Shader* ShaderProgramResource::MakeShader(LLGL::ShaderType shaderType)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*bool ShaderProgramResource::AddShaderData(LLGL::ShaderType type, const String& data)
+bool ShaderProgramResource::AddShaderData(LLGL::ShaderType type, const String& data)
 {
 	if(_shaderData.find(type) != _shaderData.end())
 	{
@@ -289,11 +256,6 @@ LLGL::Shader* ShaderProgramResource::MakeShader(LLGL::ShaderType shaderType)
 	}
 	_shaderData[type] = data;
 	return true;
-}*/
-
-void ShaderProgramResource::AddDependency(Resource&& resource)
-{
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -115,6 +115,12 @@ bool Resource::IsFinished() const
 			FIRE_LOG_ERROR("Exception in Resource::IsFinished: %s", e.what());
 		}
 	}
+	if(_obj)
+	{
+		// the resource object might be depending on other resources, so we will check the IsReady
+		// return as well.
+		return _isFinished && _obj->IsReady();
+	}
 	return _isFinished;
 }
 

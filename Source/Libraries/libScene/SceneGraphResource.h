@@ -34,7 +34,6 @@ private:
 	RenderMgr&                           _renderMgr;
 	Json::CharReaderBuilder              _builder;
 	Json::CharReader*                    _reader;
-	ObjectPool<class SceneGraphResource> _pool;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +64,8 @@ public:
 public:
 	SceneGraphResource(RenderMgr& renderMgr);
 	virtual ~SceneGraphResource();
+
+	virtual bool IsReady() const;
 
 private:
 	RenderMgr&                _renderMgr;

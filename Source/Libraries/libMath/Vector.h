@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  AABB.h
+//  Vector
 //
-//  An Axis Aligned Bounding Box.
+//  3D/2D Vector classes and their operations.
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Elflord 2018
@@ -24,6 +24,18 @@ public:
 	explicit Vector2(const Vector3& v);
 	explicit Vector2(const Vector4& v);
 
+	Vector2 operator*(float scalar)
+	{
+		return Vector2(x * scalar, y * scalar);
+	}
+
+	Vector2& operator*=(float scalar)
+	{
+		x *= scalar;
+		y *= scalar;
+		return *this;
+	}
+
 	float x, y;
 };
 
@@ -33,6 +45,19 @@ public:
 	Vector3(float x = 0.0f, float y = 0.0f, float z = 0.0f);
 	Vector3(const Vector2& v2d, float z = 0.0f);
 	explicit Vector3(const Vector4& v2d);
+
+	Vector3 operator*(float scalar)
+	{
+		return Vector3(x * scalar, y*scalar, z*scalar);
+	}
+
+	Vector3& operator*=(float scalar)
+	{
+		x *= scalar;
+		y *= scalar;
+		z *= scalar;
+		return *this;
+	}
 
 	float x, y, z;
 };
@@ -44,12 +69,22 @@ public:
 	Vector4(const Vector2& v, float z = 0.0f, float w = 0.0f);
 	Vector4(const Vector3& v, float w = 0.0f);
 
+	Vector4 operator*(float scalar)
+	{
+		return Vector4(x * scalar, y*scalar, z*scalar, w*scalar);
+	}
+
+	Vector4& operator*=(float scalar)
+	{
+		x *= scalar;
+		y *= scalar;
+		z *= scalar;
+		w *= scalar;
+		return *this;
+	}
+
 	float x, y, z, w;
 };
-
-OPEN_NAMESPACE(Math);
-
-CLOSE_NAMESPACE(Math);
 
 CLOSE_NAMESPACE(Firestorm);
 

@@ -58,7 +58,7 @@ ResourcePtr ResourceCache::FindResource(const String& name) const
 	auto found = _cache.find(name);
 	if(found != _cache.end())
 	{
-		return found->second.lock();
+		return found->second;
 	}
 	return nullptr;
 }
@@ -73,23 +73,15 @@ void ResourceCache::ClearOrphanedResources()
 	while(iter != _cache.end())
 	{
 		auto ptr = iter->second;
-		if(ptr.expired())
-		{
-			iter = _cache.erase(iter);
-		}
-		else
-		{
-			++iter;
-		}
 		// orphaned, only used by the cache.
-		/*if(ptr.use_count() == 1)
+		if(ptr.use_count() == 1)
 		{
 			iter = _cache.erase(iter);
 		}
 		else
 		{
 			++iter;
-		}*/
+		}
 	}
 }
 

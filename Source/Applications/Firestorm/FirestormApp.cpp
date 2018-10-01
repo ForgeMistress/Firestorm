@@ -10,7 +10,7 @@
 #include <libIO/libIO.h>
 #include <libIO/ResourceMgr.h>
 
-#include <libScene/ShaderResource.h>
+#include <libScene/ShaderProgramResource.h>
 #include <libScene/MeshResource.h>
 #include <libScene/SceneGraphResource.h>
 
