@@ -28,7 +28,7 @@ struct ResourceHandleErrors
 	#ResourceMgr::Load. Instances can be stored in client classes, however this is done with
 	the understanding that they will eventually be assigned to an instance
  **/
-class Resource final
+class Resource 
 {
 	friend class ResourceCache;
 	friend class ResourceMgr;
@@ -39,13 +39,12 @@ public:
 
 	// move only
 	Resource(Resource&& other);
-	Resource(const Resource& other) = delete;
+	Resource(const Resource& other);
 
-	~Resource();
+	virtual ~Resource();
 
-	// move only
 	Resource& operator=(Resource&& handle);
-	Resource& operator=(const Resource& handle) = delete;
+	Resource& operator=(const Resource& handle);
 
 	template<class T>
 	const RefPtr<T> Get() const

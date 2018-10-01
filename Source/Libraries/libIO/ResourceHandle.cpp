@@ -52,6 +52,15 @@ Resource::Resource(Resource&& other)
 {
 }
 
+Resource::Resource(const Resource& other)
+: _error(other._error)
+, _obj(other._obj)
+, _hasFuture(false)
+, _isFinished(other._isFinished)
+, _futurePulled(other._futurePulled)
+{
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Resource::~Resource()
@@ -71,6 +80,19 @@ Resource& Resource::operator=(Resource&& other)
 		_hasFuture = std::move(other._hasFuture);
 		_isFinished = std::move(other._isFinished);
 		_futurePulled = std::move(other._futurePulled);
+	}
+	return *this;
+}
+
+Resource& Resource::operator=(const Resource& other)
+{
+	if(this != &other)
+	{
+		_error = other._error;
+		_obj = other._obj;
+		_hasFuture = false;
+		_isFinished = other._isFinished;
+		_futurePulled = other._futurePulled;
 	}
 	return *this;
 }
