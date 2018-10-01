@@ -14,7 +14,7 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FIRE_MIRROR_DEFINE(Firestorm::Engine)
+/*FIRE_MIRROR_DEFINE(Firestorm::Engine)
 {
 
 }
@@ -217,7 +217,7 @@ void Engine::Refresh()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const String& Engine::GetName() const
-{ 
+{
 	return _name;
 }
 
@@ -416,7 +416,7 @@ void Engine::ManageEntities()
 		{
 			Vector<WeakPtr<Entity>>& systemEntities = system->_entities;
 
-			auto foundInSystem = std::find_if(systemEntities.begin(), systemEntities.end(), 
+			auto foundInSystem = std::find_if(systemEntities.begin(), systemEntities.end(),
 				[&entity](const WeakPtr<Entity>& e) {
 					return e.lock() == entity;
 				});
@@ -433,7 +433,7 @@ void Engine::ManageEntities()
 	_entitiesToAdd.clear();
 	_entitiesToModify.clear();
 	_entitiesToRemove.clear();
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

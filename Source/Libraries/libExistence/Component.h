@@ -34,37 +34,13 @@ struct ComponentMetadata
 	A component is an object that contains data and is a part of an \ref Entity. \ref Components should not
 	contain application logic within their class definitions.
  **/
-class Component : public Mirror::Object,
-                  public Mirror::IInspectableObject,
-                  public IRefCounted
+/*class IComponent
 {
-	FIRE_MIRROR_DECLARE(Component, Mirror::Object);
+	FIRE_MIRROR_DECLARE(IComponent);
 public:
-	Component();
-	virtual ~Component();
-
-	inline const String& GetName() const;
-
-	inline void SetName(const String& name);
-
-	/**
-		Retrieve the entity that this Component is a part of.
-
-		\return entity The internally held WeakPtr<Entity> with const qualifiers.
-	 **/
-	inline const WeakPtr<Entity>& GetEntity() const;
-
-	/**
-		Retrieve the entity that this Component is a part of.
-
-		\return entity The internally held WeakPtr<Entity> without const qualifiers.
-	**/
-	inline WeakPtr<Entity>& GetEntity();
-
-private:
-	String m_name;
-	WeakPtr<Entity> m_entity;
-};
+	IComponent();
+	virtual ~IComponent();
+};*/
 
 CLOSE_NAMESPACE(Firestorm);
 #endif

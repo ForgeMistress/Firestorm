@@ -11,18 +11,44 @@
 #define LIBEXISTENCE_ENTITY_H_
 #pragma once
 
-#include <libCore/IRefCounted.h>
-
 OPEN_NAMESPACE(Firestorm);
 
-class Component;
+#define ENT_INDEX_BITS      24
+#define ENT_INDEX_MASK      ((1 << ENT_INDEX_BITS) - 1)
+#define ENT_GENERATION_BITS 8
+#define ENT_GENERATION_MASK ((1 << ENT_GENERATION_BITS) - 1)
 
-/**
-	An entity's cache coherency can easily be optimized by doing placement new
-	with enough space allocated for both the entity _and_ the components we know it is going to hold, leaving room for
-	the entity to have components added and removed as we need them. Since the Entity itself is responsible for 
-	allocating the components it wants to hold, we are in complete control of the memory at this level.
- **/
+using ID = uint32_t;
+
+struct Entity final
+{
+	ID id;
+
+	inline uint32_t Index() const
+	{
+		return id & ENT_INDEX_MASK;
+	}
+
+	inline uint32_t Generation() const
+	{
+		return (id >> ENT_INDEX_BITS) & ENT_GENERATION_MASK;
+	}
+};
+
+
+class EntityMgr final
+{
+public:
+	Entity Create();
+
+	bool IsAlive(const Entity& entity);
+
+	void Destroy(const Entity& entity);
+private:
+	uint8_t _generation
+};
+
+/*
 class Entity : public Mirror::Object,
                public Mirror::IInspectableObject,
                public IRefCounted
@@ -76,7 +102,7 @@ private:
 	friend class Engine;
 	bool _modified{ false };
 	Engine* _owningEngine{ nullptr };
-};
+};*/
 
 CLOSE_NAMESPACE(Firestorm);
 #endif

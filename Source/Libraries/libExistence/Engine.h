@@ -24,10 +24,10 @@ OPEN_NAMESPACE(Firestorm);
 	\class Engine
 	\brief Holds Systems and Entities.
 
-	Engine is the class that brings Systems and Entities together. It holds ownership of the 
-	\ref Systems and \ref Entities that are passed to it through \ref AddSystem and \ref AddEntity.
+	Engine is the class that brings Systems and Entities together. It holds ownership of the
+	Systems and Entities that are passed to it through #Engine::AddSystem and #Engine::AddEntity.
  **/
-class Engine final : public Mirror::Object
+/*class Engine final : public Mirror::Object
 {
 	FIRE_MIRROR_DECLARE(Engine, Mirror::Object);
 public:
@@ -109,10 +109,7 @@ private:
 
 	UnorderedSet<SystemPtr> _systemsToAdd;
 	UnorderedSet<SystemPtr> _systemsToRemove;
-};
-
-typedef RefPtr<Engine>  EnginePtr;
-typedef WeakPtr<Engine> EngineWeakPtr;
+};*/
 
 CLOSE_NAMESPACE(Firestorm);
 #endif

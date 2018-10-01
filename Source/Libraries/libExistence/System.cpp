@@ -2,7 +2,7 @@
 //
 //  System.cpp
 //
-//  
+//
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) Project Elflord 2018
@@ -15,7 +15,7 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-FIRE_MIRROR_DEFINE(SystemEvent)
+/*FIRE_MIRROR_DEFINE(SystemEvent)
 {
 }
 
@@ -85,7 +85,7 @@ void System::Pause()
 	_paused = true;
 }
 
-void* System::DoInspect(Mirror::Type type) 
+void* System::DoInspect(Mirror::Type type)
 {
 	if(type == System::MyType())
 	{
@@ -112,6 +112,6 @@ void System::Reset()
 {
 	_engine = nullptr;
 	_entities.clear();
-}
+}*/
 
 CLOSE_NAMESPACE(Firestorm);

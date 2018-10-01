@@ -9,9 +9,9 @@
 OPEN_NAMESPACE(Firestorm);
 void libExistence::Initialize(int ac, char** av)
 {
-	Lib::RegisterReflection<Component>();
+	/*Lib::RegisterReflection<Component>();
 	Lib::RegisterReflection<Engine>();
 	Lib::RegisterReflection<Entity>();
-	Lib::RegisterReflection<System>();
+	Lib::RegisterReflection<System>();*/
 }
 CLOSE_NAMESPACE(Firestorm);
