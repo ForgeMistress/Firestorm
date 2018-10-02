@@ -16,26 +16,42 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+const Entity Entity::dummy(0, 0);
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Entity EntityMgr::Create()
 {
 	ID idx;
-	if(_freeIndices.size() > )
+	if(_freeIndices.size() > FIRE_MIN_FREE_INDICES)
+	{
+		idx = _freeIndices.front();
+		_freeIndices.pop_front();
+	}
+	else
+	{
+		_generations.push_back(0);
+		idx = _generations.size() - 1;
+		FIRE_ASSERT(idx < (1 << ENT_INDEX_BITS));
+	}
+
+	return Entity(idx, _generations[idx]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool EntityMgr::IsAlive(const Entity& entity)
 {
-
+	return _generations[entity.Index()] == entity.Generation();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void EntityMgr::Destroy(const Entity& entity)
 {
-	uint32_t
+	const uint32_t idx = entity.Index();
+	++_generations[idx];
+	_freeIndices.push_back(idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

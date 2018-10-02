@@ -6,6 +6,6 @@
 OPEN_NAMESPACE(Firestorm);
 void libScript::Initialize(int ac, char** av)
 {
-	Lib::RegisterReflection<ScriptComponent>();
+	//Lib::RegisterReflection<ScriptComponent>();
 }
 CLOSE_NAMESPACE(Firestorm);

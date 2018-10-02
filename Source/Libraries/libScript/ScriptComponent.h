@@ -11,23 +11,18 @@
 #define LIBSCRIPT_SCRIPTCOMPONENT_H_
 #pragma once
 
+#include <libIO/ResourceReference.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 class Entity;
 
 /**
-	\class ScriptComponent
-
 	Contains a reference to a script resource.
-**/
-class ScriptComponent : public Component
+ **/
+class ScriptComponent : public IComponent<ResourceReference>
 {
-	FIRE_MIRROR_DECLARE(ScriptComponent, Component);
 public:
-	ScriptComponent();
-	virtual ~ScriptComponent();
-
-	String ResourceFile;
 };
 
 CLOSE_NAMESPACE(Firestorm);

@@ -18,34 +18,63 @@ OPEN_NAMESPACE(Firestorm);
 #define ENT_GENERATION_BITS 8
 #define ENT_GENERATION_MASK ((1 << ENT_GENERATION_BITS) - 1)
 
-using ID = uint32_t;
+#define FIRE_MIN_FREE_INDICES 1024
 
-struct Entity final
+class Entity final
 {
-	ID id;
+public:
+	Entity(uint32_t idx, uint32_t generation)
+	: _id((generation << ENT_INDEX_BITS) | idx)
+	{
+	}
+
+	inline uint32_t ID() const
+	{
+		return _id;
+	}
 
 	inline uint32_t Index() const
 	{
-		return id & ENT_INDEX_MASK;
+		return _id & ENT_INDEX_MASK;
 	}
 
 	inline uint32_t Generation() const
 	{
-		return (id >> ENT_INDEX_BITS) & ENT_GENERATION_MASK;
+		return (_id >> ENT_INDEX_BITS) & ENT_GENERATION_MASK;
 	}
+
+	inline operator String() const
+	{
+		return Format("Entity[ IDX:%d, GEN:%d ]", Index(), Generation());
+	}
+
+	static const Entity dummy;
+
+private:
+	uint32_t _id;
 };
 
 
 class EntityMgr final
 {
 public:
+	/**
+		Create a brand new Entity.
+	 **/
 	Entity Create();
 
+	/**
+		Check whether or not the Entity is alive.
+	 **/
 	bool IsAlive(const Entity& entity);
 
+	/**
+		Release the Entity.
+	 **/
 	void Destroy(const Entity& entity);
 private:
-	uint8_t _generation
+	Vector<uint8_t>      _generations;
+	std::deque<uint32_t> _freeIndices;
 };
 
 /*
