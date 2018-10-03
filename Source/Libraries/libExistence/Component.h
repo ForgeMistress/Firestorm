@@ -26,7 +26,7 @@ struct member_data
 {
 	// the size of the actual member.
 	size_t Size;
-	size_t Offset;
+	size_t OffsetTo;
 };
 
 using member_data_list = Vector<member_data>;
@@ -77,6 +77,26 @@ struct unroll_members<>
 		size_t&           /* count      */,
 		size_t            /* prevOffset */,
 		size_t            /* prevSize   */) {}
+};
+
+template<class T>
+struct member_traits
+{
+	static void copy(const T* from, T* to)
+	{
+		memcpy(to, from, sizeof(T));
+	}
+};
+
+template<>
+struct member_traits<String>
+{
+	static void copy(const String* from, String* to)
+	{
+		to->clear();
+		to->resize(from->size());
+		*to = *from;
+	}
 };
 
 CLOSE_NAMESPACE(detail);
@@ -148,6 +168,10 @@ size_t IComponent<MembersT...>::_s_numMembers = 0;
 template<class... MembersT>
 detail::member_data_list IComponent<MembersT...>::_s_members;
 
+struct Component
+{
+	uint32_t Index;
+};
 
 /**
 
@@ -181,70 +205,82 @@ public:
 	T GetData(size_t row, size_t column) const
 	{
 		T output;
-		memcpy(&output, GetMemberPtr<void>(row, column), GetMemberSize(column));
+		detail::member_traits<T>::copy(GetMemberPtr<T>(row, column), &output);
 		return output;
-	}
-
-	template<>
-	String GetData(size_t row, size_t column) const
-	{
-		const String* strPtr = GetMemberPtr<String>(row, column);
-		return String(strPtr->begin(), strPtr->end());
 	}
 
 	/**
 		Set the data with a copy operation.
 	 **/
 	template<class T>
-	void SetData(size_t row, size_t column, const T& data);
-
-	template<>
-	void SetData(size_t row, size_t column, const String& data)
+	void SetData(size_t row, size_t column, const T& inData)
 	{
-		String* strPtr = GetMemberPtr<String>(row, column);
-		strPtr->clear();
-		strPtr->resize(data.size());
-		*strPtr = data;
-		//strPtr->assign(data.c_str());
+		T* myDataPtr = GetMemberPtr<T>(row, column);
+		detail::member_traits<T>::copy(&inData, myDataPtr);
 	}
 
 	template<class T>
 	const T* GetMemberPtr(size_t row, size_t column) const
 	{
-		return reinterpret_cast<const T*>(
-			reinterpret_cast<const char*>(_data.buffer)[GetMemberPos(row, column)]
-		);
+		size_t memberPos = GetMemberPos(row, column);
+		char* data = _data.buffer + memberPos;
+		return reinterpret_cast<const T*>(data);
 	}
 
 	template<class T>
 	T* GetMemberPtr(size_t row, size_t column)
 	{
 		size_t memberPos = GetMemberPos(row, column);
-		return reinterpret_cast<T*>(
-			reinterpret_cast<char*>(_data.buffer)[memberPos]
-		);
+		char* data = _data.buffer + memberPos;
+		return reinterpret_cast<T*>(data);
 	}
 
-	/**
-		Set the data with a move operation.
-	 **/
-	// template<class T>
-	// void SetData(size_t row, size_t column, T&& data);
+	Component AddNewInstance()
+	{
+		if(_data.n == _data.capacity)
+		{
+			Alloc(_data.capacity * 2);
+		}
+		return Component{ ++_data.n };
+	}
+
+	Vector<Component> AddNewInstances(size_t numNewInstances)
+	{
+		Vector<Component> output;
+		output.reserve(numNewInstances);
+
+		for(size_t i=0; i<numNewInstances; ++i)
+		{
+			output.push_back(AddNewInstance());
+		}
+
+		return output;
+	}
 
 	/**
 		Retrieve how many live objects are within the manager.
 	 **/
-	size_t GetCount() const;
+	size_t GetCount() const
+	{
+		return _data.n;
+	}
 	
 	/**
-		Retrieve how much space is allocated for how many components.
+		Retrieve how much space is allocated for how many components. This is expressed as the number of components
+		this manager can hold.
 	 **/
-	size_t GetCapacity() const;
+	size_t GetCapacity() const
+	{
+		return _data.capacity;
+	}
 
 	/**
 		What it says on the tin...
 	 **/
-	size_t GetBufferSizeInBytes() const;
+	size_t GetBufferSizeInBytes() const
+	{
+		return _data.bufferSize;
+	}
 
 private:
 	size_t GetMemberPos(size_t row, size_t column) const
@@ -253,7 +289,7 @@ private:
 		FIRE_ASSERT(column < members.size());
 
 		auto& member = members[column];
-		return GetComponentPos(row) + member.Offset;
+		return GetRowStart(row) + member.OffsetTo;
 	}
 
 	// get the start of 
@@ -273,9 +309,9 @@ private:
 	struct Data
 	{
 		size_t n{ 0 };
-		size_t allocated{ 0 };
+		size_t capacity{ 0 };
 		size_t bufferSize{ 0 };
-		void*  buffer{ nullptr };
+		char*  buffer{ nullptr };
 	};
 	Data _data;
 };
@@ -299,55 +335,21 @@ void BasicComponentManager<ComponentT>::Alloc(size_t count)
 
 	Data newData;
 
-	newData.buffer = malloc(component_type::SizeOf() * count);
+	size_t bufferSize = component_type::SizeOf() * count;
+
+	newData.buffer = (char*)malloc(bufferSize);
+	memset(newData.buffer, 0, bufferSize);
+
 	newData.n = _data.n;
-	newData.allocated = count;
-	newData.bufferSize = component_type::SizeOf() * count;
+	newData.capacity = count;
+	newData.bufferSize = bufferSize;
+
+	if(_data.bufferSize > 0)
+		memcpy(newData.buffer, _data.buffer, _data.bufferSize);
 
 	free(_data.buffer);
 	_data = newData;
 }
-
-template<class ComponentT>
-template<class T>
-void BasicComponentManager<ComponentT>::SetData(size_t row, size_t column, const T& tdata)
-{
-	auto& members = component_type::MyMembers();
-	FIRE_ASSERT(column < members.size());
-
-	auto& member = members[column];
-	FIRE_ASSERT(member.Size == sizeof(tdata));
-
-	size_t destinationStart = component_type::SizeOf() * row;
-	size_t memberPos = destinationStart + member.Offset;
-	//T* data = (T*)_data.buffer[memberPos];
-	T* data = GetMemberPtr<T>(row, column);
-	memcpy(data, &tdata, sizeof(tdata));
-}
-
-template<class ComponentT>
-size_t BasicComponentManager<ComponentT>::GetCount() const
-{
-	return _data.n;
-}
-
-template<class ComponentT>
-size_t BasicComponentManager<ComponentT>::GetCapacity() const
-{
-	return _data.allocated;
-}
-
-/**
-	A component is an object that contains data and is a part of an Entity. Components should not
-	contain application logic within their class definitions.
- **/
-/*class IComponent
-{
-	FIRE_MIRROR_DECLARE(IComponent);
-public:
-	IComponent();
-	virtual ~IComponent();
-};*/
 
 CLOSE_NAMESPACE(Firestorm);
 #endif

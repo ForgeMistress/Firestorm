@@ -104,11 +104,11 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		for(size_t i=0; i<memberDetailList.size(); ++i)
 		{
 			auto& memberInfo = memberDetailList[i];
-			FIRE_LOG_DEBUG("[%d] size = %d, offset = %d", i, memberInfo.Size, memberInfo.Offset);
+			FIRE_LOG_DEBUG("[%d] size = %d, offset = %d", i, memberInfo.Size, memberInfo.OffsetTo);
 			t.Assert(memberInfo.Size == expectedMemberSize, 
 				Format("size of member [%d] was wrong. expected %d. got %d", i, expectedMemberSize, memberInfo.Size));
-			t.Assert(memberInfo.Offset == expectedOffset,
-				Format("offset of member [%d] was wrong. expected %d. got %d.", i, expectedOffset, memberInfo.Offset));
+			t.Assert(memberInfo.OffsetTo == expectedOffset,
+				Format("offset of member [%d] was wrong. expected %d. got %d.", i, expectedOffset, memberInfo.OffsetTo));
 			expectedOffset += memberInfo.Size;
 		}
 	});
@@ -119,37 +119,80 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		for(size_t i=0; i<memberDetailList.size(); ++i)
 		{
 			auto& memberInfo = memberDetailList[i];
-			FIRE_LOG_DEBUG("[%d] size = %d, offset = %d", i, memberInfo.Size, memberInfo.Offset);
-			t.Assert(memberInfo.Offset == expectedOffset,
-				Format("offset of member [%d] was wrong. expected %d. got %d.", i, expectedOffset, memberInfo.Offset));
+			FIRE_LOG_DEBUG("[%d] size = %d, offset = %d", i, memberInfo.Size, memberInfo.OffsetTo);
+			t.Assert(memberInfo.OffsetTo == expectedOffset,
+				Format("offset of member [%d] was wrong. expected %d. got %d.", i, expectedOffset, memberInfo.OffsetTo));
 			expectedOffset += memberInfo.Size;
 		}
 	});
 
 	h->It("the component manager should allocate space properly", [](TestCase& t) {
-		TestComplexComponentMgr test;
+		TestComponentMgr test;
 		t.Assert(test.GetCapacity() == 5,
 			Format(
-				"test mgr capacity was an unexpected value. expected %d. got %d.",
-				5, 
-				test.GetCapacity()));
-
-
+			"test mgr capacity was an unexpected value. expected %d. got %d.",
+			5,
+			test.GetCapacity()));
 	});
 
-	h->It("components should be modifiable", [](TestCase& t) {
-		TestComponentMgr test;
-		EntityMgr eMgr;
+	h->It("components managers should manage their data buffers properly", [](TestCase& t) {
 
-		Entity e = eMgr.Create();
-		test.SetFlag1(e, 1);
-		t.Assert(test.GetFlag1(e) == 1,
-			Format("unexpected value. expected 1. got %d", test.GetFlag1(e)));
-		/*test.SetName(e, "Test Name");
+		// ensure that the capacity of the data buffer is enlarged when it is expected to be.
+		// data buffer should expand when Count == Capacity and someone attempts to add a new instance.
+		// in this instance, the capacity of the internal data buffer should grow by a factor of 2.
+		{
+			TestComponentMgr testMgr;
+			EntityMgr eMgr;
 
-		String testName = test.GetName(e);
-		t.Assert(testName == "Test Name", 
-			Format("unexpected name. expected 'Test Name'. got '%s'. (also this might crash...)", testName));*/
+			Entity e = eMgr.Create();
+			size_t capacityBefore = testMgr.GetCapacity();
+
+			Vector<Component> handles(testMgr.AddNewInstances(5));
+
+			t.Assert(capacityBefore == testMgr.GetCapacity(),
+				Format("the testMgr's capacity was modified when it shouldn't have been. before = %d. after = %d",
+				capacityBefore, testMgr.GetCapacity()));
+
+			handles.push_back(testMgr.AddNewInstance());
+			t.Assert(testMgr.GetCapacity() == (capacityBefore * 2),
+				Format("the testMgr's capacity was not modified properly. expected %d. got %d.",
+				(capacityBefore * 2), testMgr.GetCapacity()));
+		}
+
+
+		{
+
+		}
+	});
+
+	h->It("component managers should be able to access the fields of components properly", [](TestCase& t) {
+		// test of a simple 4 byte component.
+		{
+			TestComponentMgr testMgr;
+			EntityMgr eMgr;
+
+			Entity e = eMgr.Create();
+			Component c = testMgr.AddNewInstance();
+			testMgr.SetFlag1(e, 20);
+			uint8_t flag1 = testMgr.GetFlag1(e);
+			t.Assert(flag1 == 20, "the flag value was not set properly");
+		}
+
+		// test of a more complicated component
+		{
+			TestComplexComponentMgr testMgr;
+			EntityMgr eMgr;
+			Entity e = eMgr.Create();
+			Component c = testMgr.AddNewInstance();
+
+			String testName = "Test Name";
+
+			testMgr.SetName(e, testName);
+			String retrieveTestName = testMgr.GetName(e);
+			FIRE_LOG_DEBUG("retrieved the test name '%s'", retrieveTestName);
+			t.Assert(testName == retrieveTestName,
+				Format("the retrieved test name was wrong. expected %s. got %s", testName, retrieveTestName));
+		}
 	});
 
 
