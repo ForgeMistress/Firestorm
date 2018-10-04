@@ -19,6 +19,273 @@ OPEN_NAMESPACE(Firestorm);
 
 class Entity;
 
+OPEN_NAMESPACE(detail);
+
+template<class T>
+struct member_traits
+{
+	static void copy(const T* from, T* to)
+	{
+		memcpy(to, from, sizeof(T));
+	}
+
+	static void make_new(void* data)
+	{
+		new (data) T();
+	}
+};
+
+template<>
+struct member_traits<String>
+{
+	static void copy(const String* from, String* to)
+	{
+		to->clear();
+		to->resize(from->size());
+		*to = *from;
+	}
+
+	static void make_new(void* data)
+	{
+		new (data) String();
+	}
+};
+
+CLOSE_NAMESPACE(detail);
+
+typedef void (*AllocFunc)(void*);
+
+struct MemberDataBase
+{
+	MemberDataBase(size_t sizeOf, AllocFunc func)
+		: SizeOf(sizeOf)
+		, Func(func)
+	{
+	}
+
+	size_t SizeOf;
+	AllocFunc Func;
+};
+
+template<class T>
+struct MemberData : public MemberDataBase
+{
+	MemberData()
+		: MemberDataBase(sizeof(T), detail::member_traits<T>::make_new)
+	{
+	}
+};
+
+struct Buffer
+{
+	Buffer(){}
+	~Buffer() { Free(); }
+
+	inline void Alloc(size_t sizeInBytes)
+	{
+		FIRE_ASSERT(Data == nullptr);
+		Data = (char*)malloc(sizeInBytes);
+		Size = sizeInBytes;
+	}
+
+	inline void Init(size_t offset, AllocFunc& func)
+	{
+		func(Data + offset);
+	}
+
+	inline void Free()
+	{
+		FIRE_ASSERT(Data != nullptr);
+		free((void*)Data);
+		Data = nullptr;
+	}
+
+
+	void Set(int val, size_t size = std::numeric_limits<size_t>::max())
+	{
+		if(size == std::numeric_limits<size_t>::max())
+		{
+			size = Size;
+		}
+		memset((void*)Data, val, size);
+	}
+
+	template<class T>
+	inline T* Get(size_t item) const
+	{
+		return reinterpret_cast<T*>(Data + (item * sizeof(T)));
+	}
+
+	template<class T>
+	inline void Set(size_t item, const T* data)
+	{
+		T* dpos = reinterpret_cast<T*>(Data + (item * sizeof(T)));
+		detail::member_traits<T>::copy(data, dpos);
+	}
+
+	/*
+	FIRE_ASSERT(count > _data.n);
+
+	Data newData;
+
+	size_t bufferSize = component_type::SizeOf() * count;
+
+	newData.buffer = (char*)malloc(bufferSize);
+	memset(newData.buffer, 0, bufferSize);
+
+	newData.n = _data.n;
+	newData.capacity = count;
+	newData.bufferSize = bufferSize;
+
+	if(_data.bufferSize > 0)
+	memcpy(newData.buffer, _data.buffer, _data.bufferSize);
+
+	free(_data.buffer);
+	_data = newData;
+	*/
+
+	// expands the size of the buffer by the provided factor.
+	void Expand(uint16_t factor=2)
+	{
+		size_t newSize = Size * factor;
+
+		// allocate the new buffer
+		char* newData = (char*)malloc(newSize);
+
+		// set the new buffer data.
+		memset(newData, 0, newSize);
+
+		// copy the old data over to the new buffer
+		memcpy(newData, Data, Size);
+
+		// release the old buffer
+		free(Data);
+
+		// set the buffer ptr to thhe new buffer
+		Data = newData;
+
+		// set thhe size to the new size.
+		Size = newSize;
+	}
+
+	size_t Size; // the size of this particular buffer.
+	char* Data{ nullptr };
+};
+
+OPEN_NAMESPACE(detail);
+
+template<class... ArgsT> struct variadic_tpl_impl;
+
+template<class ArgT, class... ArgsT>
+struct variadic_tpl_impl<ArgT, ArgsT...>
+{
+	static void do_count(size_t& cnt)
+	{
+		variadic_tpl_impl<ArgsT...>::do_count(++cnt);
+	}
+};
+
+template<class ArgT>
+struct variadic_tpl_impl<ArgT>
+{
+	static void do_count(size_t& cnt)
+	{
+		++cnt;
+	}
+};
+
+template<>
+struct variadic_tpl_impl<>
+{
+	static void do_count(size_t& /* cnt */){}
+};
+
+CLOSE_NAMESPACE(detail);
+
+template<class... ArgsT> struct variadic_tpl
+{
+	static size_t count()
+	{
+		size_t cnt;
+		detail::variadic_tpl_impl<ArgsT...>::do_count(cnt);
+		return cnt;
+	}
+};
+
+struct ComponentManagerBase_MemoryManagement
+{
+	inline ComponentManagerBase_MemoryManagement(std::initializer_list<MemberDataBase>&& members, size_t initialCapacity = 0)
+		: _count(0)
+	{
+		size_t NumMembers = members.size();
+		_buffers.reserve(NumMembers);
+		_buffers.resize(NumMembers);
+		_memberData.reserve(NumMembers);
+		_memberData.assign(members.begin(), members.end());
+		if(initialCapacity > 0)
+		{
+			size_t i = 0;
+			for(auto member = members.begin(); member != members.end(); ++member, ++i)
+			{
+				_buffers[i].Alloc(member->SizeOf * initialCapacity);
+			}
+		}
+	}
+	
+	virtual ~ComponentManagerBase_MemoryManagement(){} // buffers free'd on destructor
+
+	inline size_t MakeInstance()
+	{
+		size_t inst = _count;
+		for(size_t i = 0; i < _buffers.size(); ++i)
+		{
+			_buffers[i].Init(inst * _memberData[i].SizeOf, _memberData[i].Func);
+		}
+		++_count;
+		return inst;
+	}
+
+	inline void Alloc(size_t numberOfComponents)
+	{
+		for(size_t i = 0; i < _buffers.size(); ++i)
+		{
+			_buffers[i].Alloc(numberOfComponents * _memberData[i].SizeOf);
+		}
+	}
+
+	inline void Expand(size_t numberOfMoreComponents)
+	{
+		for(size_t i = 0; i < _buffers.size(); ++i)
+		{
+			_buffers[i].Expand(numberOfMoreComponents * _memberData[i].SizeOf);
+		}
+	}
+
+	template<class T>
+	inline const T& Get(size_t row, size_t column) const
+	{
+		FIRE_ASSERT(row < _buffers.size());
+		return &_buffers[row].Get<T>(column);
+	}
+
+	template<class T>
+	inline T& Get(size_t row, size_t column)
+	{
+		FIRE_ASSERT(row < _buffers.size());
+		return *_buffers[row].Get<T>(column);
+	}
+
+	template<class T>
+	inline void Set(size_t row, size_t column, const T& data)
+	{
+		FIRE_ASSERT(row < _buffers.size());
+		return _buffers[row].Set(column, &data);
+	}
+
+	Vector<Buffer>         _buffers;
+	Vector<MemberDataBase> _memberData;
+	size_t _count;
+};
 
 OPEN_NAMESPACE(detail);
 
@@ -77,26 +344,6 @@ struct unroll_members<>
 		size_t&           /* count      */,
 		size_t            /* prevOffset */,
 		size_t            /* prevSize   */) {}
-};
-
-template<class T>
-struct member_traits
-{
-	static void copy(const T* from, T* to)
-	{
-		memcpy(to, from, sizeof(T));
-	}
-};
-
-template<>
-struct member_traits<String>
-{
-	static void copy(const String* from, String* to)
-	{
-		to->clear();
-		to->resize(from->size());
-		*to = *from;
-	}
 };
 
 CLOSE_NAMESPACE(detail);
