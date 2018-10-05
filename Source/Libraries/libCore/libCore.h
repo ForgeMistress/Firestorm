@@ -23,6 +23,8 @@
 #include <future>
 #include <sstream>
 #include <ostream>
+#include <chrono>
+#include <tuple>
 
 #include "LibraryRegistrar.h"
 #include "Expected.h"
@@ -31,6 +33,14 @@ OPEN_NAMESPACE(Firestorm);
 
 using std::cout;
 using std::endl;
+
+template<class... Args>
+using Tuple = std::tuple<Args...>;
+
+template<class TupleType>
+using TupleSize = std::tuple_size<TupleType>;
+
+namespace Chrono = std::chrono;
 
 template<class T>
 using Future = std::future<T>;

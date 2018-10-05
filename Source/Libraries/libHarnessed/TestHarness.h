@@ -17,11 +17,13 @@
 OPEN_NAMESPACE(Firestorm);
 
 class TestCase;
+class Benchmark;
 
 class TestHarness : public IRefCounted
 {
 public:
 	typedef Function<void(TestCase&)> TestFunction_t;
+	typedef Function<void(Benchmark&)> BenchmarkFunction_t;
 
 	TestHarness(const String& name, bool quietly = false);
 	virtual ~TestHarness();
@@ -38,6 +40,8 @@ public:
 	// Example: It("should do this thing properly without errors", ...);
 	void It(const String& name, TestFunction_t testFunction);
 
+	void Profile(const String& name, size_t numberOfRuns, BenchmarkFunction_t benchmarkFunction);
+
     const String& GetName() const { return m_name; }
 
 	template <class... Args_t>
@@ -50,10 +54,22 @@ public:
 	void ReportError(TestCase* tc, const String& message);
 
 private:
+	size_t RunTests();
+	void RunBenchmarks();
+
+
 	String m_name;
 	bool m_quietly;
 	Vector<String>         m_caseNames;
-	Vector<TestFunction_t> m_cases;
+	Vector<TestFunction_t> _cases;
+
+	struct BenchmarkInfo
+	{
+		size_t NumRuns;
+		String Name;
+		BenchmarkFunction_t Op;
+	};
+	Vector<BenchmarkInfo> _benchmarks;
 };
 
 CLOSE_NAMESPACE(Firestorm);

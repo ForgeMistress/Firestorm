@@ -120,23 +120,455 @@ struct TestComplexComponentMgr_Alt : public ComponentManagerBase_MemoryManagemen
 	}
 };*/
 
-class TupleBasedComponentMgr : public ComponentDefinition<uint8_t, uint8_t, uint8_t>
+class TupleBasedSimpleComponentMgr : public ComponentDefinition<uint8_t, uint8_t, uint8_t>
 {
-	TupleBasedComponentMgr(size_t allocs = 5)
+public:
+	TupleBasedSimpleComponentMgr(size_t allocs = 5)
 	{
-		
+		Alloc(allocs);
+	}
+
+	void MakeInstance()
+	{
+		def_type::New<0, uint8_t>();
+		def_type::New<1, uint8_t>();
+		def_type::New<2, uint8_t>();
+		Size++;
+	}
+
+	void SetFlag1(const Entity& entity, uint8_t value)
+	{
+		Move<0, uint8_t>(entity.Index(), std::move(value));
+		//Set<0, uint8_t>(entity.Index(), value);
+	}
+
+	void SetFlag2(const Entity& entity, uint8_t value)
+	{
+		Move<1, uint8_t>(entity.Index(), std::move(value));
+	}
+
+	const uint8_t& GetFlag1(const Entity& entity) const
+	{
+		return Get<0, uint8_t>(entity.Index());
+	}
+
+	const uint8_t& GetFlag2(const Entity& entity) const
+	{
+		return Get<1, uint8_t>(entity.Index());
 	}
 };
 
+
+
+class TupleBasedComplexComponentMgr : public ComponentDefinition<String, double, float>
+{
+public:
+	TupleBasedComplexComponentMgr(size_t allocs = 5)
+	{
+		Alloc(allocs);
+		
+	}
+
+	virtual ~TupleBasedComplexComponentMgr()
+	{
+	}
+
+	void MakeInstance()
+	{
+		def_type::New<0, String>();
+		def_type::New<1, double>();
+		def_type::New<2, float>();
+		Size++;
+	}
+
+	void SetName(const Entity& entity, String& value)
+	{
+		Move<0, String>(entity.Index(), std::move(value));
+	}
+
+	const String& GetName(const Entity& entity) const
+	{
+		return Get<0, String>(entity.Index());
+	}
+
+	void SetVelocity(const Entity& entity, double value)
+	{
+		Move<1, double>(entity.Index(), std::move(value));
+	}
+
+	const double& GetVelocity(const Entity& entity) const
+	{
+		return Get<1, double>(entity.Index());
+	}
+};
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// naieve OOP implementations
+struct NaieveSimpleComponent
+{
+	uint8_t flag1;
+	uint8_t flag2;
+	uint8_t flag3;
+};
+struct NaieveSimpleComponentManager
+{
+	NaieveSimpleComponentManager(size_t allocations = 5)
+	{
+		components.reserve(allocations);
+	}
+	~NaieveSimpleComponentManager()
+	{
+		for(size_t i=0; i<components.size(); ++i)
+		{
+			delete components[i];
+		}
+	}
+
+	void MakeInstance()
+	{
+		components.push_back(new NaieveSimpleComponent());
+	}
+
+	void SetFlag1(const Entity& e, const uint8_t& value)
+	{
+		components[e.Index()]->flag1 = value;
+	}
+
+	const uint8_t& GetFlag1(const Entity& e) const
+	{
+		return components[e.Index()]->flag1;
+	}
+
+	void SetFlag2(const Entity& e, const uint8_t& value)
+	{
+		components[e.Index()]->flag2 = value;
+	}
+
+	const uint8_t& GetFlag2(const Entity& e) const
+	{
+		return components[e.Index()]->flag2;
+	}
+
+	Vector<NaieveSimpleComponent*> components;
+};
+
+
+struct NaieveComplexComponent
+{
+	String name;
+	double velocity;
+	float forTheLulz;
+};
+struct NaieveComplexComponentManager
+{
+	NaieveComplexComponentManager(size_t allocations = 5)
+	{
+		components.reserve(allocations);
+	}
+	~NaieveComplexComponentManager()
+	{
+		for(size_t i=0; i<components.size(); ++i)
+		{
+			delete components[i];
+		}
+	}
+	void MakeInstance()
+	{
+		components.push_back(new NaieveComplexComponent());
+	}
+
+	void SetName(const Entity& e, const String& value)
+	{
+		components[e.Index()]->name = value;
+	}
+
+	const String& GetName(const Entity& e) const
+	{
+		return components[e.Index()]->name;
+	}
+
+	void SetVelocity(const Entity& e, const double& value)
+	{
+		components[e.Index()]->velocity = value;
+	}
+
+	const double& GetVelocity(const Entity& e) const
+	{
+		return components[e.Index()]->velocity;
+	}
+
+	Vector<NaieveComplexComponent*> components;
+};
+
+
+static size_t numRuns = 5;
+static size_t numObjects = 500000;
+
+#define NUM_OBJECTS 500000
+#define NUM_RUNS 50
+
 RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 {
-	using namespace std::chrono;
-	static size_t numRuns = 5;
-	static size_t numObjects = 500000;
+	static EntityMgr eMgr;
+
+	FIRE_LOG_DEBUG("+++++ allocating entities");
+	static Vector<Entity> ents;
+	ents.reserve(NUM_OBJECTS);
+	std::unordered_set<uint32_t> createdIndices;
+	for(size_t i = 0; i < NUM_OBJECTS; ++i)
+	{
+		Entity e = eMgr.Create();
+		FIRE_ASSERT(createdIndices.find(e.Index()) == createdIndices.end());
+		createdIndices.insert(e.Index());
+		ents.push_back(e);
+	}
 
 	RefPtr<TestHarness> h(new TestHarness("libExistence"));
 
-	h->It("benchmark[OOP Complex]", [](TestCase&) {
+	h->Profile(Format("Tuple/Vector Simple ComponentManager [%d Items]",NUM_OBJECTS), NUM_RUNS, [](Benchmark& bm) {
+
+		Benchmark::SnapshotHandle* ssh = nullptr;
+		{
+		
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+			ssh = bm.StartSegment("manager constructor");
+			TupleBasedSimpleComponentMgr testMgr(NUM_OBJECTS);
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("component additions");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.MakeInstance();
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("setting flags 1");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.SetFlag1(ents[i], 101);
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("setting flags 2");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.SetFlag2(ents[i], 101);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("getting flags 1");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr.GetFlag1(ents[i]) == 101);
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("getting flags 2");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr.GetFlag2(ents[i]) == 101);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("destruction");
+		}
+		bm.StopSegment(ssh);
+	});
+
+	h->Profile(Format("Naieve Simple ComponentManager [%d Items]",NUM_OBJECTS), NUM_RUNS, [](Benchmark& bm) {
+
+		Benchmark::SnapshotHandle* ssh = nullptr;
+		{
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("manager constructor");
+			NaieveSimpleComponentManager testMgr(NUM_OBJECTS);
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("component additions");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.MakeInstance();
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("setting flags 1");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.SetFlag1(ents[i], 101);
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("setting flags 2");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.SetFlag2(ents[i], 101);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("getting flags 1");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr.GetFlag1(ents[i]) == 101);
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("getting flags 2");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr.GetFlag2(ents[i]) == 101);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("destruction");
+		}
+		bm.StopSegment(ssh);
+	});
+
+
+	h->Profile(Format("Tuple/Vector Complex ComponentManager [%d Items]",NUM_OBJECTS), NUM_RUNS, [](Benchmark& bm) {
+
+		Benchmark::SnapshotHandle* ssh = nullptr;
+		{
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("manager constructor");
+			TupleBasedComplexComponentMgr testMgr(NUM_OBJECTS);
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("component additions");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.MakeInstance();
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("setting names");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.SetName(ents[i], String("Slim Shady"));
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("setting velocities");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.SetVelocity(ents[i], 9001.0);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("getting names");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr.GetName(ents[i]) == "Slim Shady");
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("getting velocities");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr.GetVelocity(ents[i]) == 9001.0);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("destruction");
+		}
+		bm.StopSegment(ssh);
+	});
+
+	h->Profile(Format("Naieve Complex ComponentManager [%d Items]",NUM_OBJECTS), NUM_RUNS, [](Benchmark& bm) {
+
+		Benchmark::SnapshotHandle* ssh = nullptr;
+		{
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("manager constructor");
+			NaieveComplexComponentManager testMgr(NUM_OBJECTS);
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("component additions");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.MakeInstance();
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("setting names");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.SetName(ents[i], "Slim Shady");
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("setting velocities");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr.SetVelocity(ents[i], 9001.0);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("getting names");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr.GetName(ents[i]) == "Slim Shady");
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("getting velocities");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr.GetVelocity(ents[i]) == 9001.0);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("destruction");
+		}
+		bm.StopSegment(ssh);
+	});
+
+	return h;
+}
+
+	/*h->It("benchmark[OOP Complex]", [](TestCase&) {
 		Vector<double> construction;
 		Vector<double> constructors;
 		Vector<double> flagSets;
@@ -198,7 +630,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		FIRE_LOG_DEBUG("%f%f+++++ name gets         = %d", std::fixed, std::setprecision(15), flaggt / numRuns);
 		FIRE_LOG_DEBUG("%f%f+++++ destructions      = %d", std::fixed, std::setprecision(15), destructiont / numRuns);
 	});
-}
+}*/
 
 	/*h->It("Entities should be instantiable and contain proper ids", [](Firestorm::TestCase& t) {
 		EntityMgr eMgr;

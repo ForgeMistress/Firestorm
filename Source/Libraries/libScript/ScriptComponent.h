@@ -20,10 +20,10 @@ class Entity;
 /**
 	Contains a reference to a script resource.
  **/
-class ScriptComponent : public IComponent<ResourceReference>
+/*class ScriptComponent : public IComponent<ResourceReference>
 {
 public:
-};
+};*/
 
 CLOSE_NAMESPACE(Firestorm);
 #endif

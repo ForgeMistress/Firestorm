@@ -36,7 +36,7 @@ public:
 		std::ostringstream _stream;
 	};
 
-
+	AssertionException(const std::string& message);
 	AssertionException(const char* expression, const char* file, int line, const std::string& message);
 
 	virtual const char* what() const throw();
@@ -48,6 +48,8 @@ public:
 	const char*         Report()     const throw();
 
 private:
+	void Format() throw();
+
 	const char* _expression;
 	const char* _file;
 	int         _line;

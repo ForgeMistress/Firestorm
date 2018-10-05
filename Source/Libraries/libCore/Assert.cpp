@@ -20,6 +20,14 @@ AssertionException::StreamFormatter::operator std::string() const
 	return _stream.str();
 }
 
+AssertionException::AssertionException(const std::string& message)
+: _expression("<force>")
+, _file("<force>")
+, _line(0)
+, _message(message)
+{
+	Format();
+}
 
 AssertionException::AssertionException(const char*   expression,
                                        const char*   file, 
@@ -30,12 +38,17 @@ AssertionException::AssertionException(const char*   expression,
 , _line(line)
 , _message(message)
 {
+	Format();
+}
+
+void AssertionException::Format() throw()
+{
 	std::ostringstream ostream;
-	if(!message.empty())
+	if(!_message.empty())
 	{
-		ostream << message << ": ";
+		ostream << _message << ": ";
 	}
-	String expr(expression);
+	String expr(_expression);
 
 	if(expr == "false" || expr == "0" || expr == "FALSE")
 	{
@@ -43,9 +56,9 @@ AssertionException::AssertionException(const char*   expression,
 	}
 	else
 	{
-		ostream << "Assertion '" << expression << "'";
+		ostream << "Assertion '" << _expression << "'";
 	}
-	ostream << " failed in file '" << file << "' line# " << line;
+	ostream << " failed in file '" << _file << "' line# " << _line;
 	_report = ostream.str();
 
 	FIRE_LOG_ERROR(_report.c_str());
