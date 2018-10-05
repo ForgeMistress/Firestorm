@@ -18,6 +18,15 @@
 #include <variant>
 OPEN_NAMESPACE(Firestorm);
 
+/**
+	Size and capacity data for every ComponentDefinition.
+ **/
+struct BufferInfo
+{
+	size_t Size{ 0 };
+	size_t Capacity{ 0 };
+};
+
 OPEN_NAMESPACE(detail);
 
 template<class T>
@@ -250,6 +259,164 @@ using does_not_require_destructor_call = typename std::enable_if<
 	std::is_arithmetic<T>::value
 	>::value;
 
+// instruct the New operation to perform a placement new operation.
+struct placement_new {};
+
+// instruct the New operation to search for the first open block and then allocate the item there.
+struct search_new {};
+
+/**
+	General catchall case.
+ **/
+template<class T>
+struct Memory
+{
+	using type = std::decay_t<T>;
+	static constexpr size_t type_size = sizeof(type);
+
+	/**
+		Allocate a memory block with enough space to contain the specified number of items.
+	 **/
+	static inline type* Alloc(size_t numItems)
+	{
+		*mem = (type*)malloc(numItems * type_size);
+	}
+
+	/**
+		Call memset on the specified buffer pointer.
+	 **/
+	static inline void Memset(type** buffer, int val, size_t numItems=1)
+	{
+		memset(*buffer, val, numItems * type_size);
+	}
+
+	/**
+		Release the memory referenced by the specified buffer pointer.
+	 **/
+	static inline void Free(type** buffer)
+	{
+		free((void*)*buffer);
+	}
+
+	/**
+		Allocate a single new instance in the provided buffer and return the pointer.
+	 **/
+	static inline type* New(type** buffer, const BufferInfo* info)
+	{
+		// since this should be for the primitive type, we can just call memset on the block.
+		FIRE_ASSERT(info->Size < info->Capacity);
+		
+		memset(*buffer, 0, type_size);
+
+		return &(*buffer)[info->Size];
+	}
+
+	/**
+		Quickly allocate a single new instance in the provided buffer at the specified position and return the pointer. (analogous to placement new)
+	 **/
+	static inline type* PlacementNew(type** buffer, const BufferInfo* info)
+	{
+		FIRE_ASSERT(info->Size < info->Capacity);
+		// since this should be for the primitive type, we can just call memset on the block.
+		memset(*buffer, 0, type_size);
+	}
+
+	/**
+		Destroy an item held in the buffer.
+		\note This implementation will move data for the item in the last position (bufferSize - 1) into the position of the element that's being removed.
+		Implementors take note, YOU ARE RESPONSIBLE FOR MANAGING THE SIZE FIELD YOU PROVIDE.
+	 **/
+	static inline type* Delete(type** buffer, size_t item, size_t bufferSize)
+	{
+		FIRE_ASSERT(item < bufferSize);
+		size_t last = bufferSize - 1;
+		(*buffer)[item] = (*buffer)[last];
+		memset(&(*buffer)[last], 0, type_size);
+	}
+
+	/**
+		Copy the data from one buffer to another.
+	 **/
+	static inline void Copy(type* from, type* to)
+	{
+		memcpy(to, from, type_size);
+	}
+};
+
+template<>
+struct Memory<String>
+{
+	using type = std::decay_t<String>;
+	static constexpr size_t type_size = sizeof(String);
+
+	/**
+		Allocate a memory block with enough space to contain the specified number of items.
+	**/
+	static inline String* Alloc(size_t numItems)
+	{
+		return (String*)malloc(numItems * type_size);
+	}
+
+	/**
+		Call memset on the specified buffer pointer.
+	**/
+	static inline void Memset(String** buffer, int val, size_t numItems=1)
+	{
+		memset(*buffer, val, numItems * type_size);
+	}
+
+	/**
+		Release the memory referenced by the specified buffer pointer. STRING: Calls the destructor.
+	**/
+	static inline void Free(String** buffer)
+	{
+		free(*buffer);
+	}
+
+	/**
+		Allocate a single new instance in the first free block of the provided buffer and return the pointer.
+	 **/
+	template<class... Args>
+	static inline String* New(String* buffer, const BufferInfo* info, Args... args)
+	{
+		FIRE_ASSERT(info->Size < info->Capacity);
+		String* newItemPtr = &(buffer)[info->Size];
+		newItemPtr->type(std::forward<Args>(args)...);
+		return newItemPtr;
+	}
+
+	/**
+		Quickly allocate a single new instance in the provided buffer at the specified position and return the pointer. (analogous to placement new)
+	**/
+	static inline String* PlacementNew(String* buffer, const BufferInfo* info)
+	{
+		
+	}
+
+	/**
+		Destroy an item held in the buffer.
+		\note This implementation will move data for the item in the last position (bufferSize - 1) into the position of the element that's being removed.
+		Implementors take note, YOU ARE RESPONSIBLE FOR MANAGING THE SIZE FIELD YOU PROVIDE.
+	**/
+	static inline String* Delete(String** buffer, size_t item, const BufferInfo* info)
+	{
+		FIRE_ASSERT(item < info->Size);
+		size_t last = info->Size - 1;
+		std::swap((*buffer)[item], (*buffer)[last]);
+		(*buffer)[last].~type();
+		memset(&(*buffer)[last], 0, type_size);
+	}
+
+	/**
+		Copy the data from one item to another.
+	**/
+	static inline void Copy(String* from, String* to)
+	{
+		to->reserve(from->size());
+		to->assign(*from);
+	}
+};
+
 CLOSE_NAMESPACE(detail);
 
 template<class T> struct MemberData;
@@ -381,34 +548,11 @@ struct MemberBufferTraits
 		memcpy(inst, value, sizeof(Mem));
 	}
 
-	struct copyable_class_tag{};
-	/*template<
-		class MemberT,
-		typename Mem = std::remove_pointer_t<MemberT>,
-		typename tag = typename std::enable_if<
-			std::is_class<Mem>::value &&
-			std::is_copy_constructible<Mem>::value, copyable_class_tag>::type
-	> static inline void Copy(Mem* buffer, size_t index, const Mem* value, copyable_class_tag* t=nullptr)
-	{
-		Mem* inst = &buffer[index];
-		if(inst)
-		{
-			if constexpr(std::is_copy_assignable_v<Mem>)
-			{
-				*inst = *value;
-			}
-		}
-		else
-		{
-			new(inst) Mem(*value);
-		}
-	}*/
-
 	template<
 		class MemberT,
 		typename Mem = std::remove_pointer_t<MemberT>,
 		typename tag = typename std::enable_if<
-			std::is_class<Mem>::value, copyable_class_tag>::type
+			std::is_class<Mem>::value>::type
 	> static inline void Copy(Mem* buffer, size_t index, const Mem* value)
 	{
 		Mem* inst = &buffer[index];
