@@ -215,7 +215,7 @@ public:
 };
 
 template<class T>
-using requires_destructor_call = typename std::enable_if<
+using requires_destructor_call_v = typename std::enable_if<
 	std::is_class<T>::value &&
 	!std::is_arithmetic<T>::value &&
 	std::is_destructible<T>::value &&
@@ -225,6 +225,18 @@ using requires_destructor_call = typename std::enable_if<
 	)>::value;
 
 template<class T>
+using requires_destructor_call = typename std::enable_if<
+	(
+		std::is_class<T>::value &&
+		!std::is_arithmetic<T>::value &&
+		std::is_destructible<T>::value &&
+		(
+			!std::is_trivially_destructible<T>::value ||
+			std::has_virtual_destructor<T>::value
+		)
+	) || std::is_same_v<String, T>>;
+
+template<class T>
 using requires_default_constructor_call = typename std::enable_if<
 	std::is_class<T>::value &&
 	!std::is_arithmetic<T>::value &&
@@ -232,6 +244,11 @@ using requires_default_constructor_call = typename std::enable_if<
 	(
 		std::is_default_constructible<T>::value
 	)>::value;
+
+template<class T>
+using does_not_require_destructor_call = typename std::enable_if<
+	std::is_arithmetic<T>::value
+	>::value;
 
 CLOSE_NAMESPACE(detail);
 
@@ -254,7 +271,7 @@ struct MemberBufferTraits
 	template<
 		class MemberT,
 		typename Mem = std::remove_pointer_t<MemberT>,
-		typename = detail::requires_destructor_call<Mem>
+		typename detail::requires_destructor_call_v<Mem>* = nullptr
 	> static inline void FreeItem(Mem* buffer, size_t item)
 	{
 		Mem* item = &buffer[i];
@@ -268,7 +285,7 @@ struct MemberBufferTraits
 	template<
 		class MemberT,
 		typename Mem = std::remove_pointer_t<MemberT>,
-		typename = detail::requires_destructor_call<Mem>
+		typename detail::requires_destructor_call_v<Mem>* = nullptr
 	>
 	static inline void Free(Mem* buffer, size_t numElements)
 	{
@@ -284,12 +301,32 @@ struct MemberBufferTraits
 		free(buffer);
 	}
 
+	static inline void Free(String* buffer, size_t numElements)
+	{
+		for(size_t i = 0; i < numElements; ++i)
+		{
+			String* item = &buffer[i];
+			if(item)
+			{
+				item->~String();
+				memset(item, 0, sizeof(String));
+			}
+		}
+		free(buffer);
+	}
+
 	template<
 		class MemberT,
-		typename Mem = std::remove_pointer_t<MemberT>
+		typename Mem = std::remove_pointer_t<MemberT>,
+		typename detail::does_not_require_destructor_call<Mem>* = nullptr
 	> static inline void FreeItem(Mem* buffer, size_t item)
 	{
 		memset(&buffer[item], 0, sizeof(Mem));
+	}
+
+	static inline void FreeItem(String* buffer, size_t item)
+	{
+		memset(&buffer[item], 0, sizeof(String));
 	}
 
 	template<
@@ -372,7 +409,7 @@ struct MemberBufferTraits
 		typename Mem = std::remove_pointer_t<MemberT>,
 		typename tag = typename std::enable_if<
 			std::is_class<Mem>::value, copyable_class_tag>::type
-	> static inline void Copy(Mem* buffer, size_t index, const Mem* value, copyable_class_tag* t=nullptr)
+	> static inline void Copy(Mem* buffer, size_t index, const Mem* value)
 	{
 		Mem* inst = &buffer[index];
 		FIRE_ASSERT(inst);

@@ -314,6 +314,8 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 {
 	static EntityMgr eMgr;
 
+	FIRE_LOG_DEBUG("%fString Traits: requires destructor call = %b", std::boolalpha, !std::is_same<detail::requires_destructor_call<String>::type, void>::value);
+
 	FIRE_LOG_DEBUG("+++++ allocating entities");
 	static Vector<Entity> ents;
 	ents.reserve(NUM_OBJECTS);
