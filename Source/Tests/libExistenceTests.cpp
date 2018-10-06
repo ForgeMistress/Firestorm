@@ -133,18 +133,18 @@ public:
 		def_type::New<0, uint8_t>();
 		def_type::New<1, uint8_t>();
 		def_type::New<2, uint8_t>();
-		Size++;
+		AddSize();
 	}
 
 	void SetFlag1(const Entity& entity, uint8_t value)
 	{
-		Move<0, uint8_t>(entity.Index(), std::move(value));
+		Set<0, uint8_t>(entity.Index(), std::move(value));
 		//Set<0, uint8_t>(entity.Index(), value);
 	}
 
 	void SetFlag2(const Entity& entity, uint8_t value)
 	{
-		Move<1, uint8_t>(entity.Index(), std::move(value));
+		Set<1, uint8_t>(entity.Index(), std::move(value));
 	}
 
 	const uint8_t& GetFlag1(const Entity& entity) const
@@ -178,12 +178,12 @@ public:
 		def_type::New<0, String>();
 		def_type::New<1, double>();
 		def_type::New<2, float>();
-		Size++;
+		AddSize();
 	}
 
 	void SetName(const Entity& entity, String& value)
 	{
-		Move<0, String>(entity.Index(), std::move(value));
+		Set<0, String>(entity.Index(), std::move(value));
 	}
 
 	const String& GetName(const Entity& entity) const
@@ -193,7 +193,7 @@ public:
 
 	void SetVelocity(const Entity& entity, double value)
 	{
-		Move<1, double>(entity.Index(), std::move(value));
+		Set<1, double>(entity.Index(), std::move(value));
 	}
 
 	const double& GetVelocity(const Entity& entity) const
@@ -313,8 +313,6 @@ static size_t numObjects = 500000;
 RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 {
 	static EntityMgr eMgr;
-
-	FIRE_LOG_DEBUG("%fString Traits: requires destructor call = %b", std::boolalpha, !std::is_same<detail::requires_destructor_call<String>::type, void>::value);
 
 	FIRE_LOG_DEBUG("+++++ allocating entities");
 	static Vector<Entity> ents;
