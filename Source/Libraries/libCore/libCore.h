@@ -89,7 +89,7 @@ using Thread = std::thread;
 
 using Mutex = std::mutex;
 
-using ID = uint32_t;
+using ID = size_t;
 
 // Aliases for type_trait structs in type_traits (C++11)
 OPEN_NAMESPACE(Traits);

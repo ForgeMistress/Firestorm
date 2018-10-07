@@ -9,16 +9,57 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-// std::invoke from C++17
-// https://stackoverflow.com/questions/38288042/c11-14-invoke-workaround
-template <typename Fn, typename... Args,
-	typename = std::enable_if_t<std::is_member_pointer<std::decay_t<Fn>>{}>,
-	int = 0>
-constexpr auto invoke(Fn &&f, Args &&... args) noexcept(
-	noexcept(std::mem_fn(f)(std::forward<Args>(args)...)))
-	-> decltype(std::mem_fn(f)(std::forward<Args>(args)...)) {
-	return std::mem_fn(f)(std::forward<Args>(args)...);
+
+
+
+
+// https://en.cppreference.com/w/cpp/utility/functional/invoke#Possible_implementation
+namespace detail {
+template <class T>
+struct is_reference_wrapper : std::false_type {};
+template <class U>
+struct is_reference_wrapper<std::reference_wrapper<U>> : std::true_type {};
+template <class T>
+constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
+
+template <class T, class Type, class T1, class... Args>
+decltype(auto) INVOKE(Type T::* f, T1&& t1, Args&&... args)
+{
+	if constexpr (std::is_member_function_pointer_v<decltype(f)>) {
+		if constexpr (std::is_base_of_v<T, std::decay_t<T1>>)
+			return (std::forward<T1>(t1).*f)(std::forward<Args>(args)...);
+		else if constexpr (is_reference_wrapper_v<std::decay_t<T1>>)
+			return (t1.get().*f)(std::forward<Args>(args)...);
+		else
+			return ((*std::forward<T1>(t1)).*f)(std::forward<Args>(args)...);
+	} else {
+		static_assert(std::is_member_object_pointer_v<decltype(f)>);
+		static_assert(sizeof...(args) == 0);
+		if constexpr (std::is_base_of_v<T, std::decay_t<T1>>)
+			return std::forward<T1>(t1).*f;
+		else if constexpr (is_reference_wrapper_v<std::decay_t<T1>>)
+			return t1.get().*f;
+		else
+			return (*std::forward<T1>(t1)).*f;
+	}
 }
+
+template <class F, class... Args>
+decltype(auto) INVOKE(F&& f, Args&&... args)
+{
+	return std::forward<F>(f)(std::forward<Args>(args)...);
+}
+} // namespace detail
+
+template< class F, class... Args>
+std::invoke_result_t<F, Args...> invoke(F&& f, Args&&... args) 
+noexcept(std::is_nothrow_invocable_v<F, Args...>)
+{
+	return detail::INVOKE(std::forward<F>(f), std::forward<Args>(args)...);
+}
+
+
+
 
 // https://stackoverflow.com/questions/1198260/iterate-over-tuple
 

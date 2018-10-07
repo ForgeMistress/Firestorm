@@ -21,9 +21,10 @@ namespace Firestorm{
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define FIRE_BUFFER_TC(left, right, func)                                 \
-static_assert(std::is_same<left, right>::value,                           \
-"Invalid type passed to '"func"'. The field types must be the _exact_ same.");
+#define FIRE_BUFFER_TC(left, right, func)                                   \
+static_assert(std::is_same<left, right>::value ||                           \
+std::is_convertible<left,right>::value,                                     \
+"Invalid type passed to '"func"'. The field types must be the _exact_ same");
 
 #define tt_this ((tuple_type&)(*this))
 
@@ -34,7 +35,7 @@ struct BufferInfo
 {
 	size_t Size{ 0 };
 	size_t Capacity{ 0 };
-	void* Buffer;
+	void* Buffer{ nullptr };
 };
 
 template<class T, class... Types, size_t N = 0, std::size_t NumElements=sizeof...(Types)>
@@ -79,16 +80,11 @@ struct CalculateSizeOf
 };
 
 template<class... MembersT>
-struct ComponentDefinition : public std::tuple<std::add_pointer_t<std::decay_t<MembersT>>...>
+struct ComponentDefinition : public std::tuple<std::add_pointer_t<std::remove_reference_t<MembersT>>...>
 {
-	using tuple_type = std::tuple<std::add_pointer_t<std::decay_t<MembersT>>...>;
-
-	
-
+	using tuple_type = std::tuple<std::add_pointer_t<std::remove_reference_t<MembersT>>...>;
 	static constexpr std::size_t LLength = sizeof...(MembersT); // number of individual members.
-
-
-	using def_type = ComponentDefinition<MembersT...>;
+	template<class T> using raw = std::remove_pointer_t<std::remove_reference_t<T>>;
 
 private:
 	BufferInfo _info;
@@ -102,7 +98,7 @@ public:
 
 
 	/**
-	\brief Destructor.
+		\brief Destructor.
 
 		The destructor will free all of the memory that has been allocated. No action is required on your part
 		when the time comes for this object to meet its untimely demise. Why are you a do horrible of a person to
@@ -112,9 +108,29 @@ public:
 	**/
 	virtual ~ComponentDefinition()
 	{
-		/*tuple_for_each(tt_this, [this](auto& buffer) {
-			Mem::Free<decltype(buffer)>(buffer);
-		});*/
+		Delete();
+		Free();
+	}
+
+	/**
+		\brief Retrieve the size of the container.
+
+		Do I really need to explain this one?
+	**/
+	size_t Size() const
+	{
+		return _info.Size;
+	}
+
+	/**
+		\brief Retrieve the capacity of the container.
+
+		This one I will explain. Capacity refers to how much space for how many elements this ComponentDefinition
+		can hold. Capacity is not related to Size in any way other than for bounds checking.
+	**/
+	size_t Capacity() const
+	{
+		return _info.Capacity;
 	}
 
 	/**
@@ -155,56 +171,20 @@ public:
 
 	template<
 		size_t Index = 0, // start iteration at 0 index
-		typename TTuple,  // the tuple type
-		size_t Size =
-		std::tuple_size_v<
-			std::remove_reference_t<TTuple>>, // tuple size
-			typename TCallable // the callable to bo invoked for each tuple item
-		>
-		void my_for_each(TTuple&& tuple, TCallable&& callable, void** arg)
+		typename TCallable // the callable to be invoked for each tuple item
+	>
+	constexpr void IterateMembers(TCallable& callable)
 	{
-		if constexpr (Index < Size)
+		if constexpr(Index < LLength)
 		{
-			invoke(callable, &std::get<Index>(tuple), arg);
+			std::invoke(callable, Index, std::get<Index>(tt_this));
 
-			if constexpr (Index + 1 < Size)
-				my_for_each<Index + 1>(
-					std::forward<TTuple>(tuple),
-					std::forward<TCallable>(callable),
-					std::forward<void**>(arg));
+			if constexpr(Index + 1 < LLength)
+			{
+				IterateMembers<Index + 1>(callable);
+			}
 		}
 	}
-#define get_tup(index, tup) std::get<index>(tup)
-	template<class... Types>
-	struct ForwardAddresses
-	{
-		template<std::size_t Index, typename tuple_type, typename CurrentPointerType, typename PrevPointerType>
-		static constexpr auto DoOp(tuple_type& tuple, char** previous, std::size_t size)
-		{
-			constexpr PrevPointerType previousCasted = *reinterpret_cast<PrevPointerType>(&previous);
-			constexpr CurrentPointerType currentCasted = 
-				reinterpret_cast<CurrentPointerType>(std::get<Index>(tuple));
-			if constexpr(Index == 0)
-			{
-				std::set<Index>(tuple, *previous);
-				if constexpr(Index + 1 < sizeof...(Types))
-				{
-					DoOp<Index + 1, decltype(get_tup(Index + 1, tuple)), decltype(get_tup(Index, tuple))>(tuple, &(void*)currentCasted);
-				}
-			}
-			else if constexpr(Index < sizeof...(Types))
-			{
-				std::set<Index>(tuple, *previous + size);
-				DoOp<Index + 1, decltype(get_tup(Index + 1, tuple)), decltype(get_tup(Index, tuple))>(tuple, &(void*)currentCasted);
-			}
-		}
-
-		template<class tuple_type>
-		static constexpr void Op(tuple_type& tuple, char** first, std::size_t size)
-		{
-			DoOp<0, tuple_type, decltype(std::get<0>(tuple)), decltype(std::get<0>(tuple))>(tuple, first, size);
-		}
-	};
 
 	/**
 		\brief Allocate space in each of the internal member buffers.
@@ -218,60 +198,42 @@ public:
 		\pre Capacity == #ComponentDefinition::Capacity()
 		\post Size == 0
 		\post Capacity == numMembers
+
+		\note This function is safe to call in the event you need to resize the buffer. The operation
+		will take the contents of the old buffer and store a copy of it in the new one, so the data will
+		remain.
 	 **/
 	void Alloc(size_t numMembers)
 	{
-		_info.Capacity = numMembers;
-		_info.Size = 0;
+		FIRE_ASSERT(numMembers > _info.Capacity);
 
-		/*tuple_for_each((tuple_type&)(*this), [numMembers](auto& buffer) {
-			Mem::Free<decltype(buffer)>(buffer);
-			buffer = Mem::Alloc<decltype(buffer)>(numMembers);
-		});*/
+		// we'll store this properly as void* later. referenced as char* for now to make offset
+		// calculation a bit cleaner to look at (void* can't reliably have pointer arithmetic applied to it)
+		char* newBuffer = new char[Sizeof * numMembers];
 
-		void* newBuffer = malloc(Sizeof * numMembers);
-		ForwardAddresses<MembersT...>::Op(tt_this, &(char*)newBuffer, numMembers);
-		/*tuple_for_each(tt_this, [this, numMembers, &newBuffer](auto& blockWereSetting, void** previousBlock) {
-			using ptr = decltype(blockWereSetting);
-			ptr* prevPtr = reinterpret_cast<ptr*>(*previousBlock);
+		// calculate the block offsets and store them in the tuple //
+		char* nextElement = newBuffer;
+		IterateMembers([this, &nextElement, &numMembers](size_t index, auto& memberPointer) {
+			memberPointer = reinterpret_cast<decltype(memberPointer)>(nextElement);
 
-			// the first iteration case.
-			if(prevPtr == newBuffer)
-				blockWereSetting = prevPtr;
-			else
-				blockWereSetting = prevPtr + numMembers;
-
-			*previousBlock = blockWereSetting;
-		}, nb);*/
+			// once we've stored nextBlock in the tuple, we simply need to move the nextElement pointer
+			// to the location of the next block.
+			size_t sizeofElement = sizeof(raw<decltype(memberPointer)>);
+			size_t sizeofBlock = sizeofElement * numMembers;
+			nextElement += sizeofBlock;
+		});
 
 		if(_info.Buffer)
 		{
-			free(_info.Buffer);
+			// no sense in copying the entire old buffer, especially if _info.Size is considerably less than the capacity.
+			memcpy(newBuffer, _info.Buffer, Sizeof * _info.Size);
+			Delete();
+			Free();
 		}
-		_info.Buffer = newBuffer;
+		_info.Buffer = (void*)newBuffer;
+		_info.Capacity = numMembers;
+		_info.Size = 0;
 	}
-
-	/**
-		\brief Retrieve the size of the container.
-
-		Do I really need to explain this one?
-	 **/
-	size_t Size() const
-	{
-		return _info.Size;
-	}
-
-	/**
-		\brief Retrieve the capacity of the container.
-
-		This one I will explain. Capacity refers to how much space for how many elements this ComponentDefinition
-		can hold. Capacity is not related to Size in any way other than for bounds checking.
-	**/
-	size_t Capacity() const
-	{
-		return _info.Capacity;
-	}
-
 	/**
 		Instantiate a new item. This will iterate all of the buffers and allocate a new instance of the fields
 		for that item.
@@ -280,81 +242,64 @@ public:
 
 		\note This version of the function will manage the internal size count for you, so no further action is needed.
 	 **/
-	template<
-		template<class... MembersConstructorArgsPack>
-		class... MembersPack
-	>
-	size_t New(MembersPack<MembersConstructorArgsPack&&...>&&... args)
+	size_t New()
 	{
-		/*static_assert(LLength == sizeof...(args),
-			"initialization packs were not provided for all of the fields. this function is an all or nothing deal broheim.");
-		FIRE_ASSERT_MSG(_info.Size < _info.Capacity, "out of memory. can't instantiate any more instances of the stuff.");
+		FIRE_ASSERT(_info.Size < _info.Capacity);
 
-		size_t instanceIndex = _info.Size;
-		constexpr size_t N = 0;
-		if constexpr(N < LLength)
-		{
-
-		}
-
-		// todo: make this work with only one loop.
-		tuple_for_each(tt_this, [this, &instanceIndex](auto& bufferPtr) {
-			Memtraits<decltype(bufferPtr)>::New(bufferPtr, instanceIndex);
+		IterateMembers([this](size_t index, auto& bufferPointer) {
+			Mem::New<raw<decltype(bufferPointer)>>(bufferPointer, _info.Size);
 		});
-
-		tuple_for_each(tt_this, [this](auto& bufferPtr) {
-
-		});
-
-		//new_for_each((tuple_type&)(*this), [this](auto& buffer) {
-			//Memtraits<decltype(buffer)>::New(&buffer, _info.Size, std::forward<Args>(args)...);
-		//}, std::make_tuple(Args...));
-
-		size_t out = _info.Size;
+		size_t itemIndex = _info.Size;
 		AddSize();
-		return out;*/
-		return 0;
+		return itemIndex;
 	}
 
 	/**
 		Allocate a new instance for only the specified field.
+
+		\return \c itemIndex The index where the new item lives.
 
 		\warning THIS DOES NOT MODIFY THE INTERNAL SIZE COUNT.
 		YOU HAVE TO MANAGE THE SIZE ON YOUR OWN IF YOU USE THIS!
 	 **/
 	template<
 		size_t MemberIndex,
-		class T,
 		class... Args,
-		class TT = std::remove_pointer_t<std::decay<T>::type>,
 		typename ElemT = std::remove_pointer_t<
-			std::decay_t<
-				std::tuple_element_t<
-					MemberIndex,
-					tuple_type
-				>
+			std::tuple_element_t<
+				MemberIndex,
+				tuple_type
 			>
 		>
 	>
-	void New(Args&&... args)
+	size_t New()
 	{
-		FIRE_BUFFER_TC(TT, ElemT, "New");
 		FIRE_ASSERT_MSG(_info.Size < _info.Capacity, "reached max capacity. i gave you everything, and this is how you thank me?");
-		Memtraits<ElemT>::New(std::get<MemberIndex>(tt_this), _info.Size, std::forward<Args>(args)...);
+		Mem::New<ElemT>(std::get<MemberIndex>(tt_this), _info.Size);
+		return _info.Size;
 	}
 
 	/**
 		Delete the component at the specified index. This will iterate over all of the internal buffers and delete the
 		requested item.
 
+		\return \c opResults The operation will return a vector of operation results. 
+		For each member that this definition defines, \c opResults.first is the index of the element that was "deleted,"
+		(I.E., the instanceIndex you passed in), and \c opResults.second is the old index of the element that moved to take
+		its place. These results can be used to perform any index remapping that you need to perform in your client classes.
+
 		\note This version of the function will manage the internal size count for you, so no further action is needed.
 	 **/
-	void Delete(size_t instanceIndex)
+	using OpResults = std::pair<size_t, size_t>;
+	std::pair<size_t, Vector<OpResults>> Delete(size_t instanceIndex)
 	{
-		/*tuple_for_each(tt_type, [this](auto& buffer) {
-			Memtraits<decltype(buffer)>::Delete(&buffer, instanceIndex, _info);
-		});*/
+		Vector<OpResults> results;
+		results.reserve(LLength);
+		IterateMembers([this, &results](size_t index, auto& buffer) {
+			results.push_back(Mem::Delete<raw<decltype(buffer)>>(&buffer, instanceIndex, _info.Size));
+		});
 		DecSize();
+		return std::make_pair(_info.Size, std::move(results));
 	}
 
 	/**
@@ -365,61 +310,46 @@ public:
 	 **/
 	template<
 		size_t MemberIndex,
-		class T,
-		class... Args,
-		class TT = std::remove_pointer_t<std::decay<T>::type>,
 		typename ElemT = std::remove_pointer_t<
-			std::decay_t<
-				std::tuple_element_t<
-					MemberIndex,
-					tuple_type
-				>
+			std::tuple_element_t<
+				MemberIndex,
+				tuple_type
 			>
 		>
 	>
-	void Delete(size_t instanceIndex)
+	OpResults Delete(size_t instanceIndex)
 	{
-		FIRE_BUFFER_TC(TT, ElemT, "Delete");
-		Memtraits<TT>::Delete(std::get<MemberIndex>(tt_this), instanceIndex, _info);
+		return Mem::Delete<ElemT>(std::get<MemberIndex>(tt_this), instanceIndex, _info.Size);
 	}
 
 	/**
-		Perform a wholesale 'free()' operation on the element buffer at the specified MemberIndex.
+		\brief Delete all of the members in the buffers.
 
-		\warning BE VERY CAREFUL WITH THIS! THIS OPERATION WILL PERFORM A COMPLETE FREE ON THE BUFFER
-		SO MAKE SORE THAT YOU KNOW WHAT YOU ARE DOING IF YOU CALL THIS FUNCTION! YOU. HAVE. BEEN. WARNED.
+		This function will iterate over all instances of all of the Member types and perform a delete operation.
+		This will respect destruction logic in its members and so is the safest way to clear a buffer to
+		make room for new instances of elements.
 	 **/
-	template<
-		size_t MemberIndex,
-		class T,
-		class... Args,
-		class TT = std::remove_pointer_t<std::decay<T>::type>,
-		typename ElemT = std::remove_pointer_t<
-			std::decay_t<
-				std::tuple_element_t<
-					MemberIndex,
-					tuple_type
-				>
-			>
-		>
-	>
-	void Free()
+	void Delete()
 	{
-		FIRE_BUFFER_TC(TT, ElemT, "Free");
-		Mem::Free<ElemT>(_info.Buffer, Capacity);
+		IterateMembers([this](size_t index, auto& buffer) {
+			Mem::Delete<raw<decltype(buffer)>>(buffer, _info.Size);
+		});
+		_info.Size = 0;
 	}
 
 	/**
-		Perform a wholesale 'free()' on ALL of the member buffers.
+		Perform a wholesale 'free()' operation on the element buffer.
 
-		\warning YOU SHOULD KNOW WHAT THIS DOES! THIS WILL NUKE THE ENTIRE DAMN BUFFER! YOU KNOW
-		WHAT YOU'RE GETTING YOURSELF INTO!
-	 **/
+		\warning BE VERY CAREFUL WITH THIS! THIS OPERATION WILL PERFORM A COMPLETE FREE ON THE BUFFER WITHOUT
+		ANY REGARD FOR DESTRUCTORS OR OTHER LOGIC THAT HAS TO RUN AS A RESULT OF OOBJECT DELETION.
+		MAKE SURE THAT YOU KNOW WHAT YOU ARE DOING IF YOU CALL THIS FUNCTION! YOU. HAVE. BEEN. WARNED.
+	**/
 	void Free()
 	{
-		/*tuple_for_each(tt_this, [this](auto& buffer) {
-			Mem::Free<decltype(buffer)>(buffer);
-		});*/
+		delete _info.Buffer;
+		_info.Buffer = nullptr;
+		_info.Size = 0;
+		_info.Capacity = 0;
 	}
 
 	/**
@@ -427,26 +357,20 @@ public:
 	 **/
 	template<
 		size_t MemberIndex,
-		class T,
-		class... Args,
-		class TT = std::remove_pointer_t<std::decay<T>::type>,
 		typename ElemT = std::remove_pointer_t<
-			std::decay_t<
-				std::tuple_element_t<
-					MemberIndex,
-					tuple_type
-				>
+			std::tuple_element_t<
+				MemberIndex,
+				tuple_type
 			>
 		>
 	>
-		T& Get(size_t instanceIndex) const
+	ElemT& Get(size_t instanceIndex) const
 	{
-		FIRE_BUFFER_TC(TT, ElemT, "Get");
 		FIRE_ASSERT_MSG(instanceIndex < _info.Size,
 			Format("the instance index was outside the bounds of the member buffer (Size = %d, Capacity = %d)",
 			_info.Size,
 			_info.Capacity));
-		return Memtraits<TT>::Get(std::get<MemberIndex>(tt_this), instanceIndex);
+		return Mem::Get<ElemT>(std::get<MemberIndex>(tt_this), instanceIndex);
 	}
 
 	/**
@@ -454,30 +378,27 @@ public:
 	 **/
 	template<
 		size_t MemberIndex,
-		class T,
-		class... Args,
-		class TT = std::remove_pointer_t<std::decay<T>::type>,
+		class Arg,
 		typename ElemT = std::remove_pointer_t<
-			std::decay_t<
-				std::tuple_element_t<
-					MemberIndex,
-					tuple_type
-				>
+			std::tuple_element_t<
+				MemberIndex,
+				tuple_type
 			>
 		>
 	>
-		void Set(size_t instanceIndex, const TT& value)
+	void Set(size_t instanceIndex, const Arg& value)
 	{
-		FIRE_BUFFER_TC(TT, ElemT, "Set");
-		FIRE_ASSERT_MSG(instanceIndex < _info.Size,
-			Format("the instance index was outside the bounds of the member buffer (Size = %d, Capacity = %d)",
+		FIRE_ASSERT_MSG(instanceIndex < _info.Capacity,
+			Format("the instance index was outside the bounds of the member buffer (Index = %d, Size = %d, Capacity = %d)",
+			instanceIndex,
 			_info.Size,
 			_info.Capacity));
-		// MemberBufferTraits::Copy<T>(std::get<MemberIndex>(*this), instanceIndex, &value);
+		Mem::Set<ElemT>(std::get<MemberIndex>(tt_this), instanceIndex, value);
 	}
 };
 
-
+template<class... MembersT>
+std::size_t ComponentDefinition<MembersT...>::Sizeof = 0;
 
 }
 #endif

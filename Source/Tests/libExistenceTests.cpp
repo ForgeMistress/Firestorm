@@ -9,6 +9,8 @@
 #include <libExistence/Component.h>
 #include <libExistence/Entity.h>
 
+#include <libMath/Vector.h>
+
 #include <libCore/Logger.h>
 
 #include <iomanip>
@@ -120,7 +122,7 @@ struct TestComplexComponentMgr_Alt : public ComponentManagerBase_MemoryManagemen
 	}
 };*/
 
-class TupleBasedSimpleComponentMgr : public ComponentDefinition<uint8_t, uint8_t, uint8_t>
+class TupleBasedSimpleComponentMgr : public ComponentDefinition<uint8_t, uint8_t, uint8_t, Vector3, Vector3>
 {
 public:
 	TupleBasedSimpleComponentMgr(size_t allocs = 5)
@@ -130,31 +132,31 @@ public:
 
 	void MakeInstance()
 	{
-		def_type::New<0, uint8_t>();
-		def_type::New<1, uint8_t>();
-		def_type::New<2, uint8_t>();
-		AddSize();
+		size_t index = New();
+		Set<0>(index, 0);
+		Set<1>(index, 0);
+		Set<2>(index, 0);
 	}
 
 	void SetFlag1(const Entity& entity, uint8_t value)
 	{
-		Set<0, uint8_t>(entity.Index(), std::move(value));
+		Set<0>(entity.Index(), std::move(value));
 		//Set<0, uint8_t>(entity.Index(), value);
 	}
 
 	void SetFlag2(const Entity& entity, uint8_t value)
 	{
-		Set<1, uint8_t>(entity.Index(), std::move(value));
+		Set<1>(entity.Index(), std::move(value));
 	}
 
 	const uint8_t& GetFlag1(const Entity& entity) const
 	{
-		return Get<0, uint8_t>(entity.Index());
+		return Get<0>(entity.Index());
 	}
 
 	const uint8_t& GetFlag2(const Entity& entity) const
 	{
-		return Get<1, uint8_t>(entity.Index());
+		return Get<1>(entity.Index());
 	}
 };
 
@@ -175,30 +177,30 @@ public:
 
 	void MakeInstance()
 	{
-		def_type::New<0, String>();
-		def_type::New<1, double>();
-		def_type::New<2, float>();
-		AddSize();
+		size_t index = New();
+		Set<0>(index, "");
+		Set<1>(index, 9001.0);
+		Set<2>(index, 9001.0f);
 	}
 
-	void SetName(const Entity& entity, String& value)
+	void SetName(const Entity& entity, const String& value)
 	{
-		Set<0, String>(entity.Index(), std::move(value));
+		Set<0>(entity.Index(), value);
 	}
 
 	const String& GetName(const Entity& entity) const
 	{
-		return Get<0, String>(entity.Index());
+		return Get<0>(entity.Index());
 	}
 
 	void SetVelocity(const Entity& entity, double value)
 	{
-		Set<1, double>(entity.Index(), std::move(value));
+		Set<1>(entity.Index(), std::move(value));
 	}
 
 	const double& GetVelocity(const Entity& entity) const
 	{
-		return Get<1, double>(entity.Index());
+		return Get<1>(entity.Index());
 	}
 };
 
@@ -310,6 +312,17 @@ static size_t numObjects = 500000;
 #define NUM_OBJECTS 500000
 #define NUM_RUNS 50
 
+class Foo
+{
+public:
+	Foo()
+	{
+		for(size_t i=0; i<3000; ++i)
+			junk.push_back(0);
+	}
+	Vector<char> junk;
+};
+
 RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 {
 	static EntityMgr eMgr;
@@ -336,7 +349,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 			ssh = bm.StartSegment("manager constructor");
-			TupleBasedSimpleComponentMgr testMgr(NUM_OBJECTS);
+			TupleBasedSimpleComponentMgr* testMgr = new TupleBasedSimpleComponentMgr(NUM_OBJECTS);
 			bm.StopSegment(ssh);
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,7 +357,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 			ssh = bm.StartSegment("component additions");
 			for(size_t i = 0; i < NUM_OBJECTS; ++i)
 			{
-				testMgr.MakeInstance();
+				testMgr->MakeInstance();
 			}
 			bm.StopSegment(ssh);
 
@@ -353,14 +366,14 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 			ssh = bm.StartSegment("setting flags 1");
 			for(size_t i = 0; i < NUM_OBJECTS; ++i)
 			{
-				testMgr.SetFlag1(ents[i], 101);
+				testMgr->SetFlag1(ents[i], 101);
 			}
 			bm.StopSegment(ssh);
 
 			ssh = bm.StartSegment("setting flags 2");
 			for(size_t i = 0; i < NUM_OBJECTS; ++i)
 			{
-				testMgr.SetFlag2(ents[i], 101);
+				testMgr->SetFlag2(ents[i], 101);
 			}
 			bm.StopSegment(ssh);
 
@@ -369,20 +382,81 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 			ssh = bm.StartSegment("getting flags 1");
 			for(size_t i = 0; i < NUM_OBJECTS; ++i)
 			{
-				FIRE_ASSERT(testMgr.GetFlag1(ents[i]) == 101);
+				FIRE_ASSERT(testMgr->GetFlag1(ents[i]) == 101);
 			}
 			bm.StopSegment(ssh);
 
 			ssh = bm.StartSegment("getting flags 2");
 			for(size_t i = 0; i < NUM_OBJECTS; ++i)
 			{
-				FIRE_ASSERT(testMgr.GetFlag2(ents[i]) == 101);
+				FIRE_ASSERT(testMgr->GetFlag2(ents[i]) == 101);
 			}
 			bm.StopSegment(ssh);
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			ssh = bm.StartSegment("destruction");
+			delete testMgr;
+		}
+		bm.StopSegment(ssh);
+	});
+
+	h->Profile(Format("Tuple/Vector Complex ComponentManager [%d Items]",NUM_OBJECTS), NUM_RUNS, [](Benchmark& bm) {
+
+		Benchmark::SnapshotHandle* ssh = nullptr;
+		{
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("manager constructor");
+			TupleBasedComplexComponentMgr* testMgr = new TupleBasedComplexComponentMgr(NUM_OBJECTS);
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("component additions");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr->MakeInstance();
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("setting names");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr->SetName(ents[i], "Slim Shady");
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("setting velocities");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				testMgr->SetVelocity(ents[i], 9001.0);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("getting names");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr->GetName(ents[i]) == "Slim Shady");
+			}
+			bm.StopSegment(ssh);
+
+			ssh = bm.StartSegment("getting velocities");
+			for(size_t i = 0; i < NUM_OBJECTS; ++i)
+			{
+				FIRE_ASSERT(testMgr->GetVelocity(ents[i]) == 9001.0);
+			}
+			bm.StopSegment(ssh);
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			ssh = bm.StartSegment("destruction");
+			delete testMgr;
 		}
 		bm.StopSegment(ssh);
 	});
@@ -436,66 +510,6 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 			for(size_t i = 0; i < NUM_OBJECTS; ++i)
 			{
 				FIRE_ASSERT(testMgr.GetFlag2(ents[i]) == 101);
-			}
-			bm.StopSegment(ssh);
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			ssh = bm.StartSegment("destruction");
-		}
-		bm.StopSegment(ssh);
-	});
-
-
-	h->Profile(Format("Tuple/Vector Complex ComponentManager [%d Items]",NUM_OBJECTS), NUM_RUNS, [](Benchmark& bm) {
-
-		Benchmark::SnapshotHandle* ssh = nullptr;
-		{
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			ssh = bm.StartSegment("manager constructor");
-			TupleBasedComplexComponentMgr testMgr(NUM_OBJECTS);
-			bm.StopSegment(ssh);
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			ssh = bm.StartSegment("component additions");
-			for(size_t i = 0; i < NUM_OBJECTS; ++i)
-			{
-				testMgr.MakeInstance();
-			}
-			bm.StopSegment(ssh);
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			ssh = bm.StartSegment("setting names");
-			for(size_t i = 0; i < NUM_OBJECTS; ++i)
-			{
-				testMgr.SetName(ents[i], String("Slim Shady"));
-			}
-			bm.StopSegment(ssh);
-
-			ssh = bm.StartSegment("setting velocities");
-			for(size_t i = 0; i < NUM_OBJECTS; ++i)
-			{
-				testMgr.SetVelocity(ents[i], 9001.0);
-			}
-			bm.StopSegment(ssh);
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			ssh = bm.StartSegment("getting names");
-			for(size_t i = 0; i < NUM_OBJECTS; ++i)
-			{
-				FIRE_ASSERT(testMgr.GetName(ents[i]) == "Slim Shady");
-			}
-			bm.StopSegment(ssh);
-
-			ssh = bm.StartSegment("getting velocities");
-			for(size_t i = 0; i < NUM_OBJECTS; ++i)
-			{
-				FIRE_ASSERT(testMgr.GetVelocity(ents[i]) == 9001.0);
 			}
 			bm.StopSegment(ssh);
 
