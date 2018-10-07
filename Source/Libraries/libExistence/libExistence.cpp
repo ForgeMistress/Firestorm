@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "libExistence.h"
 
-#include "Component.h"
 #include "Engine.h"
 #include "Entity.h"
 #include "System.h"

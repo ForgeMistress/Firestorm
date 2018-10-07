@@ -1,32 +1,26 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Component.h
+//  SOA
 //
-//  A component in an entity that contains only data at the high level.
+//  A generalized implementation of a structure of arrays.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) Project Elflord 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBEXISTENCE_COMPONENT_H_
-#define LIBEXISTENCE_COMPONENT_H_
+#ifndef LIBCORE_SOA_H_
+#define LIBCORE_SOA_H_
 #pragma once
 
 #include <libCore/libCore.h>
-#include "Entity.h"
 #include <libCore/Logger.h>
 #include <libCore/TupleUtils.h>
+
 #include "Memtraits.h"
 #include <utility>
-namespace Firestorm{
+
+OPEN_NAMESPACE(Firestorm);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define FIRE_BUFFER_TC(left, right, func)                                   \
-static_assert(std::is_same<left, right>::value ||                           \
-std::is_convertible<left,right>::value,                                     \
-"Invalid type passed to '"func"'. The field types must be the _exact_ same");
-
-#define tt_this ((tuple_type&)(*this))
 
 /**
 	Size and capacity data for every ComponentDefinition.
@@ -79,23 +73,62 @@ struct CalculateSizeOf
 	}
 };
 
-template<class... MembersT>
-struct ComponentDefinition : public std::tuple<std::add_pointer_t<std::remove_reference_t<MembersT>>...>
+
+
+template<class... ItemsT>
+struct SOABase : public std::tuple<std::add_pointer_t<std::remove_reference_t<ItemsT>>...>
 {
-	using tuple_type = std::tuple<std::add_pointer_t<std::remove_reference_t<MembersT>>...>;
-	static constexpr std::size_t LLength = sizeof...(MembersT); // number of individual members.
 	template<class T> using raw = std::remove_pointer_t<std::remove_reference_t<T>>;
+	using tuple_type = std::tuple<std::add_pointer_t<std::remove_reference_t<ItemsT>>...>;
+
+	static constexpr std::size_t LLength = sizeof...(ItemsT); // number of individual members.
+	static std::size_t Sizeof;
+
+	tuple_type& _this;
+
+	SOABase() : _this(((tuple_type&)(*this))){}
+
+	template<
+		size_t Index = 0, // start iteration at 0 index
+		typename TCallable // the callable to be invoked for each tuple item
+	>
+	constexpr void IterateMembers(TCallable&& callable)
+	{
+		if constexpr(Index < LLength)
+		{
+			callable(Index, std::get<Index>(_this));
+
+			if constexpr(Index + 1 < LLength)
+			{
+				IterateMembers<Index + 1>(callable);
+			}
+		}
+	}
+};
+
+template<class... MembersT>
+std::size_t SOABase<MembersT...>::Sizeof = CalculateSizeOf<MembersT...>::Op(SOABase<MembersT...>());
+
+
+
+enum struct AllocationRule : uint8_t
+{
+	FIXED_SIZE,   // the structure can not be resized automatically.
+	VARIABLE_SIZE // the structure is allowed to reallocate its buffer size automatically.
+};
+
+template<class... ItemsT>
+struct SOA : public SOABase<ItemsT...>
+{	
+	using soa_type = SOA<ItemsT...>;
 
 private:
 	BufferInfo _info;
-	static std::size_t Sizeof;
 
 public:
-	ComponentDefinition()
+	SOA()
 	{
-		Sizeof = CalculateSizeOf<MembersT...>::Op(tt_this);
 	}
-
 
 	/**
 		\brief Destructor.
@@ -106,7 +139,7 @@ public:
 
 		\note You monster.
 	**/
-	virtual ~ComponentDefinition()
+	virtual ~SOA()
 	{
 		Delete();
 		Free();
@@ -169,23 +202,6 @@ public:
 		return _info.Size;
 	}
 
-	template<
-		size_t Index = 0, // start iteration at 0 index
-		typename TCallable // the callable to be invoked for each tuple item
-	>
-	constexpr void IterateMembers(TCallable& callable)
-	{
-		if constexpr(Index < LLength)
-		{
-			std::invoke(callable, Index, std::get<Index>(tt_this));
-
-			if constexpr(Index + 1 < LLength)
-			{
-				IterateMembers<Index + 1>(callable);
-			}
-		}
-	}
-
 	/**
 		\brief Allocate space in each of the internal member buffers.
 
@@ -204,11 +220,12 @@ public:
 		remain.
 	 **/
 	void Alloc(size_t numMembers)
-	{
-		FIRE_ASSERT(numMembers > _info.Capacity);
-
+	{	
+		FIRE_ASSERT_MSG(numMembers > _info.Capacity, "the reallocated buffer must be larger than the previous one");
+		
 		// we'll store this properly as void* later. referenced as char* for now to make offset
-		// calculation a bit cleaner to look at (void* can't reliably have pointer arithmetic applied to it)
+		// calculation a bit cleaner to look at (void* can't reliably have pointer arithmetic applied 
+		// to it on all compilers)
 		char* newBuffer = new char[Sizeof * numMembers];
 
 		// calculate the block offsets and store them in the tuple //
@@ -242,7 +259,7 @@ public:
 
 		\note This version of the function will manage the internal size count for you, so no further action is needed.
 	 **/
-	size_t New()
+	inline size_t New()
 	{
 		FIRE_ASSERT(_info.Size < _info.Capacity);
 
@@ -252,6 +269,29 @@ public:
 		size_t itemIndex = _info.Size;
 		AddSize();
 		return itemIndex;
+	}
+
+	/**
+		Instantiate a bundle of new items. This will iterate all of the buffers and allocate a new instance of the fields
+		for that item.
+
+		\return \c itemIndex The index where this new item lives.
+
+		\note This version of the function will manage the internal size count for you, so no further action is needed.
+	**/
+	inline Vector<size_t> BatchNew(size_t numItems)
+	{
+		FIRE_ASSERT(_info.Size + (numItems-1) < _info.Capacity);
+		Vector<size_t> items(numItems);
+		for(size_t i=0; i<numItems; ++i)
+		{
+			IterateMembers([this](size_t index, auto& bufferPointer) {
+				Mem::New<raw<decltype(bufferPointer)>>(bufferPointer, _info.Size);
+			});
+			items.push_back(_info.Size);
+			_info.Size++;
+		}
+		return items;
 	}
 
 	/**
@@ -272,10 +312,10 @@ public:
 			>
 		>
 	>
-	size_t New()
+	inline size_t New()
 	{
 		FIRE_ASSERT_MSG(_info.Size < _info.Capacity, "reached max capacity. i gave you everything, and this is how you thank me?");
-		Mem::New<ElemT>(std::get<MemberIndex>(tt_this), _info.Size);
+		Mem::New<ElemT>(std::get<MemberIndex>(_this), _info.Size);
 		return _info.Size;
 	}
 
@@ -291,7 +331,7 @@ public:
 		\note This version of the function will manage the internal size count for you, so no further action is needed.
 	 **/
 	using OpResults = std::pair<size_t, size_t>;
-	std::pair<size_t, Vector<OpResults>> Delete(size_t instanceIndex)
+	inline std::pair<size_t, Vector<OpResults>> Delete(size_t instanceIndex)
 	{
 		Vector<OpResults> results;
 		results.reserve(LLength);
@@ -317,9 +357,9 @@ public:
 			>
 		>
 	>
-	OpResults Delete(size_t instanceIndex)
+	inline OpResults Delete(size_t instanceIndex)
 	{
-		return Mem::Delete<ElemT>(std::get<MemberIndex>(tt_this), instanceIndex, _info.Size);
+		return Mem::Delete<ElemT>(std::get<MemberIndex>(_this), instanceIndex, _info.Size);
 	}
 
 	/**
@@ -329,7 +369,7 @@ public:
 		This will respect destruction logic in its members and so is the safest way to clear a buffer to
 		make room for new instances of elements.
 	 **/
-	void Delete()
+	inline void Delete()
 	{
 		IterateMembers([this](size_t index, auto& buffer) {
 			Mem::Delete<raw<decltype(buffer)>>(buffer, _info.Size);
@@ -344,7 +384,7 @@ public:
 		ANY REGARD FOR DESTRUCTORS OR OTHER LOGIC THAT HAS TO RUN AS A RESULT OF OOBJECT DELETION.
 		MAKE SURE THAT YOU KNOW WHAT YOU ARE DOING IF YOU CALL THIS FUNCTION! YOU. HAVE. BEEN. WARNED.
 	**/
-	void Free()
+	inline void Free()
 	{
 		delete _info.Buffer;
 		_info.Buffer = nullptr;
@@ -364,13 +404,13 @@ public:
 			>
 		>
 	>
-	ElemT& Get(size_t instanceIndex) const
+	inline ElemT& Get(size_t instanceIndex) const
 	{
 		FIRE_ASSERT_MSG(instanceIndex < _info.Size,
 			Format("the instance index was outside the bounds of the member buffer (Size = %d, Capacity = %d)",
 			_info.Size,
 			_info.Capacity));
-		return Mem::Get<ElemT>(std::get<MemberIndex>(tt_this), instanceIndex);
+		return Mem::Get<ElemT>(std::get<MemberIndex>(_this), instanceIndex);
 	}
 
 	/**
@@ -386,19 +426,16 @@ public:
 			>
 		>
 	>
-	void Set(size_t instanceIndex, const Arg& value)
+	inline void Set(size_t instanceIndex, const Arg& value)
 	{
 		FIRE_ASSERT_MSG(instanceIndex < _info.Capacity,
 			Format("the instance index was outside the bounds of the member buffer (Index = %d, Size = %d, Capacity = %d)",
 			instanceIndex,
 			_info.Size,
 			_info.Capacity));
-		Mem::Set<ElemT>(std::get<MemberIndex>(tt_this), instanceIndex, value);
+		Mem::Set<ElemT>(std::get<MemberIndex>(_this), instanceIndex, value);
 	}
 };
 
-template<class... MembersT>
-std::size_t ComponentDefinition<MembersT...>::Sizeof = 0;
-
-}
+CLOSE_NAMESPACE(Firestorm);
 #endif

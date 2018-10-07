@@ -61,7 +61,7 @@ OPEN_NAMESPACE(Mem);
 template<class T, class... Args>
 static inline T* New(T* bufferHead,size_t itemIndex, Args&&... args)
 {
-	T* buffer = &bufferHead[itemIndex];
+	T* buffer = bufferHead + itemIndex;
 	new(buffer) T(std::forward<Args>(args)...);
 	return buffer;
 }
@@ -69,7 +69,7 @@ static inline T* New(T* bufferHead,size_t itemIndex, Args&&... args)
 template<class T>
 static inline T* New(T* bufferHead, size_t itemIndex)
 {
-	return &bufferHead[itemIndex];
+	return bufferHead + itemIndex;
 }
 
 /**
@@ -86,7 +86,7 @@ static inline T* New(T* bufferHead, size_t itemIndex)
 template<class T>
 static inline std::pair<size_t,size_t> Delete(T* bufferHead, size_t itemIndex, size_t lastElement)
 {
-	std::swap(bufferHead[itemIndex], bufferHead[lastElement]);
+	std::swap(*(bufferHead +itemIndex), *(bufferHead + lastElement));
 	return std::make_pair<size_t, size_t>(itemIndex, lastElement);
 }
 
@@ -125,7 +125,7 @@ template<>
 static inline std::pair<size_t,size_t> Delete<String>(String* bufferHead, size_t itemIndex, size_t lastElement)
 {
 	bufferHead[itemIndex].~basic_string();
-	std::swap(bufferHead[itemIndex], bufferHead[lastElement]);
+	std::swap(*(bufferHead + itemIndex), *(bufferHead + lastElement));
 	return std::make_pair(itemIndex, lastElement);
 }
 
@@ -133,9 +133,9 @@ static inline std::pair<size_t,size_t> Delete<String>(String* bufferHead, size_t
 template<>
 static inline void Delete<String>(String* bufferHead, size_t bufferSize)
 {
-	for(size_t i=0; i<bufferSize; ++i)
+	for(size_t i=0; i<bufferSize-1; ++i)
 	{
-		bufferHead[i].~basic_string();
+		(bufferHead + i)->~basic_string();
 	}
 }
 
@@ -160,7 +160,13 @@ static inline void Delete<String>(String* bufferHead, size_t bufferSize)
 template<class T>
 static inline T& Get(T* bufferHead, size_t itemIndex)
 {
-	return bufferHead[itemIndex];
+	return *(bufferHead + itemIndex);
+}
+
+template<class T>
+static inline T* GetPtr(T* bufferHead, size_t itemIndex)
+{
+	return (bufferHead + itemIndex);
 }
 
 /**
@@ -172,10 +178,10 @@ static inline T& Get(T* bufferHead, size_t itemIndex)
 	\arg \c itemIndex The index of the element that you want to set the value of.
 	\arg \c value The value to set the element at \c itemIndex to.
 **/
-template<class T>
-static inline void Set(T* bufferHead, size_t itemIndex, const T& value)
+template<class T, class Arg>
+static inline void Set(T* bufferHead, size_t itemIndex, const Arg& value)
 {
-	new(&bufferHead[itemIndex])T(value);
+	*(bufferHead + itemIndex) = value;
 }
 
 
@@ -189,10 +195,9 @@ static inline void Set(T* bufferHead, size_t itemIndex, const T& value)
 	\arg \c value The value to set the element at \c itemIndex to.
 **/
 template<>
-static inline void Set<String>(String* bufferHead, size_t itemIndex, const String& value)
+static inline void Set<String, String>(String* bufferHead, size_t itemIndex, const String& value)
 {
-	String* val = &bufferHead[itemIndex];
-	new(val)String(value);
+	new(bufferHead + itemIndex) String(value);
 }
 
 CLOSE_NAMESPACE(Mem);
