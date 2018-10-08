@@ -21,49 +21,52 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+template<class T> using raw = std::remove_pointer_t<std::remove_reference_t<T>>;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<class T, class... Types, size_t N = 0, std::size_t NumElements=sizeof...(Types)>
-static constexpr void DoCalculateSizeof(T t, Types... tt, std::size_t& size)
+template<class T, class... Args>
+static constexpr bool RequiresConstructorCall()
 {
-	if constexpr(N == NumElements)
+	if constexpr(std::is_arithmetic_v<T>)
 	{
-		return;
+		return false;
 	}
-	else
+	else if constexpr(std::is_class_v<T>)
 	{
-		size += sizeof(decltype(std::get<N>(types...)));
-		DoCalculateSizeof<N + 1>(Types...);
+		if constexpr(std::is_trivially_default_constructible_v<T>)
+		{
+			return false;
+		}
 	}
+	// err on the side of caution.
+	return true;
 }
 
 template<class... Types>
-struct CalculateSizeOf
+struct IsTriviallyConstructible
 {
 	template<std::size_t Index, typename tuple_type>
-	static constexpr auto DoOp(tuple_type& tuple, std::size_t& result)
+	static constexpr bool DoOp(tuple_type& tuple)
 	{
+		using type = decltype(std::get<Index>(tuple));
 		if constexpr(Index < sizeof...(Types))
 		{
-			result += sizeof(
-				std::remove_pointer_t<
-					std::decay_t<
-						decltype(std::get<Index>(tuple))
-					>
-				>);
-			DoOp<Index + 1>(tuple, result);
+			if(RequiresConstructorCall<type>())
+			{
+				return false;
+			}
+			return DoOp<Index + 1>(tuple);
 		}
+		return true;
 	}
 
 	template<class tuple_type>
-	static constexpr std::size_t Op(tuple_type& tuple)
+	static constexpr bool Op(tuple_type& tuple)
 	{
-		std::size_t out = 0;
-		DoOp<0>(tuple, out);
-		return out;
+		return DoOp<0>(tuple);
 	}
 };
-
 
 template <char... Digits>
 constexpr std::size_t parse()
@@ -83,21 +86,49 @@ constexpr std::size_t parse()
 }
 
 template<std::size_t I>
-struct index {};
+struct soa_index {};
+
+template<std::size_t I>
+struct aos_index {};
 
 template <char... Digits>
 decltype(auto) operator"" _soa()
 {
-	return std::integral_constant<std::size_t, parse<Digits...>()>{};
+	return soa_index<parse<Digits...>()>{};
 }
 
+template <char... Digits>
+decltype(auto) operator"" _aos()
+{
+	return aos_index<parse<Digits...>()>{};
+}
+
+template<class T>
+struct SOAB
+{
+	SOAB(T* ptr, size_t size): _ptr(ptr), _size(size) {}
+	inline T& operator[](const size_t& index)
+	{
+		FIRE_ASSERT_MSG(index < _size, 
+			Format("index '%d' exceeds the bounds of the buffer (size = %d)", index, _size));
+		return _ptr[index];
+	}
+private:
+	size_t _size;
+	T* _ptr;
+};
 
 enum struct AllocationRule : uint8_t
 {
 	FIXED_SIZE,   // the structure can not be resized automatically.
 	VARIABLE_SIZE // the structure is allowed to reallocate its buffer size automatically.
 };
-template<class T> using raw = std::remove_pointer_t<std::remove_reference_t<T>>;
+
+template<typename... Types>
+static inline constexpr std::size_t CalculateSizeof()
+{
+	return (0 + ... + sizeof(Types));
+}
 
 template<class... ItemsT>
 struct SOA final : public std::tuple<std::add_pointer_t<raw<ItemsT>>...>
@@ -105,17 +136,17 @@ struct SOA final : public std::tuple<std::add_pointer_t<raw<ItemsT>>...>
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// SOABase
 	using tuple_type = std::tuple<std::add_pointer_t<raw<ItemsT>>...>;
+	using raw_tuple_type = std::tuple<raw<ItemsT>...>;
 	static constexpr std::size_t LLength = sizeof...(ItemsT); // number of individual members.
-	static constexpr std::size_t Sizeof = CalculateSizeOf<raw<ItemsT>...>::Op(std::tuple<raw<ItemsT>...>());
-		//std::tuple_size<std::tuple<raw<ItemsT>...>>::value;
+	static constexpr std::size_t Sizeof = CalculateSizeof<ItemsT...>();
 
 	size_t _size{ 0 };
 	size_t _capacity{ 0 };
 	void* _buffer{ nullptr };
-	tuple_type& _tuple;// { tuple_type() };
+	tuple_type& _tuple;
 
 	template<
-		size_t Index = 0, // start iteration at 0 index
+		size_t Index = 0,  // start iteration at 0 index
 		typename TCallable // the callable to be invoked for each tuple item
 	>
 	constexpr void IterateMembers(TCallable&& callable)
@@ -131,6 +162,24 @@ struct SOA final : public std::tuple<std::add_pointer_t<raw<ItemsT>>...>
 		}
 	}
 
+	/**
+		\brief Retrieve a const pointer for instance indexing.
+
+		Currently, operator[] only supports data reading. For data writing, see
+		#SOA::Set. The operator returns a pointer to the buffer where the
+		data for instances is stored which can then itself be indexed.
+
+		\code{.cpp}
+		SOA<String, float, double> s;
+		// ... initialize your items.
+		size_t someIndex = value; // ... retrieved from somewhere.
+		s[0_soa][someIndex]; // retrieves the String value at the specified index.
+		\endcode
+
+		\note As long as your index is < #SOA::Capacity, you should be able to retrieve a valid
+		item. Note that this behavior is subject to the item stored, and that care must be taken to
+		initialize values that need to be initialized.
+	 **/
 	template<
 		std::size_t I,
 		typename ElemT = std::remove_pointer_t<
@@ -140,9 +189,23 @@ struct SOA final : public std::tuple<std::add_pointer_t<raw<ItemsT>>...>
 			>
 		>
 	>
-	const ElemT* operator[](std::integral_constant<std::size_t,I>) const
+	const ElemT* operator[](soa_index<I>) const
 	{
 		return std::get<I>(_tuple);
+	}
+
+	template<
+		std::size_t I,
+		typename ElemT = std::remove_pointer_t<
+			std::tuple_element_t<
+				I,
+				tuple_type
+			>
+		>
+	>
+	SOAB<ElemT> operator[](soa_index<I>)
+	{
+		return SOAB<ElemT>{ std::get<I>(_tuple), _size };
 	}
 
 public:
@@ -240,9 +303,9 @@ public:
 		remain.
 	 **/
 	void Alloc(size_t numMembers)
-	{	
+	{
 		FIRE_ASSERT_MSG(numMembers > _capacity, "the reallocated buffer must be larger than the previous one");
-		
+
 		// we'll store this properly as void* later. referenced as char* for now to make offset
 		// calculation a bit cleaner to look at (void* can't reliably have pointer arithmetic applied 
 		// to it on all compilers)]
@@ -273,6 +336,7 @@ public:
 		_capacity = numMembers;
 		_size = 0;
 	}
+
 	/**
 		Instantiate a new item. This will iterate all of the buffers and allocate a new instance of the fields
 		for that item.
@@ -286,8 +350,13 @@ public:
 		FIRE_ASSERT(_size < _capacity);
 
 		IterateMembers([this](size_t index, auto& bufferPointer) {
-			Mem::New<raw<decltype(bufferPointer)>>(bufferPointer, _size);
+			using bp_type = raw<decltype(bufferPointer)>;
+			if constexpr(RequiresConstructorCall<bp_type>())
+			{
+				Mem::New<bp_type>(bufferPointer, _size);
+			}
 		});
+
 		size_t itemIndex = _size;
 		AddSize();
 		return itemIndex;
@@ -400,7 +469,10 @@ public:
 	}
 
 	/**
-		Perform a wholesale 'free()' operation on the element buffer.
+		\brief Release the memory block held by the SOA.
+
+		This operation performs a wholesale \c delete operation on the entire data buffer. After this is called,
+		there will be no ability to access the data buffers whatsoever.
 
 		\warning BE VERY CAREFUL WITH THIS! THIS OPERATION WILL PERFORM A COMPLETE FREE ON THE BUFFER WITHOUT
 		ANY REGARD FOR DESTRUCTORS OR OTHER LOGIC THAT HAS TO RUN AS A RESULT OF OOBJECT DELETION.
@@ -412,6 +484,9 @@ public:
 		_buffer = nullptr;
 		_size = 0;
 		_capacity = 0;
+		IterateMembers([this](size_t index, auto& member) {
+			member = nullptr;
+		});
 	}
 
 	/**
@@ -432,7 +507,6 @@ public:
 			Format("the instance index was outside the bounds of the member buffer (Size = %d, Capacity = %d)",
 			_size,
 			_capacity));*/
-		//return SOAB<ElemT>{std::get<MemberIndex>(_tuple)};
 		return Mem::Get<ElemT>(std::get<MemberIndex>(_tuple), instanceIndex);
 	}
 

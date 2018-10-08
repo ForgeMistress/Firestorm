@@ -72,6 +72,14 @@ static inline T* New(T* bufferHead, size_t itemIndex)
 	return bufferHead + itemIndex;
 }
 
+template<>
+static inline String* New(String* bufferHead, size_t itemIndex)
+{
+	String* buffer = bufferHead + itemIndex;
+	new(buffer) String();
+	return buffer;
+}
+
 /**
 	\brief Destroy an item held in the buffer. 
 
