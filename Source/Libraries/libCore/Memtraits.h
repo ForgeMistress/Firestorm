@@ -124,8 +124,9 @@ static inline void Delete(T* bufferHead, size_t bufferSize)
 template<>
 static inline std::pair<size_t,size_t> Delete<String>(String* bufferHead, size_t itemIndex, size_t lastElement)
 {
-	bufferHead[itemIndex].~basic_string();
-	std::swap(*(bufferHead + itemIndex), *(bufferHead + lastElement));
+	String* item = bufferHead + itemIndex;
+	item->~basic_string();
+	std::swap(*item, *(bufferHead + lastElement));
 	return std::make_pair(itemIndex, lastElement);
 }
 
@@ -178,10 +179,25 @@ static inline T* GetPtr(T* bufferHead, size_t itemIndex)
 	\arg \c itemIndex The index of the element that you want to set the value of.
 	\arg \c value The value to set the element at \c itemIndex to.
 **/
-template<class T, class Arg>
-static inline void Set(T* bufferHead, size_t itemIndex, const Arg& value)
+template<class T>
+static inline void Set(T* bufferHead, size_t itemIndex, const T& value)
 {
-	*(bufferHead + itemIndex) = value;
+	memcpy(bufferHead + itemIndex, &value, sizeof(T));
+}
+
+/**
+	\brief Set the value of an element in the buffer with move semantics.
+
+	This operation will set the value of the item in the buffer at index \c itemIndex using move semantics.
+
+	\arg \c bufferHead A pointer to the start of the buffer (I.E. the kind of pointer that malloc returns to you).
+	\arg \c itemIndex The index of the element that you want to set the value of.
+	\arg \c value The value to set the element at \c itemIndex to.
+**/
+template<class T>
+static inline void Set(T* bufferHead, size_t itemIndex, T&& value)
+{
+	memmove(bufferHead + itemIndex, &value, sizeof(T));
 }
 
 
@@ -195,9 +211,24 @@ static inline void Set(T* bufferHead, size_t itemIndex, const Arg& value)
 	\arg \c value The value to set the element at \c itemIndex to.
 **/
 template<>
-static inline void Set<String, String>(String* bufferHead, size_t itemIndex, const String& value)
+static inline void Set<String>(String* bufferHead, size_t itemIndex, const String& value)
 {
 	new(bufferHead + itemIndex) String(value);
+}
+
+/**
+	\brief Set the value of an element in the buffer.
+
+	This operation will set the value of the item in the buffer at index \c itemIndex.
+
+	\arg \c bufferHead A pointer to the start of the buffer (I.E. the kind of pointer that malloc returns to you).
+	\arg \c itemIndex The index of the element that you want to set the value of.
+	\arg \c value The value to set the element at \c itemIndex to.
+**/
+template<>
+static inline void Set<String>(String* bufferHead, size_t itemIndex, String&& value)
+{
+	new(bufferHead + itemIndex) String(std::move(value));
 }
 
 CLOSE_NAMESPACE(Mem);

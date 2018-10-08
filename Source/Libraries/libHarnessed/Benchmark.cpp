@@ -67,7 +67,7 @@ void Benchmark::Report()
 		{
 			total += result.Results[i];
 		}
-		FIRE_LOG_DEBUG("%f%f+++++ %s%s = %d", std::fixed, std::setprecision(10), result.Name, spacePadding, total / _numRuns);
+		FIRE_LOG_DEBUG("%f%f%s%s = %d", std::fixed, std::setprecision(10), result.Name, spacePadding, total / _numRuns);
 	}
 	FIRE_LOG_DEBUG("");
 }
