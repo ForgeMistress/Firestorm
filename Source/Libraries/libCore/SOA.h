@@ -25,49 +25,6 @@ template<class T> using raw = std::remove_pointer_t<std::remove_reference_t<T>>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<class T, class... Args>
-static constexpr bool RequiresConstructorCall()
-{
-	if constexpr(std::is_arithmetic_v<T>)
-	{
-		return false;
-	}
-	else if constexpr(std::is_class_v<T>)
-	{
-		if constexpr(std::is_trivially_default_constructible_v<T>)
-		{
-			return false;
-		}
-	}
-	// err on the side of caution.
-	return true;
-}
-
-template<class... Types>
-struct IsTriviallyConstructible
-{
-	template<std::size_t Index, typename tuple_type>
-	static constexpr bool DoOp(tuple_type& tuple)
-	{
-		using type = decltype(std::get<Index>(tuple));
-		if constexpr(Index < sizeof...(Types))
-		{
-			if(RequiresConstructorCall<type>())
-			{
-				return false;
-			}
-			return DoOp<Index + 1>(tuple);
-		}
-		return true;
-	}
-
-	template<class tuple_type>
-	static constexpr bool Op(tuple_type& tuple)
-	{
-		return DoOp<0>(tuple);
-	}
-};
-
 template <char... Digits>
 constexpr std::size_t parse()
 {
@@ -130,6 +87,54 @@ static inline constexpr std::size_t CalculateSizeof()
 	return (0 + ... + sizeof(Types));
 }
 
+template<class T, class... Args>
+static constexpr bool RequiresConstructorCall()
+{
+	if constexpr(std::is_arithmetic_v<T>)
+	{
+		return false;
+	}
+	else if constexpr(std::is_class_v<T>)
+	{
+		if constexpr(std::is_trivially_default_constructible_v<T>)
+		{
+			return false;
+		}
+	}
+	// err on the side of caution.
+	return true;
+}
+
+template<typename... Types>
+static inline constexpr bool IsTriviallyConstructible()
+{
+	return (... && !RequiresConstructorCall<Types>());
+}
+
+template<class T, class... Args>
+static constexpr bool RequiresDestructorCall()
+{
+	if constexpr(std::is_arithmetic_v<T>)
+	{
+		return false;
+	}
+	else if constexpr(std::is_class_v<T>)
+	{
+		if constexpr(std::is_trivially_destructible_v<T>)
+		{
+			return false;
+		}
+	}
+	// err on the side of caution.
+	return true;
+}
+
+template<typename... Types>
+static inline constexpr bool IsTriviallyDestructible()
+{
+	return (... && !RequiresDestructorCall<Types>());
+}
+
 template<class... ItemsT>
 struct SOA final : public std::tuple<std::add_pointer_t<raw<ItemsT>>...>
 {
@@ -139,6 +144,8 @@ struct SOA final : public std::tuple<std::add_pointer_t<raw<ItemsT>>...>
 	using raw_tuple_type = std::tuple<raw<ItemsT>...>;
 	static constexpr std::size_t LLength = sizeof...(ItemsT); // number of individual members.
 	static constexpr std::size_t Sizeof = CalculateSizeof<ItemsT...>();
+	static constexpr bool IsTrivialCons = IsTriviallyConstructible<ItemsT...>();
+	static constexpr bool IsTrivialDest = IsTriviallyDestructible<ItemsT...>();
 
 	size_t _size{ 0 };
 	size_t _capacity{ 0 };
@@ -349,13 +356,20 @@ public:
 	{
 		FIRE_ASSERT(_size < _capacity);
 
-		IterateMembers([this](size_t index, auto& bufferPointer) {
-			using bp_type = raw<decltype(bufferPointer)>;
-			if constexpr(RequiresConstructorCall<bp_type>())
-			{
-				Mem::New<bp_type>(bufferPointer, _size);
-			}
-		});
+		// if the whole thing is trivially constructible, there's no reason to
+		// iterate the members. we can let the compiler remove this for us.
+		if constexpr(!IsTrivialCons)
+		{
+			IterateMembers([this](size_t index, auto& bufferPointer) {
+				// If all of the members aren't trivially constructible, we can still
+				// optimize out the fields that don't require a constructor call.
+				using bp_type = raw<decltype(bufferPointer)>;
+				if constexpr(RequiresConstructorCall<bp_type>())
+				{
+					Mem::New<bp_type>(bufferPointer, _size);
+				}
+			});
+		}
 
 		size_t itemIndex = _size;
 		AddSize();
@@ -373,12 +387,20 @@ public:
 	inline Vector<size_t> BatchNew(size_t numItems)
 	{
 		FIRE_ASSERT(_size + (numItems-1) < _capacity);
-		Vector<size_t> items(numItems);
+		Vector<size_t> items;
+		items.reserve(numItems);
 		for(size_t i=0; i<numItems; ++i)
 		{
-			IterateMembers([this](size_t index, auto& bufferPointer) {
-				Mem::New<raw<decltype(bufferPointer)>>(bufferPointer, _size);
-			});
+			if constexpr(!IsTriviallyConstructible)
+			{
+				IterateMembers([this](size_t index, auto& bufferPointer) {
+					using bp_type = raw<decltype(bufferPointer)>;
+					if constexpr(RequiresConstructorCall<bp_type>())
+					{
+						Mem::New<raw<decltype(bufferPointer)>>(bufferPointer, _size);
+					}
+				});
+			}
 			items.push_back(_size);
 			_size++;
 		}
