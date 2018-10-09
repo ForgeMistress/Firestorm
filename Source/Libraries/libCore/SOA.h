@@ -212,6 +212,7 @@ struct SOA final
 private:
 	size_t _size{ 0 };
 	size_t _capacity{ 0 };
+	size_t _sizeBytes{ 0 };
 	void* _buffer{ nullptr };
 	tuple_type _tuple;
 
@@ -295,6 +296,14 @@ public:
 		return _capacity;
 	}
 
+	/**
+		Retrieve the size in bytes of the container.
+	 **/
+	size_t Bytes() const
+	{
+		return _sizeBytes;
+	}
+
 private:
 	template<size_t Index = 0>
 	inline constexpr void ReserveIterate(char* element, size_t numMembers)
@@ -340,8 +349,8 @@ public:
 		// we'll store this properly as void* later. referenced as char* for now to make offset
 		// calculation a bit cleaner to look at (void* can't reliably have pointer arithmetic applied 
 		// to it on all compilers)
-		size_t bufferSize = Sizeof * numMembers;
-		char* newBuffer = (char*)malloc(bufferSize);
+		_sizeBytes = Sizeof * numMembers;
+		char* newBuffer = (char*)malloc(_sizeBytes);
 
 		// calculate the block offsets and store them in the tuple //
 		char* nextElement = newBuffer;
@@ -404,7 +413,14 @@ public:
 		static_assert(sizeof...(Args) == LLength, "invalid number of arguments provided to PushBack");
 		if(_size == _capacity)
 		{
-			Reserve(_capacity * 2);
+			if(_capacity == 0)
+			{
+				Reserve(1);
+			}
+			else
+			{
+				Reserve(_capacity * 2);
+			}
 		}
 		
 		PushBackIterate(_size, std::make_tuple(args...));
