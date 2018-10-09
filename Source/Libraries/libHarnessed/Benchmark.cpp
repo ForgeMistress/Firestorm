@@ -34,17 +34,19 @@ Benchmark::~Benchmark()
 
 void Benchmark::Run(Function<void(Benchmark&)> op)
 {
+	_overallStart = clock_type::now();
 	for(size_t i = 0; i < _numRuns; ++i)
 	{
 		op(*this);
 	}
+	_overallStop = clock_type::now();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Benchmark::Report()
 {
-	size_t widest = 0;
+	size_t widest = String("Overall Time").size();
 	for(auto result : _snapshotResults)
 	{
 		if(result.Name.size() > widest)
@@ -69,6 +71,18 @@ void Benchmark::Report()
 		}
 		FIRE_LOG_DEBUG("%f%f%s%s = %d", std::fixed, std::setprecision(10), result.Name, spacePadding, total / _numRuns);
 	}
+	String name("Overall Time");
+	size_t diff = widest - name.size();
+	String spacePadding;
+	for(size_t i = 0; i < diff; ++i)
+	{
+		spacePadding.push_back(' ');
+	}
+	auto cnt = Chrono::duration_cast<Chrono::nanoseconds>(
+		Chrono::duration<double, std::nano>(_overallStop - _overallStart)
+		).count();
+	double overallTime = ((double)cnt / 1000000000.0);
+	FIRE_LOG_DEBUG("%f%f%s%s = %d", std::fixed, std::setprecision(10), name, spacePadding, overallTime);
 	FIRE_LOG_DEBUG("");
 }
 

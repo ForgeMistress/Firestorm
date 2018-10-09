@@ -71,6 +71,8 @@ private:
 	size_t _numRuns;
 
 	String _name;
+	time_point _overallStart;
+	time_point _overallStop;
 
 	struct Result
 	{
