@@ -216,7 +216,6 @@ private:
 	void* _buffer{ nullptr };
 	tuple_type _tuple;
 
-
 public:
 	/**
 		\brief Retrieve an indexible handle for reading.

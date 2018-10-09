@@ -4,7 +4,7 @@
 #include <libHarnessed/libHarnessed.h>
 
 #include <libExistence/libExistence.h>
-#include <libExistence/Engine.h>
+#include <libExistence/Universe.h>
 #include <libExistence/System.h>
 #include <libExistence/Entity.h>
 
