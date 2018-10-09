@@ -1,24 +1,27 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Engine.h
+//  Universe
 //
-//  An object that holds a number of Systems and Entities.
+//  It is everything and it is nothing. It is, the Universe.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) Project Elflord 2018
+// Copyright (c) Project Universe 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBEXISTENCE_ENGINE_H_
-#define LIBEXISTENCE_ENGINE_H_
+#ifndef LIBEXISTENCE_UNIVERSE_H_
+#define LIBEXISTENCE_UNIVERSE_H_
 #pragma once
-
-#include <libCore/RefPtr.h>
-#include <libCore/WeakPtr.h>
-#include <libMirror/Object.h>
 
 #include "System.h"
 #include "Entity.h"
 
 OPEN_NAMESPACE(Firestorm);
+
+template<class... Args>
+class Universe final
+{
+public:
+private:
+};
 
 /**
 	\class Engine

@@ -11,6 +11,8 @@
 #define LIBEXISTENCE_ENTITY_H_
 #pragma once
 
+#include <libCore/libCore.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 #define ENT_INDEX_BITS      24
@@ -20,7 +22,10 @@ OPEN_NAMESPACE(Firestorm);
 
 #define FIRE_MIN_FREE_INDICES 1024
 
-class Entity final
+
+using EntityID = ID;
+
+/*class Entity final
 {
 public:
 	Entity(uint32_t idx, uint32_t generation)
@@ -33,16 +38,6 @@ public:
 		return _id;
 	}
 
-	inline uint32_t Index() const
-	{
-		return _id & ENT_INDEX_MASK;
-	}
-
-	inline uint32_t Generation() const
-	{
-		return (_id >> ENT_INDEX_BITS) & ENT_GENERATION_MASK;
-	}
-
 	inline operator String() const
 	{
 		return Format("Entity[ IDX:%d, GEN:%d ]", Index(), Generation());
@@ -51,33 +46,26 @@ public:
 	static const Entity dummy;
 
 private:
-	uint32_t _id;
+	ID _id;
 };
 
 
 class EntityMgr final
 {
 public:
-	/**
 		Create a brand new Entity.
-	 **/
 	Entity Create();
 
-	/**
 		Check whether or not the Entity is alive.
-	 **/
 	bool IsAlive(const Entity& entity);
 
-	/**
 		Release the Entity.
-	 **/
 	void Destroy(const Entity& entity);
 private:
 	Vector<uint8_t>      _generations;
 	std::deque<uint32_t> _freeIndices;
 };
 
-/*
 class Entity : public Mirror::Object,
                public Mirror::IInspectableObject,
                public IRefCounted
