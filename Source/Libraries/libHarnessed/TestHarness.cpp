@@ -15,8 +15,8 @@
 OPEN_NAMESPACE(Firestorm);
 
 TestHarness::TestHarness(const String& name, bool quietly)
-: m_name(name)
-, m_quietly(quietly)
+: _name(name)
+, _quietly(quietly)
 {
 }
 
@@ -33,12 +33,12 @@ uint32_t TestHarness::Run()
 
 void TestHarness::It(const String& caseName, TestFunction_t testFunction)
 {
-	for(const auto& cn : m_caseNames)
+	for(const auto& cn : _caseNames)
 	{
 		FIRE_ASSERT(cn != caseName);
 	}
 	_cases.push_back(testFunction);
-	m_caseNames.push_back(caseName);
+	_caseNames.push_back(caseName);
 }
 
 void TestHarness::Profile(const String& name, size_t numberOfRuns, BenchmarkFunction_t benchmarkFunction)
@@ -63,9 +63,9 @@ void TestHarness::ReportError(TestCase* tc, const String& message)
 
 size_t TestHarness::RunTests()
 {
-	FIRE_ASSERT(_cases.size() == m_caseNames.size());
+	FIRE_ASSERT(_cases.size() == _caseNames.size());
 
-	Print("Test: %s", m_name);
+	Print("Test: %s", _name);
 	Print("");
 
 	uint32_t finalErrorCount = 0;
@@ -73,7 +73,7 @@ size_t TestHarness::RunTests()
 	for(size_t i=0;i<_cases.size(); ++i)
 	{
 		auto test = _cases[i];
-		const String& testName = m_caseNames[i];
+		const String& testName = _caseNames[i];
 
 		Print("Case[%d] %s",i, testName);
 		TestCase testCase(testName, this);

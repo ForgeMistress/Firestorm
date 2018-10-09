@@ -42,12 +42,12 @@ public:
 
 	void Profile(const String& name, size_t numberOfRuns, BenchmarkFunction_t benchmarkFunction);
 
-    const String& GetName() const { return m_name; }
+    const String& GetName() const { return _name; }
 
 	template <class... Args_t>
 	void Print(const char* fmt, Args_t... args)
 	{
-		if(!m_quietly)
+		if(!_quietly)
 			FIRE_LOG_ERROR(fmt, args...);
 	}
 
@@ -58,9 +58,9 @@ private:
 	void RunBenchmarks();
 
 
-	String m_name;
-	bool m_quietly;
-	Vector<String>         m_caseNames;
+	String _name;
+	bool _quietly;
+	Vector<String>         _caseNames;
 	Vector<TestFunction_t> _cases;
 
 	struct BenchmarkInfo
