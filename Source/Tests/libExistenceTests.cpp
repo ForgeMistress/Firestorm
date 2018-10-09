@@ -6,8 +6,9 @@
 #include <libExistence/libExistence.h>
 #include <libExistence/Engine.h>
 #include <libExistence/System.h>
-#include <libExistence/Component.h>
 #include <libExistence/Entity.h>
+
+#include <libMath/Vector.h>
 
 #include <libCore/Logger.h>
 
@@ -15,116 +16,78 @@
 
 using namespace Firestorm;
 
-
-struct TestComponent : public IComponent<uint8_t, uint8_t, uint8_t, uint8_t>
-{
-};
-
-struct TestComponentMgr : public BasicComponentManager<TestComponent>
-{
-	TestComponentMgr(size_t count=5)
-	{
-		Alloc(count);
-	}
-	void SetFlag1(const Entity& ent, uint8_t flag)
-	{
-		SetData<uint8_t>(ent.Index(), 0, flag);
-	}
-
-	uint8_t GetFlag1(const Entity& ent)
-	{
-		return GetData<uint8_t>(ent.Index(), 0);
-	}
-};
-
-
-
-
-struct TestComponentMgr_Alt : public ComponentManagerBase_MemoryManagement
-{
-	TestComponentMgr_Alt(size_t count=5)
-		: ComponentManagerBase_MemoryManagement({
-			MemberData<uint8_t>(),
-			MemberData<uint8_t>(),
-			MemberData<uint8_t>(),
-			MemberData<uint8_t>()
-		})
-	{
-		Alloc(count);
-	}
-	void SetFlag1(const Entity& ent, uint8_t flag)
-	{
-		Set(0, ent.Index(), flag);
-	}
-
-	uint8_t GetFlag1(const Entity& ent)
-	{
-		return Get<uint8_t>(0, ent.Index());
-	}
-
-	void SetFlag2(const Entity& ent, uint8_t flag)
-	{
-		Set(1, ent.Index(), flag);
-	}
-
-	uint8_t GetFlag2(const Entity& ent)
-	{
-		return Get<uint8_t>(ent.Index(), 1);
-	}
-};
-
-
-
-struct TestComplexComponent : public IComponent<String, float, double>
-{
-};
-
-struct TestComplexComponentMgr : public BasicComponentManager<TestComplexComponent>
-{
-	TestComplexComponentMgr(size_t allocs = 5)
-	{
-		Alloc(allocs);
-	}
-
-	void SetName(const Entity& entity, const String& name)
-	{
-		SetData(entity.Index(), 0, name);
-	}
-
-	String GetName(const Entity& entity)
-	{
-		return GetData<String>(entity.Index(), 0);
-	}
-};
-
-struct TestComplexComponentMgr_Alt : public ComponentManagerBase_MemoryManagement
-{
-	TestComplexComponentMgr_Alt(size_t allocs = 5)
-		: ComponentManagerBase_MemoryManagement({
-			MemberData<String>(),
-			MemberData<float>(),
-			MemberData<double>()
-		})
-	{
-		Alloc(allocs);
-	}
-
-	void SetName(const Entity& entity, const String& name)
-	{
-		Set<String>(0, entity.Index(), name);
-	}
-
-	String GetName(const Entity& entity)
-	{
-		return Get<String>(0, entity.Index());
-	}
-};
-
 RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 {
 	RefPtr<TestHarness> h(new TestHarness("libExistence"));
 
-	h->It("Entities should be instantiable and contain proper ids", [](Firestorm::TestCase& t) {
+	return h;
+}
+
+	/*h->It("benchmark[OOP Complex]", [](TestCase&) {
+		Vector<double> construction;
+		Vector<double> constructors;
+		Vector<double> flagSets;
+		Vector<double> flagGets;
+		Vector<double> destructions;
+		for(size_t i=0;i<numRuns;++i)
+		{
+			//FIRE_LOG_DEBUG("+++++ Run %d +++++", i);
+			auto begin = high_resolution_clock::now();
+			{
+				TupleBasedComponentMgr testMgr(benchmarkAllocations);
+				log_duration("manager construction", begin, construction);
+				begin = high_resolution_clock::now();
+
+				for(size_t i = 0; i < benchmarkAllocations; ++i)
+				{
+					//if(i % 5000 == 0)
+					//FIRE_LOG_DEBUG("%d allocations performed...", i);
+					testMgr.MakeInstance();
+				}
+
+				log_duration("component additions", begin, constructors);
+
+				//FIRE_LOG_DEBUG("+++++ beginning %d flag sets", benchmarkAllocations);
+				begin = high_resolution_clock::now();
+				for(size_t i = 0; i < benchmarkAllocations; ++i)
+				{
+					//if(i % 5000 == 0)
+					//FIRE_LOG_DEBUG("%d flag sets performed...", i);
+					testMgr.SetName(ents[i], "Slim Shady");
+				}
+				log_duration("component name sets", begin, flagSets);
+
+				begin = high_resolution_clock::now();
+				for(size_t i = 0; i < benchmarkAllocations; ++i)
+				{
+					//if(i % 5000 == 0)
+					//FIRE_LOG_DEBUG("%d flag sets performed...", i);
+					String value(testMgr.GetName(ents[i]));
+				}
+				log_duration("component name gets", begin, flagGets);
+				begin = high_resolution_clock::now();
+			}
+			log_duration("manager destruction", begin, destructions);
+		}
+		FIRE_LOG_DEBUG("+++++ Average over %d Runs +++++", numRuns);
+		double constructiont = 0, compCons = 0,flagt = 0, flaggt=0, destructiont = 0;
+		for(size_t i = 0; i < numRuns; ++i)
+		{
+			constructiont += construction[i];
+			compCons += constructors[i];
+			flagt += flagSets[i];
+			flaggt += flagGets[i];
+			destructiont += destructions[i];
+		}
+		FIRE_LOG_DEBUG("%f%f+++++ constructions     = %d", std::fixed, std::setprecision(15), constructiont / numRuns);
+		FIRE_LOG_DEBUG("%f%f+++++ comp constructors = %d", std::fixed, std::setprecision(15), compCons / numRuns);
+		FIRE_LOG_DEBUG("%f%f+++++ name sets         = %d", std::fixed, std::setprecision(15), flagt / numRuns);
+		FIRE_LOG_DEBUG("%f%f+++++ name gets         = %d", std::fixed, std::setprecision(15), flaggt / numRuns);
+		FIRE_LOG_DEBUG("%f%f+++++ destructions      = %d", std::fixed, std::setprecision(15), destructiont / numRuns);
+	});
+}*/
+
+	/*h->It("Entities should be instantiable and contain proper ids", [](Firestorm::TestCase& t) {
 		EntityMgr eMgr;
 
 		Entity e = eMgr.Create();
@@ -272,7 +235,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 
 	static size_t numRuns = 50;
 
-	h->It("benchmark[Single Buffer Allocator]", [](TestCase& /*t*/) {
+	h->It("benchmark[Single Buffer Allocator]", [](TestCase&) {
 		Vector<double> construction;
 		Vector<double> constructors;
 		Vector<double> flagSets;
@@ -338,7 +301,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 	});
 
 
-	h->It("benchmark[Multi Buffer Allocator]", [](TestCase& /*t*/) {
+	h->It("benchmark[Multi Buffer Allocator]", [](TestCase&) {
 		Vector<double> construction;
 		Vector<double> constructors;
 		Vector<double> flagSets;
@@ -406,7 +369,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 
 
 
-	h->It("benchmark[Single Buffer Allocator Complex]", [](TestCase& /*t*/) {
+	h->It("benchmark[Single Buffer Allocator Complex]", [](TestCase&) {
 		Vector<double> construction;
 		Vector<double> constructors;
 		Vector<double> flagSets;
@@ -471,7 +434,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 	});
 
 
-	h->It("benchmark[Multi Buffer Allocator Complex]", [](TestCase& /*t*/) {
+	h->It("benchmark[Multi Buffer Allocator Complex]", [](TestCase&) {
 		Vector<double> construction;
 		Vector<double> constructors;
 		Vector<double> flagSets;
@@ -565,7 +528,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		Vector<ComplexComponent> components;
 	};
 
-	h->It("benchmark[OOP Complex]", [](TestCase& /*t*/) {
+	h->It("benchmark[OOP Complex]", [](TestCase&) {
 		Vector<double> construction;
 		Vector<double> constructors;
 		Vector<double> flagSets;
@@ -629,4 +592,4 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 	});
 
 	return h;
-}
+}*/

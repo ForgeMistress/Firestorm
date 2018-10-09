@@ -15,9 +15,19 @@
 #include <libMirror/IInspectableObject.h>
 #include <libMirror/EventDispatcher.h>
 
+#include <libCore/SOA.h>
+
 #include "Entity.h"
 
 OPEN_NAMESPACE(Firestorm);
+
+/*template<class... SOATypes, class SSOATypes = std::add_pointer_t<SOATypes>...>
+struct System
+{
+	System(SOATypes)
+	std::tuple<std::add_pointer_t<SOATypes>...> _items;
+};*/
+
 
 //class Engine;
 

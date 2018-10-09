@@ -7,6 +7,7 @@
 
 #include "TestHarness.h"
 #include "TestCase.h"
+#include "Benchmark.h"
 
 OPEN_NAMESPACE(Firestorm);
 struct libHarnessed : public Library<libHarnessed>
