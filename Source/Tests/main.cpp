@@ -71,6 +71,8 @@ int main(int ac, char** av)
         FIRE_LOG_DEBUG("Completed all tests with no failures!");
     }
 
+    libCore::ReportMemoryLeaks();
+
     FIRE_LOG_DEBUG("Press 'return' to close...");
     std::cin.get();
 

@@ -12,18 +12,24 @@
 #pragma once
 
 #include <libCore/libCore.h>
+#include <libCore/UUIDMgr.h>
 
 OPEN_NAMESPACE(Firestorm);
 
-#define ENT_INDEX_BITS      24
-#define ENT_INDEX_MASK      ((1 << ENT_INDEX_BITS) - 1)
-#define ENT_GENERATION_BITS 8
-#define ENT_GENERATION_MASK ((1 << ENT_GENERATION_BITS) - 1)
+using Entity = UUID;
 
-#define FIRE_MIN_FREE_INDICES 1024
+class EntityMgr final
+{
+public:
+	EntityMgr(UUIDMgr& uuidMgr);
 
+	Entity SpawnEntity() const;
 
-using EntityID = ID;
+	void DespawnEntity(Entity entity);
+
+private:
+	UUIDMgr& _uuidMgr;
+};
 
 /*class Entity final
 {

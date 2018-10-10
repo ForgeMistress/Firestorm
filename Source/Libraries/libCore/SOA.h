@@ -15,7 +15,6 @@
 #include <libCore/Logger.h>
 #include <libCore/TupleUtils.h>
 
-#include "Memtraits.h"
 #include <utility>
 #include <tuple>
 
@@ -349,7 +348,7 @@ public:
 		// calculation a bit cleaner to look at (void* can't reliably have pointer arithmetic applied 
 		// to it on all compilers)
 		_sizeBytes = Sizeof * numMembers;
-		char* newBuffer = (char*)malloc(_sizeBytes);
+		char* newBuffer = libCore::Alloc<char>(_sizeBytes);
 
 		// calculate the block offsets and store them in the tuple //
 		char* nextElement = newBuffer;
@@ -359,7 +358,7 @@ public:
 		{
 			// no sense in copying the entire old buffer, especially if _size is considerably less than the capacity.
 			memcpy(newBuffer, oldBuffer, Sizeof * _size);
-			free(oldBuffer);
+			libCore::Free(oldBuffer);
 		}
 		_buffer = (void*)newBuffer;
 		_capacity = numMembers;
@@ -492,12 +491,12 @@ public:
 
 		size_t sizeofNew = _size * Sizeof;
 		char* oldBuffer = _buffer;
-		char* newBuffer = (char*)malloc(sizeofNew);
+		char* newBuffer = libCore::Alloc<char>(sizeofNew);
 		memmove(newBuffer, _buffer, sizeofNew);
 
 		_buffer = (void*)newBuffer;
 
-		free(oldBuffer);
+		libCore::Free(oldBuffer);
 		_capacity = _size;
 	}
 
@@ -525,7 +524,7 @@ public:
 	{
 		if(_buffer)
 		{
-			free(_buffer);
+			libCore::Free(_buffer);
 			_size = 0;
 			_capacity = 0;
 			_buffer = nullptr;

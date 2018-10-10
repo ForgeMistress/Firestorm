@@ -14,7 +14,6 @@
 #include <libCore/RefPtr.h>
 #include <libCore/WeakPtr.h>
 #include "Object.h"
-#include <libCore/IRefCounted.h>
 
 OPEN_NAMESPACE(Firestorm);
 

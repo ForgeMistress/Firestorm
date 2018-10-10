@@ -25,6 +25,8 @@
 #include <ostream>
 #include <chrono>
 #include <tuple>
+#include <new>
+#include <iomanip>
 
 #include "LibraryRegistrar.h"
 #include "Expected.h"
@@ -175,32 +177,24 @@ struct libCore : public Library<libCore>
 
 	static void SetThreadName(Thread& thread, const String& name);
 
+	template<class T>
+	static T* Alloc(size_t numItems)
+	{
+		return (T*)Alloc(numItems * sizeof(T));
+	}
+
+	static void* Alloc(size_t sizeInBytes);
+	static void Free(void* block);
+
+
+	static void ReportMemoryLeaks();
+
 private:
 	static void Initialize(int ac, char** av);
 
 };
 
 extern Vector<String> SplitString(const String& str, char delim);
-
-template<class T>
-extern void Remove(Vector<T>& v, const T& value)
-{
-	v.erase(std::remove(v.begin(), v.end(), value), v.end());
-}
-
-template <class T, class U>
-extern bool Exists(const T& search, const U& value)
-{
-	if(std::find(search.begin(), search.end(), value) == search.end())
-		return false;
-	return true;
-}
-
-template <class T>
-extern T* PlacementNew(void* place)
-{
-	return new (place) T;
-}
 
 
 
@@ -229,10 +223,6 @@ Function<void(const Arg_t&)> WrapFn(void(*funcPointer)(const Arg_t&))
 {
 	return std::function<void(const Arg_t&)>(funcPointer);
 }
-
-
-
-
 
 CLOSE_NAMESPACE(Firestorm);
 

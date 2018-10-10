@@ -12,7 +12,6 @@
 #pragma once
 
 #include <libCore/Result.h>
-#include <libCore/IRefCounted.h>
 
 OPEN_NAMESPACE(Firestorm);
 

@@ -14,7 +14,6 @@
 #include "IResourceObject.h"
 #include "ResourceLoader.h"
 #include "ResourceCache.h"
-#include <libCore/IRefCounted.h>
 #include <libMirror/Object.h>
 
 OPEN_NAMESPACE(Firestorm);

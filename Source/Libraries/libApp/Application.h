@@ -160,6 +160,7 @@ CLOSE_NAMESPACE(Firestorm);
 		app->Initialize(ac, av);                                    			   \
 		int result = app->Run();                                    			   \
 		delete app;                                                 			   \
+		libCore::ReportMemoryLeaks();                                              \
 		return result;                                              			   \
 	}
 

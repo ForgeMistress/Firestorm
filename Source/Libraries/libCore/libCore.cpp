@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "libCore.h"
-
+#include "Logger.h"
 #include <sstream>
 
 #define _printt(type) \
@@ -46,6 +46,55 @@ void libCore::SetThreadName(Thread& thread, const String& name)
 	{
 	}
 }
+
+#ifndef FIRE_FINAL
+
+static UnorderedMap<void*, size_t> _s_liveAllocations;
+
+#endif
+
+void* libCore::Alloc(size_t sizeInBytes)
+{
+#ifndef FIRE_FINAL
+	void* ptr = malloc(sizeInBytes);
+	_s_liveAllocations[ptr] = sizeInBytes;
+	return ptr;
+#else
+	return malloc(sizeInBytes);
+#endif
+}
+
+void libCore::Free(void* block)
+{
+#ifndef FIRE_FINAL
+	_s_liveAllocations.erase(block);
+#endif
+	free(block);
+}
+
+void libCore::ReportMemoryLeaks()
+{
+#ifndef FIRE_FINAL
+	FIRE_LOG_DEBUG("");
+	FIRE_LOG_DEBUG("======= LEAK CHECK =======");
+	if(_s_liveAllocations.empty())
+	{
+		FIRE_LOG_DEBUG("No memory leaks. It's all good fam.");
+	}
+	else
+	{
+		for(auto& allocation : _s_liveAllocations)
+		{
+			FIRE_LOG_ERROR("Leak => 0x%f%f%f%a -> %d bytes",
+				std::hex, std::setw(sizeof(allocation.first)*2), std::setfill('0'),
+				allocation.first, allocation.second);
+		}
+	}
+	FIRE_LOG_DEBUG("===== END LEAK CHECK =====");
+	FIRE_LOG_DEBUG("");
+#endif
+}
+
 CLOSE_NAMESPACE(Firestorm);
 
 #endif

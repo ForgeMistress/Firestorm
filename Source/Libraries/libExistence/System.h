@@ -11,7 +11,6 @@
 #define LIBEXISTENCE_SYSTEM_H_
 #pragma once
 
-#include <libCore/IRefCounted.h>
 #include <libMirror/IInspectableObject.h>
 #include <libMirror/EventDispatcher.h>
 
@@ -20,6 +19,13 @@
 #include "Entity.h"
 
 OPEN_NAMESPACE(Firestorm);
+
+
+class System
+{
+public:
+private:
+};
 
 /*template<class... SOATypes, class SSOATypes = std::add_pointer_t<SOATypes>...>
 struct System
