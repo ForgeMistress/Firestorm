@@ -12,6 +12,9 @@
 #pragma once
 
 #include "ObjectMaker.h"
+#include <libIO/ResourceMgr.h>
+#include <libScene/RenderMgr.h>
+#include <libMirror/ObjectMaker.h>
 
 OPEN_NAMESPACE(Firestorm);
 
