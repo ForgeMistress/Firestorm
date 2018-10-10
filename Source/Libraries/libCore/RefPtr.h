@@ -17,7 +17,6 @@
 
 #include "libCore.h"
 #include "Assert.h"
-#include "PtrControlBlock.h"
 #include <functional>
 #include <rttr/wrapper_mapper.h>
 #include <memory>
