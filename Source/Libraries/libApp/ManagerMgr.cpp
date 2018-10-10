@@ -17,41 +17,35 @@
 OPEN_NAMESPACE(Firestorm);
 
 ManagerMgr::ManagerMgr()
-: _resourceMgr(new ResourceMgr())
-, _objectMaker(new ObjectMaker())
-, _renderMgr(new RenderMgr(*_resourceMgr, *_objectMaker))
+: _renderMgr(&_resourceMgr, &_objectMaker))
 {
 }
 
 ManagerMgr::~ManagerMgr()
 {
-	_resourceMgr->Shutdown();
-	_renderMgr->Shutdown();
-
-	delete _resourceMgr;
-	delete _objectMaker;
-	delete _renderMgr;
+	_resourceMgr.Shutdown();
+	_renderMgr.Shutdown();
 }
 
 void ManagerMgr::Shutdown()
 {
-	_resourceMgr->Shutdown();
-	_renderMgr->Shutdown();
+	_resourceMgr.Shutdown();
+	_renderMgr.Shutdown();
 }
 
 ResourceMgr& ManagerMgr::GetResourceMgr()
 {
-	return *_resourceMgr;
+	return _resourceMgr;
 }
 
 RenderMgr& ManagerMgr::GetRenderMgr()
 {
-	return *_renderMgr;
+	return _renderMgr;
 }
 
 ObjectMaker& ManagerMgr::GetObjectMaker()
 {
-	return *_objectMaker;
+	return _objectMaker;
 }
 
 CLOSE_NAMESPACE(Firestorm);

@@ -183,9 +183,23 @@ struct libCore : public Library<libCore>
 		return (T*)Alloc(numItems * sizeof(T));
 	}
 
+	template<class T, class... Args>
+	static T* New(Args&&... args)
+	{
+		void* ptr = Alloc(sizeof(T));
+		new(ptr) T(std::forward<Args>(args)...);
+		return ptr;
+	}
+
 	static void* Alloc(size_t sizeInBytes);
 	static void Free(void* block);
 
+	template<class T>
+	static void Delete(T* ptr)
+	{
+		ptr->~T();
+		Free(ptr);
+	}
 
 	static void ReportMemoryLeaks();
 

@@ -34,9 +34,9 @@ public:
 	ObjectMaker& GetObjectMaker();
 
 private:
-	ResourceMgr* _resourceMgr;
-	RenderMgr*   _renderMgr;
-	ObjectMaker* _objectMaker;
+	ResourceMgr _resourceMgr;
+	RenderMgr   _renderMgr;
+	ObjectMaker _objectMaker;
 };
 
 
