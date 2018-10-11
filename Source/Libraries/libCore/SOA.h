@@ -363,7 +363,7 @@ public:
 		// calculation a bit cleaner to look at (void* can't reliably have pointer arithmetic applied 
 		// to it on all compilers)
 		_sizeBytes = Sizeof * numMembers;
-		char* newBuffer = libCore::Alloc<char>(_sizeBytes);
+		char* newBuffer = (char*)fire_alloc(_sizeBytes);//libCore::Alloc<char>(_sizeBytes);
 
 		// calculate the block offsets and store them in the tuple //
 		char* nextElement = newBuffer;
@@ -556,7 +556,7 @@ public:
 
 		size_t sizeofNew = _size * Sizeof;
 		char* oldBuffer = _buffer;
-		char* newBuffer = libCore::Alloc<char>(sizeofNew);
+		char* newBuffer = fire_alloc(sizeofNew);
 		memmove(newBuffer, _buffer, sizeofNew);
 
 		_buffer = (void*)newBuffer;

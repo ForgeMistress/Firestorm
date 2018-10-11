@@ -30,13 +30,13 @@ struct Buffer
 	template<class T>
 	static T* New(size_t initialSize)
 	{
-		void* ptr = libCore::Alloc(sizeof(BufferInfo) + (sizeof(T) * initialSize));
+		void* ptr = fire_alloc(sizeof(BufferInfo) + (sizeof(T) * initialSize));//libCore::Alloc(sizeof(BufferInfo) + (sizeof(T) * initialSize));
 		return static_cast<T*>((char*)ptr + sizeof(BufferInfo));
 	}
 
 	static void Delete(void* buffer)
 	{
-		libCore::Free(FIRE_BUFFER_HEADER(buffer));
+		fire_free(FIRE_BUFFER_HEADER(buffer));
 	}
 };
 

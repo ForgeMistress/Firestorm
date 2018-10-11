@@ -171,12 +171,25 @@ template <class T> using AddPointer = std::add_pointer<T>;
 
 CLOSE_NAMESPACE(Traits);
 
+#ifdef FIRE_FINAL
+#define fire_new(TYPE, ...)     ::Firestorm::libCore::New<TYPE>(__VA_ARGS__)
+#define fire_alloc(SIZE)        ::Firestorm::libCore::Alloc(SIZE)
+#define fire_delete(TYPE, PTR)  ::Firestorm::libCore::Delete<TYPE>(PTR)
+#define fire_free(PTR)          ::Firestorm::libCore::Free(PTR)
+#else
+#define fire_new(TYPE, ...)    ::Firestorm::libCore::New<TYPE>(__FILE__, __LINE__, __VA_ARGS__)
+#define fire_alloc(SIZE)       ::Firestorm::libCore::Alloc(SIZE, __FILE__, __LINE__)
+#define fire_delete(TYPE, PTR) ::Firestorm::libCore::Delete<TYPE>(PTR)
+#define fire_free(PTR)         ::Firestorm::libCore::Free(PTR)
+#endif
+
 struct libCore : public Library<libCore>
 {
 	FIRE_LIBRARY(libCore);
 
 	static void SetThreadName(Thread& thread, const String& name);
 
+#ifdef FIRE_FINAL
 	template<class T>
 	static T* Alloc(size_t numItems)
 	{
@@ -192,6 +205,24 @@ struct libCore : public Library<libCore>
 	}
 
 	static void* Alloc(size_t sizeInBytes);
+#else
+	template<class T>
+	static T* Alloc(size_t numItems, const char* file, size_t line)
+	{
+		return (T*)Alloc(numItems * sizeof(T), file, line);
+	}
+
+	template<class T, class... Args>
+	static T* New(const char* file, size_t line, Args&&... args)
+	{
+		void* ptr = Alloc(sizeof(T), file, line);
+		new(ptr) T(std::forward<Args>(args)...);
+		return ptr;
+	}
+
+	static void* Alloc(size_t sizeInBytes, const char* file, size_t line);
+#endif
+
 	static void Free(void* block);
 
 	template<class T>

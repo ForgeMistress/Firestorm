@@ -48,18 +48,28 @@ void libCore::SetThreadName(Thread& thread, const String& name)
 }
 
 #ifndef FIRE_FINAL
-
-static UnorderedMap<void*, size_t> _s_liveAllocations;
-
+struct AllocInfo
+{
+	size_t allocSize;
+	String file;
+	size_t line;
+};
+static UnorderedMap<void*, AllocInfo> _s_liveAllocations;
 #endif
 
-void* libCore::Alloc(size_t sizeInBytes)
-{
 #ifndef FIRE_FINAL
+void* libCore::Alloc(size_t sizeInBytes, const char* file, size_t line)
+{
 	void* ptr = malloc(sizeInBytes);
-	_s_liveAllocations[ptr] = sizeInBytes;
+	_s_liveAllocations[ptr] = {
+		sizeInBytes,
+		file,
+		line
+	};
 	return ptr;
 #else
+void* libCore::Alloc(size_t sizeInBytes)
+{
 	return malloc(sizeInBytes);
 #endif
 }
@@ -85,9 +95,10 @@ void libCore::ReportMemoryLeaks()
 	{
 		for(auto& allocation : _s_liveAllocations)
 		{
-			FIRE_LOG_ERROR("Leak => 0x%f%f%f%a -> %d bytes",
+			AllocInfo& info = allocation.second;
+			FIRE_LOG_ERROR("Leak => 0x%f%f%f%a -> %d bytes (file: %s, line: %d)",
 				std::hex, std::setw(sizeof(allocation.first)*2), std::setfill('0'),
-				allocation.first, allocation.second);
+				allocation.first, info.allocSize, info.file, info.line);
 		}
 	}
 	FIRE_LOG_DEBUG("===== END LEAK CHECK =====");
