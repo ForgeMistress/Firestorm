@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  MappedComponentDefinition
+//  Component
 //
 //  Creates a definition of a component type that Entities can be tied to.
 //
@@ -23,7 +23,34 @@ OPEN_NAMESPACE(Firestorm);
 	FIRE_ASSERT_MSG(i != FIRE_INVALID_COMPONENT, "the component is invalid "\
 		"(side note... what the *actual* *hell* are you doing where you made *that* *many* components?!)")
 
-class IComponentDefinition
+struct ComponentIDType
+{
+public:
+	ComponentIDType(const char* name)
+		: _hash(std::hash<String>()(name))
+		, _name(name)
+	{}
+
+	operator size_t() const { return _hash; }
+private:
+	size_t _hash{ 0 };
+	const char* _name;
+};
+
+using ComponentID = const ComponentIDType&;
+
+#define FIRE_COMPONENT(TYPE)                   \
+	virtual ComponentID ID() const             \
+	{                                          \
+		static ComponentIDType* _id = nullptr; \
+		if(_id == nullptr)                     \
+		{                                      \
+			_id = new ComponentIDType(#TYPE);  \
+		}                                      \
+		return *_id;                           \
+	}                                          \
+
+class IComponent
 {
 public:
 	using Instance = size_t;
@@ -36,8 +63,25 @@ protected:
 
 public:
 	/**
+		Enumeration that defines different ways the destruction of entities can be handled by a component.
+		A component should only lock itself into one type of destruction handler.
+	 **/
+	enum struct DestructionHandler
+	{
+		//< Used to signify that the component requires immediate attention when Entities are destroyed.
+		kImmediate,
+
+		//< A simple garbage collector is fine for this component.
+		kGC
+	};
+
+	IComponent(DestructionHandler handler)
+		: _dest(handler) {}
+	virtual ~IComponent(){}
+
+	/**
 		Look up a component instance using the provided Entity. If one does not exist, then the implementing
-		class needs to either make a new instance and return that or throow some kind of crashing error.
+		class needs to either make a new instance and return that or throw some kind of crashing error.
 	**/
 	virtual Instance Lookup(Entity entity) = 0;
 
@@ -56,29 +100,39 @@ public:
 		is pretty absurdly high (max of size_t) and I doubt that you'll ever have this problem.
 	 **/
 	virtual Instance Assign(Entity entity) = 0;
+
+	/**
+		This routine does exactly what it says on the tin. It clears out *everything*.
+	 **/
+	virtual void Clear() = 0;
+
+	/**
+		Retrieve thhe way thhis component should handle it when entities are destroyed.
+	 **/
+	DestructionHandler GetDestructionHandler() const { return _dest; }
+private:
+	DestructionHandler _dest;
 };
 
 /**
 	\brief A component definition with the first SOA index being an Entity.
 
 	This is pretty much the default component definition that you'll be getting the most
-	use out of.
+	use out of. The first template parameter specifies the mapping key (likely an Entity ;) )
+	and the rest are the members. Uses the SOA container internally and exposes it
+	with the member \c _this to your superclasses.
  **/
 template<class... Members>
-class MappedComponentDefinition : public IComponentDefinition
+class Component : public IComponent
 {
 public:
-	using DefType = MappedComponentDefinition<Members...>;
+	using Base = Component<Members...>;
 
-	/**
-		Used internally to signify that the definition is garbage collected.
-	 **/
-	static constexpr bool GarbageCollected = false;
-
-	MappedComponentDefinition(EntityMgr& entityMgr, bool registerDestructor = false)
-	: _eMgr(entityMgr)
+	Component(EntityMgr& entityMgr, DestructionHandler handler)
+	: IComponent(handler)
+	, _eMgr(entityMgr)
 	{
-		if(registerDestructor)
+		if(GetDestructionHandler() == DestructionHandler::kImmediate)
 		{
 			_eMgr.RegisterDestructionCallback(this, [this](Entity entity) {
 				// lookup the index of the provided entity
@@ -96,9 +150,10 @@ public:
 		}
 	}
 
-	virtual ~MappedComponentDefinition()
+	virtual ~Component()
 	{
-		_eMgr.UnregisterDestructionCallback(this);
+		if(GetDestructionHandler() == DestructionHandler::kImmediate)
+			_eMgr.UnregisterDestructionCallback(this);
 	}
 
 	virtual Instance Lookup(Entity entity) final
@@ -118,7 +173,7 @@ public:
 
 	virtual Instance Assign(Entity entity) final
 	{
-		if(_map.find(entity) != _map.end())
+		if(Contains(entity))
 		{
 			return _map[entity];
 		}
@@ -129,6 +184,12 @@ public:
 		_this[0_soa][i] = entity;
 		_map[entity] = i;
 		return i;
+	}
+
+	virtual void Clear()
+	{
+		_this.Clear();
+		_map.clear();
 	}
 
 private:

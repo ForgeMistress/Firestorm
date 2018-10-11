@@ -18,6 +18,10 @@ OPEN_NAMESPACE(Firestorm);
 
 using Entity = UUID;
 
+struct EntityData
+{
+};
+
 class EntityMgr final
 {
 public:
@@ -25,10 +29,13 @@ public:
 
 	EntityMgr(UUIDMgr& uuidMgr);
 
-	Entity SpawnEntity() const;
+	/**
+		Spawn yourself a shiny new entity.
+	 **/
+	Entity SpawnEntity(EntityData* data = nullptr) const;
 
 	/**
-
+		Despawn an entity and mark it as dead.
 	 **/
 	void DespawnEntity(Entity entity);
 
@@ -43,6 +50,11 @@ public:
 	void UnregisterDestructionCallback(void* registrant);
 
 	/**
+		Check whether or not the Entity is alive.
+	 **/
+	bool IsAlive(Entity entity);
+
+	/**
 		Retrieve the number of registered destructor callbacks.
 
 		\note This is used mostly for unit testing.
@@ -51,9 +63,9 @@ public:
 
 private:
 	void DispatchDestruction(Entity entity);
+	void BuildEntity(Entity entity, EntityData* data) const;
 
 	UUIDMgr& _uuidMgr;
-	static Entity _s_nextEntity;
 
 	struct CallbackInfo
 	{
@@ -61,6 +73,7 @@ private:
 		void* Registrant;
 	};
 	Vector<CallbackInfo> _destructionCallbacks;
+	mutable Vector<Entity> _deadEntities;
 };
 
 /*class Entity final

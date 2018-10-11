@@ -187,7 +187,7 @@ struct SOA
 	using tuple_type = std::tuple<std::add_pointer_t<ItemsT>...>;
 
 	/**
-		Helper that retrieves the raw type (no pointers or references) to the item at the tuple index \c I.
+		Helper that retrieves the to the item at the tuple index \c I.
 	**/
 	template<size_t I> 
 	using EElemT = std::tuple_element_t<I, tuple_type>;
@@ -287,6 +287,9 @@ public:
 		return _size;
 	}
 
+	/**
+		Retrieve the index to the last element in the container.
+	 **/
 	size_t Last() const
 	{
 		return _size - 1;
@@ -295,7 +298,7 @@ public:
 	/**
 		\brief Retrieve the capacity of the container.
 
-		This one I will explain. Capacity refers to how much space for how many elements this MappedComponentDefinition
+		This one I will explain. Capacity refers to how much space for how many elements this SOA
 		can hold. Capacity is not related to Size in any way other than for bounds checking.
 	**/
 	size_t Capacity() const
@@ -305,6 +308,8 @@ public:
 
 	/**
 		Retrieve the size in bytes of the container.
+
+		\notes Used for unit testing, mostly. I dunno. Maybe you'll get some use out of it.
 	 **/
 	size_t Bytes() const
 	{
