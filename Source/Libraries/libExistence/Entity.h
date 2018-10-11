@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Entity.h
+//  EntityMgr
 //
-//  A collection of components.
+//  Creates and destroys entities.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) Project Elflord 2018
@@ -21,14 +21,46 @@ using Entity = UUID;
 class EntityMgr final
 {
 public:
+	using DestructionCallback = Function<void(Entity)>;
+
 	EntityMgr(UUIDMgr& uuidMgr);
 
 	Entity SpawnEntity() const;
 
+	/**
+
+	 **/
 	void DespawnEntity(Entity entity);
 
+	/**
+		Register a function to be called when an Entity is destroyed.
+	 **/
+	void RegisterDestructionCallback(void* definition, DestructionCallback callback);
+
+	/**
+		Unregister a registrant from the destruction listeners.
+	 **/
+	void UnregisterDestructionCallback(void* registrant);
+
+	/**
+		Retrieve the number of registered destructor callbacks.
+
+		\note This is used mostly for unit testing.
+	 **/
+	size_t GetNumRegisteredDestructors() const { return _destructionCallbacks.size(); }
+
 private:
+	void DispatchDestruction(Entity entity);
+
 	UUIDMgr& _uuidMgr;
+	static Entity _s_nextEntity;
+
+	struct CallbackInfo
+	{
+		DestructionCallback Callback;
+		void* Registrant;
+	};
+	Vector<CallbackInfo> _destructionCallbacks;
 };
 
 /*class Entity final

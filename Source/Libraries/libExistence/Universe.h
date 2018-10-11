@@ -16,12 +16,10 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-template<class... Args>
 class Universe final
 {
 public:
 private:
-
 };
 
 /**

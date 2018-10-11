@@ -13,35 +13,20 @@
 OPEN_NAMESPACE(Firestorm);
 
 ManagerMgr::ManagerMgr()
-: _renderMgr(_resourceMgr, _objectMaker)
+: _FIRE_MGR_VAR(RenderMgr)(_FIRE_MGR_VAR(ResourceMgr), _FIRE_MGR_VAR(ObjectMaker))
+, _FIRE_MGR_VAR(EntityMgr)(_FIRE_MGR_VAR(UUIDMgr))
 {
 }
 
 ManagerMgr::~ManagerMgr()
 {
-	_resourceMgr.Shutdown();
-	_renderMgr.Shutdown();
+	Shutdown();
 }
 
 void ManagerMgr::Shutdown()
 {
-	_resourceMgr.Shutdown();
-	_renderMgr.Shutdown();
-}
-
-ResourceMgr& ManagerMgr::GetResourceMgr()
-{
-	return _resourceMgr;
-}
-
-RenderMgr& ManagerMgr::GetRenderMgr()
-{
-	return _renderMgr;
-}
-
-ObjectMaker& ManagerMgr::GetObjectMaker()
-{
-	return _objectMaker;
+	_FIRE_MGR_VAR(ResourceMgr).Shutdown();
+	_FIRE_MGR_VAR(RenderMgr).Shutdown();
 }
 
 CLOSE_NAMESPACE(Firestorm);

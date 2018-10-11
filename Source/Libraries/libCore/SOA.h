@@ -19,6 +19,8 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+#define FIRE_MAX_SOA_CAPACITY std::numeric_limits<size_t>::max()
+
 template<class T> using raw = std::remove_pointer_t<std::remove_reference_t<T>>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,6 +47,8 @@ struct soa_index {};
 
 template<std::size_t I>
 struct aos_index {};
+
+#define FIRE_SOA_INDEX(SYMBOL, POS) static constexpr soa_index<POS> SYMBOL{};
 
 template <char... Digits>
 decltype(auto) operator"" _soa()
@@ -119,7 +123,7 @@ static inline constexpr bool AnyAreArrays()
 }
 
 template<class... ItemsT>
-struct SOA final
+struct SOA
 {
 	static_assert(!AnyAreArrays<ItemsT...>(), "can not store arrays within this structure (yet)");
 
@@ -129,11 +133,11 @@ struct SOA final
 	template<class T>
 	struct SOARead
 	{
-		using type = T;
+		using type = raw<T>;
 	public:
-		SOARead(T* ptr, size_t size) : _ptr(ptr), _size(size) {}
+		SOARead(type* ptr, size_t size) : _ptr(ptr), _size(size) {}
 
-		inline const T& operator[](const size_t& index) const
+		inline const type& operator[](const size_t& index) const
 		{
 			FIRE_ASSERT_MSG(index < _size, 
 				Format("index '%d' exceeds the bounds of the buffer (size = %d)", index, _size));
@@ -145,7 +149,7 @@ struct SOA final
 		}
 	private:
 		size_t _size;
-		T* _ptr;
+		type* _ptr;
 	};
 
 	/**
@@ -154,10 +158,11 @@ struct SOA final
 	template<class T>
 	struct SOAWrite
 	{
+		using type = raw<T>;
 	public:
-		SOAWrite(T* ptr, size_t size) : _ptr(ptr), _size(size) {}
+		SOAWrite(type* ptr, size_t size) : _ptr(ptr), _size(size) {}
 
-		inline T& operator[](const size_t& index)
+		inline type& operator[](const size_t& index)
 		{
 			FIRE_ASSERT_MSG(index < _size, 
 				Format("index '%d' exceeds the bounds of the buffer (size = %d)", index, _size));
@@ -169,7 +174,7 @@ struct SOA final
 		}
 	private:
 		size_t _size;
-		T* _ptr;
+		type* _ptr;
 	};
 
 
@@ -179,13 +184,13 @@ struct SOA final
 	/**
 		Alias to the type of the tuple that this SOA uses to do its job.
 	 **/
-	using tuple_type = std::tuple<std::add_pointer_t<raw<ItemsT>>...>;
+	using tuple_type = std::tuple<std::add_pointer_t<ItemsT>...>;
 
 	/**
 		Helper that retrieves the raw type (no pointers or references) to the item at the tuple index \c I.
 	**/
 	template<size_t I> 
-	using EElemT = std::remove_pointer_t<std::tuple_element_t<I, tuple_type>>;
+	using EElemT = std::tuple_element_t<I, tuple_type>;
 
 	/**
 		Helper that stores the number of items passed to the class template.
@@ -234,7 +239,7 @@ public:
 		std::size_t I,
 		typename ElemT = EElemT<I>
 	>
-	SOARead<ElemT> operator[](soa_index<I>) const
+	const SOARead<ElemT> operator[](soa_index<I>) const
 	{
 		return SOARead<ElemT>{std::get<I>(_tuple), _size};
 	}
@@ -267,7 +272,7 @@ public:
 	{
 	}
 
-	~SOA()
+	virtual ~SOA()
 	{
 		Clear();
 	}
@@ -282,10 +287,15 @@ public:
 		return _size;
 	}
 
+	size_t Last() const
+	{
+		return _size - 1;
+	}
+
 	/**
 		\brief Retrieve the capacity of the container.
 
-		This one I will explain. Capacity refers to how much space for how many elements this ComponentDefinition
+		This one I will explain. Capacity refers to how much space for how many elements this MappedComponentDefinition
 		can hold. Capacity is not related to Size in any way other than for bounds checking.
 	**/
 	size_t Capacity() const
@@ -338,9 +348,10 @@ public:
 	 **/
 	void Reserve(size_t numMembers)
 	{
+		FIRE_ASSERT_MSG(numMembers < FIRE_MAX_SOA_CAPACITY, "maximum capacity of the SOA container has been reached.");
+
 		if(numMembers < _capacity) { return; }
 		void* oldBuffer = _buffer;
-
 		_capacity = numMembers;
 
 		// we'll store this properly as void* later. referenced as char* for now to make offset
@@ -428,6 +439,52 @@ public:
 	}
 
 private:
+	// iterator for the PushBack operation.
+	template<
+		size_t Index = 0,
+		class ElementType = raw<std::tuple_element_t<Index, tuple_type>>
+	>
+	constexpr void PushBackPlainIterate(std::size_t elementPos)
+	{
+		if constexpr(Index < LLength)
+		{
+			auto& element = std::get<Index>(_tuple);
+
+			using bp_type = raw<decltype(element)>;
+			if constexpr(RequiresConstructorCall<bp_type>())
+			{
+				new(element + elementPos) ElementType();
+			}
+
+			if constexpr(Index + 1 < LLength)
+			{
+				PushBackPlainIterate<Index + 1>(elementPos);
+			}
+		}
+	}
+public:
+	inline size_t PushBack()
+	{
+		if(_size == _capacity)
+		{
+			if(_capacity == 0)
+			{
+				Reserve(1);
+			}
+			else
+			{
+				Reserve(_capacity * 2);
+			}
+		}
+
+		PushBackPlainIterate(_size);
+
+		size_t itemIndex = _size;
+		++_size;
+		return itemIndex;
+	}
+
+private:
 	// iterator for the Erase operation.
 	template<size_t Index = 0>
 	constexpr void EraseIterate(size_t removedElement)
@@ -441,7 +498,11 @@ private:
 			{
 				element[removedElement].~bp_type();
 			}
-			std::swap(element[removedElement], element[_size-1]);
+			// no need to swap if we're erasing the last element.
+			if(removedElement != Last())
+			{
+				std::swap(element[removedElement], element[Last()]);
+			}
 
 			if constexpr(Index + 1 < LLength)
 			{

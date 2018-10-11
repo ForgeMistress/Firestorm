@@ -46,7 +46,7 @@ UUID UUIDMgr::Get() const
 		_uuidBlock = Alloc();
 		_numIDsUsed = 0;
 	}
-	return (UUID)((char*)_uuidBlock + _numIDsUsed++);
+	return (UUIDType*)((char*)_uuidBlock + _numIDsUsed++);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

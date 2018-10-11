@@ -13,7 +13,8 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-using UUID = void*;
+struct UUIDType {}; // void* doesn't play nice with the SOA.
+using UUID = UUIDType*;
 
 class UUIDMgr final
 {

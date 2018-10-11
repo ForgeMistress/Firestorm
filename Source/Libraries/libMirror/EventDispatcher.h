@@ -12,7 +12,6 @@
 #pragma once
 
 #include <libCore/RefPtr.h>
-#include <libCore/WeakPtr.h>
 #include "Object.h"
 
 OPEN_NAMESPACE(Firestorm);

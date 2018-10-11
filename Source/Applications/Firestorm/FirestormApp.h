@@ -3,6 +3,7 @@
 #pragma once
 
 #include <libIO/ResourceHandle.h>
+#include <libCore/SOA.h>
 
 using namespace Firestorm;
 

@@ -20,7 +20,6 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-
 class System
 {
 public:

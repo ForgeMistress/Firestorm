@@ -14,7 +14,6 @@
 #include <libCore/libCore.h>
 #include <libCore/Result.h>
 #include <libCore/RefPtr.h>
-#include <libCore/WeakPtr.h>
 
 #include "ResourceHandle.h"
 #include "IResourceObject.h"

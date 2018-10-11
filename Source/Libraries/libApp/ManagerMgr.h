@@ -12,15 +12,21 @@
 #pragma once
 
 #include "ObjectMaker.h"
+#include <libCore/UUIDMgr.h>
 #include <libIO/ResourceMgr.h>
 #include <libScene/RenderMgr.h>
 #include <libMirror/ObjectMaker.h>
+#include <libExistence/Entity.h>
 
 OPEN_NAMESPACE(Firestorm);
 
-class ResourceMgr;
-class RenderMgr;
-class ObjectMaker;
+#define _FIRE_MGR_VAR(TYPE) _##TYPE##_INSTANCE
+
+#define FIRE_MGR_INSTALL(TYPE)\
+private:\
+	TYPE _FIRE_MGR_VAR(TYPE);\
+public:\
+	TYPE& Get##TYPE () { return _FIRE_MGR_VAR(TYPE); }
 
 class ManagerMgr final
 {
@@ -32,14 +38,11 @@ private:
 	void Shutdown();
 
 public:
-	ResourceMgr& GetResourceMgr();
-	RenderMgr&   GetRenderMgr();
-	ObjectMaker& GetObjectMaker();
-
-private:
-	ResourceMgr _resourceMgr;
-	RenderMgr   _renderMgr;
-	ObjectMaker _objectMaker;
+	FIRE_MGR_INSTALL(UUIDMgr);
+	FIRE_MGR_INSTALL(ResourceMgr);
+	FIRE_MGR_INSTALL(RenderMgr);
+	FIRE_MGR_INSTALL(ObjectMaker);
+	FIRE_MGR_INSTALL(EntityMgr);
 };
 
 
