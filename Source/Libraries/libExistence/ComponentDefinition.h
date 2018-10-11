@@ -42,17 +42,15 @@ using ComponentID = const ComponentIDType&;
 #define FIRE_COMPONENT(TYPE)                   \
 	virtual ComponentID ID() const             \
 	{                                          \
-		static ComponentIDType* _id = nullptr; \
-		if(_id == nullptr)                     \
-		{                                      \
-			_id = new ComponentIDType(#TYPE);  \
-		}                                      \
-		return *_id;                           \
+		static ComponentIDType _id {#TYPE};    \
+		return _id;                            \
 	}                                          \
 
 class IComponent
 {
 public:
+	FIRE_COMPONENT(IComponent);
+
 	using Instance = size_t;
 
 protected:
@@ -107,7 +105,7 @@ public:
 	virtual void Clear() = 0;
 
 	/**
-		Retrieve thhe way thhis component should handle it when entities are destroyed.
+		Retrieve thhe way this component should handle it when entities are destroyed.
 	 **/
 	DestructionHandler GetDestructionHandler() const { return _dest; }
 private:
