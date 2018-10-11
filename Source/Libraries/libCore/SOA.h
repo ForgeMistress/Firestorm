@@ -373,7 +373,7 @@ public:
 		{
 			// no sense in copying the entire old buffer, especially if _size is considerably less than the capacity.
 			memcpy(newBuffer, oldBuffer, Sizeof * _size);
-			libCore::Free(oldBuffer);
+			fire_free(oldBuffer);
 		}
 		_buffer = (void*)newBuffer;
 		_capacity = numMembers;
