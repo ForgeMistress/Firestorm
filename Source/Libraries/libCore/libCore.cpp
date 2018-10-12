@@ -52,7 +52,7 @@ void libCore::SetThreadName(Thread& thread, const string& name)
 struct AllocInfo
 {
 	size_t allocSize;
-	string file;
+	const char* file;
 	size_t line;
 };
 static unordered_map<void*, AllocInfo> _s_liveAllocations;
@@ -62,11 +62,11 @@ static unordered_map<void*, AllocInfo> _s_liveAllocations;
 void* libCore::Alloc(size_t sizeInBytes, const char* file, size_t line)
 {
 	void* ptr = malloc(sizeInBytes);
-	_s_liveAllocations[ptr] = {
-		sizeInBytes,
-		file,
-		line
-	};
+	//_s_liveAllocations[ptr] = {
+	//	sizeInBytes,
+	//	file?file:"",
+	//	line
+	//};
 	return ptr;
 #else
 void* libCore::Alloc(size_t sizeInBytes)

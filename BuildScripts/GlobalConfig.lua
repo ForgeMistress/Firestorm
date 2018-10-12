@@ -75,13 +75,6 @@ function configureEngineLib(libName)
     cppdialect("C++17")
     kind("StaticLib")
 
-    filter({"platforms:Win32"})
-        architecture("x86")
-    clearFilters()
-    filter({"platforms:Win64"})
-        architecture("x86_64")
-    clearFilters()
-
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
@@ -113,13 +106,6 @@ function configureToolsApplication(appName, gameName)
     language("C++")
     cppdialect("C++17")
     kind("ConsoleApp")
-
-    filter({"platforms:Win32"})
-        architecture("x86")
-    clearFilters()
-    filter({"platforms:Win64"})
-        architecture("x86_64")
-    clearFilters()
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
@@ -166,13 +152,6 @@ function configureGame(gameName)
     language("C++")
     cppdialect("C++17")
     kind("ConsoleApp")
-
-    filter({"platforms:Win32"})
-        architecture("x86")
-    clearFilters()
-    filter({"platforms:Win64"})
-        architecture("x86_64")
-    clearFilters()
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
@@ -222,13 +201,6 @@ function configureGameLib(gameName)
     cppdialect("C++17")
     kind("StaticLib")
 
-    filter({"platforms:Win32"})
-        architecture("x86")
-    clearFilters()
-    filter({"platforms:Win64"})
-        architecture("x86_64")
-    clearFilters()
-
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
@@ -240,9 +212,7 @@ function configureGameLib(gameName)
         ENGINE_BIN_OUTPUT_DIR
     })
 
-    links({
-        "lib"..gameName,
-    })
+    --links({ "lib"..gameName, })
     dependson({
         "rttr",
         "EASTL"
@@ -306,14 +276,6 @@ function configureUnitTestApplication()
     cppdialect("C++17")
     kind("ConsoleApp")
     
-    filter({"platforms:Win32"})
-        architecture("x86")
-    clearFilters()
-    filter({"platforms:Win64"})
-        architecture("x86_64")
-    clearFilters()
-
-
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({

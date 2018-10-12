@@ -23,13 +23,16 @@ ArgParser::ArgParser(int ac, char** av)
 	{
 		string arg(av[i]);
 		vector<string> splitString(SplitString(av[i], '='));
-		if(splitString.size() == 1)
+		if(!splitString.empty())
 		{
-			_args[splitString[0]] = "__FIRESTORM_TRUE_VALUE__";
-		}
-		else
-		{
-			_args[splitString[0]] = splitString[1];
+			if(splitString.size() == 1)
+			{
+				_args[splitString[0]] = "__FIRESTORM_TRUE_VALUE__";
+			}
+			else
+			{
+				_args[splitString[0]] = splitString[1];
+			}
 		}
 	}
 }
