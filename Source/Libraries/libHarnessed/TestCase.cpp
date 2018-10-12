@@ -4,7 +4,7 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-void TestCase::Assert(bool assertion, const String& message)
+void TestCase::Assert(bool assertion, const string& message)
 {
 	if(!assertion)
 	{
@@ -14,7 +14,7 @@ void TestCase::Assert(bool assertion, const String& message)
 	}
 }
 
-void TestCase::AssertIsTrue(bool assertion, const String& message)
+void TestCase::AssertIsTrue(bool assertion, const string& message)
 {
 	if(!assertion)
 	{
@@ -24,7 +24,7 @@ void TestCase::AssertIsTrue(bool assertion, const String& message)
 	}
 }
 
-void TestCase::AssertIsFalse(bool assertion, const String& message)
+void TestCase::AssertIsFalse(bool assertion, const string& message)
 {
 	if(assertion)
 	{

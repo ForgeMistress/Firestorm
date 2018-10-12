@@ -18,27 +18,27 @@ struct libIO : public Library<libIO>
 	/**
 		Mount a directory at the specified mount point.
 	 **/
-	static bool Mount(const String& directory, const String& mountpoint);
+	static bool Mount(const string& directory, const string& mountpoint);
 
 	/**
 		Check if the file exists.
 	 **/
-	static bool FileExists(const String& filename);
+	static bool FileExists(const string& filename);
 
 	/**
 		Load a file from disk. The operation happens synchronously.
 	 **/
-	static Result<Vector<char>, Error> LoadFile(const String& filename);
+	static Result<vector<char>, Error> LoadFile(const string& filename);
 
 	/**
 		Load a file and return the result as a string.
 	 **/
-	static Result<String, Error> LoadFileString(const String& filename);
+	static Result<string, Error> LoadFileString(const string& filename);
 	
 	/**
 		Retrieve all of the files in a given path.
 	 **/
-	static Vector<String> GetFiles(const String& path);
+	static vector<string> GetFiles(const string& path);
 private:
 	static void Initialize(int ac, char** av);
 };

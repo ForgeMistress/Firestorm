@@ -58,12 +58,12 @@ MeshLoader::LoadResult MeshLoader::Load(ResourceMgr* resourceMgr, const Resource
 		auto result = libIO::LoadFile(path);
 		if(result.has_value())
 		{
-			RefPtr<MeshResource> resource(std::make_shared<MeshResource>(_renderMgr));
+			RefPtr<MeshResource> resource(make_shared<MeshResource>(_renderMgr));
 			resource->_data = result.value();
 			return FIRE_LOAD_SUCCESS(resource);
 		}
 		return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_READ_ERROR,
-			"reading file '" + path + "'\nDetails: "+((String)result.error()));
+			"reading file '" + path + "'\nDetails: "+((string)result.error()));
 	}
 
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, "could not find file '"+path+"'");

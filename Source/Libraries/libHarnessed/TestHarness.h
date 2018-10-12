@@ -21,10 +21,10 @@ class Benchmark;
 class TestHarness final
 {
 public:
-	typedef Function<void(TestCase&)> TestFunction_t;
-	typedef Function<void(Benchmark&)> BenchmarkFunction_t;
+	typedef function<void(TestCase&)> TestFunction_t;
+	typedef function<void(Benchmark&)> BenchmarkFunction_t;
 
-	TestHarness(const String& name, bool quietly = false);
+	TestHarness(const string& name, bool quietly = false);
 	virtual ~TestHarness();
 
 	// Run before every test case.
@@ -37,11 +37,11 @@ public:
 	// sentence that states what it should be doing.
 	//
 	// Example: It("should do this thing properly without errors", ...);
-	void It(const String& name, TestFunction_t testFunction);
+	void It(const string& name, TestFunction_t testFunction);
 
-	void Profile(const String& name, size_t numberOfRuns, BenchmarkFunction_t benchmarkFunction);
+	void Profile(const string& name, size_t numberOfRuns, BenchmarkFunction_t benchmarkFunction);
 
-    const String& GetName() const { return _name; }
+    const string& GetName() const { return _name; }
 
 	template <class... Args_t>
 	void Print(const char* fmt, Args_t... args)
@@ -50,25 +50,25 @@ public:
 			FIRE_LOG_ERROR(fmt, args...);
 	}
 
-	void ReportError(TestCase* tc, const String& message);
+	void ReportError(TestCase* tc, const string& message);
 
 private:
 	size_t RunTests();
 	void RunBenchmarks();
 
 
-	String _name;
+	string _name;
 	bool _quietly;
-	Vector<String>         _caseNames;
-	Vector<TestFunction_t> _cases;
+	vector<string>         _caseNames;
+	vector<TestFunction_t> _cases;
 
 	struct BenchmarkInfo
 	{
 		size_t NumRuns;
-		String Name;
+		string Name;
 		BenchmarkFunction_t Op;
 	};
-	Vector<BenchmarkInfo> _benchmarks;
+	vector<BenchmarkInfo> _benchmarks;
 };
 
 CLOSE_NAMESPACE(Firestorm);

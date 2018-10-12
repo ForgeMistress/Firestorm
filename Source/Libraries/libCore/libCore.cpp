@@ -2,6 +2,7 @@
 #include "libCore.h"
 #include "Logger.h"
 #include <sstream>
+#include <EASTL/string.h>
 
 #define _printt(type) \
 	std::cout << "    :: "#type" -> Max = " << std::numeric_limits<type>::max() <<" Size = "<<sizeof(type)<< std::endl
@@ -31,7 +32,7 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-void libCore::SetThreadName(Thread& thread, const String& name)
+void libCore::SetThreadName(Thread& thread, const string& name)
 {
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
@@ -51,10 +52,10 @@ void libCore::SetThreadName(Thread& thread, const String& name)
 struct AllocInfo
 {
 	size_t allocSize;
-	String file;
+	string file;
 	size_t line;
 };
-static UnorderedMap<void*, AllocInfo> _s_liveAllocations;
+static unordered_map<void*, AllocInfo> _s_liveAllocations;
 #endif
 
 #ifndef FIRE_FINAL
@@ -96,8 +97,7 @@ void libCore::ReportMemoryLeaks()
 		for(auto& allocation : _s_liveAllocations)
 		{
 			AllocInfo& info = allocation.second;
-			FIRE_LOG_ERROR("Leak => 0x%f%f%f%a -> %d bytes (file: %s, line: %d)",
-				std::hex, std::setw(sizeof(allocation.first)*2), std::setfill('0'),
+			FIRE_LOG_ERROR("Leak => %#x -> %d bytes (file: %s, line: %d)",
 				allocation.first, info.allocSize, info.file, info.line);
 		}
 	}
@@ -111,15 +111,19 @@ CLOSE_NAMESPACE(Firestorm);
 #endif
 
 OPEN_NAMESPACE(Firestorm);
-Vector<String> SplitString(const String & str, char delim)
+vector<string> SplitString(const string & str, char delim)
 {
-	Vector<String> tokens;
-	String token;
-	std::istringstream tokenStream(str);
-	while (std::getline(tokenStream, token, delim))
-	{
-		tokens.push_back(token);
-	}
-	return tokens;
+	return vector<string>();
 }
 CLOSE_NAMESPACE(Firestorm);
+
+
+void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags, const char* file, int line)
+{
+	return ::Firestorm::libCore::Alloc(size, file, line);
+}
+
+void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line)
+{
+	return ::Firestorm::libCore::Alloc(size, file, line);
+}

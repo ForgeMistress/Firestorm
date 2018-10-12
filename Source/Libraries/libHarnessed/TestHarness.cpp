@@ -14,7 +14,7 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-TestHarness::TestHarness(const String& name, bool quietly)
+TestHarness::TestHarness(const string& name, bool quietly)
 : _name(name)
 , _quietly(quietly)
 {
@@ -31,7 +31,7 @@ uint32_t TestHarness::Run()
 	return numFailures;
 }
 
-void TestHarness::It(const String& caseName, TestFunction_t testFunction)
+void TestHarness::It(const string& caseName, TestFunction_t testFunction)
 {
 	for(const auto& cn : _caseNames)
 	{
@@ -41,7 +41,7 @@ void TestHarness::It(const String& caseName, TestFunction_t testFunction)
 	_caseNames.push_back(caseName);
 }
 
-void TestHarness::Profile(const String& name, size_t numberOfRuns, BenchmarkFunction_t benchmarkFunction)
+void TestHarness::Profile(const string& name, size_t numberOfRuns, BenchmarkFunction_t benchmarkFunction)
 {
 	for(const auto& bm : _benchmarks)
 	{
@@ -55,7 +55,7 @@ void TestHarness::Profile(const String& name, size_t numberOfRuns, BenchmarkFunc
 	});
 }
 
-void TestHarness::ReportError(TestCase* tc, const String& message)
+void TestHarness::ReportError(TestCase* tc, const string& message)
 {
 	Print("    Error: %s", message);
 }
@@ -73,7 +73,7 @@ size_t TestHarness::RunTests()
 	for(size_t i=0;i<_cases.size(); ++i)
 	{
 		auto test = _cases[i];
-		const String& testName = _caseNames[i];
+		const string& testName = _caseNames[i];
 
 		Print("Case[%d] %s",i, testName);
 		TestCase testCase(testName, this);
@@ -94,7 +94,7 @@ void TestHarness::RunBenchmarks()
 	for(size_t i = 0; i < _benchmarks.size(); ++i)
 	{
 		auto benchmark = _benchmarks[i];
-		const String& benchmarkName = benchmark.Name;
+		const string& benchmarkName = benchmark.Name;
 
 		Print("Benchmark[%d] %s", i, benchmarkName);
 		Benchmark b(benchmarkName, benchmark.NumRuns, i);

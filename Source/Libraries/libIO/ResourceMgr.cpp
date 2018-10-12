@@ -23,13 +23,13 @@ ResourceMgr::ResourceMgr()
 {
 	for(size_t i = 0; i < _numThreads; ++i)
 	{
-		std::stringstream ss;
-		ss << "ResourceMgr Thread [" << i << "]";
+		string ostring;
+		ostring.append_sprintf("ResourceMgr Thread[%d]", i);
 		_threads[i] = Thread(std::bind(&ResourceMgr::ThreadRun, this));
 
 		while(!_threads[i].joinable()); // wait until the thread is joinable.
 
-		libCore::SetThreadName(_threads[i], ss.str());
+		libCore::SetThreadName(_threads[i], ostring);
 	}
 }
 

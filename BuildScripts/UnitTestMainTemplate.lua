@@ -25,7 +25,7 @@ int main(int ac, char** av)
 
 {LIB_INITIALIZATIONS}
 
-    Vector<RefPtr<TestHarness>> TESTS = {
+    vector<RefPtr<TestHarness>> TESTS = {
 {TEST_FUNCTIONS}
     };
 
@@ -51,15 +51,10 @@ int main(int ac, char** av)
         FIRE_LOG_DEBUG("Completed all tests with no failures!");
     }
     
-    FIRE_LOG_DEBUG("");
-	FIRE_LOG_DEBUG("======= LEAK CHECK =======");
     libCore::ReportMemoryLeaks();
-	FIRE_LOG_DEBUG("===== END LEAK CHECK =====");
-	FIRE_LOG_DEBUG("");
 
     FIRE_LOG_DEBUG("Press 'return' to close...");
     std::cin.get();
 
     return overallFailureCount;
-}
-]]
+}]]

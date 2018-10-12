@@ -18,33 +18,33 @@ class TestCase
 public:
 	struct AssertionException
 	{
-		AssertionException(const String& message)
+		AssertionException(const string& message)
 		: m_message(message) {}
 
-		const String& GetMessage() const { return m_message; }
+		const string& GetMessage() const { return m_message; }
 
 	private:
-		String m_message;
+		string m_message;
 	};
 
-	void Assert(bool assertion, const String& message);
+	void Assert(bool assertion, const string& message);
 
-	void AssertIsTrue(bool assertion, const String& message);
+	void AssertIsTrue(bool assertion, const string& message);
 
-	void AssertIsFalse(bool assertion, const String& message);
-
-	template<class T>
-	void AssertIsNull(T ptr, const String& message);
+	void AssertIsFalse(bool assertion, const string& message);
 
 	template<class T>
-	void AssertNotNull(T ptr, const String& message);
+	void AssertIsNull(T ptr, const string& message);
+
+	template<class T>
+	void AssertNotNull(T ptr, const string& message);
 
 
 	size_t GetFailureCount() const;
-	const Vector<String>& GetFailures() const { return m_failures; }
+	const vector<string>& GetFailures() const { return m_failures; }
 
 protected:
-	TestCase(const String& name, class TestHarness* harness)
+	TestCase(const string& name, class TestHarness* harness)
 		: _name(name)
 		, _harness(harness) {}
 	~TestCase() {}
@@ -53,13 +53,13 @@ protected:
 
 private:
 	class TestHarness* _harness;
-	Vector<String> m_failures;
-	String _name;
+	vector<string> m_failures;
+	string _name;
 	bool _hasFailed{ false };
 };
 
 template<class T>
-void TestCase::AssertNotNull(T ptr, const String& message)
+void TestCase::AssertNotNull(T ptr, const string& message)
 {
 	if(ptr == nullptr)
 	{
@@ -69,7 +69,7 @@ void TestCase::AssertNotNull(T ptr, const String& message)
 }
 
 template<class T>
-void TestCase::AssertIsNull(T ptr, const String& message)
+void TestCase::AssertIsNull(T ptr, const string& message)
 {
 	if(ptr != nullptr)
 	{

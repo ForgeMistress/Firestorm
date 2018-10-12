@@ -50,7 +50,7 @@ public:
 class Surface : public LLGL::Surface
 {
 public:
-	Surface(class Application* app, const LLGL::Extent2D& size, const String& title);
+	Surface(class Application* app, const LLGL::Extent2D& size, const string& title);
 	virtual ~Surface();
 
 	void GetNativeHandle(void* nativeHandle) const override;
@@ -74,7 +74,7 @@ private:
 	GLFWwindow* CreateGLFWWindow();
 
 	class Application* _app{ nullptr };
-	String _title;
+	string _title;
 	LLGL::Extent2D _size;
 	GLFWwindow* _window{ nullptr };
 	IInputEventListener* _listener{ nullptr };

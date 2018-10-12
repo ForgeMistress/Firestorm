@@ -27,7 +27,7 @@ struct ComponentIDType
 {
 public:
 	ComponentIDType(const char* name)
-		: _hash(std::hash<String>()(name))
+		: _hash(eastl::hash<string>()(name))
 		, _name(name)
 	{}
 
@@ -203,7 +203,7 @@ private:
 
 	EntityMgr& _eMgr;
 
-	UnorderedMap<Entity, Instance> _map;
+	unordered_map<Entity, Instance> _map;
 protected:
 	SOA<Entity, Members...> _this;
 };

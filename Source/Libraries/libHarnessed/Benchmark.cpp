@@ -18,7 +18,7 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Benchmark::Benchmark(const String& name, size_t numRuns, size_t index)
+Benchmark::Benchmark(const string& name, size_t numRuns, size_t index)
 : _name(name)
 , _numRuns(numRuns)
 {
@@ -32,7 +32,7 @@ Benchmark::~Benchmark()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Benchmark::Run(Function<void(Benchmark&)> op)
+void Benchmark::Run(function<void(Benchmark&)> op)
 {
 	_overallStart = clock_type::now();
 	for(size_t i = 0; i < _numRuns; ++i)
@@ -46,7 +46,7 @@ void Benchmark::Run(Function<void(Benchmark&)> op)
 
 void Benchmark::Report()
 {
-	size_t widest = String("Overall Time").size();
+	size_t widest = string("Overall Time").size();
 	for(auto result : _snapshotResults)
 	{
 		if(result.Name.size() > widest)
@@ -58,7 +58,7 @@ void Benchmark::Report()
 	for(auto result : _snapshotResults)
 	{
 		size_t diff = widest - result.Name.size();
-		String spacePadding;
+		string spacePadding;
 		for(size_t i = 0; i < diff; ++i)
 		{
 			spacePadding.push_back(' ');
@@ -71,15 +71,15 @@ void Benchmark::Report()
 		}
 		FIRE_LOG_DEBUG("%f%f%s%s = %d", std::fixed, std::setprecision(10), result.Name, spacePadding, total / _numRuns);
 	}
-	String name("Overall Time");
+	string name("Overall Time");
 	size_t diff = widest - name.size();
-	String spacePadding;
+	string spacePadding;
 	for(size_t i = 0; i < diff; ++i)
 	{
 		spacePadding.push_back(' ');
 	}
-	auto cnt = Chrono::duration_cast<Chrono::nanoseconds>(
-		Chrono::duration<double, std::nano>(_overallStop - _overallStart)
+	auto cnt = eastl::chrono::duration_cast<eastl::chrono::nanoseconds>(
+		eastl::chrono::duration<double, std::nano>(_overallStop - _overallStart)
 		).count();
 	double overallTime = ((double)cnt / 1000000000.0);
 	FIRE_LOG_DEBUG("%f%f%s%s = %d", std::fixed, std::setprecision(10), name, spacePadding, overallTime);

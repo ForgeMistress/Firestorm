@@ -15,12 +15,7 @@
 OPEN_NAMESPACE(Firestorm);
 
 
-AssertionException::StreamFormatter::operator std::string() const
-{
-	return _stream.str();
-}
-
-AssertionException::AssertionException(const std::string& message)
+AssertionException::AssertionException(const eastl::string& message)
 : _expression("<force>")
 , _file("<force>")
 , _line(0)
@@ -32,7 +27,7 @@ AssertionException::AssertionException(const std::string& message)
 AssertionException::AssertionException(const char*   expression,
                                        const char*   file, 
                                        int           line,
-                                       const std::string& message)
+                                       const eastl::string& message)
 : _expression(expression)
 , _file(file)
 , _line(line)
@@ -43,23 +38,24 @@ AssertionException::AssertionException(const char*   expression,
 
 void AssertionException::Format() throw()
 {
-	std::ostringstream ostream;
+	//std::ostringstream ostream;
+	string ostream;
 	if(!_message.empty())
 	{
-		ostream << _message << ": ";
+		ostream.append_sprintf("%s: ", _message);
 	}
-	String expr(_expression);
+	string expr(_expression);
 
 	if(expr == "false" || expr == "0" || expr == "FALSE")
 	{
-		ostream << "Unreachable Code Assertion";
+		ostream.append_sprintf("Unreachable Code Assertion");
 	}
 	else
 	{
-		ostream << "Assertion '" << _expression << "'";
+		ostream.append_sprintf("Assertion '%s'", _expression);
 	}
-	ostream << " failed in file '" << _file << "' line# " << _line;
-	_report = ostream.str();
+	ostream.append_sprintf(" failed in file '%s' line# %d", _file, _line);
+	_report = ostream;
 
 	FIRE_LOG_ERROR(_report.c_str());
 }

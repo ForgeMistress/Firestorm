@@ -56,7 +56,7 @@ public:
 		_cond.notify_one();
 	}
 private:
-	std::queue<T> _queue;
+	eastl::queue<T> _queue;
 	std::mutex _mutex;
 	std::condition_variable _cond;
 };

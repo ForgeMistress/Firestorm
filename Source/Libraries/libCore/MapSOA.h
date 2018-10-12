@@ -19,8 +19,8 @@ template<class PrimaryKey, class... TypesT>
 struct MapSOA final
 {
 	using SOAType = SOA<TypesT...>;
-	using KeyToIndexMap = UnorderedMap<PrimaryKey, size_t>;
-	using IndexToKeyMap = Vector<PrimaryKey>;
+	using KeyToIndexMap = unordered_map<PrimaryKey, size_t>;
+	using IndexToKeyMap = vector<PrimaryKey>;
 public:
 	MapSOA() {}
 	~MapSOA() = default;

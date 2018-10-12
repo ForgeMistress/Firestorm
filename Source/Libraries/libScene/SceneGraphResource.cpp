@@ -76,7 +76,7 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 			Json::Value root;
 			if(!_reader->parse(&data[0], &data[data.size() - 1], &root, &errors))
 			{
-				return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, errors);
+				return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, errors.c_str());
 			}
 
 			FIRE_ASSERT_MSG(root.isMember("asset"), "not a valid gltf file. no 'asset' block.");
@@ -84,11 +84,11 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 			// Read the asset block.
 			auto asset = root["asset"];
 
-			RefPtr<SceneGraphResource> resource(std::make_shared<SceneGraphResource>(_renderMgr));
+			RefPtr<SceneGraphResource> resource(make_shared<SceneGraphResource>(_renderMgr));
 
-			resource->_assetData.Version = asset.get("version", "0.0.0").asString();
-			resource->_assetData.Copyright = asset.get("copyright", "").asString();
-			resource->_assetData.Generator = asset.get("generator", "<unknown>").asString();
+			resource->_assetData.Version = asset.get("version", "0.0.0").asCString();
+			resource->_assetData.Copyright = asset.get("copyright", "").asCString();
+			resource->_assetData.Generator = asset.get("generator", "<unknown>").asCString();
 
 			// now read the buffers and buffer views.
 			if(root.isMember("buffers"))
@@ -96,7 +96,7 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 				auto buffers = root["buffers"];
 				for(size_t i = 0; i < buffers.size(); ++i)
 				{
-					String meshResource(ref.GetPathTo() + buffers[i]["uri"].asString());
+					string meshResource(ref.GetPathTo() + buffers[(int)i]["uri"].asCString());
 					Resource mesh = resourceMgr->Load<MeshResource>(meshResource);
 					// kick off a load of the mesh.
 					resource->_buffers.push_back(SceneGraphResource::Buffer{
@@ -111,7 +111,7 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 				auto bufferViews = root["bufferViews"];
 				for(size_t i = 0; i < bufferViews.size(); ++i)
 				{
-					auto bufferView = bufferViews[i];
+					auto bufferView = bufferViews[(int)i];
 					resource->_bufferViews.push_back(SceneGraphResource::BufferView{
 						bufferView["buffer"].asUInt(),
 						bufferView["byteLength"].asUInt(),
@@ -122,7 +122,7 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 
 			return FIRE_LOAD_SUCCESS(resource);
 		}
-		return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, (String)result.error());
+		return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, (string)result.error());
 	}
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, path);
 }

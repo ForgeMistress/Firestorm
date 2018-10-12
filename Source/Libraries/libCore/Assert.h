@@ -11,8 +11,7 @@
 #define LIBCORE_ASSERT_H_
 #pragma once
 
-#include <ostream>
-#include <sstream>
+#include "libCore.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -20,24 +19,8 @@ OPEN_NAMESPACE(Firestorm);
 class AssertionException : public std::exception
 {
 public:
-	class StreamFormatter
-	{
-	public:
-		operator std::string() const;
-
-		template<class T>
-		StreamFormatter& operator<<(const T& value)
-		{
-			_stream << value;
-			return *this;
-		}
-
-	private:
-		std::ostringstream _stream;
-	};
-
-	AssertionException(const std::string& message);
-	AssertionException(const char* expression, const char* file, int line, const std::string& message);
+	AssertionException(const eastl::string& message);
+	AssertionException(const char* expression, const char* file, int line, const eastl::string& message);
 
 	virtual const char* what() const throw();
 
@@ -50,35 +33,31 @@ public:
 private:
 	void Format() throw();
 
-	const char* _expression;
-	const char* _file;
-	int         _line;
-	std::string _message;
-	std::string _report;
+	const char*   _expression;
+	const char*   _file;
+	int           _line;
+	eastl::string _message;
+	eastl::string _report;
 };
 
 #define FIRE_ASSERT_MSG(EXPRESSION, MESSAGE)    \
 	if(!(EXPRESSION))							\
-	{											\
-		AssertionException::StreamFormatter f;  \
-		f << MESSAGE;                           \
+	{                                           \
 		throw AssertionException(				\
 			#EXPRESSION,						\
 			__FILE__,							\
 			__LINE__,							\
-			(std::string)f);                    \
+			MESSAGE);                           \
 	}
 
 #define FIRE_ASSERT(EXPRESSION)                \
 	if(!(EXPRESSION))						   \
 	{										   \
-		AssertionException::StreamFormatter f; \
-		f << "an assertion was thrown";        \
 		throw AssertionException(			   \
 			#EXPRESSION,					   \
 			__FILE__,						   \
 			__LINE__,						   \
-			(std::string)f);                   \
+			"an exception was thrown");        \
 	}
 
 CLOSE_NAMESPACE(Firestorm);

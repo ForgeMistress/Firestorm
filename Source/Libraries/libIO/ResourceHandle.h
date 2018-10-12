@@ -34,7 +34,7 @@ class Resource
 public:
 	// make an empty handle that's waiting for a resource.
 	Resource();
-	Resource(Future<ResourceLoader::LoadResult>&& future);
+	Resource(future<ResourceLoader::LoadResult>&& future);
 
 	// move only
 	Resource(Resource&& other);
@@ -48,13 +48,13 @@ public:
 	template<class T>
 	const RefPtr<T> Get() const
 	{
-		return std::dynamic_pointer_cast<T>(PullData());
+		return eastl::dynamic_pointer_cast<T>(PullData());
 	}
 
 	template<class T>
 	RefPtr<T> Get()
 	{
-		return std::dynamic_pointer_cast<T>(PullData());
+		return eastl::dynamic_pointer_cast<T>(PullData());
 	}
 
 	/**
@@ -87,11 +87,11 @@ public:
 private:
 	ResourcePtr PullData() const;
 
-	mutable Error                                   _error;
-	mutable std::future<ResourceLoader::LoadResult> _future;
-	mutable ResourcePtr                             _obj;
-	mutable bool                                    _futurePulled{ false };
-	mutable bool                                    _isFinished{ false };
+	mutable Error                              _error;
+	mutable future<ResourceLoader::LoadResult> _future;
+	mutable ResourcePtr                        _obj;
+	mutable bool                               _futurePulled{ false };
+	mutable bool                               _isFinished{ false };
 
 	bool _hasFuture{ false };
 	bool _hasError{ false };

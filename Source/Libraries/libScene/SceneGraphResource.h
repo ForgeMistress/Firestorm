@@ -44,9 +44,9 @@ class SceneGraphResource final : public IResourceObject
 public:
 	struct AssetData
 	{
-		String Version;
-		String Generator;
-		String Copyright;
+		string Version;
+		string Generator;
+		string Copyright;
 	};
 
 	struct Buffer
@@ -70,8 +70,8 @@ public:
 private:
 	RenderMgr&                _renderMgr;
 	AssetData                 _assetData;
-	Vector<Buffer>            _buffers;
-	Vector<BufferView>        _bufferViews;
+	vector<Buffer>            _buffers;
+	vector<BufferView>        _bufferViews;
 };
 
 CLOSE_NAMESPACE(Firestorm);

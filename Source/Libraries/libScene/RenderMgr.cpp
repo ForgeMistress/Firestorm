@@ -33,19 +33,19 @@ RenderMgr::~RenderMgr()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderMgr::Initialize(const String& system, const LLGL::RenderContextDescriptor& renderContextDesc)
+void RenderMgr::Initialize(const string& system, const LLGL::RenderContextDescriptor& renderContextDesc)
 {
-	System = LLGL::RenderSystem::Load(system);
+	System = LLGL::RenderSystem::Load(system.c_str());
 	Context = System->CreateRenderContext(renderContextDesc);
 
 	// Print renderer information
 	const auto& info = System->GetRendererInfo();
 
-	if(info.rendererName.find("OpenGL") != String::npos)
+	if(info.rendererName.find("OpenGL") != string::npos)
 	{
 		_rendererName = Renderers::OpenGL;
 	}
-	else if(info.rendererName.find("Direct3D") != String::npos)
+	else if(info.rendererName.find("Direct3D") != string::npos)
 	{
 		_rendererName = Renderers::Direct3D;
 	}
@@ -65,10 +65,10 @@ void RenderMgr::Shutdown()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool RenderMgr::IsUsingRenderer(const String& api)
+bool RenderMgr::IsUsingRenderer(const string& api)
 {
-	String renderer(GetRenderer());
-	if(renderer.find(api) != String::npos)
+	string renderer(GetRenderer());
+	if(renderer.find(api) != string::npos)
 	{
 		return true;
 	}
@@ -77,28 +77,28 @@ bool RenderMgr::IsUsingRenderer(const String& api)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const String& RenderMgr::GetRenderer() const
+string RenderMgr::GetRenderer() const
 {
 	return _rendererName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const String& RenderMgr::GetDevice() const
+string RenderMgr::GetDevice() const
 {
 	return System->GetRendererInfo().deviceName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const String& RenderMgr::GetVendor() const
+string RenderMgr::GetVendor() const
 {
 	return System->GetRendererInfo().vendorName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const String& RenderMgr::GetShadingLanguageName() const
+string RenderMgr::GetShadingLanguageName() const
 {
 	return System->GetRendererInfo().shadingLanguageName;
 }

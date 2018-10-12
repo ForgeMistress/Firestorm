@@ -21,16 +21,16 @@ class Error
 {
 public:
 	Error();
-	Error(const ErrorCode* errorCode, const String& details);
+	Error(const ErrorCode* errorCode, const string& details);
 	Error(const Error& error);
 	Error(Error&& other);
-	explicit operator String() const;
+	explicit operator string() const;
 	explicit operator uint32_t() const;
 
 	Error& operator=(const Error& e);
 	bool operator==(const Error& e) const;
 
-	void Set(const ErrorCode* code, const String& details);
+	void Set(const ErrorCode* code, const string& details);
 
 	operator bool() const;
 
@@ -38,22 +38,22 @@ public:
 
 private:
 	const ErrorCode* _code;
-	String _details;
+	string _details;
 };
 
 class ErrorCode
 {
 	friend class Error;
 public:
-	ErrorCode(const String& message);
+	ErrorCode(const string& message);
 
-	explicit operator String() const;
-	explicit operator const String&() const;
+	explicit operator string() const;
+	explicit operator const string&() const;
 	explicit operator uint32_t() const;
 
 private:
 	uint32_t _code;
-	String   _message;
+	string   _message;
 
 	static uint32_t s_errorCodes;
 };

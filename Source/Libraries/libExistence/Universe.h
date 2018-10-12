@@ -96,7 +96,7 @@ private:
 	SystemList _systems;
 	EntityList _entities;
 
-	UnorderedSet<Mirror::Type> _systemTypes;
+	unordered_set<Mirror::Type> _systemTypes;
 
 	// Runtime
 	bool _running;
@@ -105,12 +105,12 @@ private:
 	using EntityPtr = RefPtr<Entity>;
 	using SystemPtr = RefPtr<System>;
 
-	UnorderedSet<EntityPtr> _entitiesToAdd;
-	UnorderedSet<EntityPtr> _entitiesToModify;
-	UnorderedSet<EntityPtr> _entitiesToRemove;
+	unordered_set<EntityPtr> _entitiesToAdd;
+	unordered_set<EntityPtr> _entitiesToModify;
+	unordered_set<EntityPtr> _entitiesToRemove;
 
-	UnorderedSet<SystemPtr> _systemsToAdd;
-	UnorderedSet<SystemPtr> _systemsToRemove;
+	unordered_set<SystemPtr> _systemsToAdd;
+	unordered_set<SystemPtr> _systemsToRemove;
 };*/
 
 CLOSE_NAMESPACE(Firestorm);

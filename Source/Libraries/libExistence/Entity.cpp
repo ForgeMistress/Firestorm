@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "Entity.h"
 #include "Universe.h"
+#include "ComponentDefinition.h"
 
 #include <libCore/Logger.h>
 
@@ -18,7 +19,6 @@ OPEN_NAMESPACE(Firestorm);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 EntityMgr::EntityMgr(UUIDMgr& uuidMgr)
-: _uuidMgr(uuidMgr)
 {
 }
 
@@ -26,8 +26,8 @@ EntityMgr::EntityMgr(UUIDMgr& uuidMgr)
 
 Entity EntityMgr::SpawnEntity(EntityData* data) const
 {
-	Entity out = nullptr;
-	if(!_deadEntities.empty())
+	Entity out ={ 0,0 };
+	/*if(!_deadEntities.empty())
 	{
 		out = _deadEntities.back();
 		_deadEntities.pop_back();
@@ -40,7 +40,7 @@ Entity EntityMgr::SpawnEntity(EntityData* data) const
 	if(data)
 	{
 		BuildEntity(out, data);
-	}
+	}*/
 	return out;
 }
 
@@ -82,7 +82,7 @@ bool EntityMgr::IsAlive(Entity entity)
 {
 	for(size_t i=0; i<_deadEntities.size(); ++i)
 	{
-		if(_deadEntities[i] == entity)
+		if(_deadEntities[i].id == entity.id)
 			return true;
 	}
 	return false;

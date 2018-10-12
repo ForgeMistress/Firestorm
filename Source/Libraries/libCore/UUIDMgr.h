@@ -32,7 +32,7 @@ private:
 	size_t _systemPageSize;
 	mutable void* _uuidBlock{ nullptr };
 	mutable size_t _numIDsUsed{ 0 };
-	Vector<void*> _trackedPages;
+	vector<void*> _trackedPages;
 };
 
 

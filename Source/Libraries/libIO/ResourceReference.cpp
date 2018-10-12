@@ -14,15 +14,15 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FIRE_MIRROR_DEFINE(Firestorm::ResourceReference)
-{
-	Class
-		.property("resourcePath", &ResourceReference::_resourcePath);
-}
+// FIRE_MIRROR_DEFINE(Firestorm::ResourceReference)
+// {
+// 	Class
+// 		.property("resourcePath", &ResourceReference::_resourcePath);
+// }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceReference::ResourceReference(const String& path)
+ResourceReference::ResourceReference(const string& path)
 : _resourcePath(path)
 {
 }
@@ -35,18 +35,18 @@ ResourceReference::~ResourceReference()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const String& ResourceReference::GetResourcePath() const
+const string& ResourceReference::GetResourcePath() const
 {
 	return _resourcePath;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-String ResourceReference::GetPathTo() const
+string ResourceReference::GetPathTo() const
 {
 	auto split = SplitString(_resourcePath, '/');
 	split.pop_back();
-	String out;
+	string out;
 	for(auto str : split)
 		out += str + "/";
 	return out;
@@ -54,7 +54,7 @@ String ResourceReference::GetPathTo() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceReference::SetResourcePath(const String& path)
+void ResourceReference::SetResourcePath(const string& path)
 {
 	_resourcePath = path;
 }

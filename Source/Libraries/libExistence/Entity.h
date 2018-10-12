@@ -16,7 +16,33 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-using Entity = UUID;
+using EntityID = uint64_t;
+
+static const unsigned ENT_INDEX_BITS = sizeof(EntityID) / 2;
+static const unsigned ENT_INDEX_MASK = (1<<ENT_INDEX_BITS) - 1;
+static const unsigned ENT_GENERATION_BITS = sizeof(EntityID) - ENT_INDEX_BITS;
+static const unsigned ENT_GENERATION_MASK = (1<<ENT_GENERATION_BITS) - 1;
+
+static const EntityID ENT_INVALID = eastl::numeric_limits<EntityID>::max();
+
+
+struct Entity
+{
+	EntityID id;
+	Entity():id(ENT_INVALID) {}
+	Entity(unsigned index, unsigned generation)
+	: id((generation << ENT_INDEX_BITS) | index)
+	{
+	}
+	size_t Index() const { return id & ENT_INDEX_MASK; }
+	size_t Generation() const { return (id >> ENT_INDEX_BITS) & ENT_GENERATION_MASK; }
+	bool Valid() const { return id == ENT_INVALID; }
+
+	bool operator==(const Entity& other)
+	{
+		return other.id == id;
+	}
+};
 
 struct EntityData
 {
@@ -25,7 +51,7 @@ struct EntityData
 class EntityMgr final
 {
 public:
-	using DestructionCallback = Function<void(Entity)>;
+	using DestructionCallback = function<void(Entity)>;
 
 	EntityMgr(UUIDMgr& uuidMgr);
 
@@ -65,15 +91,13 @@ private:
 	void DispatchDestruction(Entity entity);
 	void BuildEntity(Entity entity, EntityData* data) const;
 
-	UUIDMgr& _uuidMgr;
-
 	struct CallbackInfo
 	{
 		DestructionCallback Callback;
 		void* Registrant;
 	};
-	Vector<CallbackInfo> _destructionCallbacks;
-	mutable Vector<Entity> _deadEntities;
+	vector<CallbackInfo> _destructionCallbacks;
+	mutable vector<Entity> _deadEntities;
 };
 
 /*class Entity final
@@ -173,4 +197,22 @@ private:
 };*/
 
 CLOSE_NAMESPACE(Firestorm);
+
+OPEN_NAMESPACE(eastl);
+
+template<>
+struct hash<::Firestorm::Entity>
+{
+	size_t operator()(const ::Firestorm::Entity& e) const
+	{
+		return e.Index();
+	}
+};
+
+static bool operator==(const ::Firestorm::Entity& e1, const ::Firestorm::Entity& e2)
+{
+	return e1.id == e2.id;
+}
+
+CLOSE_NAMESPACE(eastl);
 #endif

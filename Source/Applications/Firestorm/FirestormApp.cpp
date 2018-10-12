@@ -37,7 +37,9 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	FIRE_ASSERT(libIO::FileExists("/Models/base-female.gltf"));
 
 	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
-	Dispatcher.Register(&FirestormApp::HandleApplicationWantsToClose, this);
+	Dispatcher.Register<ApplicationWantsToCloseEvent>([this](const ApplicationWantsToCloseEvent& e) {
+		HandleApplicationWantsToClose(e);
+	});// &FirestormApp::HandleApplicationWantsToClose, this);
 
 	struct Vertex
 	{
@@ -82,8 +84,8 @@ void FirestormApp::OnInitialize(int ac, char** av)
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
-	FIRE_ASSERT_MSG(!_shaderResource.HasError(), Format("Error Loading Shader: %s", (String)_shaderResource.GetError()));
-	FIRE_ASSERT_MSG(!_sceneGraphResource.HasError(), Format("Error Loading Mesh: %s", (String)_sceneGraphResource.GetError()));
+	FIRE_ASSERT_MSG(!_shaderResource.HasError(), Format("Error Loading Shader: %s", (string)_shaderResource.GetError()));
+	FIRE_ASSERT_MSG(!_sceneGraphResource.HasError(), Format("Error Loading Mesh: %s", (string)_sceneGraphResource.GetError()));
 
 	auto resource = _shaderResource.Get<ShaderProgramResource>();
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;

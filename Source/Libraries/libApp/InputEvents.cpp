@@ -12,9 +12,9 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-FIRE_MIRROR_DEFINE(MouseButtonEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(MouseButtonEvent)
+// {
+// }
 
 MouseButtonEvent::MouseButtonEvent(Application* app, int button, bool isDown, int mods)
 : App(app)
@@ -24,9 +24,9 @@ MouseButtonEvent::MouseButtonEvent(Application* app, int button, bool isDown, in
 {
 }
 
-FIRE_MIRROR_DEFINE(MouseMoveEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(MouseMoveEvent)
+// {
+// }
 
 MouseMoveEvent::MouseMoveEvent(Application* app, const Vector2& previousPos, const Vector2& currentPos)
 : App(app)
@@ -43,9 +43,9 @@ Vector2 MouseMoveEvent::GetDelta() const
 	};
 }
 
-FIRE_MIRROR_DEFINE(ScrollWheelEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(ScrollWheelEvent)
+// {
+// }
 
 ScrollWheelEvent::ScrollWheelEvent(Application* app, const Vector2& offset)
 : App(app)
@@ -53,9 +53,9 @@ ScrollWheelEvent::ScrollWheelEvent(Application* app, const Vector2& offset)
 {
 }
 
-FIRE_MIRROR_DEFINE(CharEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(CharEvent)
+// {
+// }
 
 CharEvent::CharEvent(Application* app, unsigned int c)
 : App(app)
@@ -63,9 +63,9 @@ CharEvent::CharEvent(Application* app, unsigned int c)
 {
 }
 
-FIRE_MIRROR_DEFINE(CharModsEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(CharModsEvent)
+// {
+// }
 
 CharModsEvent::CharModsEvent(Application* app, unsigned int c, int mods)
 	: App(app)
@@ -74,9 +74,9 @@ CharModsEvent::CharModsEvent(Application* app, unsigned int c, int mods)
 {
 }
 
-FIRE_MIRROR_DEFINE(KeyEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(KeyEvent)
+// {
+// }
 
 KeyEvent::KeyEvent(Application* app, int key, int scancode, int mods, bool isDown)
 : App(app)
@@ -87,9 +87,9 @@ KeyEvent::KeyEvent(Application* app, int key, int scancode, int mods, bool isDow
 {
 }
 
-FIRE_MIRROR_DEFINE(KeyRepeatEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(KeyRepeatEvent)
+// {
+// }
 
 KeyRepeatEvent::KeyRepeatEvent(Application* app, int key, int scancode, int mods)
 : App(app)
@@ -99,9 +99,9 @@ KeyRepeatEvent::KeyRepeatEvent(Application* app, int key, int scancode, int mods
 {
 }
 
-FIRE_MIRROR_DEFINE(JoystickConnectedEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(JoystickConnectedEvent)
+// {
+// }
 
 JoystickConnectedEvent::JoystickConnectedEvent(Application* app, int jid)
 : App(app)
@@ -109,9 +109,9 @@ JoystickConnectedEvent::JoystickConnectedEvent(Application* app, int jid)
 {
 }
 
-FIRE_MIRROR_DEFINE(JoystickDisconnectedEvent)
-{
-}
+// FIRE_MIRROR_DEFINE(JoystickDisconnectedEvent)
+// {
+// }
 
 JoystickDisconnectedEvent::JoystickDisconnectedEvent(Application* app, int jid)
 : App(app)

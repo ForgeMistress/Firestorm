@@ -21,8 +21,8 @@ ArgParser::ArgParser(int ac, char** av)
 {
 	for(int i = 0; i < ac; ++i)
 	{
-		String arg(av[i]);
-		Vector<String> splitString(SplitString(av[i], '='));
+		string arg(av[i]);
+		vector<string> splitString(SplitString(av[i], '='));
 		if(splitString.size() == 1)
 		{
 			_args[splitString[0]] = "__FIRESTORM_TRUE_VALUE__";
@@ -34,7 +34,7 @@ ArgParser::ArgParser(int ac, char** av)
 	}
 }
 
-bool ArgParser::Get(const String& key, bool def)
+bool ArgParser::Get(const string& key, bool def)
 {
 	if(_args.find(key) == _args.end())
 		return def;
@@ -45,19 +45,19 @@ bool ArgParser::Get(const String& key, bool def)
 	return def;
 }
 
-String ArgParser::Get(const String& key, const String& def)
+string ArgParser::Get(const string& key, const string& def)
 {
 	if(_args.find(key) == _args.end())
 		return def;
 	return _args[key];
 }
 
-String ArgParser::Get(const String& key, const char* def)
+string ArgParser::Get(const string& key, const char* def)
 {
-	return Get(key, String(def));
+	return Get(key, string(def));
 }
 
-bool ArgParser::Has(const String& key) const
+bool ArgParser::Has(const string& key) const
 {
 	return _args.find(key) != _args.end();
 }

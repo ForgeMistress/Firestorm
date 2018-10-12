@@ -33,23 +33,24 @@ ShaderProgramLoader::~ShaderProgramLoader()
 
 ShaderProgramLoader::LoadResult ShaderProgramLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
 {
-	const String& filename = ref.GetResourcePath();
+	const string& filename = ref.GetResourcePath();
 	if(libIO::FileExists(filename))
 	{
-		Result<Vector<char>, Error> result = libIO::LoadFile(filename);
+		Result<vector<char>, Error> result = libIO::LoadFile(filename);
 		if(result.has_value())
 		{
-			const Vector<char>& data = result.value();
+			const vector<char>& data = result.value();
 			Json::Value root;
-			JSONCPP_STRING errors;
-			if(!_reader->parse(&data[0], &data[data.size() - 1], &root, &errors))
+			JSONCPP_STRING e;
+			if(!_reader->parse(&data[0], &data[data.size() - 1], &root, &e))
 			{
+				string errors(e.c_str());
 				return FIRE_LOAD_FAIL(
 					ResourceIOErrors::PARSING_ERROR,
 					errors);
 			}
 
-			RefPtr<ShaderProgramResource> shaderResource(std::make_shared<ShaderProgramResource>(_renderMgr));
+			RefPtr<ShaderProgramResource> shaderResource(make_shared<ShaderProgramResource>(_renderMgr));
 
 			if(_renderMgr.IsUsingRenderer(Renderers::OpenGL))
 			{
@@ -59,9 +60,9 @@ ShaderProgramLoader::LoadResult ShaderProgramLoader::Load(ResourceMgr* resourceM
 
 					if(openGL.isMember("vertex"))
 					{
-						auto value = openGL["vertex"].asString();
+						string value(openGL["vertex"].asCString());
 						FIRE_LOG_DEBUG("    :: Loading Vertex Shader %s", value);
-						Result<String, Error> result = libIO::LoadFileString(value);
+						Result<string, Error> result = libIO::LoadFileString(value);
 						if(!result.has_value())
 						{
 							return FIRE_LOAD_FAIL(
@@ -73,9 +74,9 @@ ShaderProgramLoader::LoadResult ShaderProgramLoader::Load(ResourceMgr* resourceM
 
 					if(openGL.isMember("fragment"))
 					{
-						auto value = openGL["fragment"].asString();
+						string value(openGL["fragment"].asCString());
 						FIRE_LOG_DEBUG("    :: Loading Fragment Shader %s", value);
-						Result<String, Error> result = libIO::LoadFileString(value);
+						Result<string, Error> result = libIO::LoadFileString(value);
 						if(!result.has_value())
 						{
 							return FIRE_LOAD_FAIL(
@@ -88,9 +89,9 @@ ShaderProgramLoader::LoadResult ShaderProgramLoader::Load(ResourceMgr* resourceM
 
 					if(openGL.isMember("geometry"))
 					{
-						auto value = openGL["geometry"].asString();
+						string value(openGL["geometry"].asCString());
 						FIRE_LOG_DEBUG("    :: Loading Geometry Shader %s", value);
-						Result<String, Error> result = libIO::LoadFileString(value);
+						Result<string, Error> result = libIO::LoadFileString(value);
 						if(!result.has_value())
 						{
 							return FIRE_LOAD_FAIL(
@@ -111,7 +112,7 @@ ShaderProgramLoader::LoadResult ShaderProgramLoader::Load(ResourceMgr* resourceM
 		}
 		return FIRE_LOAD_FAIL(
 			ResourceIOErrors::FILE_READ_ERROR,
-			((String)result.error()));
+			((string)result.error()));
 	}
 	return FIRE_LOAD_FAIL(
 		ResourceIOErrors::FILE_NOT_FOUND_ERROR,
@@ -248,7 +249,7 @@ LLGL::Shader* ShaderProgramResource::MakeShader(LLGL::ShaderType shaderType)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ShaderProgramResource::AddShaderData(LLGL::ShaderType type, const String& data)
+bool ShaderProgramResource::AddShaderData(LLGL::ShaderType type, const string& data)
 {
 	if(_shaderData.find(type) != _shaderData.end())
 	{
@@ -268,7 +269,7 @@ bool ShaderProgramResource::CompileShader(LLGL::ShaderType type)
 		if(shader != nullptr)
 		{
 			_shaderData.erase(type);
-			String log = shader->QueryInfoLog();
+			string log(shader->QueryInfoLog().c_str());
 			if(log.empty())
 			{
 				if(!shader->HasErrors())

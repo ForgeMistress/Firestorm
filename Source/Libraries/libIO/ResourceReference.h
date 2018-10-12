@@ -28,24 +28,24 @@ class ResourceReference final : public Mirror::Object
 {
 	FIRE_MIRROR_DECLARE(ResourceReference, Mirror::Object);
 public:
-	ResourceReference(const String& path = "");
+	ResourceReference(const string& path = "");
 	virtual ~ResourceReference();
 
 	/**
 		Retrieve the path to the resource on disk.
 	 **/
-	const String& GetResourcePath() const;
+	const string& GetResourcePath() const;
 
 	/**
 		Retrieve the path to this resource without the filename.
 	 **/
-	String GetPathTo() const;
+	string GetPathTo() const;
 
 private:
 	friend class ResourceMgr;
-	void SetResourcePath(const String& path);
+	void SetResourcePath(const string& path);
 
-	String _resourcePath;
+	string _resourcePath;
 };
 
 CLOSE_NAMESPACE(Firestorm);

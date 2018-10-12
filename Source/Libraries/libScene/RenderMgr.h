@@ -35,16 +35,16 @@ public:
 	RenderMgr(ResourceMgr& fileIOMgr, ObjectMaker& objectMaker);
 	~RenderMgr();
 
-	void Initialize(const String& renderingSystem, const LLGL::RenderContextDescriptor& renderContextDesc);
+	void Initialize(const string& renderingSystem, const LLGL::RenderContextDescriptor& renderContextDesc);
 
 	void Shutdown();
 
-	bool IsUsingRenderer(const String& api);
+	bool IsUsingRenderer(const string& api);
 
-	const String& GetRenderer() const;
-	const String& GetDevice() const;
-	const String& GetVendor() const;
-	const String& GetShadingLanguageName() const;
+	string GetRenderer() const;
+	string GetDevice() const;
+	string GetVendor() const;
+	string GetShadingLanguageName() const;
 
 	LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& desc);
 
@@ -53,7 +53,7 @@ public:
 	LLGL::RenderContext* Context{ nullptr };
 
 private:
-	String _rendererName;
+	string _rendererName;
 
 	ResourceMgr& _fileIOMgr;
 	ObjectMaker& _objectMaker;

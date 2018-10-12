@@ -26,7 +26,7 @@ ObjectMaker::~ObjectMaker()
 	_makers.clear();
 }
 
-bool ObjectMaker::RegisterMaker(Mirror::Type type, IMaker* maker)
+bool ObjectMaker::RegisterMaker(FireClassID type, IMaker* maker)
 {
 	std::scoped_lock lock(_s_allLock);
 	if(_makers.find(type) == _makers.end())
@@ -37,18 +37,18 @@ bool ObjectMaker::RegisterMaker(Mirror::Type type, IMaker* maker)
 	return false;
 }
 
-void* ObjectMaker::Make(Mirror::Type type)
+void* ObjectMaker::Make(FireClassID type)
 {
 	IMaker* maker = GetMaker(type);
 	return maker->Make();
 }
 
-bool ObjectMaker::IsMakerRegistered(Mirror::Type type) const
+bool ObjectMaker::IsMakerRegistered(FireClassID type) const
 {
 	return _makers.find(type) != _makers.end();
 }
 
-IMaker* ObjectMaker::GetMaker(Mirror::Type type) const
+IMaker* ObjectMaker::GetMaker(FireClassID type) const
 {
 	std::scoped_lock<std::mutex> lock(_s_allLock);
 	auto found = _makers.find(type);

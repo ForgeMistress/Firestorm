@@ -4,7 +4,22 @@
 
 #include <libCore/Logger.h>
 
-#if defined FIRE_DEBUG || FIRE_RELEASE
+OPEN_NAMESPACE(Firestorm);
+
+CLOSE_NAMESPACE(Firestorm);
+
+#define FIRE_MIRROR_DECLARE(OBJECT_TYPE, ...) \
+public:                                       \
+	static FireClassID MyType()               \
+	{                                         \
+		static FireClassIDType _id {          \
+			#OBJECT_TYPE                      \
+		};                                    \
+		return &_id;                          \
+	}                                         \
+private:
+
+//#if defined FIRE_DEBUG || FIRE_RELEASE
 /**
 	Macro that provides more functions to a reflected object.
 
@@ -12,7 +27,7 @@
 	static Is       - Checks the type against all common forms.
 	virtual GetType - Retrieve the type at the instance leve.
 **/
-	#define FIRE_MIRROR_DECLARE(ObjectType, ...)                                                                   \
+	/*#define FIRE_MIRROR_DECLARE(ObjectType, ...)                                                                   \
 		private:                                                                                                   \
 			static bool s_isRegistered;                                                                            \
 			template <class T> friend struct Library;                                                              \
@@ -49,9 +64,9 @@
 			template<typename Ctor_Type, typename Policy, typename Accessor, typename Arg_Indexer>				   \
 			friend struct rttr::detail::constructor_invoker
 
-#endif // FIRE_MIRROR_DECLARE macro
+#endif // FIRE_MIRROR_DECLARE macro*/
 
-#if defined FIRE_DEBUG || FIRE_RELEASE
+/*#if defined FIRE_DEBUG || FIRE_RELEASE
 	#define FIRE_MIRROR_DEFINE_NAMED(ObjectType, ObjectName)			                                       \
 		bool ObjectType::s_isRegistered = false;                                                               \
 		rttr::type ObjectType::MyType()                                                                        \
@@ -113,11 +128,11 @@
 			ObjectType::DoRegisterReflection(registration);                                            \
 		}                                                                                              \
 		void ObjectType::DoRegisterReflection(register_type& Class)
-#endif // FIRE_MIRROR_DEFINE_NAMED macro
+#endif // FIRE_MIRROR_DEFINE_NAMED macro*/
 
 /**
 	Define a class for the reflection system.
  **/
-#define FIRE_MIRROR_DEFINE(ObjectType) FIRE_MIRROR_DEFINE_NAMED(ObjectType, #ObjectType)
+#define FIRE_MIRROR_DEFINE(ObjectType)// FIRE_MIRROR_DEFINE_NAMED(ObjectType, #ObjectType)
 
 #endif

@@ -42,9 +42,7 @@ template<class T>
 template<class U>
 void Library<T>::RegisterReflection()
 {
-	U::RegisterReflection();
-	Mirror::Type t = Mirror::Type::get<U>();
-	FIRE_LOG_DEBUG("        :: Size of %s = %d ((%d))", t.get_name(), t.get_sizeof(), sizeof(U));
+	//U::RegisterReflection();
 }
 
 }

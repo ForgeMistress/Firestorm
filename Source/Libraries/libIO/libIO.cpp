@@ -15,7 +15,7 @@ OPEN_NAMESPACE(Firestorm);
 
 const ErrorCode* libIO::INTERNAL_ERROR(new ErrorCode("there was an error that occurred with the internal libraries"));
 
-static void LogLastPhysfsError(const String& preamble)
+static void LogLastPhysfsError(const string& preamble)
 {
 	PHYSFS_ErrorCode lastErrorCode = PHYSFS_getLastErrorCode();
 	if(lastErrorCode != PHYSFS_ERR_OK)
@@ -30,13 +30,13 @@ void libIO::Initialize(int ac, char** av)
 
 	FIRE_ASSERT(parser.Has("--AppName") && "Application must have --AppName defined as an argument");
 
-	String assetsDir(parser.Get("--AssetsDir", av[0]));
+	string assetsDir(parser.Get("--AssetsDir", av[0]));
 
 	if(PHYSFS_init(assetsDir.c_str()) != 0)
 	{
 		LogLastPhysfsError("Error Initializing physfs");
 	}
-	String appName(parser.Get("--AppName", String()));
+	string appName(parser.Get("--AppName", string()));
 
 	if(!PHYSFS_isDirectory(appName.c_str()))
 	{
@@ -46,15 +46,15 @@ void libIO::Initialize(int ac, char** av)
 	if(!libIO::Mount(assetsDir.c_str(),"/"))
 		LogLastPhysfsError("Error when mounting 'Assets' directory");
 
-	String appDir(assetsDir + "/" + appName.c_str());
+	string appDir(assetsDir + "/" + appName.c_str());
 
 	if(!libIO::Mount(appDir, "/"))
 		LogLastPhysfsError("Error when mounting '"+appName+"' directory");
 
-	String modules(parser.Get("--Modules", ""));
+	string modules(parser.Get("--Modules", ""));
 	if(!modules.empty())
 	{
-		Vector<String> mods = SplitString(modules, ',');
+		vector<string> mods = SplitString(modules, ',');
 		for(auto mod : mods)
 		{
 			if(!libIO::Mount(assetsDir + "/" + mod, "/"))
@@ -62,11 +62,11 @@ void libIO::Initialize(int ac, char** av)
 		}
 	}
 
-	String prefDir(PHYSFS_getPrefDir("com.org.firestorm", appName.c_str()));
+	string prefDir(PHYSFS_getPrefDir("com.org.firestorm", appName.c_str()));
 	PHYSFS_setWriteDir(prefDir.c_str());
 }
 
-bool libIO::Mount(const String& dir, const String& mountPoint)
+bool libIO::Mount(const string& dir, const string& mountPoint)
 {
 	if(PHYSFS_mount(dir.c_str(), mountPoint.c_str(), true) != PHYSFS_ERR_OK)
 	{
@@ -75,14 +75,14 @@ bool libIO::Mount(const String& dir, const String& mountPoint)
 	return true;
 }
 
-bool libIO::FileExists(const String& filename)
+bool libIO::FileExists(const string& filename)
 {
 	return PHYSFS_exists(filename.c_str()) != 0;
 }
 
-Result<Vector<char>, Error> libIO::LoadFile(const String& filename)
+Result<vector<char>, Error> libIO::LoadFile(const string& filename)
 {
-	Vector<char> data;
+	vector<char> data;
 	PHYSFS_File* file = PHYSFS_openRead(filename.c_str());
 	if (file)
 	{
@@ -111,31 +111,31 @@ Result<Vector<char>, Error> libIO::LoadFile(const String& filename)
 	return data;
 }
 
-Result<String, Error> libIO::LoadFileString(const String& filename)
+Result<string, Error> libIO::LoadFileString(const string& filename)
 {
-	Result<Vector<char>, Error> data = LoadFile(filename);
+	Result<vector<char>, Error> data = LoadFile(filename);
 	if(data.has_value())
 	{
 		auto d = data.value();
-		return FIRE_RESULT(String(d.begin(), d.end()));
+		return FIRE_RESULT(string(d.begin(), d.end()));
 	}
 	return FIRE_FORWARD_ERROR(data.error());
 }
 
 static PHYSFS_EnumerateCallbackResult enumerateGetFiles(void* data, const char* origData, const char* fname)
 {
-	Vector<String>* ptr = static_cast<Vector<String>*>(data);
+	vector<string>* ptr = static_cast<vector<string>*>(data);
 	ptr->push_back(fname);
 	return PHYSFS_ENUM_OK;
 }
 
-Vector<String> libIO::GetFiles(const String& path)
+vector<string> libIO::GetFiles(const string& path)
 {
 	/*
 	PHYSFS_EnumerateCallbackResult (*PHYSFS_EnumerateCallback)(void *data,
 									   const char *origdir, const char *fname);
 	*/
-	Vector<String> outFiles;
+	vector<string> outFiles;
 	PHYSFS_enumerate(path.c_str(), enumerateGetFiles, &outFiles);
 	return outFiles;
 }

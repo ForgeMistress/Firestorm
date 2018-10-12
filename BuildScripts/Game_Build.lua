@@ -18,7 +18,8 @@ links({
     "jsoncpp",
     "angelscript",
     "LLGL",
-    "physfs"
+    "physfs",
+    "EASTL"
 })
 
 if _OPTIONS["gfxapi"] == "OpenGL" then

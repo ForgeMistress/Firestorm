@@ -31,7 +31,7 @@ Resource::Resource()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Resource::Resource(Future<ResourceLoader::LoadResult>&& future)
+Resource::Resource(future<ResourceLoader::LoadResult>&& future)
 : _obj(nullptr)
 , _future(std::move(future))
 , _hasFuture(true)

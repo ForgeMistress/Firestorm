@@ -19,39 +19,8 @@ workspace("*")
 
 include("Options")
 
--- All projects will have the following build targets available to them.
-configurations({
-    "Debug",
-    "Release",
-    "Final",
-})
-
-platforms({
-    "Win32",
-    "Win64"
-})
 
 location("Projects")
-
-filter("platforms:Win32")
-    architecture("x86")
-filter("platforms:Win64")
-    architecture("x86_64")
-
-filter("action:vs*")
-    defines({ "FIRE_VISUALSTUDIO" })
-clearFilters()
-
-filter("configurations:Debug")
-    runtime("Debug")
-    defines({"FIRE_DEBUG"});
-filter("configurations:Release")
-    runtime("Release")
-    defines({"FIRE_RELEASE"})
-filter("configurations:Final")
-    runtime("Release");
-    defines({"FIRE_FINAL"});
-clearFilters()
 
 function build(lib)
     include(lib.."_Build")
@@ -62,9 +31,42 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 workspace("Firestorm")
 
+-- All projects will have the following build targets available to them.
+configurations({
+    "Debug",
+    "Release",
+    "Final",
+})
+
+platforms({
+    "Windows"
+})
+
+filter({"platforms:*"})
+    architecture("x86_64")
+clearFilters()
+
+filter("action:vs*")
+    defines({ "FIRE_VISUALSTUDIO" })
+clearFilters()
+
+filter("configurations:Debug")
+    runtime("Debug")
+    defines({"FIRE_DEBUG"});
+clearFilters()
+filter("configurations:Release")
+    runtime("Release")
+    defines({"FIRE_RELEASE"})
+clearFilters()
+filter("configurations:Final")
+    runtime("Release");
+    defines({"FIRE_FINAL"});
+clearFilters()
+
 ------------------------------------------------------------------------------------------------------------------------
 --  THIRD PARTY LIBRARIES
 ------------------------------------------------------------------------------------------------------------------------
+build("EASTL")
 build("JsonCPP")
 build("RTTR")
 build("Angelscript")
@@ -81,7 +83,6 @@ build("libCore")
 build("libExistence")
 build("libHarnessed")
 build("libIO")
--- build("libJson")
 build("libMath")
 build("libMirror")
 build("libScene")

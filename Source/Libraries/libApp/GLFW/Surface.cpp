@@ -124,7 +124,7 @@ namespace {
 	}*/
 }
 
-Surface::Surface(class Application* app, const LLGL::Extent2D& size, const String& title)
+Surface::Surface(class Application* app, const LLGL::Extent2D& size, const string& title)
 : _app(app)
 , _size(size)
 , _title(title)
@@ -226,7 +226,7 @@ GLFWwindow* Surface::CreateGLFWWindow()
 	}
 	auto wnd = glfwCreateWindow(_size.width, _size.height, _title.c_str(), nullptr, nullptr);
 	if(!wnd)
-		throw std::runtime_error(String(String("could not create GLFW window titled ") + _title).c_str());
+		throw std::runtime_error(string(string("could not create GLFW window titled ") + _title).c_str());
 
 	glfwSetWindowUserPointer(wnd, this);
 	glfwSetCharCallback(wnd, GLFW_CharCallback);

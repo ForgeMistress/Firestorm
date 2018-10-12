@@ -66,7 +66,7 @@ Json::Value libSerial::Convert(const Mirror::Variant& var)
 		else if(t == type::get<double>())
 			return Json::Value(var.to_double());
 	}
-	else if(t == type::get<String>())
+	else if(t == type::get<string>())
 	{
 		return Json::Value(var.to_string());
 	}

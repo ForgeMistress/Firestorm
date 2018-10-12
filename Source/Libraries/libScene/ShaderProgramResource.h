@@ -25,6 +25,18 @@
 
 #include <LLGL/VertexFormat.h>
 
+
+OPEN_NAMESPACE(eastl);
+template<>
+struct hash<LLGL::ShaderType>
+{
+	size_t operator()(const LLGL::ShaderType& x) const
+	{
+		return static_cast<size_t>(x);
+	}
+};
+CLOSE_NAMESPACE(eastl);
+
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,12 +72,12 @@ public:
 private:
 	void PurgeCompiledShaders();
 	LLGL::Shader* MakeShader(LLGL::ShaderType shaderType);
-	bool AddShaderData(LLGL::ShaderType type, const String& data);
+	bool AddShaderData(LLGL::ShaderType type, const string& data);
 	bool CompileShader(LLGL::ShaderType type);
 
 	RenderMgr&                                    _renderMgr;
-	UnorderedMap<LLGL::ShaderType, LLGL::Shader*> _shaders;
-	UnorderedMap<LLGL::ShaderType, String>        _shaderData;
+	unordered_map<LLGL::ShaderType, LLGL::Shader*> _shaders;
+	unordered_map<LLGL::ShaderType, string>        _shaderData;
 	LLGL::ShaderProgram*                          _shaderProgram{ nullptr };
 	bool                                          _isCompiled{ false };
 };

@@ -13,9 +13,6 @@
 
 #include "Object.h"
 
-#include <libIO/IDocument.h>
-
-
 OPEN_NAMESPACE(Firestorm);
 OPEN_NAMESPACE(Mirror);
 

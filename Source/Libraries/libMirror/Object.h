@@ -25,27 +25,17 @@
 
 #include "MirrorMacros.h"
 
-// Borrowed from https://stackoverflow.com/questions/401621/best-way-to-for-c-types-to-self-register-in-a-list
-template<typename D>
-struct AutomaticRegister
-{
-public:
-	struct ExecRegister
-	{
-		ExecRegister()
-		{
-			D::DoRegisterReflection();
-		}
-	};
-private:
-	// will force instantiation of definition of static member
-	template<ExecRegister&> struct ref_it {};
+OPEN_NAMESPACE(Firestorm);
 
-	static ExecRegister s_registerObject;
-	static ref_it<s_registerObject> s_referrer;
+
+struct FireClassIDType
+{
+	FireClassIDType(const char* name);
+	const char* Name{ nullptr };
 };
 
-OPEN_NAMESPACE(Firestorm);
+using FireClassID = FireClassIDType*;
+
 OPEN_NAMESPACE(Mirror);
 
 /**

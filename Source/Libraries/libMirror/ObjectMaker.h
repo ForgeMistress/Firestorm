@@ -46,25 +46,25 @@ public:
 	{
 		return RegisterMaker(T::MyType(), maker);
 	}
-	bool RegisterMaker(Mirror::Type type, IMaker* maker);
+	bool RegisterMaker(FireClassID type, IMaker* maker);
 
 	template<class T, class... Args_t>
 	T* Make()
 	{
 		return reinterpret_cast<T*>(Make(T::MyType()));
 	}
-	void* Make(Mirror::Type type);
+	void* Make(FireClassID type);
 
 	template<class T>
 	bool IsMakerRegistered()
 	{
 		return IsMakerRegistered(T::MyType());
 	}
-	bool IsMakerRegistered(Mirror::Type type) const;
+	bool IsMakerRegistered(FireClassID type) const;
 
 private:
-	IMaker* GetMaker(Mirror::Type type) const;
-	UnorderedMap<Mirror::Type, IMaker*> _makers;
+	IMaker* GetMaker(FireClassID type) const;
+	unordered_map<FireClassID, IMaker*> _makers;
 	mutable Mutex _s_allLock;
 };
 

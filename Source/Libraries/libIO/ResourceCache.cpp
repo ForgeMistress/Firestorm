@@ -30,7 +30,7 @@ ResourceCache::~ResourceCache()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceCache::AddResource(const String& name, const RefPtr<IResourceObject>& resourceObject)
+bool ResourceCache::AddResource(const string& name, const RefPtr<IResourceObject>& resourceObject)
 {
 	std::scoped_lock lock(_cacheLock);
 	auto found = _cache.find(name);
@@ -44,7 +44,7 @@ bool ResourceCache::AddResource(const String& name, const RefPtr<IResourceObject
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceCache::HasResource(const String& name)
+bool ResourceCache::HasResource(const string& name)
 {
 	std::scoped_lock lock(_cacheLock);
 	return _cache.find(name) != _cache.end();
@@ -52,7 +52,7 @@ bool ResourceCache::HasResource(const String& name)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourcePtr ResourceCache::FindResource(const String& name) const
+ResourcePtr ResourceCache::FindResource(const string& name) const
 {
 	std::scoped_lock lock(_cacheLock);
 	auto found = _cache.find(name);

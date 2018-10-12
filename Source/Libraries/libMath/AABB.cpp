@@ -14,14 +14,14 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FIRE_MIRROR_DEFINE(AABB_2D)
-{
-	Class
-		.property("t", &AABB_2D::_top)
-		.property("l", &AABB_2D::_left)
-		.property("b", &AABB_2D::_bottom)
-		.property("r", &AABB_2D::_right);
-}
+// FIRE_MIRROR_DEFINE(AABB_2D)
+// {
+// 	Class
+// 		.property("t", &AABB_2D::_top)
+// 		.property("l", &AABB_2D::_left)
+// 		.property("b", &AABB_2D::_bottom)
+// 		.property("r", &AABB_2D::_right);
+// }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -45,38 +45,38 @@ AABB_2D::AABB_2D(float top, float left, float bottom, float right)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FIRE_MIRROR_DEFINE(AABB_3D)
-{
-	Class
-		.property("minx", &AABB_3D::_minx)
-		.property("miny", &AABB_3D::_miny)
-		.property("minz", &AABB_3D::_minz)
-		.property("maxx", &AABB_3D::_maxx)
-		.property("maxy", &AABB_3D::_maxy)
-		.property("maxz", &AABB_3D::_maxz);
-}
+// FIRE_MIRROR_DEFINE(AABB_3D)
+// {
+// 	Class
+// 		.property("minx", &AABB_3D::_minx)
+// 		.property("miny", &AABB_3D::_miny)
+// 		.property("minz", &AABB_3D::_minz)
+// 		.property("maxx", &AABB_3D::_maxx)
+// 		.property("maxy", &AABB_3D::_maxy)
+// 		.property("maxz", &AABB_3D::_maxz);
+// }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 AABB_3D::AABB_3D()
-	: _minx(0)
-	, _miny(0)
-	, _minz(0)
-	, _maxx(0.1f)
-	, _maxy(0.1f)
-	, _maxz(0.1f)
+: _minx(0)
+, _miny(0)
+, _minz(0)
+, _maxx(0.1f)
+, _maxy(0.1f)
+, _maxz(0.1f)
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 AABB_3D::AABB_3D(float minx, float miny, float minz, float maxx, float maxy, float maxz)
-	: _minx(minx)
-	, _miny(miny)
-	, _minz(minz)
-	, _maxx(maxx)
-	, _maxy(maxy)
-	, _maxz(maxz)
+: _minx(minx)
+, _miny(miny)
+, _minz(minz)
+, _maxx(maxx)
+, _maxy(maxy)
+, _maxz(maxz)
 {
 }
 

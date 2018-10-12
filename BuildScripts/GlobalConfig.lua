@@ -49,6 +49,21 @@ do
     end
 end
 
+function COMMON_INCLUDES()
+    includedirs({
+        THIRD_PARTY_SRC_DIR,
+        THIRD_PARTY_SRC_DIR.."/rttr/src",
+        THIRD_PARTY_SRC_DIR.."/glfw/include",
+        THIRD_PARTY_SRC_DIR.."/glfw/deps",
+        THIRD_PARTY_SRC_DIR.."/LLGL/include",
+        THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include",
+        THIRD_PARTY_SRC_DIR.."/EASTL",
+        THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EABase/include/Common",
+        THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAAssert/include",
+        THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAStdC/include"
+    })
+end
+
 function configureEngineLib(libName)
     clearFilters()
 
@@ -60,16 +75,19 @@ function configureEngineLib(libName)
     cppdialect("C++17")
     kind("StaticLib")
 
+    filter({"platforms:Win32"})
+        architecture("x86")
+    clearFilters()
+    filter({"platforms:Win64"})
+        architecture("x86_64")
+    clearFilters()
+
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_LIB_SOURCE_DIR,
-        THIRD_PARTY_SRC_DIR,
-        THIRD_PARTY_SRC_DIR.."/rttr/src",
-        THIRD_PARTY_SRC_DIR.."/glfw/include",
-        THIRD_PARTY_SRC_DIR.."/LLGL/include",
-        THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include"
     })
+    COMMON_INCLUDES()
     libdirs({ ENGINE_BIN_OUTPUT_DIR })
 
     pchheader("stdafx.h")
@@ -79,7 +97,10 @@ function configureEngineLib(libName)
         ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.h",
         ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.cpp"
     })
-    dependson({"rttr"})
+    dependson({
+        "rttr",
+        "EASTL"
+    })
 end
 
 function configureToolsApplication(appName, gameName)
@@ -93,18 +114,20 @@ function configureToolsApplication(appName, gameName)
     cppdialect("C++17")
     kind("ConsoleApp")
 
+    filter({"platforms:Win32"})
+        architecture("x86")
+    clearFilters()
+    filter({"platforms:Win64"})
+        architecture("x86_64")
+    clearFilters()
+
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_APP_SOURCE_DIR,
         ENGINE_LIB_SOURCE_DIR,
-        THIRD_PARTY_SRC_DIR,
-        THIRD_PARTY_SRC_DIR.."/rttr/src",
-        THIRD_PARTY_SRC_DIR.."/glfw/deps",
-        THIRD_PARTY_SRC_DIR.."/glfw/include",
-        THIRD_PARTY_SRC_DIR.."/LLGL/include",
-        THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include"
     })
+    COMMON_INCLUDES()
     libdirs({ ENGINE_BIN_OUTPUT_DIR })
 
     pchheader("stdafx.h")
@@ -112,7 +135,11 @@ function configureToolsApplication(appName, gameName)
 
     addDependencies(ENGINE_GAME_LIBS)
     links({
-        "lib"..gameName
+        "lib"..gameName,
+    })
+    dependson({
+        "rttr",
+        "EASTL"
     })
 
     files({
@@ -140,18 +167,20 @@ function configureGame(gameName)
     cppdialect("C++17")
     kind("ConsoleApp")
 
+    filter({"platforms:Win32"})
+        architecture("x86")
+    clearFilters()
+    filter({"platforms:Win64"})
+        architecture("x86_64")
+    clearFilters()
+
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_APP_SOURCE_DIR,
         ENGINE_LIB_SOURCE_DIR,
-        THIRD_PARTY_SRC_DIR,
-        THIRD_PARTY_SRC_DIR.."/rttr/src",
-        THIRD_PARTY_SRC_DIR.."/glfw/deps",
-        THIRD_PARTY_SRC_DIR.."/glfw/include",
-        THIRD_PARTY_SRC_DIR.."/LLGL/include",
-        THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include"
     })
+    COMMON_INCLUDES()
     libdirs({ ENGINE_BIN_OUTPUT_DIR })
 
     pchheader("stdafx.h")
@@ -159,7 +188,12 @@ function configureGame(gameName)
 
     addDependencies(ENGINE_GAME_LIBS)
     links({
-        "lib"..gameName
+        "lib"..gameName,
+        "LLGL"
+    })
+    dependson({
+        "rttr",
+        "EASTL"
     })
 
     files({
@@ -175,13 +209,6 @@ function configureGame(gameName)
         "--AppName="..gameName
     })
     debugdir(ENGINE_BIN_OUTPUT_DIR)
-    links({"LLGL"})
-    --[[filter("configurations:Debug*")
-        links({ ENGINE_BIN_OUTPUT_DIR.."/LLGLD" })
-
-    filter("configurations:Release* or Final*")
-        links({ ENGINE_BIN_OUTPUT_DIR.."/LLGL" })
-    clearFilters()]]
 end
 
 function configureGameLib(gameName)
@@ -195,20 +222,30 @@ function configureGameLib(gameName)
     cppdialect("C++17")
     kind("StaticLib")
 
+    filter({"platforms:Win32"})
+        architecture("x86")
+    clearFilters()
+    filter({"platforms:Win64"})
+        architecture("x86_64")
+    clearFilters()
+
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_APP_SOURCE_DIR,
         ENGINE_LIB_SOURCE_DIR,
-        THIRD_PARTY_SRC_DIR,
-        THIRD_PARTY_SRC_DIR.."/rttr/src",
-        THIRD_PARTY_SRC_DIR.."/glfw/deps",
-        THIRD_PARTY_SRC_DIR.."/glfw/include",
-        THIRD_PARTY_SRC_DIR.."/LLGL/include",
-        THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include"
     })
+    COMMON_INCLUDES()
     libdirs({
         ENGINE_BIN_OUTPUT_DIR
+    })
+
+    links({
+        "lib"..gameName,
+    })
+    dependson({
+        "rttr",
+        "EASTL"
     })
 
     pchheader("stdafx.h")
@@ -268,18 +305,21 @@ function configureUnitTestApplication()
     language("C++")
     cppdialect("C++17")
     kind("ConsoleApp")
+    
+    filter({"platforms:Win32"})
+        architecture("x86")
+    clearFilters()
+    filter({"platforms:Win64"})
+        architecture("x86_64")
+    clearFilters()
+
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
         ENGINE_LIB_SOURCE_DIR,
-        THIRD_PARTY_SRC_DIR,
-        THIRD_PARTY_SRC_DIR.."/rttr/src",
-        THIRD_PARTY_SRC_DIR.."/glfw/include",
-        THIRD_PARTY_SRC_DIR.."/glfw/deps",
-        THIRD_PARTY_SRC_DIR.."/LLGL/include",
-        THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include"
     })
+    COMMON_INCLUDES()
 
     files({
         ENGINE_TST_SOURCE_DIR.."/**.h",
@@ -292,7 +332,9 @@ function configureUnitTestApplication()
         "imgui",
         "jsoncpp",
         "physfs",
-        "rttr"
+        "rttr",
+        "EASTL",
+        "LLGL"
     })
 
     local p = path.getabsolute(ASSETS_DIR)
@@ -301,8 +343,6 @@ function configureUnitTestApplication()
         "--AssetsDir="..p,
         "--AppName=UnitTest"
     })
-
-    links({"LLGL"})
 
     debugdir(ENGINE_BIN_OUTPUT_DIR)
 end

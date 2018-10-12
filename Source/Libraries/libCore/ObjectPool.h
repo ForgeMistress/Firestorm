@@ -83,7 +83,7 @@ private:
 	mutable std::mutex _poolLock;
 	mutable std::forward_list<T> _pool;
 	mutable std::mutex _recycleLock;
-	mutable Vector<T*> _recycle;
+	mutable vector<T*> _recycle;
 };
 
 template<class T>

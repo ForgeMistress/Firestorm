@@ -11,10 +11,25 @@
 #define LIBIO_LOGGER_H_
 #pragma once
 
+#include "libCore.h"
 #include <iostream>
 #include <mutex>
 
 OPEN_NAMESPACE(Firestorm);
+
+template<class T>
+static std::ostream& _fmt(std::ostream& os, const T& t)
+{
+	os << t;
+	return os;
+}
+
+template<>
+static std::ostream& _fmt<string>(std::ostream& os, const string& t)
+{
+	os << t.c_str();
+	return os;
+}
 
 static std::ostream& _Format(std::ostream& os, const char * fstr) throw()
 {
@@ -34,7 +49,7 @@ static std::ostream& _Format(std::ostream& os, const char * fstr, const T & x) t
 		c = fstr[++i];
 	};
 	c = fstr[++i];
-	os << x;
+	os << _fmt(x);
 
 	if(c == 0) return os; // 
 
@@ -57,7 +72,7 @@ static std::ostream& _Format(std::ostream& os, const char * fstr, const T & x, A
 		c = fstr[++i];
 	}
 	c = fstr[++i];
-	os << x;
+	os << _fmt<T>(x);
 
 	if(c == 0) return os; // string is finished
 
@@ -65,11 +80,14 @@ static std::ostream& _Format(std::ostream& os, const char * fstr, const T & x, A
 }
 
 template<class... Args>
-extern String Format(const char* fmt, Args... args)
+extern string Format(const char* fmt, Args... args)
 {
-	std::ostringstream oss;
-	_Format(oss, fmt, std::forward<Args>(args)...);
-	return oss.str();
+	string s;
+	s.append_sprintf(fmt, args...);
+	return s;
+	// std::ostringstream oss;
+	// _Format(oss, fmt, std::forward<Args>(args)...);
+	// return oss.str();
 }
 
 class Logger
@@ -80,9 +98,11 @@ public:
 	template<class... Args>
 	void Write(const char* format, Args... args)
 	{
-		std::unique_lock<std::mutex> lock(_s_allLock);
-		_Format(_ostream, format, std::forward<Args>(args)...);
-		_ostream << std::endl << std::flush;
+		string s;
+		s.append_sprintf(format, args...);
+		// std::unique_lock<std::mutex> lock(_s_allLock);
+		// _Format(_ostream, format, std::forward<Args>(args)...);
+		// _ostream << std::endl << std::flush;
 	}
 
 	static Logger DEBUG_LOGGER;

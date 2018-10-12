@@ -116,16 +116,16 @@ private:
 
 	static const char _numThreads{ 4 };
 
-	String _name;
+	string _name;
 	Mutex _queueLock;
 
 	Thread _threads[_numThreads];
 
-	std::queue<Function<void(void)>> _queue;
+	queue<function<void(void)>> _queue;
 	std::condition_variable _cv;
 	bool _quit{ false };
 
-	UnorderedMap<const ResourceTypeID*, UniquePtr<ResourceLoader>> _loaders;
+	unordered_map<const ResourceTypeID*, UniquePtr<ResourceLoader>> _loaders;
 
 	ResourceCache _cache;
 

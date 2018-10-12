@@ -13,6 +13,7 @@
 
 #include <libCore/RefPtr.h>
 #include "Object.h"
+#include <typeinfo>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -25,7 +26,7 @@ CLOSE_NAMESPACE(Mirror);
 class IEvent
 {
 public:
-	virtual const Mirror::Type& GetEventType() const = 0;
+	virtual FireClassID GetEventType() const = 0;
 };
 
 class EventDispatcher;
@@ -34,9 +35,9 @@ template <class Arg_t>
 class Event : public IEvent
 {
 public:
-	using Callback_f = Function<void(const Arg_t&)>;
+	using Callback_f = function<void(const Arg_t&)>;
 
-	Event(Mirror::Type type, Callback_f callback)
+	Event(FireClassID type, Callback_f callback)
 	: _type(type)
 	, _callback(callback)
 	{
@@ -47,13 +48,13 @@ public:
 		_callback(arg);
 	}
 
-	virtual const Mirror::Type& GetEventType() const override
+	virtual FireClassID GetEventType() const override
 	{
 		return _type;
 	}
 
 private:
-	Mirror::Type _type;
+	FireClassID _type;
 	Callback_f const _callback;
 };
 
@@ -77,50 +78,25 @@ private:
 	};
 
 public:
-	using EventList = List<IEvent*>;
-	using EventMap = UnorderedMap<Mirror::Type, EventList>;
+	using EventList = list<IEvent*>;
+	using EventMap = unordered_map<FireClassID, EventList>;
 	using Receipt = RefPtr<EDReceipt>;
-	using ReceiptPtrList = List<WeakPtr<EDReceipt>>;
+	using ReceiptPtrList = list<WeakPtr<EDReceipt>>;
 
 	EventDispatcher();
 	~EventDispatcher();
 
-	template<class Arg_t, class Class_t = void>
-	Receipt Register(void(*funcPointer)(const Arg_t&))
-	{
-		return Register<Arg_t>(WrapFn(funcPointer));
-	}
-
-	template <class Arg_t, class Class_t>
-	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&), Class_t* instance)
-	{
-		return Register<Arg_t>(WrapFn(funcPointer, instance));
-	}
-
-	template <class Arg_t, class Class_t>
-	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&), const Class_t* instance)
-	{
-		return Register<Arg_t>(WrapFn(funcPointer, instance));
-	}
-
-	template <class Arg_t, class Class_t>
-	Receipt Register(void (Class_t::*funcPointer)(const Arg_t&) const, const Class_t* instance)
-	{
-		return Register<Arg_t>(WrapFn(funcPointer, instance));
-	}
-
-	template<class Arg_t, class Class_t = void>
-	Receipt Register(Function<void(const Arg_t&)>& callback)
+	template<class Arg_t, class Function>
+	Receipt Register(Function& callback)
 	{
 		typedef Event<Arg_t> Event_t;
 
-		Mirror::Type argType = Arg_t::MyType();
-		IEvent* event = new Event_t(argType, callback);
+		IEvent* event = new Event_t(Arg_t::MyType(), callback);
 
 		_mutex.lock();
-		_events[argType].push_back(event);
+		_events[Arg_t::MyType()].push_back(event);
 
-		Receipt r = std::make_shared<EDReceipt>(const_cast<EventDispatcher*>(this), event);
+		Receipt r = make_shared<EDReceipt>(const_cast<EventDispatcher*>(this), event);
 		_receipts.push_back(r);
 		_numRegisteredEvents++;
 		_mutex.unlock();

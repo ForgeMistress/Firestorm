@@ -17,19 +17,17 @@
 
 #include "libCore.h"
 #include "Assert.h"
-#include <functional>
-#include <memory>
 
 OPEN_NAMESPACE(Firestorm);
 
 template<class T>
-using RefPtr = std::shared_ptr<T>;
+using RefPtr = eastl::shared_ptr<T>;
 
 template<class T, class Deleter = std::default_delete<T>>
-using UniquePtr = std::unique_ptr<T, Deleter>;
+using UniquePtr = eastl::unique_ptr<T, Deleter>;
 
 template<class T>
-using WeakPtr = std::weak_ptr<T>;
+using WeakPtr = eastl::weak_ptr<T>;
 
 CLOSE_NAMESPACE(Firestorm);
 

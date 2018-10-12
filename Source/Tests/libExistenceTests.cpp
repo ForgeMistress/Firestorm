@@ -76,9 +76,9 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		PosRotComponent componentMgr(eMgr);
 		size_t count = 10;
 
-		Vector<Entity> entities;
+		vector<Entity> entities;
 		entities.reserve(count);
-		Vector<IComponent::Instance> components;
+		vector<IComponent::Instance> components;
 		components.reserve(count);
 
 		for(size_t i=0; i<count; ++i)
@@ -109,9 +109,9 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		PosRotComponent componentMgr(eMgr);
 		size_t count = 10;
 
-		Vector<Entity> entities;
+		vector<Entity> entities;
 		entities.reserve(count);
-		Vector<IComponent::Instance> components;
+		vector<IComponent::Instance> components;
 		components.reserve(count);
 
 		for(size_t i=0; i<count; ++i)
@@ -150,9 +150,9 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		PosRotComponent componentMgr(eMgr);
 		size_t count = 10;
 
-		Vector<Entity> entities;
+		vector<Entity> entities;
 		entities.reserve(count);
-		Vector<IComponent::Instance> components;
+		vector<IComponent::Instance> components;
 		components.reserve(count);
 
 		for(size_t i=0; i<count; ++i)

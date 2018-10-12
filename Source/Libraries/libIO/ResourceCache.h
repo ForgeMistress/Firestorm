@@ -29,13 +29,13 @@ public:
 	/**
 		Retrieve whether or not the resource cache has the particular resource loaded.
 	 **/
-	bool HasResource(const String& name);
+	bool HasResource(const string& name);
 
 	/**
 		Retrieve a pointer to a loaded resource, or nullptr if the resource does
 		not exist in the cache.
 	 **/
-	ResourcePtr FindResource(const String& name) const;
+	ResourcePtr FindResource(const string& name) const;
 
 	/**
 		Clear the cache of any resources that are no longer being referenced
@@ -45,10 +45,10 @@ public:
 
 private:
 	friend class ResourceMgr;
-	bool AddResource(const String& name, const RefPtr<IResourceObject>& object);
+	bool AddResource(const string& name, const RefPtr<IResourceObject>& object);
 
 	mutable Mutex _cacheLock;
-	UnorderedMap<String, RefPtr<IResourceObject>> _cache;
+	unordered_map<string, RefPtr<IResourceObject>> _cache;
 };
 
 CLOSE_NAMESPACE(Firestorm);
