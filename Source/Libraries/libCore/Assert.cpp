@@ -42,7 +42,7 @@ void AssertionException::Format() throw()
 	string ostream;
 	if(!_message.empty())
 	{
-		ostream.append_sprintf("%s: ", _message);
+		ostream.append_sprintf("%s: ", _message.c_str());
 	}
 	string expr(_expression);
 
@@ -56,8 +56,6 @@ void AssertionException::Format() throw()
 	}
 	ostream.append_sprintf(" failed in file '%s' line# %d", _file, _line);
 	_report = ostream;
-
-	FIRE_LOG_ERROR(_report.c_str());
 }
 
 

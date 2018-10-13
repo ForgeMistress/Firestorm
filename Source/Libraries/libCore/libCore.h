@@ -2,6 +2,16 @@
 #define LIBCORE_H_
 #pragma once
 
+
+#ifdef FIRE_VISUALSTUDIO
+#pragma section("firealloc")
+#define FIRE_ALLOCATOR __declspec(allocator)
+#else
+#define FIRE_ALLOCATOR
+#endif
+
+FIRE_ALLOCATOR void* FIRE_ALLOC(size_t size);
+
 #define OPEN_NAMESPACE(ns) namespace ns {
 #define CLOSE_NAMESPACE(ns) } // namespace ns
 
@@ -14,17 +24,10 @@ OPEN_NAMESPACE(Firestorm);
 using std::cout;
 using std::endl;
 
-#ifdef FIRE_FINAL
 #define fire_new(TYPE, ...)     ::Firestorm::libCore::New<TYPE>(__VA_ARGS__)
 #define fire_alloc(SIZE)        ::Firestorm::libCore::Alloc(SIZE)
 #define fire_delete(TYPE, PTR)  ::Firestorm::libCore::Delete<TYPE>(PTR)
 #define fire_free(PTR)          ::Firestorm::libCore::Free(PTR)
-#else
-#define fire_new(TYPE, ...)    ::Firestorm::libCore::New<TYPE>(__FILE__, __LINE__, __VA_ARGS__)
-#define fire_alloc(SIZE)       ::Firestorm::libCore::Alloc(SIZE, __FILE__, __LINE__)
-#define fire_delete(TYPE, PTR) ::Firestorm::libCore::Delete<TYPE>(PTR)
-#define fire_free(PTR)         ::Firestorm::libCore::Free(PTR)
-#endif
 
 struct libCore : public Library<libCore>
 {
@@ -32,7 +35,6 @@ struct libCore : public Library<libCore>
 
 	static void SetThreadName(Thread& thread, const string& name);
 
-#ifdef FIRE_FINAL
 	template<class T>
 	static T* Alloc(size_t numItems)
 	{
@@ -48,23 +50,7 @@ struct libCore : public Library<libCore>
 	}
 
 	static void* Alloc(size_t sizeInBytes);
-#else
-	template<class T>
-	static T* Alloc(size_t numItems, const char* file, size_t line)
-	{
-		return (T*)Alloc(numItems * sizeof(T), file, line);
-	}
-
-	template<class T, class... Args>
-	static T* New(const char* file, size_t line, Args&&... args)
-	{
-		void* ptr = Alloc(sizeof(T), file, line);
-		new(ptr) T(std::forward<Args>(args)...);
-		return ptr;
-	}
-
-	static void* Alloc(size_t sizeInBytes, const char* file, size_t line);
-#endif
+	static void* AlignedAlloc(size_t sizeInBytes, size_t alignment);
 
 	static void Free(void* block);
 

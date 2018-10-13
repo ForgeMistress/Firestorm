@@ -60,7 +60,7 @@ public:
 		FIRE_ASSERT(found != _snapshotResults.end());
 
 		auto cnt = eastl::chrono::duration_cast<eastl::chrono::nanoseconds>(
-			eastl::chrono::duration<double, std::nano>(ssh->stop - ssh->start)
+			eastl::chrono::duration<double, eastl::nano>(ssh->stop - ssh->start)
 		).count();
 		(*found).Results.push_back((double)cnt / 1000000000.0);
 		_handles.Return(ssh);

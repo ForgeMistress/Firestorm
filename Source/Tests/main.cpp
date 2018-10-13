@@ -27,7 +27,7 @@ RefPtr<TestHarness> libScriptPrepareHarness(int ac, char** av);
 
 int main(int ac, char** av)
 {
-
+    uint32_t overallFailureCount = 0;
     Library<::Firestorm::libApp>::Initialize(ac,av);
     Library<::Firestorm::libCore>::Initialize(ac,av);
     Library<::Firestorm::libExistence>::Initialize(ac,av);
@@ -49,32 +49,39 @@ int main(int ac, char** av)
         libScriptPrepareHarness(ac, av)
     };
 
-    uint32_t overallFailureCount = 0;
 
-    for(RefPtr<TestHarness>& harness : TESTS)
+    try
     {
-        uint32_t testResults = harness->Run();
-        overallFailureCount += testResults;
+        for(RefPtr<TestHarness>& harness : TESTS)
+        {
+            uint32_t testResults = harness->Run();
+            overallFailureCount += testResults;
 
-        // report the results for this particular test.
-        FIRE_LOG_DEBUG("");
-        FIRE_LOG_DEBUG("Completed", harness->GetName(), "with", testResults, "errors...");
-        FIRE_LOG_DEBUG("-----------------------------------------------------------------------------------------------------------");
+            // report the results for this particular test.
+            FIRE_LOG_DEBUG("");
+            FIRE_LOG_DEBUG("Completed", harness->GetName(), "with", testResults, "errors...");
+            FIRE_LOG_DEBUG("-----------------------------------------------------------------------------------------------------------");
+        }
+
+        if(overallFailureCount > 0)
+        {
+            FIRE_LOG_DEBUG("Completed all tests with %d errors.", overallFailureCount);
+        }
+        else
+        {
+            FIRE_LOG_DEBUG("Completed all tests with no failures!");
+        }
+        
+        libCore::ReportMemoryLeaks();
+
+        FIRE_LOG_DEBUG("Press 'return' to close...");
+        std::cin.get();
     }
-
-    if(overallFailureCount > 0)
+    catch(AssertionException& e)
     {
-        FIRE_LOG_DEBUG("Completed all tests with", overallFailureCount, "errors.");
+        FIRE_LOG_ERROR("!!!Uncaught exception!!! %s", e.Report());
     }
-    else
-    {
-        FIRE_LOG_DEBUG("Completed all tests with no failures!");
-    }
-    
-    libCore::ReportMemoryLeaks();
-
-    FIRE_LOG_DEBUG("Press 'return' to close...");
-    std::cin.get();
+    TESTS.clear();
 
     return overallFailureCount;
 }

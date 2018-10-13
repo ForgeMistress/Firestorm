@@ -69,7 +69,7 @@ void Benchmark::Report()
 		{
 			total += result.Results[i];
 		}
-		FIRE_LOG_DEBUG("%f%f%s%s = %d", std::fixed, std::setprecision(10), result.Name, spacePadding, total / _numRuns);
+		FIRE_LOG_DEBUG("%s%s = %.10f", result.Name, spacePadding, total / _numRuns);
 	}
 	string name("Overall Time");
 	size_t diff = widest - name.size();
@@ -79,10 +79,10 @@ void Benchmark::Report()
 		spacePadding.push_back(' ');
 	}
 	auto cnt = eastl::chrono::duration_cast<eastl::chrono::nanoseconds>(
-		eastl::chrono::duration<double, std::nano>(_overallStop - _overallStart)
+		eastl::chrono::duration<double, eastl::nano>(_overallStop - _overallStart)
 		).count();
 	double overallTime = ((double)cnt / 1000000000.0);
-	FIRE_LOG_DEBUG("%f%f%s%s = %d", std::fixed, std::setprecision(10), name, spacePadding, overallTime);
+	FIRE_LOG_DEBUG("%s%s = %.10f", name, spacePadding, overallTime);
 	FIRE_LOG_DEBUG("");
 }
 

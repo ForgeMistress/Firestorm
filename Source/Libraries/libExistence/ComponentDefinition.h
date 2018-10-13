@@ -12,6 +12,7 @@
 #pragma once
 
 #include <libCore/SOA.h>
+#include <EASTL/bonus/tuple_vector.h>
 
 #include "Entity.h"
 
@@ -134,16 +135,11 @@ public:
 		{
 			_eMgr.RegisterDestructionCallback(this, [this](Entity entity) {
 				// lookup the index of the provided entity
-				size_t e = Lookup(entity);
+				Instance i = Lookup(entity);
+				Entity lastEntity = _this[0_soa][_this.size()-1];
 
-				// nuke the reference to the old entity.
+				_this.erase(_this.begin()+i);
 				_map.erase(entity);
-
-				// remap so that the last entity equals the index of the old entity.
-				_map[_this[0_soa][_this.Last()]] = e;
-
-				// erase the old index. automatically decrements the size.
-				_this.Erase(e);
 			});
 		}
 	}
@@ -186,14 +182,15 @@ public:
 
 	virtual void Clear()
 	{
-		_this.Clear();
+		_this.clear();
 		_map.clear();
 	}
 
 private:
 	virtual Instance MakeNew() final
 	{
-		return MakeNew(_this.PushBack());
+		_this.push_back_uninitialized();
+		return MakeNew(_this.size()-1);
 	}
 
 	Instance MakeNew(size_t i)

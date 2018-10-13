@@ -17,77 +17,14 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-template<class T>
-static std::ostream& _fmt(std::ostream& os, const T& t)
-{
-	os << t;
-	return os;
-}
-
-template<>
-static std::ostream& _fmt<string>(std::ostream& os, const string& t)
-{
-	os << t.c_str();
-	return os;
-}
-
-static std::ostream& _Format(std::ostream& os, const char * fstr) throw()
-{
-	return os << fstr;
-}
-
-template<typename T, typename... Args>
-static std::ostream& _Format(std::ostream& os, const char * fstr, const T & x) throw()
-{
-	size_t i = 0;
-	char c = fstr[0];
-
-	while(c != '%')
-	{
-		if (c == 0) return os; // string is finished
-		os << c;
-		c = fstr[++i];
-	};
-	c = fstr[++i];
-	os << _fmt(x);
-
-	if(c == 0) return os; // 
-
-								  // print the rest of the stirng
-	os << &fstr[++i];
-	return os;
-}
-
-
-template<typename T, typename... Args>
-static std::ostream& _Format(std::ostream& os, const char * fstr, const T & x, Args... args) throw()
-{
-	size_t i = 0;
-	char c = fstr[0];
-
-	while(c != '%')
-	{
-		if (c == 0) return os; // string is finished
-		os << c;
-		c = fstr[++i];
-	}
-	c = fstr[++i];
-	os << _fmt<T>(x);
-
-	if(c == 0) return os; // string is finished
-
-	return _Format(os, &fstr[++i], args...);
-}
-
-template<class... Args>
-extern string Format(const char* fmt, Args... args)
+static string Format(const char* fmt, ...)
 {
 	string s;
-	s.append_sprintf(fmt, args...);
+	va_list l;
+	va_start(l, fmt);
+	s.append_sprintf_va_list(fmt, l);
+	va_end(l);
 	return s;
-	// std::ostringstream oss;
-	// _Format(oss, fmt, std::forward<Args>(args)...);
-	// return oss.str();
 }
 
 class Logger
@@ -95,14 +32,11 @@ class Logger
 public:
 	Logger(std::ostream& ostream);
 
-	template<class... Args>
-	void Write(const char* format, Args... args)
+	void Write(const char* format, va_list list)
 	{
 		string s;
-		s.append_sprintf(format, args...);
-		// std::unique_lock<std::mutex> lock(_s_allLock);
-		// _Format(_ostream, format, std::forward<Args>(args)...);
-		// _ostream << std::endl << std::flush;
+		s.append_sprintf_va_list(format, list);
+		_ostream << s.c_str()<<std::endl<<std::flush;
 	}
 
 	static Logger DEBUG_LOGGER;
@@ -114,22 +48,43 @@ private:
 	std::ostream& _ostream;
 };
 
-template<class... Args>
-static void FIRE_LOG_DEBUG(const char* format, Args... args)
+static void FIRE_LOG_DEBUG(const char* format, ...)
 {
-	Logger::DEBUG_LOGGER.Write(format, args...);
+	va_list l;
+	va_start(l, format);
+	Logger::DEBUG_LOGGER.Write(format, l);
+	va_end(l);
 }
 
-template<class... Args>
-static void FIRE_LOG_WARNING(const char* format, Args... args)
+static void FIRE_LOG_DEBUG(const char* format, va_list l)
 {
-	Logger::WARNING_LOGGER.Write(format, args...);
+	Logger::DEBUG_LOGGER.Write(format, l);
 }
 
-template<class... Args>
-static void FIRE_LOG_ERROR(const char* format, Args... args)
+static void FIRE_LOG_WARNING(const char* format, ...)
 {
-	Logger::ERROR_LOGGER.Write(format, args...);
+	va_list l;
+	va_start(l, format);
+	Logger::WARN_LOGGER.Write(format, l);
+	va_end(l);
+}
+
+static void FIRE_LOG_WARNING(const char* format, va_list l)
+{
+	Logger::WARN_LOGGER.Write(format, l);
+}
+
+static void FIRE_LOG_ERROR(const char* format, ...)
+{
+	va_list l;
+	va_start(l, format);
+	Logger::ERROR_LOGGER.Write(format, l);
+	va_end(l);
+}
+
+static void FIRE_LOG_ERROR(const char* format, va_list l)
+{
+	Logger::ERROR_LOGGER.Write(format, l);
 }
 
 CLOSE_NAMESPACE(Firestorm);

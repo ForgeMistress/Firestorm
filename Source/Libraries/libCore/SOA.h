@@ -13,20 +13,20 @@
 
 #include <libCore/libCore.h>
 #include <libCore/Logger.h>
-
-#include <utility>
-#include <tuple>
+#include <EASTL/utility.h>
+#include <EASTL/tuple.h>
+#include <EASTL/bonus/tuple_vector.h>
 
 OPEN_NAMESPACE(Firestorm);
 
-#define FIRE_MAX_SOA_CAPACITY std::numeric_limits<size_t>::max()
+#define FIRE_MAX_SOA_CAPACITY eastl::numeric_limits<size_t>::max()
 
-template<class T> using raw = std::remove_pointer_t<std::remove_reference_t<T>>;
+template<class T> using raw = eastl::remove_pointer_t<eastl::remove_reference_t<T>>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <char... Digits>
-constexpr std::size_t parse()
+constexpr size_t parse()
 {
 	// convert to array so we can use a loop instead of recursion
 	char digits[] = {Digits...}; 
@@ -42,10 +42,10 @@ constexpr std::size_t parse()
 	return result;
 }
 
-template<std::size_t I>
+template<size_t I>
 struct soa_index {};
 
-template<std::size_t I>
+template<size_t I>
 struct aos_index {};
 
 #define FIRE_SOA_INDEX(SYMBOL, POS) static constexpr soa_index<POS> SYMBOL{};
@@ -56,14 +56,9 @@ decltype(auto) operator"" _soa()
 	return soa_index<parse<Digits...>()>{};
 }
 
-template <char... Digits>
-decltype(auto) operator"" _aos()
-{
-	return aos_index<parse<Digits...>()>{};
-}
-
+#ifdef FIRE_DISABLED
 template<typename... Types>
-static inline constexpr std::size_t CalculateSizeof()
+static inline constexpr size_t CalculateSizeof()
 {
 	return (0 + ... + sizeof(Types));
 }
@@ -71,13 +66,13 @@ static inline constexpr std::size_t CalculateSizeof()
 template<class T>
 static constexpr bool RequiresConstructorCall()
 {
-	if constexpr(std::is_arithmetic_v<T>)
+	if constexpr(eastl::is_arithmetic<T>::value)
 	{
 		return false;
 	}
-	else if constexpr(std::is_class_v<T>)
+	else if constexpr(eastl::is_class<T>::value)
 	{
-		if constexpr(std::is_trivially_default_constructible_v<T>)
+		if constexpr(eastl::is_trivially_default_constructible<T>::value)
 		{
 			return false;
 		}
@@ -95,13 +90,13 @@ static inline constexpr bool IsTriviallyConstructible()
 template<class T>
 static constexpr bool RequiresDestructorCall()
 {
-	if constexpr(std::is_arithmetic_v<T>)
+	if constexpr(eastl::is_arithmetic<T>::value)
 	{
 		return false;
 	}
-	else if constexpr(std::is_class_v<T>)
+	else if constexpr(eastl::is_class<T>::value)
 	{
-		if constexpr(std::has_virtual_destructor_v<T> || !std::is_trivially_destructible_v<T>)
+		if constexpr(eastl::has_virtual_destructor<T>::value || !eastl::is_trivially_destructible<T>::value)
 		{
 			return true;
 		}
@@ -113,15 +108,35 @@ static constexpr bool RequiresDestructorCall()
 template<typename... Types>
 static inline constexpr bool IsTriviallyDestructible()
 {
-	return (... && std::is_trivially_destructible_v<Types>);
+	return (... && eastl::is_trivially_destructible<Types>::value);
 }
 
 template<typename... Types>
 static inline constexpr bool AnyAreArrays()
 {
-	return (... && std::is_array_v<Types>);
+	return (... && eastl::is_array<Types>::value);
 }
+#endif
 
+template<class... Ts>
+class SOA : public eastl::TupleVecInternal::TupleVecImpl<EASTLAllocatorType, make_index_sequence<sizeof...(Ts)>, Ts...>
+{
+public:
+	template<size_t I>
+	const eastl::TupleVecInternal::tuplevec_element_t<I, Ts...>* operator[](soa_index<I>)const
+	{
+		typedef eastl::TupleVecInternal::tuplevec_element_t<I, Ts...> Element;
+		return eastl::TupleVecInternal::TupleVecLeaf<I, Element>::mpData;
+	}
+	template<size_t I>
+	eastl::TupleVecInternal::tuplevec_element_t<I, Ts...>* operator[](soa_index<I>)
+	{
+		typedef eastl::TupleVecInternal::tuplevec_element_t<I, Ts...> Element;
+		return eastl::TupleVecInternal::TupleVecLeaf<I, Element>::mpData;
+	}
+};
+
+#ifdef FIRE_DISABLED
 template<class... ItemsT>
 struct SOA
 {
@@ -184,23 +199,23 @@ struct SOA
 	/**
 		Alias to the type of the tuple that this SOA uses to do its job.
 	 **/
-	using tuple_type = std::tuple<std::add_pointer_t<ItemsT>...>;
+	using tuple_type = eastl::tuple<eastl::add_pointer_t<ItemsT>...>;
 
 	/**
 		Helper that retrieves the to the item at the tuple index \c I.
 	**/
 	template<size_t I> 
-	using EElemT = std::tuple_element_t<I, tuple_type>;
+	using EElemT = eastl::tuple_element_t<I, tuple_type>;
 
 	/**
 		Helper that stores the number of items passed to the class template.
 	 **/
-	static constexpr std::size_t LLength = sizeof...(ItemsT); // number of individual members.
+	static constexpr size_t LLength = sizeof...(ItemsT); // number of individual members.
 
 	/**
 		The sum total of the size of all of the items stored within the container.
 	 **/
-	static constexpr std::size_t Sizeof = CalculateSizeof<ItemsT...>();
+	static constexpr size_t Sizeof = CalculateSizeof<ItemsT...>();
 
 	/**
 		Helper denoting whether or not all of the items in the container are trivially constructible.
@@ -236,12 +251,12 @@ public:
 		\warning This will assert if you attempt to index out of the range of the buffer.
 	 **/
 	template<
-		std::size_t I,
+		size_t I,
 		typename ElemT = EElemT<I>
 	>
 	const SOARead<ElemT> operator[](soa_index<I>) const
 	{
-		return SOARead<ElemT>{std::get<I>(_tuple), _size};
+		return SOARead<ElemT>{eastl::get<I>(_tuple), _size};
 	}
 
 	/**
@@ -260,19 +275,19 @@ public:
 		\warning This will assert if you attempt to index out of the range of the buffer.
 	 **/
 	template<
-		std::size_t I,
+		size_t I,
 		typename ElemT = EElemT<I>
 	>
 	SOAWrite<ElemT> operator[](soa_index<I>)
 	{
-		return SOAWrite<ElemT>{std::get<I>(_tuple), _size};
+		return SOAWrite<ElemT>{eastl::get<I>(_tuple), _size};
 	}
 public:
 	SOA()
 	{
 	}
 
-	virtual ~SOA()
+	~SOA()
 	{
 		Clear();
 	}
@@ -322,7 +337,7 @@ private:
 	{
 		if constexpr(Index < LLength)
 		{
-			auto& memberPointer = std::get<Index>(_tuple);
+			auto& memberPointer = eastl::get<Index>(_tuple);
 			memberPointer = reinterpret_cast<decltype(memberPointer)>(element);
 
 			// once we've stored nextBlock in the tuple, we simply need to move the nextElement pointer
@@ -339,7 +354,7 @@ public:
 	/**
 		\brief Reserve space for \c numMembers elements in the internal storage buffer.
 
-		This operation behaves in the same manner as \c std::vector, where.
+		This operation behaves in the same manner as \c eastl::vector, where.
 
 		1) If \c numMembers > #SOA::Capacity, new storage is allocated and the old data is copied over.
 		2) If \c numMembers <= #SOA::Capacity, no-op. Nothing happens.
@@ -356,7 +371,6 @@ public:
 		FIRE_ASSERT_MSG(numMembers < FIRE_MAX_SOA_CAPACITY, "maximum capacity of the SOA container has been reached.");
 
 		if(numMembers < _capacity) { return; }
-		void* oldBuffer = _buffer;
 		_capacity = numMembers;
 
 		// we'll store this properly as void* later. referenced as char* for now to make offset
@@ -364,18 +378,19 @@ public:
 		// to it on all compilers)
 		_sizeBytes = Sizeof * numMembers;
 		char* newBuffer = (char*)fire_alloc(_sizeBytes);//libCore::Alloc<char>(_sizeBytes);
+		FIRE_ASSERT(newBuffer != nullptr);
 
 		// calculate the block offsets and store them in the tuple //
 		char* nextElement = newBuffer;
 		ReserveIterate(newBuffer, numMembers);
 
-		if(oldBuffer)
+		if(_buffer)
 		{
 			// no sense in copying the entire old buffer, especially if _size is considerably less than the capacity.
-			memcpy(newBuffer, oldBuffer, Sizeof * _size);
-			fire_free(oldBuffer);
+			memcpy(newBuffer, _buffer, Sizeof * _size);
+			fire_free(_buffer);
 		}
-		_buffer = (void*)newBuffer;
+		_buffer = newBuffer;
 		_capacity = numMembers;
 	}
 
@@ -384,22 +399,22 @@ private:
 	template<
 		size_t Index = 0,
 		class args_tuple,
-		class ElementType = raw<std::tuple_element_t<Index, tuple_type>>
+		class ElementType = raw<eastl::tuple_element_t<Index, tuple_type>>
 	>
-	constexpr void PushBackIterate(std::size_t elementPos, args_tuple& args)
+	constexpr void PushBackIterate(size_t elementPos, args_tuple& args)
 	{
 		if constexpr(Index < LLength)
 		{
-			auto& element = std::get<Index>(_tuple);
+			auto& element = eastl::get<Index>(_tuple);
 
 			using bp_type = raw<decltype(element)>;
 			if constexpr(RequiresConstructorCall<bp_type>())
 			{
-				new (element + elementPos) ElementType(std::get<Index>(args));
+				new (element + elementPos) ElementType(eastl::get<Index>(args));
 			}
 			else
 			{
-				element[elementPos] = std::get<Index>(args);
+				element[elementPos] = eastl::get<Index>(args);
 			}
 
 			if constexpr(Index + 1 < LLength)
@@ -412,7 +427,7 @@ public:
 	/**
 		\brief Insert an element into the back of the container.
 
-		This function behaves just like \c std::vector::push_back() where elements pushed in
+		This function behaves just like \c eastl::vector::push_back() where elements pushed in
 		will be at the back of the buffer. Attempting to push a data set when #SOA::Size() == #SOA::Capacity()
 		will result in the capacity growing exponentially from its present capacity.
 
@@ -436,7 +451,7 @@ public:
 			}
 		}
 		
-		PushBackIterate(_size, std::make_tuple(args...));
+		PushBackIterate(_size, eastl::make_tuple(args...));
 
 		size_t itemIndex = _size;
 		++_size;
@@ -447,13 +462,13 @@ private:
 	// iterator for the PushBack operation.
 	template<
 		size_t Index = 0,
-		class ElementType = raw<std::tuple_element_t<Index, tuple_type>>
+		class ElementType = raw<eastl::tuple_element_t<Index, tuple_type>>
 	>
-	constexpr void PushBackPlainIterate(std::size_t elementPos)
+	constexpr void PushBackPlainIterate(size_t elementPos)
 	{
 		if constexpr(Index < LLength)
 		{
-			auto& element = std::get<Index>(_tuple);
+			auto& element = eastl::get<Index>(_tuple);
 
 			using bp_type = raw<decltype(element)>;
 			if constexpr(RequiresConstructorCall<bp_type>())
@@ -496,7 +511,7 @@ private:
 	{
 		if constexpr(Index < LLength)
 		{
-			auto& element = std::get<Index>(_tuple);
+			auto& element = eastl::get<Index>(_tuple);
 
 			using bp_type = raw<decltype(element)>;
 			if constexpr(RequiresDestructorCall<bp_type>())
@@ -506,9 +521,39 @@ private:
 			// no need to swap if we're erasing the last element.
 			if(removedElement != Last())
 			{
-				std::swap(element[removedElement], element[Last()]);
+				eastl::swap(element[removedElement], element[Last()]);
 			}
 
+			if constexpr(Index + 1 < LLength)
+			{
+				EraseIterate<Index + 1>(removedElement);
+			}
+		}
+	}
+
+	// iterator for the Erase operation.
+	template<size_t Index = 0>
+	constexpr void EraseRangeIterate(size_t from, size_t to)
+	{
+		FIRE_ASSERT(from < _size && to < _size && to > from);
+		if constexpr(Index < LLength)
+		{
+			auto& element = eastl::get<Index>(_tuple);
+
+			using bp_type = raw<decltype(element)>;
+			if constexpr(RequiresDestructorCall<bp_type>())
+			{
+				for(size_t i=from; i<=to; ++i)
+				{
+					element[removedElement].~bp_type();
+				}
+			}
+			else
+			{
+				FIRE_ASSERT((to - from) * Sizeof < _sizeBytes);
+				memset(&element[from], 0, (to - from) * Sizeof);
+			}
+			
 			if constexpr(Index + 1 < LLength)
 			{
 				EraseIterate<Index + 1>(removedElement);
@@ -521,8 +566,8 @@ public:
 
 		This operation will remove an element at the specified index by swapping the values stored at
 		\c #SOA::Size() - 1 with the provided index. As a result, this will invalidate the specified index 
-		as new data will be stored there. The swap occurs with \c std::swap, so elements must meet the requirements
-		that \c std::swap imposes.
+		as new data will be stored there. The swap occurs with \c eastl::swap, so elements must meet the requirements
+		that \c eastl::swap imposes.
 
 		\arg \c index The index of the element that you want to erase.
 
@@ -536,12 +581,39 @@ public:
 	 **/
 	inline size_t Erase(size_t index)
 	{
-		FIRE_ASSERT_MSG(index < _size, "index out of bounds");
 		if(_size == 0) { return 0; }
+		FIRE_ASSERT_MSG(index < _size, Format("index '%d' out of bounds", index).c_str());
 		EraseIterate(index);
 		size_t out = _size;
 		--_size;
 		return _size;
+	}
+
+
+private:
+	// iterator for the Erase operation.
+	template<size_t Index = 0>
+	constexpr void SwapIterate(size_t i1, size_t i2)
+	{
+		if constexpr(Index < LLength)
+		{
+			auto& element = eastl::get<Index>(_tuple);
+			eastl::swap(element[i1], element[i2]);
+
+			if constexpr(Index + 1 < LLength)
+			{
+				SwapIterate<Index + 1>(i1, i2);
+			}
+		}
+	}
+public:
+	inline void Swap(size_t i1, size_t i2)
+	{
+		if(_size == 0) { return; }
+		if(i1 == i2) { return; }
+		FIRE_ASSERT_MSG(i1 < _size, Format("index '%d' out of bounds", i1).c_str());
+		FIRE_ASSERT_MSG(i2 < _size, Format("index '%d' out of bounds", i2).c_str());
+		SwapIterate(i1, i2);
 	}
 
 	/**
@@ -577,6 +649,23 @@ public:
 		return _size == 0;
 	}
 
+private:
+	// iterator for the Erase operation.
+	template<size_t Index = 0>
+	constexpr void ClearIterate()
+	{
+		if constexpr(Index < LLength)
+		{
+			auto& element = eastl::get<Index>(_tuple);
+			element = nullptr;
+
+			if constexpr(Index + 1 < LLength)
+			{
+				ClearIterate<Index + 1>();
+			}
+		}
+	}
+public:
 	/**
 		\brief Deallocate the buffer memory.
 
@@ -589,13 +678,15 @@ public:
 	{
 		if(_buffer)
 		{
+			memset(_buffer, 0, _sizeBytes);
 			libCore::Free(_buffer);
+			ClearIterate();
 			_size = 0;
 			_capacity = 0;
 			_buffer = nullptr;
 		}
 	}
 };
-
+#endif
 CLOSE_NAMESPACE(Firestorm);
 #endif

@@ -17,31 +17,36 @@
 OPEN_NAMESPACE(Firestorm);
 
 using EntityID = uint64_t;
+using EntityGeneration = uint16_t;
+// since there's no uint48_t type, we'll leave that alone.
 
-static const unsigned ENT_INDEX_BITS = sizeof(EntityID) / 2;
+// 16 bits for the generation and 48 bits for the index.
+static const unsigned ENT_INDEX_BITS = sizeof(EntityID) - sizeof(uint8_t);
 static const unsigned ENT_INDEX_MASK = (1<<ENT_INDEX_BITS) - 1;
 static const unsigned ENT_GENERATION_BITS = sizeof(EntityID) - ENT_INDEX_BITS;
 static const unsigned ENT_GENERATION_MASK = (1<<ENT_GENERATION_BITS) - 1;
 
 static const EntityID ENT_INVALID = eastl::numeric_limits<EntityID>::max();
 
-
 struct Entity
 {
 	EntityID id;
 	Entity():id(ENT_INVALID) {}
-	Entity(unsigned index, unsigned generation)
+	Entity(EntityID index, uint8_t generation)
 	: id((generation << ENT_INDEX_BITS) | index)
 	{
 	}
-	size_t Index() const { return id & ENT_INDEX_MASK; }
-	size_t Generation() const { return (id >> ENT_INDEX_BITS) & ENT_GENERATION_MASK; }
-	bool Valid() const { return id == ENT_INVALID; }
 
-	bool operator==(const Entity& other)
+	EntityID Index() const { return id & ENT_INDEX_MASK; }
+	EntityID Generation() const { return (id >> ENT_INDEX_BITS) & ENT_GENERATION_MASK; }
+
+	inline bool operator==(const Entity& other)
 	{
 		return other.id == id;
 	}
+
+private:
+	friend class EntityMgr;
 };
 
 struct EntityData
@@ -58,7 +63,7 @@ public:
 	/**
 		Spawn yourself a shiny new entity.
 	 **/
-	Entity SpawnEntity(EntityData* data = nullptr) const;
+	Entity SpawnEntity(EntityData* data = nullptr);
 
 	/**
 		Despawn an entity and mark it as dead.
@@ -97,7 +102,8 @@ private:
 		void* Registrant;
 	};
 	vector<CallbackInfo> _destructionCallbacks;
-	mutable vector<Entity> _deadEntities;
+	vector<uint8_t> _generation;
+	deque<EntityID> _freeIndices;
 };
 
 /*class Entity final
@@ -205,13 +211,15 @@ struct hash<::Firestorm::Entity>
 {
 	size_t operator()(const ::Firestorm::Entity& e) const
 	{
-		return e.Index();
+		size_t index = e.Index();
+		return index;
 	}
 };
 
 static bool operator==(const ::Firestorm::Entity& e1, const ::Firestorm::Entity& e2)
 {
-	return e1.id == e2.id;
+	return e1.Index() == e2.Index() &&
+		   e1.Generation() == e2.Generation();
 }
 
 CLOSE_NAMESPACE(eastl);

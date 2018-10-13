@@ -24,7 +24,7 @@ TestHarness::~TestHarness()
 {
 }
 
-uint32_t TestHarness::Run()
+size_t TestHarness::Run()
 {
 	size_t numFailures = RunTests();
 	RunBenchmarks();
@@ -65,25 +65,36 @@ size_t TestHarness::RunTests()
 {
 	FIRE_ASSERT(_cases.size() == _caseNames.size());
 
-	Print("Test: %s", _name);
+	Print("Test: %s", _name.c_str());
 	Print("");
 
-	uint32_t finalErrorCount = 0;
+	size_t finalErrorCount = 0;
 	bool hasFailed = false;
 	for(size_t i=0;i<_cases.size(); ++i)
 	{
 		auto test = _cases[i];
 		const string& testName = _caseNames[i];
 
-		Print("Case[%d] %s",i, testName);
+		Print("Case[%d] %s", i, testName.c_str());
 		TestCase testCase(testName, this);
 
-		test(testCase);
+		try
+		{
+			test(testCase);
+		}
+		catch(AssertionException& assertion)
+		{
+			Print("!! Case [%d] failed due to an internal assertion and kicked out early...", i);
+			Print("!! Case [%d] may have additional issues that were not detected due to the kickout. ", i);
+			Print("!! Case [%d] fix the assert and run the tests again.", i);
+			Print("!!    %s", assertion.Report());
+			finalErrorCount += 1;
+		}
 		auto failures = testCase.m_failures;
 		if(!failures.empty())
 		{
 			finalErrorCount += failures.size();
-			Print("!!  Case [%d] failed with %d errors...", i, failures.size());
+			Print("!! Case [%d] failed with %d errors...", i, failures.size());
 		}
 	}
 	return finalErrorCount;
@@ -96,7 +107,7 @@ void TestHarness::RunBenchmarks()
 		auto benchmark = _benchmarks[i];
 		const string& benchmarkName = benchmark.Name;
 
-		Print("Benchmark[%d] %s", i, benchmarkName);
+		Print("Benchmark[%d] %s", i, benchmarkName.c_str());
 		Benchmark b(benchmarkName, benchmark.NumRuns, i);
 
 		b.Run(benchmark.Op);

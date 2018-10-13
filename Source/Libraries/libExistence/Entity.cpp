@@ -24,23 +24,38 @@ EntityMgr::EntityMgr(UUIDMgr& uuidMgr)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Entity EntityMgr::SpawnEntity(EntityData* data) const
+Entity EntityMgr::SpawnEntity(EntityData* data)
 {
-	Entity out ={ 0,0 };
+	EntityID idx;
+	if(_freeIndices.size() > 1024)
+	{
+		idx = _freeIndices.front();
+		_freeIndices.pop_front();
+	}
+	else
+	{
+		idx = _generation.size();
+		_generation.push_back(0);
+		FIRE_ASSERT(idx < (1 << ENT_INDEX_BITS));
+	}
+	Entity out{ idx, _generation[idx] };
+	//Entity out{ 0,0 };
 	/*if(!_deadEntities.empty())
 	{
 		out = _deadEntities.back();
 		_deadEntities.pop_back();
+		out.IncrementGeneration();
 	}
 	else
 	{
-		out = _uuidMgr.Get();
-	}
+		out.Set(_nextIndex, 0);
+		_nextIndex++;
+	}*/
 
 	if(data)
 	{
 		BuildEntity(out, data);
-	}*/
+	}
 	return out;
 }
 
@@ -48,8 +63,9 @@ Entity EntityMgr::SpawnEntity(EntityData* data) const
 
 void EntityMgr::DespawnEntity(Entity entity)
 {
-	_deadEntities.push_back(entity);
-	DispatchDestruction(entity);
+	EntityID idx = entity.Index();
+	++_generation[idx];
+	_freeIndices.push_back(idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,12 +96,7 @@ void EntityMgr::UnregisterDestructionCallback(void* registrant)
 
 bool EntityMgr::IsAlive(Entity entity)
 {
-	for(size_t i=0; i<_deadEntities.size(); ++i)
-	{
-		if(_deadEntities[i].id == entity.id)
-			return true;
-	}
-	return false;
+	return _generation[entity.Index()] == entity.Generation();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

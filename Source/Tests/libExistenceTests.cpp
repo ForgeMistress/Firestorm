@@ -37,6 +37,7 @@ public:
 	void SetPosition(Instance i, const Vector3& value)
 	{
 		_this[POSITION][i] = value;
+		//_this[POSITION][i] = value;
 	}
 };
 
@@ -66,7 +67,6 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		t.Assert(eye != FIRE_INVALID_COMPONENT, "received an invalid component for some reason");
 
 		IComponent::Instance i = componentMgr.Lookup(e);
-		IComponent::Instance ii = componentMgr.Lookup(e);
 		t.Assert(eye == i, "the component manager did not properly map the Entity to the component");
 	});
 
@@ -85,6 +85,7 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 		{
 			entities.push_back(eMgr.SpawnEntity());
 			IComponent::Instance ii = componentMgr.Assign(entities.back());
+			t.Assert(ii == i, Format("the instance index %d was unexpected", ii).c_str());
 
 			// if we're double mapping, the call to Lookup would return a duplicate component index.
 			components.push_back(componentMgr.Lookup(entities.back()));
@@ -116,12 +117,14 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 
 		for(size_t i=0; i<count; ++i)
 		{
-			entities.push_back(eMgr.SpawnEntity());
+			Entity e = eMgr.SpawnEntity();
+			entities.push_back(e);
 			IComponent::Instance ii = componentMgr.Assign(entities.back());
 			components.push_back(ii);
 		}
 
-		IComponent::Instance i_last = componentMgr.Lookup(entities.back());
+		Entity backEnt = entities.back();
+		IComponent::Instance i_last = componentMgr.Lookup(backEnt);
 		componentMgr.SetPosition(i_last, { 9001.0f,9001.0f,9001.0f });
 		{
 			const Vector3& pos_test = componentMgr.GetPosition(i_last);

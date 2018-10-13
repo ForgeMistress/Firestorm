@@ -31,7 +31,7 @@ public:
 	virtual void Before() {}
 
 	// Runs all of the test cases. Reports back the number of errors.
-	uint32_t Run();
+	size_t Run();
 
 	// Inserts a test case. The name should be something descriptive and should be a
 	// sentence that states what it should be doing.
@@ -43,11 +43,13 @@ public:
 
     const string& GetName() const { return _name; }
 
-	template <class... Args_t>
-	void Print(const char* fmt, Args_t... args)
+	void Print(const char* fmt, ...)
 	{
+		va_list l;
+		va_start(l, fmt);
 		if(!_quietly)
-			FIRE_LOG_ERROR(fmt, args...);
+			FIRE_LOG_ERROR(fmt, l);
+		va_end(l);
 	}
 
 	void ReportError(TestCase* tc, const string& message);
@@ -55,7 +57,6 @@ public:
 private:
 	size_t RunTests();
 	void RunBenchmarks();
-
 
 	string _name;
 	bool _quietly;
