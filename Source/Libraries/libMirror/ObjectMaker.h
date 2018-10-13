@@ -65,7 +65,7 @@ public:
 private:
 	IMaker* GetMaker(FireClassID type) const;
 	unordered_map<FireClassID, IMaker*> _makers;
-	mutable Mutex _s_allLock;
+	mutable mutex _s_allLock;
 };
 
 CLOSE_NAMESPACE(Firestorm);

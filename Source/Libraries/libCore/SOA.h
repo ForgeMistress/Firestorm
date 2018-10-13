@@ -45,13 +45,17 @@ constexpr size_t parse()
 template<size_t I>
 struct soa_index {};
 
-template<size_t I>
-struct aos_index {};
-
-#define FIRE_SOA_INDEX(SYMBOL, POS) static constexpr soa_index<POS> SYMBOL{};
+// Use this to make a named static Tuple Vector Index for easier indexing into the SOA.
+#define FIRE_TVI(SYMBOL, POS) static constexpr soa_index<POS> SYMBOL{};
 
 template <char... Digits>
 decltype(auto) operator"" _soa()
+{
+	return soa_index<parse<Digits...>()>{};
+}
+
+template<char... Digits>
+decltype(auto) operator"" _tvi()
 {
 	return soa_index<parse<Digits...>()>{};
 }

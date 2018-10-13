@@ -2,16 +2,6 @@
 #define LIBCORE_H_
 #pragma once
 
-
-#ifdef FIRE_VISUALSTUDIO
-#pragma section("firealloc")
-#define FIRE_ALLOCATOR __declspec(allocator)
-#else
-#define FIRE_ALLOCATOR
-#endif
-
-FIRE_ALLOCATOR void* FIRE_ALLOC(size_t size);
-
 #define OPEN_NAMESPACE(ns) namespace ns {
 #define CLOSE_NAMESPACE(ns) } // namespace ns
 
@@ -20,6 +10,21 @@ FIRE_ALLOCATOR void* FIRE_ALLOC(size_t size);
 #include "Expected.h"
 
 OPEN_NAMESPACE(Firestorm);
+
+template <class T>
+static void InitializeLib(int ac, char** av)
+{
+	try
+	{
+		Library<T>::Initialize(ac, av);
+	}
+	catch(std::exception& e)
+	{
+		FIRE_LOG_ERROR("Exception initializing lib :: Error -> %s", e.what());
+		std::cout<<std::flush;
+		throw std::runtime_error("lib init exception encountered");
+	}
+}
 
 using std::cout;
 using std::endl;
@@ -33,7 +38,7 @@ struct libCore : public Library<libCore>
 {
 	FIRE_LIBRARY(libCore);
 
-	static void SetThreadName(Thread& thread, const string& name);
+	static void SetThreadName(thread& thread, const string& name);
 
 	template<class T>
 	static T* Alloc(size_t numItems)

@@ -33,7 +33,7 @@ public:
 class Application : public IInputEventListener
 {
 public:
-	Application(Thread::id mainThreadID);
+	Application(thread::id mainThreadID);
 	virtual ~Application();
 
 	void Initialize(int ac, char** av);
@@ -111,7 +111,7 @@ private:
 
 	Surface* _surface{ nullptr };
 
-	Thread::id _mainThreadId;
+	thread::id _mainThreadId;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	GLOBAL SYSTEMS
@@ -127,41 +127,38 @@ CLOSE_NAMESPACE(Firestorm);
 
 // InitializeLib<::Firestorm::libJson>(ac, av);
 
-#define FIRE_RUN_APPLICATION(CLASS_NAME)                                           \
-	template <class T>                                                             \
-	static void InitializeLib(int ac, char** av)                                   \
-	{																			   \
-		try																		   \
-		{																		   \
-			Library<T>::Initialize(ac, av);									       \
-		}																		   \
-		catch(std::exception& e)												   \
-		{																		   \
-			FIRE_LOG_ERROR("Exception initializing lib :: Error -> %s", e.what()); \
-			std::cout<<std::flush;                                                 \
-			throw std::runtime_error("lib init exception encountered");			   \
-		}																		   \
-	}																			   \
-	int main(int ac, char** av)                                     			   \
-	{                                                                              \
-		InitializeLib<::Firestorm::libApp>(ac,av);           			           \
-		InitializeLib<::Firestorm::libCore>(ac,av);           			           \
-		InitializeLib<::Firestorm::libExistence>(ac,av);           			       \
-		InitializeLib<::Firestorm::libIO>(ac,av);           			           \
-		InitializeLib<::Firestorm::libMath>(ac,av);           			           \
-		InitializeLib<::Firestorm::libMirror>(ac,av);           			       \
-		InitializeLib<::Firestorm::libScene>(ac,av);           			           \
-		InitializeLib<::Firestorm::libScript>(ac,av);           			       \
-		InitializeLib<::Firestorm::libSerial>(ac,av);           			       \
-		InitializeLib<::Firestorm::libUI>(ac,av);           			           \
-                                                                    			   \
-		::Firestorm::Application* app = new CLASS_NAME(std::this_thread::get_id());\
-		FIRE_ASSERT(app && "application could not be initialized"); 			   \
-		app->Initialize(ac, av);                                    			   \
-		int result = app->Run();                                    			   \
-		delete app;                                                 			   \
-		libCore::ReportMemoryLeaks();                                              \
-		return result;                                              			   \
+#define FIRE_RUN_APPLICATION(CLASS_NAME)                                                \
+	int main(int ac, char** av)                                     			        \
+	{                                                                                   \
+		::Firestorm::InitializeLib<::Firestorm::libApp>(ac,av);           			    \
+		::Firestorm::InitializeLib<::Firestorm::libCore>(ac,av);           			    \
+		::Firestorm::InitializeLib<::Firestorm::libExistence>(ac,av);           		\
+		::Firestorm::InitializeLib<::Firestorm::libIO>(ac,av);           			    \
+		::Firestorm::InitializeLib<::Firestorm::libMath>(ac,av);           			    \
+		::Firestorm::InitializeLib<::Firestorm::libMirror>(ac,av);           			\
+		::Firestorm::InitializeLib<::Firestorm::libScene>(ac,av);           			\
+		::Firestorm::InitializeLib<::Firestorm::libScript>(ac,av);           			\
+		::Firestorm::InitializeLib<::Firestorm::libSerial>(ac,av);           			\
+		::Firestorm::InitializeLib<::Firestorm::libUI>(ac,av);           			    \
+        int result = 0;                                                                 \
+		::Firestorm::Application* app = nullptr;                                        \
+		try																				\
+		{                                                                               \
+			app = new CLASS_NAME(std::this_thread::get_id());                           \
+			FIRE_ASSERT(app && "application could not be initialized"); 			    \
+			app->Initialize(ac, av);                                    			    \
+			result = app->Run();                                    			        \
+		}                                                                               \
+		catch(::Firestorm::AssertionException& e)                                       \
+		{																				\
+			::Firestorm::FIRE_LOG_ERROR(e.Report());									\
+			FIRE_ASSERT_MSG(false, "Assertion encountered...");                         \
+			result = -1;																\
+		}                                                                               \
+		if(app)                                                                         \
+			delete app;                                                 			    \
+		libCore::ReportMemoryLeaks();                                                   \
+		return result;                                              			        \
 	}
 
 #endif

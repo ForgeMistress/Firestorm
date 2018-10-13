@@ -21,9 +21,10 @@ class Error
 {
 public:
 	Error();
-	Error(const ErrorCode* errorCode, const string& details);
+	Error(const ErrorCode* errorCode, const string& details, const char* file = nullptr, int line = 0);
 	Error(const Error& error);
 	Error(Error&& other);
+
 	explicit operator string() const;
 	explicit operator uint32_t() const;
 
@@ -36,9 +37,12 @@ public:
 
 	const ErrorCode* GetCode() const { return _code; }
 
+	const char* Format() const;
+
 private:
 	const ErrorCode* _code;
 	string _details;
+	string _formatted;
 };
 
 class ErrorCode
@@ -62,11 +66,11 @@ template <typename Expected_t, typename Unexpected_t>
 using Result = tl::expected<Expected_t, Unexpected_t>;
 
 
-#define FIRE_ERROR( ERROR_CODE, ... ) \
-	tl::make_unexpected( Error( ERROR_CODE, __VA_ARGS__ ) )
+#define FIRE_ERROR( ERROR_CODE, DETAILS ) \
+	tl::make_unexpected( Error( ERROR_CODE, DETAILS ) )
 
-#define FIRE_FORWARD_ERROR( ERROR ) \
-	tl::make_unexpected( ERROR )
+#define FIRE_FORWARD_ERROR( ERR ) \
+	tl::make_unexpected( ERR )
 	
 
 #define FIRE_RESULT( VALUE ) \

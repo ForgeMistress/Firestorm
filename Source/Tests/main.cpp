@@ -27,7 +27,7 @@ RefPtr<TestHarness> libScriptPrepareHarness(int ac, char** av);
 
 int main(int ac, char** av)
 {
-    uint32_t overallFailureCount = 0;
+    size_t overallFailureCount = 0;
     Library<::Firestorm::libApp>::Initialize(ac,av);
     Library<::Firestorm::libCore>::Initialize(ac,av);
     Library<::Firestorm::libExistence>::Initialize(ac,av);
@@ -54,12 +54,12 @@ int main(int ac, char** av)
     {
         for(RefPtr<TestHarness>& harness : TESTS)
         {
-            uint32_t testResults = harness->Run();
+            size_t testResults = harness->Run();
             overallFailureCount += testResults;
 
             // report the results for this particular test.
             FIRE_LOG_DEBUG("");
-            FIRE_LOG_DEBUG("Completed", harness->GetName(), "with", testResults, "errors...");
+            FIRE_LOG_DEBUG("Completed %s with %d errors...", harness->GetName(), testResults);
             FIRE_LOG_DEBUG("-----------------------------------------------------------------------------------------------------------");
         }
 

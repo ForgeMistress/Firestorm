@@ -12,3 +12,7 @@ configureEngineLib("libScene")
 addDependencies({
     "libCore"
 })
+
+links({
+    VK_SDK_LIB
+})

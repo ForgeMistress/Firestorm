@@ -19,4 +19,6 @@
 
 #include <json/json.h>
 
+#include <vulkan/vulkan.h>
+
 #endif

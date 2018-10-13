@@ -23,10 +23,21 @@ Error::Error()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Error::Error(const ErrorCode* errorCode, const string& details)
+Error::Error(const ErrorCode* errorCode, const string& details, const char* file, int line)
 : _code(errorCode)
 , _details(details)
 {
+	_formatted.append_sprintf("[%d] ERROR %s", _code->_code, _code->_message.c_str());
+	if(!_details.empty())
+		_formatted.append_sprintf("\n    DETAILS: %s", _details.c_str());
+	if(file)
+	{
+		_formatted.append_sprintf("\n    File: %s", file);
+	}
+	if(line > 0)
+	{
+		_formatted.append_sprintf("\n    Line: %d", line);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,12 +45,16 @@ Error::Error(const ErrorCode* errorCode, const string& details)
 Error::Error(const Error& error)
 : _code(error._code)
 , _details(error._details)
+, _formatted(error._formatted)
 {
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Error::Error(Error&& other)
 : _code(other._code)
-, _details(std::move(other._details))
+, _details(eastl::move(other._details))
+, _formatted(eastl::move(other._formatted))
 {
 	other._code = nullptr;
 }
@@ -48,12 +63,14 @@ Error::Error(Error&& other)
 
 Error::operator string() const
 {
-	string s;
-	s.append_sprintf("[%d] ERROR %s", _code->_code, _code->_message);
-	
-	if(!_details.empty())
-		s.append_sprintf("\n    DETAILS: %s", _details);
-	return s;
+	return _formatted;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const char* Error::Format() const
+{
+	return _formatted.c_str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,6 +88,7 @@ Error& Error::operator=(const Error& e)
 	{
 		_code = e._code;
 		_details = e._details;
+		_formatted = e._formatted;
 	}
 	return *this;
 }

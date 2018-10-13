@@ -45,15 +45,13 @@ static const string str_Default;
 
 using uchar = unsigned char;
 
-template<class T> using Atomic = std::atomic<T>;
+template<class T> using atomic = std::atomic<T>;
 
-using Thread = std::thread;
+using thread = std::thread;
 
-using Mutex = std::mutex;
+using mutex = std::mutex;
 
 using ID = uint64_t;
-
-
 }
 
 #endif

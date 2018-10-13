@@ -11,7 +11,7 @@
 #include "ArgParser.h"
 
 #include "libCore.h"
-
+#include "Logger.h"
 #include <istream>
 #include <sstream>
 
@@ -23,6 +23,11 @@ ArgParser::ArgParser(int ac, char** av)
 	{
 		string arg(av[i]);
 		vector<string> splitString(SplitString(av[i], '='));
+		for(size_t j=0;j<splitString.size();++j)
+		{
+			FIRE_LOG_DEBUG("Arg %d: %s", j, splitString[j].c_str());
+		}
+
 		if(!splitString.empty())
 		{
 			if(splitString.size() == 1)

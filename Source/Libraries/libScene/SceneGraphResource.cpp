@@ -64,7 +64,7 @@ SceneGraphLoader::~SceneGraphLoader()
 ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
 {
 	auto path = ref.GetResourcePath();
-	if(libIO::FileExists(path))
+	if(libIO::FileExists(path.c_str()))
 	{
 		auto result = libIO::LoadFile(path);
 		if(result.has_value())

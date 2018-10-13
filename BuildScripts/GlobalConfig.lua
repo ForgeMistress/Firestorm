@@ -49,19 +49,97 @@ do
     end
 end
 
-function COMMON_INCLUDES()
+-- A list of all of the third party libraries that the application executable needs to see.
+THIRD_PARTY_LIBS = {
+    "angelscript",
+    "imgui",
+    "jsoncpp",
+    "physfs",
+    "rttr",
+    "EASTL"
+}
+
+THIRD_PARTY_INCLUDE_DIRS = {
+    THIRD_PARTY_SRC_DIR,
+    THIRD_PARTY_SRC_DIR.."/rttr/src",
+    THIRD_PARTY_SRC_DIR.."/glfw/include",
+    THIRD_PARTY_SRC_DIR.."/glfw/deps",
+    THIRD_PARTY_SRC_DIR.."/LLGL/include",
+    THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include",
+    THIRD_PARTY_SRC_DIR.."/EASTL",
+    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EABase/include/Common",
+    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAAssert/include",
+    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAStdC/include",
+}
+
+-- Check for all of the third party libraries that are not distributed with this.
+VK_SDK_PATH = ""
+VK_SDK_INCLUDES = ""
+VK_SDK_LIB = "vulkan-1"
+do
+    print()
+    print("-- Checking for required SDKs.")
+    print("-- Checking for Vulkan SDK install...")
+    VK_SDK_PATH = os.getenv("VK_SDK_PATH")
+    if VK_SDK_PATH == nil then
+        error("!! The Vulkan SDK is not installed on this machine (VK_SDK_PATH environment var is not set). "..
+        "The build can not continue.\n"..
+        "Please download the Vulkan SDK at https://www.lunarg.com/vulkan-sdk/")
+    end
+    print("++ Vulkan SDK found at "..VK_SDK_PATH..". Setting paths for build script.")
+    
+    VK_SDK_INCLUDES = VK_SDK_PATH.."/include"
+    VK_SDK_LIBS = VK_SDK_PATH.."/Lib"
+    table.insert(THIRD_PARTY_INCLUDE_DIRS, VK_SDK_INCLUDES)
+
+    print()
+
+    print("All required SDKs are found. Ready to rock.")
+    print()
+end
+
+
+-- Set up common include directories for all Firestorm libraries.
+function COMMON_ENGINE_INCLUDE_DIRS()
     includedirs({
-        THIRD_PARTY_SRC_DIR,
-        THIRD_PARTY_SRC_DIR.."/rttr/src",
-        THIRD_PARTY_SRC_DIR.."/glfw/include",
-        THIRD_PARTY_SRC_DIR.."/glfw/deps",
-        THIRD_PARTY_SRC_DIR.."/LLGL/include",
-        THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include",
-        THIRD_PARTY_SRC_DIR.."/EASTL",
-        THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EABase/include/Common",
-        THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAAssert/include",
-        THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAStdC/include"
+        ENGINE_LIB_SOURCE_DIR,
     })
+    includedirs(THIRD_PARTY_INCLUDE_DIRS)
+end
+
+-- Set up common library locations for all Firestorm libraries.
+function COMMON_ENGINE_LIB_DIRS()
+    libdirs({ 
+        ENGINE_BIN_OUTPUT_DIR,
+        VK_SDK_LIBS
+    })
+end
+
+function COMMON_ENGINE_LIB_DEFINES()
+    clearFilters()
+    if _OPTIONS["gfxapi"] == "Vulkan" then
+        defines({
+            "FIRE_GFX_VULKAN"
+        })
+    else
+        defines({
+            "FIRE_GFX_LLGL"
+        })
+    end
+end
+
+function COMMON_ENGINE_APP_LIBS()
+    links(ENGINE_LIBS)
+    links(THIRD_PARTY_LIBS)
+
+    if _OPTIONS["gfxapi"] == "Vulkan" then
+        links({ 
+            "glfw",
+            VK_SDK_LIB
+        })
+    else
+        links({"LLGL"})
+    end
 end
 
 function configureEngineLib(libName)
@@ -69,7 +147,7 @@ function configureEngineLib(libName)
 
     print("--", "Generating project for "..libName..".")
 
-    group("EngineLibs")
+    group("Engine")
     project(libName)
     language("C++")
     cppdialect("C++17")
@@ -77,11 +155,8 @@ function configureEngineLib(libName)
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
-    includedirs({
-        ENGINE_LIB_SOURCE_DIR,
-    })
-    COMMON_INCLUDES()
-    libdirs({ ENGINE_BIN_OUTPUT_DIR })
+    COMMON_ENGINE_INCLUDE_DIRS()
+    COMMON_ENGINE_LIB_DIRS()
 
     pchheader("stdafx.h")
     pchsource(ENGINE_LIB_SOURCE_DIR.."/"..libName.."/stdafx.cpp")
@@ -109,12 +184,12 @@ function configureToolsApplication(appName, gameName)
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
+    -- This is not in COMMON_INCLUDES because we don't want the core engine projects to see the game lib projects.
     includedirs({
-        ENGINE_APP_SOURCE_DIR,
-        ENGINE_LIB_SOURCE_DIR,
+        ENGINE_APP_SOURCE_DIR
     })
-    COMMON_INCLUDES()
-    libdirs({ ENGINE_BIN_OUTPUT_DIR })
+    COMMON_ENGINE_INCLUDE_DIRS()
+    COMMON_ENGINE_LIB_DIRS()
 
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
@@ -155,12 +230,12 @@ function configureGame(gameName)
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
+    -- This is not in COMMON_INCLUDES because we don't want the core engine projects to see the game lib projects.
     includedirs({
-        ENGINE_APP_SOURCE_DIR,
-        ENGINE_LIB_SOURCE_DIR,
+        ENGINE_APP_SOURCE_DIR
     })
-    COMMON_INCLUDES()
-    libdirs({ ENGINE_BIN_OUTPUT_DIR })
+    COMMON_ENGINE_INCLUDE_DIRS()
+    COMMON_ENGINE_LIB_DIRS()
 
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
@@ -204,15 +279,11 @@ function configureGameLib(gameName)
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     includedirs({
-        ENGINE_APP_SOURCE_DIR,
-        ENGINE_LIB_SOURCE_DIR,
+        ENGINE_APP_SOURCE_DIR
     })
-    COMMON_INCLUDES()
-    libdirs({
-        ENGINE_BIN_OUTPUT_DIR
-    })
+    COMMON_ENGINE_INCLUDE_DIRS()
+    COMMON_ENGINE_LIB_DIRS()
 
-    --links({ "lib"..gameName, })
     dependson({
         "rttr",
         "EASTL"
@@ -281,22 +352,17 @@ function configureUnitTestApplication()
     includedirs({
         ENGINE_LIB_SOURCE_DIR,
     })
-    COMMON_INCLUDES()
+    COMMON_ENGINE_INCLUDE_DIRS()
+    COMMON_ENGINE_LIB_DIRS()
+    COMMON_ENGINE_APP_LIBS()
 
     files({
         ENGINE_TST_SOURCE_DIR.."/**.h",
         ENGINE_TST_SOURCE_DIR.."/**.cpp"
     })
-    links(ENGINE_LIBS)
-    links({
-        "angelscript",
-        "glfw",
-        "imgui",
-        "jsoncpp",
-        "physfs",
-        "rttr",
-        "EASTL",
-        "LLGL"
+
+    disablewarnings({
+        "4267" -- size_t to int conversion could truncate result. encountered in 64 bit builds.
     })
 
     local p = path.getabsolute(ASSETS_DIR)

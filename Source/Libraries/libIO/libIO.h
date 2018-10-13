@@ -23,7 +23,7 @@ struct libIO : public Library<libIO>
 	/**
 		Check if the file exists.
 	 **/
-	static bool FileExists(const string& filename);
+	static bool FileExists(const char* filename);
 
 	/**
 		Load a file from disk. The operation happens synchronously.

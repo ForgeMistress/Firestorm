@@ -35,7 +35,7 @@ public:
 	RenderMgr(ResourceMgr& fileIOMgr, ObjectMaker& objectMaker);
 	~RenderMgr();
 
-	void Initialize(const string& renderingSystem, const LLGL::RenderContextDescriptor& renderContextDesc);
+	void Initialize(const char* renderingSystem, const LLGL::RenderContextDescriptor& renderContextDesc);
 
 	void Shutdown();
 

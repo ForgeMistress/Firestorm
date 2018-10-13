@@ -117,9 +117,9 @@ private:
 	static const char _numThreads{ 4 };
 
 	string _name;
-	Mutex _queueLock;
+	mutex _queueLock;
 
-	Thread _threads[_numThreads];
+	thread _threads[_numThreads];
 
 	queue<function<void(void)>> _queue;
 	std::condition_variable _cv;

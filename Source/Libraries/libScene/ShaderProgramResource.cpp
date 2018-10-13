@@ -34,7 +34,7 @@ ShaderProgramLoader::~ShaderProgramLoader()
 ShaderProgramLoader::LoadResult ShaderProgramLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
 {
 	const string& filename = ref.GetResourcePath();
-	if(libIO::FileExists(filename))
+	if(libIO::FileExists(filename.c_str()))
 	{
 		Result<vector<char>, Error> result = libIO::LoadFile(filename);
 		if(result.has_value())

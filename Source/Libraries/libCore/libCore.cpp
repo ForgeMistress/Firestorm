@@ -40,7 +40,7 @@ typedef struct tagTHREADNAME_INFO
 OPEN_NAMESPACE(Firestorm);
 
 #ifdef FIRE_PLATFORM_WINDOWS
-void libCore::SetThreadName(Thread& thread, const string& name)
+void libCore::SetThreadName(thread& thread, const string& name)
 {
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
@@ -78,15 +78,25 @@ void libCore::ReportMemoryLeaks()
 
 vector<string> SplitString(const string & str, char delim)
 {
-	string s(str);
-	vector<string> out;
-	size_t pos = 0;
-	while((pos = s.find(delim)) != string::npos)
-	{
-		out.push_back(s.substr(0, pos));
-		s.erase(0, pos + 1);
+	vector<string> cont;
+	std::size_t current, previous = 0;
+	current = str.find(delim);
+	while (current != std::string::npos) {
+		cont.push_back(str.substr(previous, current - previous));
+		previous = current + 1;
+		current = str.find(delim, previous);
 	}
-	return out;
+	cont.push_back(str.substr(previous, current - previous));
+	return cont;
+	//string s(str);
+	//vector<string> out;
+	//size_t pos = 0;
+	//while((pos = s.find(delim)) != string::npos)
+	//{
+	//	out.push_back(s.substr(0, pos));
+	//	s.erase(0, pos + 1);
+	//}
+	//return out;
 }
 CLOSE_NAMESPACE(Firestorm);
 

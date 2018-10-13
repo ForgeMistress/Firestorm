@@ -34,6 +34,7 @@ public:
 
 	void Write(const char* format, va_list list)
 	{
+		std::unique_lock lock(_s_allLock);
 		string s;
 		s.append_sprintf_va_list(format, list);
 		_ostream << s.c_str()<<std::endl<<std::flush;

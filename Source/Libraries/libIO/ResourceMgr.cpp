@@ -25,7 +25,7 @@ ResourceMgr::ResourceMgr()
 	{
 		string ostring;
 		ostring.append_sprintf("ResourceMgr Thread[%d]", i);
-		_threads[i] = Thread(std::bind(&ResourceMgr::ThreadRun, this));
+		_threads[i] = thread(std::bind(&ResourceMgr::ThreadRun, this));
 
 		while(!_threads[i].joinable()); // wait until the thread is joinable.
 
@@ -86,7 +86,7 @@ Resource ResourceMgr::Load(ResourceLoader* loader, const ResourceReference& ref)
 
 	auto loadOperation = [this, loader, ref, promise](){
 		auto path = ref.GetResourcePath();
-		FIRE_LOG_DEBUG("Loading Resource: %s", path);
+		FIRE_LOG_DEBUG("Loading Resource: %s", path.c_str());
 		if(_cache.HasResource(path))
 		{
 			promise->set_value(_cache.FindResource(path));
@@ -102,7 +102,7 @@ Resource ResourceMgr::Load(ResourceLoader* loader, const ResourceReference& ref)
 		delete promise;
 	};
 
-	std::unique_lock<Mutex> lock(_queueLock);
+	std::unique_lock<mutex> lock(_queueLock);
 	_queue.push(loadOperation);
 
 	lock.unlock();

@@ -53,7 +53,7 @@ MeshLoader::~MeshLoader()
 MeshLoader::LoadResult MeshLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
 {
 	auto path = ref.GetResourcePath();
-	if(libIO::FileExists(path))
+	if(libIO::FileExists(path.c_str()))
 	{
 		auto result = libIO::LoadFile(path);
 		if(result.has_value())
@@ -63,7 +63,7 @@ MeshLoader::LoadResult MeshLoader::Load(ResourceMgr* resourceMgr, const Resource
 			return FIRE_LOAD_SUCCESS(resource);
 		}
 		return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_READ_ERROR,
-			"reading file '" + path + "'\nDetails: "+((string)result.error()));
+			Format("reading file '%s'\nDetails: %s", path.c_str(), result.error().Format()));
 	}
 
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, "could not find file '"+path+"'");

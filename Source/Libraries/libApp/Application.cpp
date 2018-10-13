@@ -40,7 +40,7 @@ ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Application::Application(Thread::id mainThreadId)
+Application::Application(thread::id mainThreadId)
 : _mainThreadId(mainThreadId)
 {
 	FIRE_ASSERT_MSG(g_theApp == nullptr, "only one instance of an Application can exist at a time");

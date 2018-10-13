@@ -33,9 +33,9 @@ RenderMgr::~RenderMgr()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderMgr::Initialize(const string& system, const LLGL::RenderContextDescriptor& renderContextDesc)
+void RenderMgr::Initialize(const char* system, const LLGL::RenderContextDescriptor& renderContextDesc)
 {
-	System = LLGL::RenderSystem::Load(system.c_str());
+	System = LLGL::RenderSystem::Load(system);
 	Context = System->CreateRenderContext(renderContextDesc);
 
 	// Print renderer information

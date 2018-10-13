@@ -21,8 +21,8 @@ using namespace Firestorm;
 class PosRotComponent : public Component<Vector3, Quaternion>
 {
 public:
-	FIRE_SOA_INDEX(ENTITY, 0);
-	FIRE_SOA_INDEX(POSITION, 1);
+	FIRE_TVI(ENTITY, 0);
+	FIRE_TVI(POSITION, 1);
 
 	PosRotComponent(EntityMgr& eMgr)
 	: Base(eMgr, DestructionHandler::kImmediate)
@@ -37,7 +37,6 @@ public:
 	void SetPosition(Instance i, const Vector3& value)
 	{
 		_this[POSITION][i] = value;
-		//_this[POSITION][i] = value;
 	}
 };
 

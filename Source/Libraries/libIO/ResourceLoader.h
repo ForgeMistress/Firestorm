@@ -18,7 +18,14 @@
 	::Firestorm::ResourceLoader::LoadResult( PTR )
 
 #define FIRE_LOAD_FAIL( ERROR_CODE, DETAILS ) \
-	::Firestorm::ResourceLoader::LoadResult( ::Firestorm::Error(ERROR_CODE, DETAILS) )
+	::Firestorm::ResourceLoader::LoadResult(  \
+		::Firestorm::Error(                   \
+			ERROR_CODE,                       \
+			DETAILS,                          \
+			__FILE__,                         \
+			__LINE__                          \
+		)                                     \
+	)
 
 OPEN_NAMESPACE(Firestorm);
 

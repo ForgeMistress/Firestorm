@@ -84,8 +84,10 @@ void FirestormApp::OnInitialize(int ac, char** av)
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
-	FIRE_ASSERT_MSG(!_shaderResource.HasError(), Format("Error Loading Shader: %s", (string)_shaderResource.GetError()));
-	FIRE_ASSERT_MSG(!_sceneGraphResource.HasError(), Format("Error Loading Mesh: %s", (string)_sceneGraphResource.GetError()));
+	FIRE_ASSERT_MSG(!_shaderResource.HasError(), 
+		Format("Error Loading Shader: %s", _shaderResource.GetError().Format()));
+	FIRE_ASSERT_MSG(!_sceneGraphResource.HasError(), 
+		Format("Error Loading Mesh: %s", _sceneGraphResource.GetError().Format()));
 
 	auto resource = _shaderResource.Get<ShaderProgramResource>();
 	LLGL::GraphicsPipelineDescriptor pipelineDesc;
