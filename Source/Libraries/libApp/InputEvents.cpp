@@ -28,19 +28,10 @@ MouseButtonEvent::MouseButtonEvent(Application* app, int button, bool isDown, in
 // {
 // }
 
-MouseMoveEvent::MouseMoveEvent(Application* app, const Vector2& previousPos, const Vector2& currentPos)
+MouseMoveEvent::MouseMoveEvent(Application* app, const Vector2& pos)
 : App(app)
-, PreviousPos(previousPos)
-, CurrentPos(currentPos)
+, Pos(pos)
 {
-}
-
-Vector2 MouseMoveEvent::GetDelta() const
-{
-	return Vector2 {
-		PreviousPos.x - CurrentPos.x,
-		PreviousPos.y - CurrentPos.y
-	};
 }
 
 // FIRE_MIRROR_DEFINE(ScrollWheelEvent)

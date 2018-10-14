@@ -15,8 +15,6 @@
 #include <libIO/ResourceMgr.h>
 #include <libIO/ResourceCache.h>
 
-#include <LLGL/LLGL.h>
-
 #include <json/json.h>
 
 #include <vulkan/vulkan.h>

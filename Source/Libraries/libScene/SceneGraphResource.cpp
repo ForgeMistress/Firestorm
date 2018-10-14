@@ -64,7 +64,7 @@ SceneGraphLoader::~SceneGraphLoader()
 ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, const ResourceReference& ref)
 {
 	auto path = ref.GetResourcePath();
-	if(libIO::FileExists(path.c_str()))
+	/*if(libIO::FileExists(path.c_str()))
 	{
 		auto result = libIO::LoadFile(path);
 		if(result.has_value())
@@ -123,7 +123,7 @@ ResourceLoader::LoadResult SceneGraphLoader::Load(ResourceMgr* resourceMgr, cons
 			return FIRE_LOAD_SUCCESS(resource);
 		}
 		return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, (string)result.error());
-	}
+	}*/
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, path);
 }
 

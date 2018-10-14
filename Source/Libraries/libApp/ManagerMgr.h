@@ -35,9 +35,9 @@ private:
 	ManagerMgr();
 	~ManagerMgr();
 
+public:
 	void Shutdown();
 
-public:
 	FIRE_MGR_INSTALL(UUIDMgr);
 	FIRE_MGR_INSTALL(ResourceMgr);
 	FIRE_MGR_INSTALL(RenderMgr);

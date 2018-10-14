@@ -23,15 +23,6 @@ public:
 
 private:
 	void RegisterResourceTypes();
-
-	LLGL::VertexFormat _vertFormat;
-
-	LLGL::Buffer*           _vertexBuffer{ nullptr };
-	Resource                _shaderResource;
-	Resource                _sceneGraphResource;
-	LLGL::GraphicsPipeline* _pipeline{ nullptr };
-	LLGL::CommandQueue*     _commandQueue{ nullptr };
-	LLGL::CommandBuffer*    _commandBuffer{ nullptr };
 };
 
 #endif

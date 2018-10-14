@@ -13,6 +13,7 @@
 
 #include "Surface.h"
 #include "ObjectMaker.h"
+#include "Window.h"
 
 #include "ManagerMgr.h"
 #include <libMirror/EventDispatcher.h>
@@ -30,7 +31,7 @@ public:
 };
 
 
-class Application : public IInputEventListener
+class Application
 {
 public:
 	Application(thread::id mainThreadID);
@@ -55,13 +56,11 @@ public:
 	const ArgParser& Args() const;
 
 	ManagerMgr& GetSystems() const;
+	Window& GetWindow();
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	END GLOBAL SYSTEMS
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void EnableWindowResizing(bool enabled) const;
-
 	virtual void OnInitialize(int ac, char** av) = 0;
 	virtual void OnUpdate(double deltaT) = 0;
 	virtual void OnRender() = 0;
@@ -69,17 +68,6 @@ public:
 	virtual int  OnShutdown() = 0;
 
 public:
-	// IInputEventListener
-	virtual void OnChar(Surface* surface, unsigned int c);
-	virtual void OnCharMods(Surface* surface, unsigned int codepoint, int mods);
-	virtual void OnMouseButtonDown(Surface* surface, int mouseButton, int mods);
-	virtual void OnMouseButtonUp(Surface* surface, int mouseButton, int mods);
-	virtual void OnMouseMoved(Surface* surface, const Vector2& mousePos);
-	virtual void OnMouseScroll(Surface* surface, const Vector2& wheelOffset);
-	virtual void OnKeyDown(Surface* surface, int key, int scancode, int mods);
-	virtual void OnKeyUp(Surface* surface, int key, int scancode, int mods);
-	virtual void OnKeyRepeat(Surface* surface, int key, int scancode, int mods);
-
 	template <class T>
 	void SetJoystickUserData(T* userData, int jid)
 	{
@@ -109,18 +97,18 @@ private:
 	Vector2 _previousMousePos;
 	Vector2 _currentMousePos;
 
-	Surface* _surface{ nullptr };
-
 	thread::id _mainThreadId;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	GLOBAL SYSTEMS
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	std::unique_ptr<ArgParser> _args;
-	mutable ManagerMgr         _managerMgr;
+	eastl::unique_ptr<ArgParser> _args;
+	mutable ManagerMgr           _managerMgr;
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	END GLOBAL SYSTEMS
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Window _window;
 };
 
 CLOSE_NAMESPACE(Firestorm);

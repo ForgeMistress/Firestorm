@@ -17,11 +17,6 @@ links({
     "rttr",
     "jsoncpp",
     "angelscript",
-    "LLGL",
     "physfs",
     "EASTL"
 })
-
-if _OPTIONS["gfxapi"] == "OpenGL" then
-    dependson("LLGL_OpenGL")
-end

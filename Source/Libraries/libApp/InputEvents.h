@@ -12,6 +12,7 @@
 #pragma once
 
 #include <libMath/Vector.h>
+#include <libMirror/Object.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -33,13 +34,10 @@ struct MouseMoveEvent
 {
 	FIRE_MIRROR_DECLARE(MouseMoveEvent);
 public:
-	MouseMoveEvent(Application* app, const Vector2& previousPos, const Vector2& currentPos);
-
-	Vector2 GetDelta() const;
+	MouseMoveEvent(Application* app, const Vector2& pos);
 
 	Application* App;
-	Vector2 PreviousPos;
-	Vector2 CurrentPos;
+	Vector2 Pos;
 };
 
 struct ScrollWheelEvent

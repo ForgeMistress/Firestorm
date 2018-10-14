@@ -12,8 +12,7 @@ configureEngineLib("libApp")
 includedirs({
     "ThirdParty",
     "ThirdParty/glfw/include",
-    "ThirdParty/rttr/src",
-    "ThirdParty/LLGL/include"
+    "ThirdParty/rttr/src"
 })
 
 for _,v in ipairs(ENGINE_GAME_LIBS) do
@@ -21,12 +20,7 @@ for _,v in ipairs(ENGINE_GAME_LIBS) do
         addDependencies({v})
     end
 end
--- addDependencies(ENGINE_GAME_LIBS)
 
 dependson({
-    "LLGL",
-    "LLGL_OpenGL"
+    "glfw"
 })
---[[if _OPTIONS["gfxapi"] == "OpenGL" then
-    links({"glfw", "OpenGL32"})
-end]]

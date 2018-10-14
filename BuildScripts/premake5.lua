@@ -11,14 +11,12 @@
 ------------------------------------------------------------------------------------------------------------------------
 --  GLOBAL SETUP
 ------------------------------------------------------------------------------------------------------------------------
+include("Options")
 include("GlobalConfig")
 include("Platform")
 
 -- GLOBAL BUILD CONFIGURATION
 workspace("*")
-
-include("Options")
-
 location("Projects")
 
 function build(lib)
@@ -71,7 +69,6 @@ build("RTTR")
 build("Angelscript")
 build("GLFW")
 build("physfs")
-build("LLGL")
 build("imgui")
 
 ------------------------------------------------------------------------------------------------------------------------

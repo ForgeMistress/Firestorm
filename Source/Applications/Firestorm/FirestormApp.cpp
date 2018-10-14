@@ -3,10 +3,6 @@
 
 #include <libCore/Logger.h>
 
-#include <LLGL/LLGL.h>
-#include <LLGL/VertexAttribute.h>
-#include <LLGL/VertexFormat.h>
-
 #include <libIO/libIO.h>
 #include <libIO/ResourceMgr.h>
 
@@ -21,17 +17,11 @@ FirestormApp::FirestormApp(std::thread::id mainThreadID)
 
 FirestormApp::~FirestormApp()
 {
-	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
-	renderMgr.System->Release(*_commandBuffer);
-	renderMgr.System->Release(*_pipeline);
-	renderMgr.System->Release(*_vertexBuffer);
 }
 
 void FirestormApp::OnInitialize(int ac, char** av)
 {
 	RegisterResourceTypes();
-
-	EnableWindowResizing(true);	
 
 	FIRE_ASSERT(libIO::FileExists("/Shaders/Triangle.shader"));
 	FIRE_ASSERT(libIO::FileExists("/Models/base-female.gltf"));
@@ -41,7 +31,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 		HandleApplicationWantsToClose(e);
 	});// &FirestormApp::HandleApplicationWantsToClose, this);
 
-	struct Vertex
+	/*struct Vertex
 	{
 		Vector2 position;
 		Vector4 color;
@@ -101,12 +91,12 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	FIRE_ASSERT(_commandQueue != nullptr);
 
 	_commandBuffer = renderMgr.System->CreateCommandBuffer();
-	FIRE_ASSERT(_commandBuffer != nullptr);
+	FIRE_ASSERT(_commandBuffer != nullptr);*/
 }
 
 void FirestormApp::OnRender()
 {
-	try
+	/*try
 	{
 		if(_commandBuffer == nullptr)
 			return;
@@ -139,7 +129,7 @@ void FirestormApp::OnRender()
 	{
 		FIRE_LOG_ERROR(e.what());
 		Close();
-	}
+	}*/
 }
 
 void FirestormApp::OnClose()

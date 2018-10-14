@@ -9,62 +9,190 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Window.h"
+#include "../Window.h"
+#include "../Application.h"
+#include "../InputEvents.h"
 
 OPEN_NAMESPACE(Firestorm);
 
-Window::Window(const LLGL::WindowDescriptor& desc)
-: _descriptor(desc)
+namespace{
+// glfw input events
+static void GetItems(GLFWwindow* glfwWindow, Application*& app)
 {
-	InitializeWindowHandle(desc);
+	app = (Application*)glfwGetWindowUserPointer(glfwWindow);
+	FIRE_ASSERT_MSG(app != nullptr, "glfw window has no Firestorm Window associated with it");
+}
+
+static void GLFW_CharCallback(GLFWwindow* gWindow, unsigned int c)
+{
+	Application* app;
+	GetItems(gWindow, app);
+
+	if(app)
+	{
+		app->Dispatcher.Dispatch(CharEvent{ app, c });
+	}
+}
+
+static void GLFW_CharModsCallback(GLFWwindow* window, unsigned int codepoint, int mods)
+{
+	Application* app;
+	GetItems(window, app);
+
+	if(app)
+	{
+		app->Dispatcher.Dispatch(CharModsEvent{ app, codepoint, mods });
+	}
+}
+
+static void GLFW_MouseButtonCallback(GLFWwindow* window, int mouseButton, int action, int mods)
+{
+	Application* app;
+	GetItems(window, app);
+
+	if(app)
+	{
+		if(action == GLFW_PRESS)
+		{
+			app->Dispatcher.Dispatch(MouseButtonEvent{ app, mouseButton, true, mods });
+		}
+		else if(action == GLFW_RELEASE)
+		{
+			app->Dispatcher.Dispatch(MouseButtonEvent{ app, mouseButton, false, mods });
+		}
+	}
+}
+
+static void GLFW_CursorPosCallback(GLFWwindow* window, double mouseX, double mouseY)
+{
+	Application* app;
+	GetItems(window, app);
+
+	if(app)
+	{
+		app->Dispatcher.Dispatch(MouseMoveEvent{ app, Vector2((float)mouseX,(float)mouseY) });
+	}
+}
+
+static void GLFW_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	Application* app;
+	GetItems(window, app);
+
+	if(app)
+	{
+		if(action == GLFW_PRESS)
+		{
+			app->Dispatcher.Dispatch(KeyEvent{ app, key,scancode,mods,true });
+		}
+		else if(action == GLFW_RELEASE)
+		{
+			app->Dispatcher.Dispatch(KeyEvent{ app, key,scancode,mods,false });
+		}
+		else if(action == GLFW_REPEAT)
+		{
+			app->Dispatcher.Dispatch(KeyRepeatEvent{ app, key,scancode,mods });
+		}
+	}
+}
+
+static void GLFW_ScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+{
+	Application* app;
+	GetItems(window, app);
+
+	if(app)
+	{
+		app->Dispatcher.Dispatch(ScrollWheelEvent{ app,Vector2(xOffset,yOffset) });
+	}
+}
+}
+
+Window::Window(Application& app, ManagerMgr& managerMgr)
+: _app(app)
+, _managerMgr(managerMgr)
+{
 }
 
 Window::~Window()
 {
+	if(_windowHandle)
+	{
+		glfwDestroyWindow(_windowHandle);
+	}
 }
 
-// LLGL implementations.
-void Window::SetPosition(const LLGL::Offset2D& position)
+void Window::Initialize(const WindowDesc& desc)
+{
+	if(glfwInit() == GLFW_TRUE)
+	{
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		_windowHandle = glfwCreateWindow(
+			desc.Width,
+			desc.Height,
+			desc.Title,
+			nullptr,
+			nullptr
+		);
+		if(!_windowHandle)
+		{
+			glfwTerminate();
+			return;
+		}
+		glfwSetWindowUserPointer(_windowHandle, &_app);
+		glfwMakeContextCurrent(_windowHandle);
+	}
+}
+
+void Window::Process()
+{
+	glfwPollEvents();
+}
+
+void Window::SetPosition(const Vector2& position)
 {
 	if(_windowHandle)
 		glfwSetWindowPos(_windowHandle, position.x, position.y);
 }
 
-LLGL::Offset2D Window::GetPosition() const
+Vector2 Window::GetPosition() const
 {
-	LLGL::Offset2D offset;
+	int w, h;
 	if(_windowHandle)
-		glfwGetWindowPos(_windowHandle, &offset.x, &offset.y);
-	return offset;
+		glfwGetWindowPos(_windowHandle, &w, &h);
+	return Vector2(w,h);
 }
 
-void Window::SetSize(const LLGL::Extent2D& size, bool useClientArea)
+void Window::SetSize(const Vector2& size, bool useClientArea)
 {
 	if(_windowHandle)
-		glfwSetWindowSize(_windowHandle, size.width, size.height);
+		glfwSetWindowSize(_windowHandle, size.x, size.y);
 }
 
-LLGL::Extent2D Window::GetSize(bool useClientArea) const
+Vector2 Window::GetSize(bool useClientArea) const
 {
 	int width, height;
 	if(_windowHandle)
 		glfwGetWindowSize(_windowHandle, &width, &height);
-	return LLGL::Extent2D(width, height);
+	return Vector2(width, height);
 }
 
-void Window::SetTitle(const std::wstring& title)
+void Window::SetTitle(const char* title)
 {
+	_title = title;
 }
 
-std::wstring Window::GetTitle() const
+const char* Window::GetTitle() const
 {
-	return std::wstring();
+	return _title.c_str();
 }
 
-void Window::Show(bool show)
+void Window::SetVisible(bool visible)
 {
 	FIRE_ASSERT(_windowHandle != nullptr && "window handle was not initialized in Window::Show()");
-	_descriptor.visible = show;
-	if(show)
+	_visible = visible;
+	if(visible)
 	{
 		glfwMakeContextCurrent(_windowHandle);
 		glfwShowWindow(_windowHandle);
@@ -73,9 +201,9 @@ void Window::Show(bool show)
 		glfwHideWindow(_windowHandle);
 }
 
-bool Window::IsShown() const
+bool Window::IsVisible() const
 {
-	return _descriptor.visible;
+	return _visible;
 }
 
 namespace {
@@ -85,55 +213,6 @@ namespace {
 		win->HandleFilesDropped(numDropped, filenames);
 	}
 }
-/*
-std::wstring    title;
-Offset2D        position;
-Extent2D        size;
-bool            visible             = false;
-bool            borderless          = false;
-bool            resizable = false;
-bool            acceptDropFiles = false;
-bool            preventForPowerSafe = false;
-bool            centered = false;
-const void*     windowContext = nullptr;
-*/
-
-void Window::SetDesc(const LLGL::WindowDescriptor& desc)
-{
-	FIRE_ASSERT(_windowHandle != nullptr && "window handle was not initialized in Window::GetDesc()");
-
-	_descriptor = desc;
-
-	glfwSetWindowTitle(_windowHandle, (char*)_descriptor.title.c_str());
-	glfwSetWindowPos(_windowHandle, _descriptor.position.x, _descriptor.position.y);
-	glfwSetWindowSize(_windowHandle, _descriptor.size.width, _descriptor.size.height);
-
-	if(!_descriptor.visible) { glfwHideWindow(_windowHandle); }
-	else { glfwShowWindow(_windowHandle); }
-
-	glfwSetWindowAttrib(_windowHandle, GLFW_DECORATED, _descriptor.borderless ? GLFW_FALSE : GLFW_TRUE);
-	glfwSetWindowAttrib(_windowHandle, GLFW_RESIZABLE, _descriptor.resizable ? GLFW_TRUE : GLFW_FALSE);
-	if(_descriptor.acceptDropFiles) { glfwSetDropCallback(_windowHandle, GLFW_DropFunc); }
-	else { glfwSetDropCallback(_windowHandle, nullptr); }
-	// centered needs implementation
-	// windowContext needs to be dealt with
-}
-
-LLGL::WindowDescriptor Window::GetDesc() const
-{
-	FIRE_ASSERT(_windowHandle != nullptr && "window handle was not initialized in Window::GetDesc()");
-	LLGL::WindowDescriptor desc;
-	glfwGetWindowPos(_windowHandle, &desc.position.x, &desc.position.y);
-
-	int w, h;
-	glfwGetWindowSize(_windowHandle, &w, &h);
-	_descriptor.size.width = (uint32_t)w;
-	_descriptor.size.height = (uint32_t)h;
-
-	_descriptor.borderless = glfwGetWindowAttrib(_windowHandle, GLFW_DECORATED) == GLFW_FALSE ? true : false;
-	_descriptor.resizable = glfwGetWindowAttrib(_windowHandle, GLFW_RESIZABLE) == GLFW_TRUE ? true : false;
-	return _descriptor;
-}
 
 void Window::HandleFilesDropped(int numDropped, const char** filenames)
 {
@@ -142,26 +221,6 @@ void Window::HandleFilesDropped(int numDropped, const char** filenames)
 void Window::OnProcessEvents()
 {
 
-}
-
-void Window::InitializeWindowHandle(const LLGL::WindowDescriptor& desc)
-{
-	if(glfwInit() == GLFW_TRUE)
-	{
-		_windowHandle = glfwCreateWindow(
-			desc.size.width,
-			desc.size.height,
-			(const char*)desc.title.c_str(),
-			nullptr,
-			nullptr
-		);
-		if(!_windowHandle)
-		{
-			glfwTerminate();
-			return;
-		}
-		glfwMakeContextCurrent(_windowHandle);
-	}
 }
 
 CLOSE_NAMESPACE(Firestorm);

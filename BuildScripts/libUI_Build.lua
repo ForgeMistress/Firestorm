@@ -16,10 +16,11 @@ includedirs({
 
 addDependencies({
     "libCore",
-    "libMirror"
+    "libMirror",
+    "libScene"
 })
 
-dependson({"LLGL", "angelscript"})
+dependson({"angelscript"})
 --[[if _OPTIONS["gfxapi"] == "OpenGL" then
     links({"OpenGL32"})
 end]]

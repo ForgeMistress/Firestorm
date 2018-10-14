@@ -12,42 +12,46 @@
 #pragma once
 
 #include <libMath/Vector.h>
-#include <LLGL/Window.h>
 #include <GLFW/glfw3.h>
-
+#include <libMirror/EventDispatcher.h>
+#include "../ManagerMgr.h"
 OPEN_NAMESPACE(Firestorm);
 
-class Window final : public LLGL::Window
+class Window final
 {
 public:
-	Window(const LLGL::WindowDescriptor& desc);
+	Window(class Application& app, ManagerMgr& managerMgr);
 	virtual ~Window();
 
+	void Initialize(const struct WindowDesc& windowDesc);
+
+	void Process();
+
 	// LLGL implementations.
-	virtual void SetPosition(const LLGL::Offset2D& position);
-	virtual LLGL::Offset2D GetPosition() const;
+	void SetPosition(const Vector2& position);
+	Vector2 GetPosition() const;
 
-	virtual void SetSize(const LLGL::Extent2D& size, bool useClientArea = true);
-	virtual LLGL::Extent2D GetSize(bool useClientArea = true) const;
+	void SetSize(const Vector2& size, bool useClientArea = true);
+	Vector2 GetSize(bool useClientArea = true) const;
 
-	virtual void SetTitle(const std::wstring& title);
-	virtual std::wstring GetTitle() const;
+	void SetTitle(const char* title);
+	const char* GetTitle() const;
 
-	virtual void Show(bool show = true);
-	virtual bool IsShown() const;
+	void SetVisible(bool show = true);
+	bool IsVisible() const;
 
-	virtual void SetDesc(const LLGL::WindowDescriptor& desc);
-	virtual LLGL::WindowDescriptor GetDesc() const;
+	Application& GetApp() const { return _app; }
 
 	void HandleFilesDropped(int numDropped, const char** filenames);
 protected:
 	virtual void OnProcessEvents();
 
-	void InitializeWindowHandle(const LLGL::WindowDescriptor& desc);
-
 private:
-	mutable LLGL::WindowDescriptor _descriptor;
+	class Application& _app;
+	ManagerMgr& _managerMgr;
 	GLFWwindow* _windowHandle{ nullptr };
+	string _title;
+	bool _visible;
 };
 
 CLOSE_NAMESPACE(Firestorm);

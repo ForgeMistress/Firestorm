@@ -22,6 +22,7 @@ OPEN_NAMESPACE(Firestorm);
 RenderMgr::RenderMgr(ResourceMgr& fileIOMgr, ObjectMaker& objectMaker)
 : _fileIOMgr(fileIOMgr)
 , _objectMaker(objectMaker)
+, _system(*this)
 {
 }
 
@@ -33,81 +34,51 @@ RenderMgr::~RenderMgr()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderMgr::Initialize(const char* system, const LLGL::RenderContextDescriptor& renderContextDesc)
+void RenderMgr::Initialize(const char* system)
 {
-	System = LLGL::RenderSystem::Load(system);
-	Context = System->CreateRenderContext(renderContextDesc);
-
-	// Print renderer information
-	const auto& info = System->GetRendererInfo();
-
-	if(info.rendererName.find("OpenGL") != string::npos)
-	{
-		_rendererName = Renderers::OpenGL;
-	}
-	else if(info.rendererName.find("Direct3D") != string::npos)
-	{
-		_rendererName = Renderers::Direct3D;
-	}
-
-	FIRE_LOG_DEBUG("Renderer:         %s", info.rendererName);
-	FIRE_LOG_DEBUG("Device:           %s", info.deviceName);
-	FIRE_LOG_DEBUG("Vendor:           %s", info.vendorName);
-	FIRE_LOG_DEBUG("Shading Language: %s", info.shadingLanguageName);
+	_system.Initialize();
+	FIRE_LOG_DEBUG("Renderer:         Vulkan");
+	FIRE_LOG_DEBUG("Device:           ??????");
+	FIRE_LOG_DEBUG("Vendor:           ??????");
+	FIRE_LOG_DEBUG("Shading Language: ??????");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderMgr::Shutdown()
 {
-	System->Release(*Context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool RenderMgr::IsUsingRenderer(const string& api)
+const char* RenderMgr::GetRenderer() const
 {
-	string renderer(GetRenderer());
-	if(renderer.find(api) != string::npos)
-	{
-		return true;
-	}
-	return false;
+	static const char* str = "";
+	return str;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-string RenderMgr::GetRenderer() const
+const char* RenderMgr::GetDevice() const
 {
-	return _rendererName;
+	static const char* str = "";
+	return str;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-string RenderMgr::GetDevice() const
+const char* RenderMgr::GetVendor() const
 {
-	return System->GetRendererInfo().deviceName;
+	static const char* str = "";
+	return str;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-string RenderMgr::GetVendor() const
+const char* RenderMgr::GetShadingLanguageName() const
 {
-	return System->GetRendererInfo().vendorName;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-string RenderMgr::GetShadingLanguageName() const
-{
-	return System->GetRendererInfo().shadingLanguageName;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-LLGL::Buffer* RenderMgr::CreateBuffer(const LLGL::BufferDescriptor& desc)
-{
-	return System->CreateBuffer(desc);
+	static const char* str = "";
+	return str;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

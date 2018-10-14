@@ -64,7 +64,6 @@ THIRD_PARTY_INCLUDE_DIRS = {
     THIRD_PARTY_SRC_DIR.."/rttr/src",
     THIRD_PARTY_SRC_DIR.."/glfw/include",
     THIRD_PARTY_SRC_DIR.."/glfw/deps",
-    THIRD_PARTY_SRC_DIR.."/LLGL/include",
     THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include",
     THIRD_PARTY_SRC_DIR.."/EASTL",
     THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EABase/include/Common",
@@ -121,10 +120,6 @@ function COMMON_ENGINE_LIB_DEFINES()
         defines({
             "FIRE_GFX_VULKAN"
         })
-    else
-        defines({
-            "FIRE_GFX_LLGL"
-        })
     end
 end
 
@@ -137,8 +132,6 @@ function COMMON_ENGINE_APP_LIBS()
             "glfw",
             VK_SDK_LIB
         })
-    else
-        links({"LLGL"})
     end
 end
 
@@ -155,6 +148,7 @@ function configureEngineLib(libName)
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
+    COMMON_ENGINE_LIB_DEFINES()
     COMMON_ENGINE_INCLUDE_DIRS()
     COMMON_ENGINE_LIB_DIRS()
 
@@ -184,12 +178,14 @@ function configureToolsApplication(appName, gameName)
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
+    COMMON_ENGINE_LIB_DEFINES()
     -- This is not in COMMON_INCLUDES because we don't want the core engine projects to see the game lib projects.
     includedirs({
         ENGINE_APP_SOURCE_DIR
     })
     COMMON_ENGINE_INCLUDE_DIRS()
     COMMON_ENGINE_LIB_DIRS()
+    COMMON_ENGINE_APP_LIBS()
 
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
@@ -230,20 +226,21 @@ function configureGame(gameName)
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
+    COMMON_ENGINE_LIB_DEFINES()
     -- This is not in COMMON_INCLUDES because we don't want the core engine projects to see the game lib projects.
     includedirs({
         ENGINE_APP_SOURCE_DIR
     })
     COMMON_ENGINE_INCLUDE_DIRS()
     COMMON_ENGINE_LIB_DIRS()
+    COMMON_ENGINE_APP_LIBS()
 
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
 
     addDependencies(ENGINE_GAME_LIBS)
     links({
-        "lib"..gameName,
-        "LLGL"
+        "lib"..gameName
     })
     dependson({
         "rttr",
@@ -278,6 +275,7 @@ function configureGameLib(gameName)
 
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
+    COMMON_ENGINE_LIB_DEFINES()
     includedirs({
         ENGINE_APP_SOURCE_DIR
     })
@@ -349,6 +347,7 @@ function configureUnitTestApplication()
     
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
+    COMMON_ENGINE_LIB_DEFINES()
     includedirs({
         ENGINE_LIB_SOURCE_DIR,
     })

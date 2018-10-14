@@ -11,8 +11,7 @@
 #define LIBSCENE_RENDERMGR_H_
 #pragma once
 
-#include <LLGL/LLGL.h>
-#include <LLGL/RenderContext.h>
+#include "RenderSystem.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -35,28 +34,21 @@ public:
 	RenderMgr(ResourceMgr& fileIOMgr, ObjectMaker& objectMaker);
 	~RenderMgr();
 
-	void Initialize(const char* renderingSystem, const LLGL::RenderContextDescriptor& renderContextDesc);
+	void Initialize(const char* renderingSystem);
 
 	void Shutdown();
 
-	bool IsUsingRenderer(const string& api);
-
-	string GetRenderer() const;
-	string GetDevice() const;
-	string GetVendor() const;
-	string GetShadingLanguageName() const;
-
-	LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& desc);
-
-public:
-	std::unique_ptr<LLGL::RenderSystem> System{ nullptr };
-	LLGL::RenderContext* Context{ nullptr };
+	const char* GetRenderer() const;
+	const char* GetDevice() const;
+	const char* GetVendor() const;
+	const char* GetShadingLanguageName() const;
 
 private:
-	string _rendererName;
-
 	ResourceMgr& _fileIOMgr;
 	ObjectMaker& _objectMaker;
+	RenderSystem _system;
+
+	string _rendererName;
 };
 
 CLOSE_NAMESPACE(Firestorm);

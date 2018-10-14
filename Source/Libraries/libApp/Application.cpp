@@ -27,12 +27,6 @@ Application* Application::g_theApp = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// FIRE_MIRROR_DEFINE(Firestorm::ApplicationWantsToCloseEvent)
-// {
-// }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 : App(app)
 {
@@ -42,6 +36,7 @@ ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 
 Application::Application(thread::id mainThreadId)
 : _mainThreadId(mainThreadId)
+, _window(*this, _managerMgr)
 {
 	FIRE_ASSERT_MSG(g_theApp == nullptr, "only one instance of an Application can exist at a time");
 	if(g_theApp == nullptr)
@@ -55,46 +50,20 @@ Application::Application(thread::id mainThreadId)
 Application::~Application()
 {
 	_managerMgr.Shutdown();
-	//_objectMaker.Shutdown();
-	// _renderMgr.Shutdown();
-	//_renderMgr.System->Release(*_renderMgr.Context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Application::Initialize(int ac, char** av)
 {
-	_args = std::make_unique<ArgParser>(ac, av);
+	_args = eastl::make_unique<ArgParser>(ac, av);
 
 	auto& renderMgr = _managerMgr.GetRenderMgr();
-
-	// Initialize the rendering context.
-	LLGL::RenderContextDescriptor contextDesc;
-	{
-		contextDesc.videoMode.resolution = { 800,600 };
-		contextDesc.vsync.enabled = true;
-		contextDesc.profileOpenGL.contextProfile = LLGL::OpenGLContextProfile::CoreProfile;
-	}
-	renderMgr.Initialize("OpenGL", contextDesc);
-
-	/*LLGL::Extent2D size(800, 600);
-	_surface = new Surface(this, size, "Firestorm Window");
-
-	_surface->SetInputListener(this);
-	_surface->SetJoystickCallback([](int jid, int event) -> void {
-		if (event == GLFW_CONNECTED)
-		{
-			Application::TheApp()->Dispatcher.Dispatch(JoystickConnectedEvent{ Application::TheApp(), jid });
-		}
-		else if (event == GLFW_DISCONNECTED)
-		{
-			Application::TheApp()->Dispatcher.Dispatch(JoystickDisconnectedEvent{ Application::TheApp(), jid });
-		}
-	});*/
-
-	auto& window = static_cast<LLGL::Window&>(renderMgr.Context->GetSurface());
-	window.SetTitle(L"Firestorm Application");
-	window.Show();
+	_window.Initialize(WindowDesc{
+		"Firestorm Application",
+		800,
+		600
+	});
 
 	OnInitialize(ac, av);
 }
@@ -110,13 +79,11 @@ int Application::Run()
 	bool isRunning{ true };
 	bool eventDispatched{ false };
 
-	auto timer = LLGL::Timer::Create();
-	auto start = std::chrono::system_clock::now();
-
 	auto& renderMgr = _managerMgr.GetRenderMgr();
 
-	while(static_cast<LLGL::Window&>(renderMgr.Context->GetSurface()).ProcessEvents())
+	while(isRunning)
 	{
+		_window.Process();
 		// _mainThreadId = std::this_thread::get_id();
 
 		/*timer->MeasureTime();
@@ -151,7 +118,6 @@ int Application::Run()
 				isRunning = false;
 			}
 		}*/
-		renderMgr.Context->Present();
 	}
 	//_surface->Close();
 	
@@ -208,83 +174,77 @@ ManagerMgr& Application::GetSystems() const
 	return _managerMgr;
 }
 
+Window& Application::GetWindow()
+{
+	return _window;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	END GLOBAL SYSTEMS
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Application::EnableWindowResizing(bool enabled) const
-{
-	auto& renderMgr = _managerMgr.GetRenderMgr();
-	LLGL::Window& window = static_cast<LLGL::Window&>(renderMgr.Context->GetSurface());
-	LLGL::WindowDescriptor desc = window.GetDesc();
-	desc.resizable = enabled;
-	window.SetDesc(desc);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnChar(Surface* surface, unsigned int c)
-{
-	Dispatcher.Dispatch(CharEvent{ this, c });
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnCharMods(Surface* surface, unsigned int codepoint, int mods)
-{
-	Dispatcher.Dispatch(CharModsEvent{ this, codepoint, mods });
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnMouseButtonDown(Surface* surface, int mouseButton, int mods)
-{
-	Dispatcher.Dispatch(MouseButtonEvent{ this, mouseButton, true, mods });
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnMouseButtonUp(Surface* surface, int mouseButton, int mods)
-{
-	Dispatcher.Dispatch(MouseButtonEvent{ this, mouseButton, false, mods });
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnMouseMoved(Surface* surface, const Vector2& mousePos)
-{
-	_previousMousePos = _currentMousePos;
-	_currentMousePos = mousePos;
-	Dispatcher.Dispatch(MouseMoveEvent{ this, _previousMousePos,_currentMousePos });
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnMouseScroll(Surface* surface, const Vector2& wheelOffset)
-{
-	Dispatcher.Dispatch(ScrollWheelEvent{ this, wheelOffset });
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnKeyDown(Surface* surface, int key, int scancode, int mods)
-{
-	Dispatcher.Dispatch(KeyEvent{ this, key, scancode, mods, true });
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnKeyUp(Surface* surface, int key, int scancode, int mods)
-{
-	Dispatcher.Dispatch(KeyEvent{ this, key, scancode, mods, false });
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Application::OnKeyRepeat(Surface* surface, int key, int scancode, int mods)
-{
-	Dispatcher.Dispatch(KeyRepeatEvent{ this, key, scancode, mods });
-}
+//void Application::OnChar(Surface* surface, unsigned int c)
+//{
+//	Dispatcher.Dispatch(CharEvent{ this, c });
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void Application::OnCharMods(Surface* surface, unsigned int codepoint, int mods)
+//{
+//	Dispatcher.Dispatch(CharModsEvent{ this, codepoint, mods });
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void Application::OnMouseButtonDown(Surface* surface, int mouseButton, int mods)
+//{
+//	Dispatcher.Dispatch(MouseButtonEvent{ this, mouseButton, true, mods });
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void Application::OnMouseButtonUp(Surface* surface, int mouseButton, int mods)
+//{
+//	Dispatcher.Dispatch(MouseButtonEvent{ this, mouseButton, false, mods });
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void Application::OnMouseMoved(Surface* surface, const Vector2& mousePos)
+//{
+//	_previousMousePos = _currentMousePos;
+//	_currentMousePos = mousePos;
+//	Dispatcher.Dispatch(MouseMoveEvent{ this, _previousMousePos,_currentMousePos });
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void Application::OnMouseScroll(Surface* surface, const Vector2& wheelOffset)
+//{
+//	Dispatcher.Dispatch(ScrollWheelEvent{ this, wheelOffset });
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void Application::OnKeyDown(Surface* surface, int key, int scancode, int mods)
+//{
+//	Dispatcher.Dispatch(KeyEvent{ this, key, scancode, mods, true });
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void Application::OnKeyUp(Surface* surface, int key, int scancode, int mods)
+//{
+//	Dispatcher.Dispatch(KeyEvent{ this, key, scancode, mods, false });
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void Application::OnKeyRepeat(Surface* surface, int key, int scancode, int mods)
+//{
+//	Dispatcher.Dispatch(KeyRepeatEvent{ this, key, scancode, mods });
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
