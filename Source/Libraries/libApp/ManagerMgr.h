@@ -36,6 +36,7 @@ private:
 	~ManagerMgr();
 
 public:
+	void Initialize();
 	void Shutdown();
 
 	FIRE_MGR_INSTALL(UUIDMgr);

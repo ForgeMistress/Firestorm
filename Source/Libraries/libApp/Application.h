@@ -128,21 +128,15 @@ CLOSE_NAMESPACE(Firestorm);
 		::Firestorm::InitializeLib<::Firestorm::libScript>(ac,av);           			\
 		::Firestorm::InitializeLib<::Firestorm::libSerial>(ac,av);           			\
 		::Firestorm::InitializeLib<::Firestorm::libUI>(ac,av);           			    \
+                                                                                        \
         int result = 0;                                                                 \
 		::Firestorm::Application* app = nullptr;                                        \
-		try																				\
-		{                                                                               \
-			app = new CLASS_NAME(std::this_thread::get_id());                           \
-			FIRE_ASSERT(app && "application could not be initialized"); 			    \
-			app->Initialize(ac, av);                                    			    \
-			result = app->Run();                                    			        \
-		}                                                                               \
-		catch(::Firestorm::AssertionException& e)                                       \
-		{																				\
-			::Firestorm::FIRE_LOG_ERROR(e.Report());									\
-			FIRE_ASSERT_MSG(false, "Assertion encountered...");                         \
-			result = -1;																\
-		}                                                                               \
+																						\
+		app = new CLASS_NAME(std::this_thread::get_id());                               \
+		FIRE_ASSERT(app && "application could not be initialized"); 			        \
+		app->Initialize(ac, av);                                    			        \
+		result = app->Run();                                    			            \
+		                                                                                \
 		if(app)                                                                         \
 			delete app;                                                 			    \
 		libCore::ReportMemoryLeaks();                                                   \

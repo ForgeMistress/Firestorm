@@ -23,6 +23,11 @@ ManagerMgr::~ManagerMgr()
 	Shutdown();
 }
 
+void ManagerMgr::Initialize()
+{
+	_FIRE_MGR_VAR(RenderMgr).Initialize("");
+}
+
 void ManagerMgr::Shutdown()
 {
 	_FIRE_MGR_VAR(ResourceMgr).Shutdown();

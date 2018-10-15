@@ -58,12 +58,13 @@ void Application::Initialize(int ac, char** av)
 {
 	_args = eastl::make_unique<ArgParser>(ac, av);
 
-	auto& renderMgr = _managerMgr.GetRenderMgr();
 	_window.Initialize(WindowDesc{
 		"Firestorm Application",
 		800,
 		600
 	});
+
+	_managerMgr.Initialize();
 
 	OnInitialize(ac, av);
 }

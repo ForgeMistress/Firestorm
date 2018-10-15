@@ -11,10 +11,13 @@
 #define LIBAPP_WINDOW_H_
 #pragma once
 
-#include <libMath/Vector.h>
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+
+#include <libMath/Vector.h>
 #include <libMirror/EventDispatcher.h>
 #include "../ManagerMgr.h"
+
 OPEN_NAMESPACE(Firestorm);
 
 class Window final

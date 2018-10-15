@@ -18,16 +18,6 @@ OPEN_NAMESPACE(Firestorm);
 class ResourceMgr;
 class ObjectMaker;
 
-/**
-	Struct containing identifier strings for different rendering backends
-	that can be returned by RenderMgr::GetRenderer.
- **/
-struct Renderers
-{
-	static constexpr char* OpenGL   = "OpenGL";
-	static constexpr char* Direct3D = "Direct3D";
-};
-
 class RenderMgr final
 {
 public:
