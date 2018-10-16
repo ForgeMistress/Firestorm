@@ -71,6 +71,7 @@ void RenderSystem::Initialize()
 	CreateInstance();
 	SetupDebugCallback();
 	PickPhysicalDevice();
+	CreateLogicalDevice();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,23 +178,60 @@ void RenderSystem::PickPhysicalDevice()
 
 	vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
-	eastl::vector<eastl::pair<int, VkPhysicalDevice>> candidates;
+
+	using cpair = eastl::pair<int, VkPhysicalDevice>;
+	eastl::vector<cpair> candidates;
 
 	for(const auto& device : devices)
 	{
 		candidates.push_back(eastl::pair(RateDeviceSuitability(device), device));
 	}
-	candidates.push_back(eastl::pair(0, nullptr));
-	candidates.push_back(eastl::pair(1, nullptr));
-	candidates.push_back(eastl::pair(2, nullptr));
 	eastl::sort(candidates.begin(), candidates.end(), 
-		[](const eastl::pair<int, VkPhysicalDevice>& left, const eastl::pair<int, VkPhysicalDevice>& right) {
-			FIRE_LOG_DEBUG("scores %d/%d", left.first, right.first);
+		[](const cpair& left, const cpair& right) {
 			return left.first > right.first;
 		});
-	FIRE_LOG_DEBUG("score of best pick: %d", (*candidates.begin()).first);
 	_physicalDevice = (*candidates.begin()).second;
 	FIRE_ASSERT_MSG(_physicalDevice != VK_NULL_HANDLE, "failed to find a suitable gpu");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::CreateLogicalDevice()
+{
+	QueueFamilyIndices indices = FindQueueFamilies(_physicalDevice);
+	VkDeviceQueueCreateInfo queueInfo ={};
+	queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueInfo.queueFamilyIndex = indices.GraphicsFamily.value();
+	queueInfo.queueCount = 1;
+	float queuePriority = 1.0f;
+	queueInfo.pQueuePriorities = &queuePriority;
+
+	VkPhysicalDeviceFeatures features ={};
+	
+	VkDeviceCreateInfo deviceInfo ={};
+	deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceInfo.pQueueCreateInfos = &queueInfo;
+	deviceInfo.queueCreateInfoCount = 1;
+	deviceInfo.pEnabledFeatures = &features;
+#ifndef FIRE_FINAL
+	deviceInfo.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
+	deviceInfo.ppEnabledLayerNames = _validationLayers.data();
+#else
+	deviceInfo.enabledLayerCount = 0;
+#endif
+	FIRE_ASSERT_MSG(vkCreateDevice(_physicalDevice, &deviceInfo, nullptr, &_device) == VK_SUCCESS, 
+		"could not create physical device");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::CreateSurface()
+{
+#ifdef FIRE_PLATFORM_WINDOWS
+
+#elif FIRE_PLATFORM_OSX
+#elif FIRE_PLATFORM_LINUX
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +264,40 @@ int RenderSystem::RateDeviceSuitability(VkPhysicalDevice device)
 	{
 		return 0;
 	}
+
+	QueueFamilyIndices indices = FindQueueFamilies(device);
+	if(!indices.IsComplete())
+		score = 0;
+
 	return score;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define has_flag(QFamily, BIT) (QFamily.queueFlags & BIT)
+RenderSystem::QueueFamilyIndices RenderSystem::FindQueueFamilies(VkPhysicalDevice device)
+{
+	QueueFamilyIndices indices;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+	vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+	int i=0;
+	for(const auto& queueFamily : queueFamilies)
+	{
+		if(queueFamily.queueCount > 0 && has_flag(queueFamily, VK_QUEUE_GRAPHICS_BIT))
+		{
+			indices.GraphicsFamily = i;
+		}
+		if(indices.IsComplete())
+			break;
+		i++;
+	}
+
+	return indices;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

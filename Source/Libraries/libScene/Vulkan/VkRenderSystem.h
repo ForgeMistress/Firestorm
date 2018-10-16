@@ -34,18 +34,21 @@ private:
 	void CreateInstance();
 	void SetupDebugCallback();
 	void PickPhysicalDevice();
-
-	bool IsDeviceSuitable(VkPhysicalDevice device);
-	int RateDeviceSuitability(VkPhysicalDevice device);
+	void CreateLogicalDevice();
+	void CreateSurface();
 
 	struct QueueFamilyIndices
 	{
-		eastl::optional<uint32_t> _graphicsFamily;
-		bool IsComplete()
+		eastl::optional<uint32_t> GraphicsFamily;
+		bool IsComplete() const
 		{
-			return _graphicsFamily.has_value();
+			return GraphicsFamily.has_value();
 		}
 	};
+
+	bool IsDeviceSuitable(VkPhysicalDevice device);
+	int RateDeviceSuitability(VkPhysicalDevice device);
+	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 
 	static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -60,6 +63,7 @@ private:
 	VkInstance _instance;
 	VkDebugUtilsMessengerEXT _callback;
 	VkPhysicalDevice _physicalDevice;
+	VkDevice _device;
 #ifndef FIRE_FINAL
 	vector<const char*> _validationLayers;
 #endif
