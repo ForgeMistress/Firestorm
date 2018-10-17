@@ -58,7 +58,7 @@ class EntityMgr final
 public:
 	using DestructionCallback = function<void(Entity)>;
 
-	EntityMgr(UUIDMgr& uuidMgr);
+	EntityMgr(class Application& app);
 
 	/**
 		Spawn yourself a shiny new entity.
@@ -95,6 +95,8 @@ public:
 private:
 	void DispatchDestruction(Entity entity);
 	void BuildEntity(Entity entity, EntityData* data) const;
+
+	class Application& _app;
 
 	struct CallbackInfo
 	{

@@ -17,11 +17,12 @@ OPEN_NAMESPACE(Firestorm);
 
 class ResourceMgr;
 class ObjectMaker;
+class Application;
 
 class RenderMgr final
 {
 public:
-	RenderMgr(ResourceMgr& fileIOMgr, ObjectMaker& objectMaker);
+	RenderMgr(Application& app);
 	~RenderMgr();
 
 	void Initialize(const char* renderingSystem);
@@ -33,9 +34,10 @@ public:
 	const char* GetVendor() const;
 	const char* GetShadingLanguageName() const;
 
+	Application& GetApp() const { return _app; }
+
 private:
-	ResourceMgr& _fileIOMgr;
-	ObjectMaker& _objectMaker;
+	Application& _app;
 	RenderSystem _system;
 
 	string _rendererName;

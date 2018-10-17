@@ -11,7 +11,8 @@
 #define LIBAPP_MANAGERMGR_H_
 #pragma once
 
-#include "ObjectMaker.h"
+#include "Window.h"
+#include <libMirror/ObjectMaker.h>
 #include <libCore/UUIDMgr.h>
 #include <libIO/ResourceMgr.h>
 #include <libScene/RenderMgr.h>
@@ -24,21 +25,23 @@ OPEN_NAMESPACE(Firestorm);
 
 #define FIRE_MGR_INSTALL(TYPE)\
 private:\
-	TYPE _FIRE_MGR_VAR(TYPE);\
+	class TYPE _FIRE_MGR_VAR(TYPE);\
 public:\
-	TYPE& Get##TYPE () { return _FIRE_MGR_VAR(TYPE); }
+	class TYPE& Get##TYPE ();
 
 class ManagerMgr final
 {
 private:
 	friend class Application;
-	ManagerMgr();
+	ManagerMgr(Application& app);
 	~ManagerMgr();
 
 public:
 	void Initialize();
 	void Shutdown();
 
+	class Application& _app;
+	FIRE_MGR_INSTALL(Window);
 	FIRE_MGR_INSTALL(UUIDMgr);
 	FIRE_MGR_INSTALL(ResourceMgr);
 	FIRE_MGR_INSTALL(RenderMgr);

@@ -13,12 +13,14 @@
 #include "ComponentDefinition.h"
 
 #include <libCore/Logger.h>
+#include <libApp/Application.h>
 
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-EntityMgr::EntityMgr(UUIDMgr& uuidMgr)
+EntityMgr::EntityMgr(Application& app)
+: _app(app)
 {
 }
 

@@ -16,14 +16,13 @@
 
 #include <libMath/Vector.h>
 #include <libMirror/EventDispatcher.h>
-#include "../ManagerMgr.h"
 
 OPEN_NAMESPACE(Firestorm);
 
 class Window final
 {
 public:
-	Window(class Application& app, ManagerMgr& managerMgr);
+	Window(class Application& app);
 	virtual ~Window();
 
 	void Initialize(const struct WindowDesc& windowDesc);
@@ -46,12 +45,13 @@ public:
 	Application& GetApp() const { return _app; }
 
 	void HandleFilesDropped(int numDropped, const char** filenames);
+
+	GLFWwindow* GetWindowHandle() { return _windowHandle; }
 protected:
 	virtual void OnProcessEvents();
 
 private:
 	class Application& _app;
-	ManagerMgr& _managerMgr;
 	GLFWwindow* _windowHandle{ nullptr };
 	string _title;
 	bool _visible;

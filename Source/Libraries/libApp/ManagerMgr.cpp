@@ -10,11 +10,17 @@
 #include "stdafx.h"
 #include "ManagerMgr.h"
 
+#include "Application.h"
+
+#define FIRE_MGR_IMPL(TYPE) class TYPE& ManagerMgr::Get##TYPE () { return _FIRE_MGR_VAR(TYPE); }
+
 OPEN_NAMESPACE(Firestorm);
 
-ManagerMgr::ManagerMgr()
-: _FIRE_MGR_VAR(RenderMgr)(_FIRE_MGR_VAR(ResourceMgr), _FIRE_MGR_VAR(ObjectMaker))
-, _FIRE_MGR_VAR(EntityMgr)(_FIRE_MGR_VAR(UUIDMgr))
+ManagerMgr::ManagerMgr(Application& app)
+: _app(app)
+, _FIRE_MGR_VAR(Window)(_app)
+, _FIRE_MGR_VAR(RenderMgr)(_app)
+, _FIRE_MGR_VAR(EntityMgr)(_app)
 {
 }
 
@@ -25,6 +31,11 @@ ManagerMgr::~ManagerMgr()
 
 void ManagerMgr::Initialize()
 {
+	_FIRE_MGR_VAR(Window).Initialize(WindowDesc{
+		"Firestorm Application",
+		800,
+		600
+	});
 	_FIRE_MGR_VAR(RenderMgr).Initialize("");
 }
 
@@ -33,5 +44,12 @@ void ManagerMgr::Shutdown()
 	_FIRE_MGR_VAR(ResourceMgr).Shutdown();
 	_FIRE_MGR_VAR(RenderMgr).Shutdown();
 }
+
+FIRE_MGR_IMPL(Window);
+FIRE_MGR_IMPL(UUIDMgr);
+FIRE_MGR_IMPL(ResourceMgr);
+FIRE_MGR_IMPL(RenderMgr);
+FIRE_MGR_IMPL(ObjectMaker);
+FIRE_MGR_IMPL(EntityMgr);
 
 CLOSE_NAMESPACE(Firestorm);

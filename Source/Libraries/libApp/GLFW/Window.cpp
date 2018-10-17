@@ -108,9 +108,8 @@ static void GLFW_ScrollCallback(GLFWwindow* window, double xOffset, double yOffs
 }
 }
 
-Window::Window(Application& app, ManagerMgr& managerMgr)
+Window::Window(Application& app)
 : _app(app)
-, _managerMgr(managerMgr)
 {
 }
 

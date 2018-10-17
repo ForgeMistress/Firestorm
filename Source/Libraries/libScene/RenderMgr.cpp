@@ -13,16 +13,17 @@
 #include <libMirror/ObjectMaker.h>
 #include <libIO/ResourceMgr.h>
 
+#include <libApp/Application.h>
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RenderMgr::RenderMgr(ResourceMgr& fileIOMgr, ObjectMaker& objectMaker)
-: _fileIOMgr(fileIOMgr)
-, _objectMaker(objectMaker)
-, _system(*this)
+RenderMgr::RenderMgr(Application& app)
+: _app(app)
+, _system(_app.GetSystems().GetRenderMgr(), _app.GetSystems().GetWindow())
 {
 }
 

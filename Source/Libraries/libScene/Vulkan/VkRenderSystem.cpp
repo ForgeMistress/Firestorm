@@ -12,19 +12,18 @@
 #include <libCore/Logger.h>
 #include "../RenderMgr.h"
 
-#include <EASTL/sort.h>
+#include <libApp/Window.h>
 
-#define GLFW_INCLUDE_VULKAN
-#include <glfw/glfw3.h>
+#include <EASTL/sort.h>
 
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
-                                      const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-                                      const VkAllocationCallbacks* pAllocator,
-                                      VkDebugUtilsMessengerEXT* pCallback)
+static VkResult CreateDebugUtilsMessengerEXT(VkInstance                                instance,
+                                             const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+                                             const VkAllocationCallbacks*              pAllocator,
+                                             VkDebugUtilsMessengerEXT*                 pCallback)
 {
 	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
 	if(func != nullptr)
@@ -34,9 +33,9 @@ VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
 	return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
-void DestroyDebugUtilsMessengerEXT(VkInstance instance,
-                                   VkDebugUtilsMessengerEXT callback,
-                                   const VkAllocationCallbacks* pAllocator)
+static void DestroyDebugUtilsMessengerEXT(VkInstance                   instance,
+                                          VkDebugUtilsMessengerEXT     callback,
+                                          const VkAllocationCallbacks* pAllocator)
 {
 	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
 	if(func != nullptr)
@@ -45,10 +44,15 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance,
 	}
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RenderSystem::RenderSystem(RenderMgr& renderMgr)
+RenderSystem::RenderSystem(RenderMgr& renderMgr, Window& window)
 : _renderMgr(renderMgr)
+, _window(window)
+, _deviceExtensions({
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+})
 #ifndef FIRE_FINAL
 , _validationLayers({
 	"VK_LAYER_LUNARG_standard_validation"
@@ -61,6 +65,12 @@ RenderSystem::RenderSystem(RenderMgr& renderMgr)
 
 RenderSystem::~RenderSystem()
 {
+	vkDestroySurfaceKHR(_instance, _surface, nullptr);
+	vkDestroyDevice(_device, nullptr);
+#ifndef FIRE_FINAL
+	DestroyDebugUtilsMessengerEXT(_instance, _callback, nullptr);
+#endif
+	vkDestroyInstance(_instance, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +80,7 @@ void RenderSystem::Initialize()
 	CheckValidationLayers();
 	CreateInstance();
 	SetupDebugCallback();
+	CreateSurface();
 	PickPhysicalDevice();
 	CreateLogicalDevice();
 }
@@ -186,7 +197,7 @@ void RenderSystem::PickPhysicalDevice()
 	{
 		candidates.push_back(eastl::pair(RateDeviceSuitability(device), device));
 	}
-	eastl::sort(candidates.begin(), candidates.end(), 
+	eastl::sort(candidates.begin(), candidates.end(),
 		[](const cpair& left, const cpair& right) {
 			return left.first > right.first;
 		});
@@ -199,20 +210,31 @@ void RenderSystem::PickPhysicalDevice()
 void RenderSystem::CreateLogicalDevice()
 {
 	QueueFamilyIndices indices = FindQueueFamilies(_physicalDevice);
-	VkDeviceQueueCreateInfo queueInfo ={};
-	queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueInfo.queueFamilyIndex = indices.GraphicsFamily.value();
-	queueInfo.queueCount = 1;
-	float queuePriority = 1.0f;
-	queueInfo.pQueuePriorities = &queuePriority;
+	vector<VkDeviceQueueCreateInfo> queueInfos;
+	unordered_set<uint32_t> uniqueQueueFamilies ={
+		indices.PresentFamily.value(),
+		indices.GraphicsFamily.value()
+	};
 
-	VkPhysicalDeviceFeatures features ={};
+	float queuePriority = 1.0f;
+	for(uint32_t queueFamily : uniqueQueueFamilies)
+	{
+		VkDeviceQueueCreateInfo queueInfo = {};
+		queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueInfo.queueFamilyIndex = queueFamily;
+		queueInfo.queueCount = 1;
+		queueInfo.pQueuePriorities = &queuePriority;
+		queueInfos.push_back(queueInfo);
+	}
+
+	VkPhysicalDeviceFeatures features = {};
 	
-	VkDeviceCreateInfo deviceInfo ={};
+	VkDeviceCreateInfo deviceInfo = {};
 	deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	deviceInfo.pQueueCreateInfos = &queueInfo;
-	deviceInfo.queueCreateInfoCount = 1;
+	deviceInfo.pQueueCreateInfos = queueInfos.data();
+	deviceInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
 	deviceInfo.pEnabledFeatures = &features;
+
 #ifndef FIRE_FINAL
 	deviceInfo.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
 	deviceInfo.ppEnabledLayerNames = _validationLayers.data();
@@ -221,28 +243,28 @@ void RenderSystem::CreateLogicalDevice()
 #endif
 	FIRE_ASSERT_MSG(vkCreateDevice(_physicalDevice, &deviceInfo, nullptr, &_device) == VK_SUCCESS, 
 		"could not create physical device");
+
+	vkGetDeviceQueue(_device, indices.GraphicsFamily.value(), 0, &_graphicsQueue);
+	vkGetDeviceQueue(_device, indices.PresentFamily.value(), 0, &_presentQueue);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderSystem::CreateSurface()
 {
-#ifdef FIRE_PLATFORM_WINDOWS
-
-#elif FIRE_PLATFORM_OSX
-#elif FIRE_PLATFORM_LINUX
-#endif
+	if(glfwCreateWindowSurface(_instance, _window.GetWindowHandle(), nullptr, &_surface) != VK_SUCCESS)
+	{
+		FIRE_ASSERT(false);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool RenderSystem::IsDeviceSuitable(VkPhysicalDevice device)
 {
-	VkPhysicalDeviceProperties props;
-	VkPhysicalDeviceFeatures features;
-	vkGetPhysicalDeviceProperties(device, &props);
-	vkGetPhysicalDeviceFeatures(device, &features);
-	return props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && features.geometryShader;
+	QueueFamilyIndices indices = FindQueueFamilies(device);
+	bool extensionsSupported = CheckDeviceExtensionSupport(device);
+	return indices.IsComplete() && extensionsSupported;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,12 +314,48 @@ RenderSystem::QueueFamilyIndices RenderSystem::FindQueueFamilies(VkPhysicalDevic
 		{
 			indices.GraphicsFamily = i;
 		}
+
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface, &presentSupport);
+		if(queueFamily.queueCount > 0 && presentSupport)
+		{
+			indices.PresentFamily = i;
+		}
+
 		if(indices.IsComplete())
+		{
 			break;
+		}
 		i++;
 	}
 
 	return indices;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool RenderSystem::CheckDeviceExtensionSupport(VkPhysicalDevice device)
+{
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+	vector<VkExtensionProperties> availableExtensions(extensionCount);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+	unordered_set<string> requiredExtensions(_deviceExtensions.begin(), _deviceExtensions.end());
+
+	for(const auto& extension : availableExtensions)
+	{
+		requiredExtensions.erase(extension.extensionName);
+	}
+	return requiredExtensions.empty();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RenderSystem::SwapChainSupportDetails RenderSystem::QuerySwapChainSupport()
+{
+	SwapChainSupportDetails details;
+
+	return details;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "Application.h"
 
+#include "Window.h"
 #include "InputEvents.h"
 
 #include <libCore/libCore.h>
@@ -36,7 +37,7 @@ ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 
 Application::Application(thread::id mainThreadId)
 : _mainThreadId(mainThreadId)
-, _window(*this, _managerMgr)
+, _managerMgr(*this)
 {
 	FIRE_ASSERT_MSG(g_theApp == nullptr, "only one instance of an Application can exist at a time");
 	if(g_theApp == nullptr)
@@ -58,12 +59,6 @@ void Application::Initialize(int ac, char** av)
 {
 	_args = eastl::make_unique<ArgParser>(ac, av);
 
-	_window.Initialize(WindowDesc{
-		"Firestorm Application",
-		800,
-		600
-	});
-
 	_managerMgr.Initialize();
 
 	OnInitialize(ac, av);
@@ -81,10 +76,10 @@ int Application::Run()
 	bool eventDispatched{ false };
 
 	auto& renderMgr = _managerMgr.GetRenderMgr();
-
+	Window& window = _managerMgr.GetWindow();
 	while(isRunning)
 	{
-		_window.Process();
+		window.Process();
 		// _mainThreadId = std::this_thread::get_id();
 
 		/*timer->MeasureTime();
@@ -173,11 +168,6 @@ const ArgParser& Application::Args() const
 ManagerMgr& Application::GetSystems() const
 {
 	return _managerMgr;
-}
-
-Window& Application::GetWindow()
-{
-	return _window;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
