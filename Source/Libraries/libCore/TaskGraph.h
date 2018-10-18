@@ -21,6 +21,16 @@ using Node = size_t;
 class TaskGraph final
 {
 public:
+	/**
+		Indices into the SOA for the node.
+	 **/
+	struct NodeI
+	{
+		FIRE_TVI(ID, 0);
+		FIRE_TVI(Operation, 1);
+		FIRE_TVI(Parent, 2);
+	};
+
 	TaskGraph();
 
 	/**
