@@ -49,6 +49,9 @@ private:
 	void PickPhysicalDevice();
 	void CreateLogicalDevice();
 	void CreateSurface();
+	void CreateSwapChain();
+	void CreateImageViews();
+	void CreateGraphicsPipeline();
 
 	struct QueueFamilyIndices
 	{
@@ -75,7 +78,6 @@ private:
 	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR>& availableFormats);
 	VkPresentModeKHR ChooseSwapPresentMode(const vector<VkPresentModeKHR>& availablePresentModes);
 	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-	void CreateSwapChain();
 
 	vector<const char*> GetRequiredExtensions() const;
 
@@ -95,6 +97,7 @@ private:
 	vector<VkImage> _swapChainImages;
 	VkFormat _swapChainImageFormat;
 	VkExtent2D _swapChainExtent;
+	vector<VkImageView> _swapChainImageViews;
 #ifndef FIRE_FINAL
 	vector<const char*> _validationLayers;
 #endif

@@ -107,12 +107,18 @@ void RenderSystem::Initialize()
 	PickPhysicalDevice();
 	CreateLogicalDevice();
 	CreateSwapChain();
+	CreateImageViews();
+	CreateGraphicsPipeline();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderSystem::Shutdown()
 {
+	for(auto imageView : _swapChainImageViews)
+	{
+		vkDestroyImageView(_device, imageView, nullptr);
+	}
 	vkDestroySwapchainKHR(_device, _swapChain, nullptr);
 	vkDestroySurfaceKHR(_instance, _surface, nullptr);
 	vkDestroyDevice(_device, nullptr);
@@ -273,6 +279,15 @@ void RenderSystem::CreateLogicalDevice()
 	vkGetDeviceQueue(_device, indices.PresentFamily.value(), 0, &_presentQueue);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::CreateSurface()
+{
+	FIRE_VALIDATE_VK_CALL(glfwCreateWindowSurface, _instance, _window.GetWindowHandle(), nullptr, &_surface);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void RenderSystem::CreateSwapChain()
 {
 	SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(_physicalDevice);
@@ -319,9 +334,7 @@ void RenderSystem::CreateSwapChain()
 
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	//FIRE_VALIDATE_VK_CALL(vkCreateSwapchainKHR, _device, &createInfo, nullptr, &_swapChain);
-	PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR = (PFN_vkCreateSwapchainKHR)vkGetDeviceProcAddr(_device, "vkCreateSwapchainKHR");
-	vkCreateSwapchainKHR(_device, &createInfo, nullptr, &_swapChain);
+	FIRE_VALIDATE_VK_CALL(vkCreateSwapchainKHR, _device, &createInfo, nullptr, &_swapChain);
 
 	vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, nullptr);
 	_swapChainImages.resize(imageCount);
@@ -333,27 +346,38 @@ void RenderSystem::CreateSwapChain()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderSystem::CreateSurface()
+void RenderSystem::CreateImageViews()
 {
-	GLFWwindow* window = _window.GetWindowHandle();
-	//int vulkanSupported = glfwVulkanSupported();
-	//FIRE_ASSERT_MSG(vulkanSupported == GLFW_TRUE, "vulkan is not supported");
-	//
-	//VkResult err;
-	//VkWin32SurfaceCreateInfoKHR sci;
-	//PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
-	//
-	//vkCreateWin32SurfaceKHR = (PFN_vkCreateWin32SurfaceKHR)vkGetInstanceProcAddr(_instance, "vkCreateWin32SurfaceKHR");
-	//FIRE_ASSERT_MSG(vkCreateWin32SurfaceKHR, "Win32: Vulkan instance missing VK_KHR_win32_surface extension");
-	//
-	//memset(&sci, 0, sizeof(sci));
-	//sci.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	//sci.hinstance = GetModuleHandle(NULL);
-	//sci.hwnd = glfwGetWin32Window(window);
-	//
-	//err = vkCreateWin32SurfaceKHR(_instance, &sci, nullptr, &_surface);
-	//FIRE_ASSERT_MSG(!err, "Win32: Failed to create Vulkan surface");
-	FIRE_VALIDATE_VK_CALL(glfwCreateWindowSurface, _instance, window, nullptr, &_surface);
+	_swapChainImageViews.resize(_swapChainImages.size());
+	for(size_t i=0; i<_swapChainImages.size(); ++i)
+	{
+		VkImageViewCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.image = _swapChainImages[i];
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.format = _swapChainImageFormat;
+
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.levelCount = 1;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+
+		FIRE_VALIDATE_VK_CALL(vkCreateImageView, _device, &createInfo, nullptr, &_swapChainImageViews[i]);
+
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::CreateGraphicsPipeline()
+{
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
