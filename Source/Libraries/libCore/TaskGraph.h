@@ -74,32 +74,6 @@ private:
 	vector<NodeEdge>                              _edges;        // edges between nodes.
 };
 
-TaskGraph::TaskGraph()
-{
-}
-
-bool TaskGraph::AreLinked(Node from, Node to)
-{
-	for(const auto& edge : _edges)
-	{
-		// check if they're already linked.
-		if(edge.first == from && edge.second == to)
-			return true;
-	}
-	return false;
-}
-
-void TaskGraph::Shutdown()
-{
-}
-
-void TaskGraph::Link(Node from, Node to)
-{
-	if(AreLinked(from, to))
-		return; // no-op if the nodes are already linked.
-	_edges.push_back(pair(from, to));
-}
-
 CLOSE_NAMESPACE(Firestorm);
 
 #endif
