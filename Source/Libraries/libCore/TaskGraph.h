@@ -66,9 +66,10 @@ private:
 	// queue<function<void(void)>> _queue;
 	// std::condition_variable _cv;
 	// bool _quit{ false };
+	using NodeEdge = pair<Node, Node>;
 
 	vector<function<void()>>         _nodeFuncs;    // functions for the nodes.
-	vector<pair<Node, Node>>         _edges;        // edges between nodes.
+	vector<NodeEdge>                 _edges;        // edges between nodes.
 	vector<pair<Node, vector<Node>>> _nodeChildren; // children of the nodes.
 };
 
