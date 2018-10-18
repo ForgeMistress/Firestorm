@@ -41,7 +41,7 @@ public:
 	Node Push(Function&& function)
 	{
 		size_t index = _nodes.size();
-		_nodes.push_back(forward<Function>(function), vector<Node>());
+		_nodes.push_back(forward<Function>(function));
 		return index;
 	}
 
@@ -68,10 +68,9 @@ private:
 	// bool _quit{ false };
 
 	using NodeEdge = pair<Node, Node>;
-	using NodeChildList = pair<Node, vector<Node>>;
 
-	tuple_vector<function<void()>, NodeChildList> _nodes;
-	vector<NodeEdge>                              _edges;        // edges between nodes.
+	tuple_vector<function<void()>> _nodes;
+	vector<NodeEdge>               _edges;        // edges between nodes.
 };
 
 CLOSE_NAMESPACE(Firestorm);
