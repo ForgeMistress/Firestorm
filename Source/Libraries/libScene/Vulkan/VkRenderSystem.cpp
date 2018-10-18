@@ -44,6 +44,33 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance                   instance,
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
+                                                   VkDebugUtilsMessageTypeFlagsEXT             messageType,
+                                                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                                                   void*                                       pUserData)
+{
+	if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+	{
+		FIRE_LOG_WARNING("!! [Vulkan WARNING]: %s", pCallbackData->pMessage);
+	}
+	else if(messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+	{
+		FIRE_LOG_ERROR("!! [Vulkan ERROR]: %s", pCallbackData->pMessage);
+	}
+	else
+	{
+		FIRE_LOG_DEBUG("!! [Vulkan INFO]: %s", pCallbackData->pMessage);
+	}
+	return VK_FALSE;
+}
+
+#define FIRE_VALIDATE_VK_CALL(function, ...)                                \
+{                                                                           \
+	VkResult result = function ( __VA_ARGS__ );                             \
+	FIRE_ASSERT_MSG(result == VK_SUCCESS, "vulkan call "#function"failed"); \
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -56,6 +83,7 @@ RenderSystem::RenderSystem(RenderMgr& renderMgr, Window& window)
 #ifndef FIRE_FINAL
 , _validationLayers({
 	"VK_LAYER_LUNARG_standard_validation"
+	//, "VK_LAYER_LUNARG_api_dump"
 })
 #endif
 {
@@ -65,12 +93,7 @@ RenderSystem::RenderSystem(RenderMgr& renderMgr, Window& window)
 
 RenderSystem::~RenderSystem()
 {
-	vkDestroySurfaceKHR(_instance, _surface, nullptr);
-	vkDestroyDevice(_device, nullptr);
-#ifndef FIRE_FINAL
-	DestroyDebugUtilsMessengerEXT(_instance, _callback, nullptr);
-#endif
-	vkDestroyInstance(_instance, nullptr);
+	Shutdown();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,12 +106,16 @@ void RenderSystem::Initialize()
 	CreateSurface();
 	PickPhysicalDevice();
 	CreateLogicalDevice();
+	CreateSwapChain();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderSystem::Shutdown()
 {
+	vkDestroySwapchainKHR(_device, _swapChain, nullptr);
+	vkDestroySurfaceKHR(_instance, _surface, nullptr);
+	vkDestroyDevice(_device, nullptr);
 #ifndef FIRE_FINAL
 	DestroyDebugUtilsMessengerEXT(_instance, _callback, nullptr);
 #endif
@@ -111,7 +138,6 @@ void RenderSystem::CheckValidationLayers()
 		bool found = false;
 		for(const auto& layerProperties : availableLayers)
 		{
-			FIRE_LOG_DEBUG("Layer: %s", layerProperties.layerName);
 			if(string(layerName) == layerProperties.layerName)
 			{
 				found = true;
@@ -132,7 +158,7 @@ void RenderSystem::CreateInstance()
 		VK_MAKE_VERSION(1,0,0),
 		"Firestorm",
 		VK_MAKE_VERSION(0,0,1),
-		VK_API_VERSION_1_1
+		VK_API_VERSION_1_0
 	};
 	VkInstanceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -151,8 +177,7 @@ void RenderSystem::CreateInstance()
 	createInfo.enabledLayerCount = 0;
 #endif
 
-	VkResult result = vkCreateInstance(&createInfo, nullptr, &_instance);
-	FIRE_ASSERT_MSG(result == VK_SUCCESS, "failed to create vulkan instance");
+	FIRE_VALIDATE_VK_CALL(vkCreateInstance, &createInfo, nullptr, &_instance);
 }
 
 void RenderSystem::SetupDebugCallback()
@@ -161,7 +186,8 @@ void RenderSystem::SetupDebugCallback()
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
 	debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
-	debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | 
+	debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                                      VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
                                       VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
                                       VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 
@@ -169,13 +195,10 @@ void RenderSystem::SetupDebugCallback()
                                   VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
                                   VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 
-	debugCreateInfo.pfnUserCallback = RenderSystem::DebugCallback;
+	debugCreateInfo.pfnUserCallback = VulkanDebugCallback;
 	debugCreateInfo.pUserData = nullptr; // Optional
 
-	if(CreateDebugUtilsMessengerEXT(_instance, &debugCreateInfo, nullptr, &_callback) != VK_SUCCESS)
-	{
-		FIRE_ASSERT(false);
-	}
+	FIRE_VALIDATE_VK_CALL(CreateDebugUtilsMessengerEXT, _instance, &debugCreateInfo, nullptr, &_callback);
 #endif
 }
 
@@ -191,11 +214,11 @@ void RenderSystem::PickPhysicalDevice()
 	vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
 
 	using cpair = eastl::pair<int, VkPhysicalDevice>;
-	eastl::vector<cpair> candidates;
+	vector<cpair> candidates;
 
 	for(const auto& device : devices)
 	{
-		candidates.push_back(eastl::pair(RateDeviceSuitability(device), device));
+		candidates.push_back(cpair(RateDeviceSuitability(device), device));
 	}
 	eastl::sort(candidates.begin(), candidates.end(),
 		[](const cpair& left, const cpair& right) {
@@ -211,7 +234,7 @@ void RenderSystem::CreateLogicalDevice()
 {
 	QueueFamilyIndices indices = FindQueueFamilies(_physicalDevice);
 	vector<VkDeviceQueueCreateInfo> queueInfos;
-	unordered_set<uint32_t> uniqueQueueFamilies ={
+	unordered_set<uint32_t> uniqueQueueFamilies = {
 		indices.PresentFamily.value(),
 		indices.GraphicsFamily.value()
 	};
@@ -235,27 +258,102 @@ void RenderSystem::CreateLogicalDevice()
 	deviceInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
 	deviceInfo.pEnabledFeatures = &features;
 
+	deviceInfo.enabledExtensionCount = static_cast<uint32_t>(_deviceExtensions.size());
+	deviceInfo.ppEnabledExtensionNames = _deviceExtensions.data();
+
 #ifndef FIRE_FINAL
 	deviceInfo.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
 	deviceInfo.ppEnabledLayerNames = _validationLayers.data();
 #else
 	deviceInfo.enabledLayerCount = 0;
 #endif
-	FIRE_ASSERT_MSG(vkCreateDevice(_physicalDevice, &deviceInfo, nullptr, &_device) == VK_SUCCESS, 
-		"could not create physical device");
+	FIRE_VALIDATE_VK_CALL(vkCreateDevice, _physicalDevice, &deviceInfo, nullptr, &_device);
 
 	vkGetDeviceQueue(_device, indices.GraphicsFamily.value(), 0, &_graphicsQueue);
 	vkGetDeviceQueue(_device, indices.PresentFamily.value(), 0, &_presentQueue);
+}
+
+void RenderSystem::CreateSwapChain()
+{
+	SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(_physicalDevice);
+
+	VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.Formats);
+	VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.PresentModes);
+	VkExtent2D extent = ChooseSwapExtent(swapChainSupport.Capabilities);
+
+	uint32_t imageCount = swapChainSupport.Capabilities.minImageCount + 1;
+	if(swapChainSupport.Capabilities.maxImageCount > 0 && imageCount > swapChainSupport.Capabilities.maxImageCount)
+	{
+		imageCount = swapChainSupport.Capabilities.maxImageCount;
+	}
+
+	VkSwapchainCreateInfoKHR createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	createInfo.surface = _surface;
+
+	createInfo.minImageCount = imageCount;
+	createInfo.imageFormat = surfaceFormat.format;
+	createInfo.imageColorSpace = surfaceFormat.colorSpace;
+	createInfo.imageExtent = extent;
+	createInfo.imageArrayLayers = 1;
+	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+	QueueFamilyIndices indices = FindQueueFamilies(_physicalDevice);
+	uint32_t queueFamilyIndices[] = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
+
+	if(indices.GraphicsFamily != indices.PresentFamily)
+	{
+		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		createInfo.queueFamilyIndexCount = 2;
+		createInfo.pQueueFamilyIndices = queueFamilyIndices;
+	}
+	else
+	{
+		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	}
+
+	createInfo.preTransform = swapChainSupport.Capabilities.currentTransform;
+	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	createInfo.presentMode = presentMode;
+	createInfo.clipped = VK_TRUE;
+
+	createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+	//FIRE_VALIDATE_VK_CALL(vkCreateSwapchainKHR, _device, &createInfo, nullptr, &_swapChain);
+	PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR = (PFN_vkCreateSwapchainKHR)vkGetDeviceProcAddr(_device, "vkCreateSwapchainKHR");
+	vkCreateSwapchainKHR(_device, &createInfo, nullptr, &_swapChain);
+
+	vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, nullptr);
+	_swapChainImages.resize(imageCount);
+	vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, _swapChainImages.data());
+
+	_swapChainImageFormat = surfaceFormat.format;
+	_swapChainExtent = extent;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderSystem::CreateSurface()
 {
-	if(glfwCreateWindowSurface(_instance, _window.GetWindowHandle(), nullptr, &_surface) != VK_SUCCESS)
-	{
-		FIRE_ASSERT(false);
-	}
+	GLFWwindow* window = _window.GetWindowHandle();
+	//int vulkanSupported = glfwVulkanSupported();
+	//FIRE_ASSERT_MSG(vulkanSupported == GLFW_TRUE, "vulkan is not supported");
+	//
+	//VkResult err;
+	//VkWin32SurfaceCreateInfoKHR sci;
+	//PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
+	//
+	//vkCreateWin32SurfaceKHR = (PFN_vkCreateWin32SurfaceKHR)vkGetInstanceProcAddr(_instance, "vkCreateWin32SurfaceKHR");
+	//FIRE_ASSERT_MSG(vkCreateWin32SurfaceKHR, "Win32: Vulkan instance missing VK_KHR_win32_surface extension");
+	//
+	//memset(&sci, 0, sizeof(sci));
+	//sci.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+	//sci.hinstance = GetModuleHandle(NULL);
+	//sci.hwnd = glfwGetWin32Window(window);
+	//
+	//err = vkCreateWin32SurfaceKHR(_instance, &sci, nullptr, &_surface);
+	//FIRE_ASSERT_MSG(!err, "Win32: Failed to create Vulkan surface");
+	FIRE_VALIDATE_VK_CALL(glfwCreateWindowSurface, _instance, window, nullptr, &_surface);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -264,7 +362,13 @@ bool RenderSystem::IsDeviceSuitable(VkPhysicalDevice device)
 {
 	QueueFamilyIndices indices = FindQueueFamilies(device);
 	bool extensionsSupported = CheckDeviceExtensionSupport(device);
-	return indices.IsComplete() && extensionsSupported;
+	bool swapChainAdequate = false;
+	if(extensionsSupported)
+	{
+		SwapChainSupportDetails details = QuerySwapChainSupport(device);
+		swapChainAdequate = !details.Formats.empty() && !details.PresentModes.empty();
+	}
+	return indices.IsComplete() && extensionsSupported && swapChainAdequate;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -351,30 +455,91 @@ bool RenderSystem::CheckDeviceExtensionSupport(VkPhysicalDevice device)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RenderSystem::SwapChainSupportDetails RenderSystem::QuerySwapChainSupport()
+RenderSystem::SwapChainSupportDetails RenderSystem::QuerySwapChainSupport(VkPhysicalDevice device)
 {
 	SwapChainSupportDetails details;
+
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _surface, &details.Capabilities);
+
+	uint32_t formatCount;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface, &formatCount, nullptr);
+	if(formatCount != 0)
+	{
+		details.Formats.resize(formatCount);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface, &formatCount, details.Formats.data());
+	}
+
+	uint32_t presentModeCount;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface, &presentModeCount, nullptr);
+	if(presentModeCount != 0)
+	{
+		details.PresentModes.resize(presentModeCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface, &presentModeCount, details.PresentModes.data());
+	}
 
 	return details;
 }
 
+VkSurfaceFormatKHR RenderSystem::ChooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR>& availableFormats)
+{
+	if(availableFormats.size() == 1 && availableFormats[0].format == VK_FORMAT_UNDEFINED)
+	{
+		return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+	}
+
+	for(const auto& availableFormat : availableFormats)
+	{
+		if(availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+		{
+			return availableFormat;
+		}
+	}
+
+	return availableFormats[0];
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-VKAPI_ATTR VkBool32 VKAPI_CALL RenderSystem::DebugCallback(
-	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-	VkDebugUtilsMessageTypeFlagsEXT messageType,
-	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-	void* pUserData)
+VkPresentModeKHR RenderSystem::ChooseSwapPresentMode(const vector<VkPresentModeKHR>& availablePresentModes)
 {
-	if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+	VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
+
+	for(const auto& availablePresentMode : availablePresentModes) 
 	{
-		FIRE_LOG_WARNING("!! Vulkan Warning: %s", pCallbackData->pMessage);
+		if(availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) 
+		{
+			return availablePresentMode;
+		}
+		else if(availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+		{
+			bestMode = availablePresentMode;
+		}
 	}
-	if(messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+
+	return bestMode;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+VkExtent2D RenderSystem::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+{
+	if(capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
 	{
-		FIRE_LOG_ERROR("!! Vulkan ERROR: %s", pCallbackData->pMessage);
+		return capabilities.currentExtent;
 	}
-	return VK_FALSE;
+	else
+	{
+		Vector2 size(_window.GetSize());
+		VkExtent2D actualExtent = {
+			static_cast<uint32_t>(size.x),
+			static_cast<uint32_t>(size.y)
+		};
+
+		actualExtent.width = eastl::max(capabilities.minImageExtent.width, eastl::min(capabilities.maxImageExtent.width, actualExtent.width));
+		actualExtent.height = eastl::max(capabilities.minImageExtent.height, eastl::min(capabilities.maxImageExtent.height, actualExtent.height));
+
+		return actualExtent;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

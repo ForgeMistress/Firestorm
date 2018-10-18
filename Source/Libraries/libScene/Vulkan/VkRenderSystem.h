@@ -71,29 +71,30 @@ private:
 	int RateDeviceSuitability(VkPhysicalDevice device);
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 	bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
-	SwapChainSupportDetails QuerySwapChainSupport();
-
-	static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
-		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		VkDebugUtilsMessageTypeFlagsEXT messageType,
-		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-		void* pUserData
-	);
+	SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
+	VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR>& availableFormats);
+	VkPresentModeKHR ChooseSwapPresentMode(const vector<VkPresentModeKHR>& availablePresentModes);
+	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+	void CreateSwapChain();
 
 	vector<const char*> GetRequiredExtensions() const;
 
 	class RenderMgr& _renderMgr;
 	class Window& _window;
 
-	VkInstance _instance;
-	VkDebugUtilsMessengerEXT _callback;
-	VkPhysicalDevice _physicalDevice;
-	VkDevice _device;
-	VkSurfaceKHR _surface;
-	VkQueue _graphicsQueue;
-	VkQueue _presentQueue;
+	VkInstance _instance{ nullptr };
+	VkDebugUtilsMessengerEXT _callback{ nullptr };
+	VkPhysicalDevice _physicalDevice{ nullptr };
+	VkDevice _device{ nullptr };
+	VkSurfaceKHR _surface{ nullptr };
+	VkQueue _graphicsQueue{ nullptr };
+	VkQueue _presentQueue{ nullptr };
 
 	vector<const char*> _deviceExtensions;
+	VkSwapchainKHR _swapChain{ nullptr };
+	vector<VkImage> _swapChainImages;
+	VkFormat _swapChainImageFormat;
+	VkExtent2D _swapChainExtent;
 #ifndef FIRE_FINAL
 	vector<const char*> _validationLayers;
 #endif

@@ -140,7 +140,6 @@ void Window::Initialize(const WindowDesc& desc)
 			return;
 		}
 		glfwSetWindowUserPointer(_windowHandle, &_app);
-		glfwMakeContextCurrent(_windowHandle);
 	}
 }
 

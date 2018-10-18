@@ -52,7 +52,6 @@ if os.ishost("windows") then
         THIRD_PARTY_SRC_DIR.."/glfw/src/window.c"
     })
 end
-
 includedirs({
     THIRD_PARTY_SRC_DIR.."/glfw/include"
 })
