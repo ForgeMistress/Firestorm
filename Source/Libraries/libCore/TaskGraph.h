@@ -12,20 +12,9 @@
 #pragma once
 
 #include "libCore.h"
-#include <EASTL/bonus/tuple_vector.h>
+#include "SOA.h"
 
 OPEN_NAMESPACE(Firestorm);
-
-/**
-	\class GoWidePool
-
-	A ThreadPool that is used to go wide and distribute work amongst multiple threads.
-	The threads share work via work stealing.
- **/
-class GoWidePool
-{
-
-};
 
 using Node = size_t;
 
@@ -41,7 +30,7 @@ public:
 	Node Push(Function&& function)
 	{
 		size_t index = _nodes.size();
-		_nodes.push_back(forward<Function>(function));
+		_nodes.push_back(index, forward<Function>(function), index);
 		return index;
 	}
 
@@ -69,8 +58,8 @@ private:
 
 	using NodeEdge = pair<Node, Node>;
 
-	tuple_vector<function<void()>> _nodes;
-	vector<NodeEdge>               _edges;        // edges between nodes.
+	SOA<Node, function<void()>, Node> _nodes; // ID, operation, parent.
+	vector<NodeEdge>                  _edges; // edges between nodes.
 };
 
 CLOSE_NAMESPACE(Firestorm);
