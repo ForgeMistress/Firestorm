@@ -12,6 +12,7 @@
 #pragma once
 
 #include "libCore.h"
+#include <EASTL/bonus/tuple_vector.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -40,8 +41,7 @@ public:
 	Node Push(Function&& function)
 	{
 		size_t index = _nodes.size();
-		_nodeFuncs.push_back(forward<Function>(function));
-		_nodeChildren.push_back(vector<Node>());
+		_nodes.push_back(forward<Function>(function), vector<Node>());
 		return index;
 	}
 
@@ -66,11 +66,12 @@ private:
 	// queue<function<void(void)>> _queue;
 	// std::condition_variable _cv;
 	// bool _quit{ false };
-	using NodeEdge = pair<Node, Node>;
 
-	vector<function<void()>>         _nodeFuncs;    // functions for the nodes.
-	vector<NodeEdge>                 _edges;        // edges between nodes.
-	vector<pair<Node, vector<Node>>> _nodeChildren; // children of the nodes.
+	using NodeEdge = pair<Node, Node>;
+	using NodeChildList = pair<Node, vector<Node>>;
+
+	tuple_vector<function<void()>, NodeChildList> _nodes;
+	vector<NodeEdge>                              _edges;        // edges between nodes.
 };
 
 TaskGraph::TaskGraph()
@@ -82,9 +83,8 @@ bool TaskGraph::AreLinked(Node from, Node to)
 	for(const auto& edge : _edges)
 	{
 		// check if they're already linked.
-		if(edge.first == from)
-			if(edge.second == to)
-				return true;
+		if(edge.first == from && edge.second == to)
+			return true;
 	}
 	return false;
 }
