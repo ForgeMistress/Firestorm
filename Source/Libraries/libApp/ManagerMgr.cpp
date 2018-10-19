@@ -11,17 +11,17 @@
 #include "ManagerMgr.h"
 
 #include "Application.h"
-
-#define FIRE_MGR_IMPL(TYPE) class TYPE& ManagerMgr::Get##TYPE () { return _FIRE_MGR_VAR(TYPE); }
+#include <thread>
 
 OPEN_NAMESPACE(Firestorm);
 
 ManagerMgr::ManagerMgr(Application& app)
 : _app(app)
-, _FIRE_MGR_VAR(Window)(_app)
-, _FIRE_MGR_VAR(RenderMgr)(_app)
-, _FIRE_MGR_VAR(EntityMgr)(_app)
-, _FIRE_MGR_VAR(TaskGraph)(_app)
+, _Window(_app)
+, _ResourceMgr(_app)
+, _RenderMgr(_app)
+, _EntityMgr(_app)
+, _Taskflow(std::thread::hardware_concurrency())
 {
 }
 
@@ -42,17 +42,46 @@ void ManagerMgr::Initialize()
 
 void ManagerMgr::Shutdown()
 {
-	_FIRE_MGR_VAR(TaskGraph).Shutdown();
-	_FIRE_MGR_VAR(ResourceMgr).Shutdown();
-	_FIRE_MGR_VAR(RenderMgr).Shutdown();
+	FIRE_LOG_DEBUG("!! Shutting down task graph...");
+	_Taskflow.wait_for_all();
+
+	FIRE_LOG_DEBUG("!! Shutting down RenderMgr");
+	_RenderMgr.Shutdown();
 }
 
-FIRE_MGR_IMPL(Window);
-FIRE_MGR_IMPL(UUIDMgr);
-FIRE_MGR_IMPL(ResourceMgr);
-FIRE_MGR_IMPL(RenderMgr);
-FIRE_MGR_IMPL(ObjectMaker);
-FIRE_MGR_IMPL(EntityMgr);
-FIRE_MGR_IMPL(TaskGraph);
+class Window& ManagerMgr::Window()
+{
+	return _Window;
+}
+
+class UUIDMgr& ManagerMgr::UUIDMgr()
+{
+	return _UUIDMgr;
+}
+
+class ResourceMgr& ManagerMgr::ResourceMgr()
+{
+	return _ResourceMgr;
+}
+
+class RenderMgr& ManagerMgr::RenderMgr()
+{
+	return _RenderMgr;
+}
+
+class ObjectMaker& ManagerMgr::ObjectMaker()
+{
+	return _ObjectMaker;
+}
+
+class EntityMgr& ManagerMgr::EntityMgr()
+{
+	return _EntityMgr;
+}
+
+class tf::Taskflow& ManagerMgr::Taskflow()
+{
+	return _Taskflow;
+}
 
 CLOSE_NAMESPACE(Firestorm);

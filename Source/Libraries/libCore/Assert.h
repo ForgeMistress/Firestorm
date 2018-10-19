@@ -11,7 +11,7 @@
 #define LIBCORE_ASSERT_H_
 #pragma once
 
-#include "libCore.h"
+#include <EASTL/string.h>
 
 OPEN_NAMESPACE(Firestorm);
 

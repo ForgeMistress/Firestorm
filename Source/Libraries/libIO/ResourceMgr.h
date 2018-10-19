@@ -23,6 +23,10 @@
 
 #include <libMirror/EventDispatcher.h>
 
+OPEN_NAMESPACE(tf);
+class Taskflow;
+CLOSE_NAMESPACE(tf);
+
 OPEN_NAMESPACE(Firestorm);
 
 class ResourceLoader;
@@ -71,12 +75,11 @@ private:
 class ResourceMgr final
 {
 public:
-	static const char* RootTask;
 	ResourceMgr(class Application& app);
 
 
 public:
-	class TaskGraph& _taskGraph;
+	tf::Taskflow& _taskflow;
 };
 
 //**

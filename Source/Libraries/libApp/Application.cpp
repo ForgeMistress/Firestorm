@@ -75,8 +75,8 @@ int Application::Run()
 	bool isRunning{ true };
 	bool eventDispatched{ false };
 
-	auto& renderMgr = _managerMgr.GetRenderMgr();
-	Window& window = _managerMgr.GetWindow();
+	auto& renderMgr = _managerMgr.RenderMgr();
+	Window& window = _managerMgr.Window();
 	while(isRunning)
 	{
 		window.Process();

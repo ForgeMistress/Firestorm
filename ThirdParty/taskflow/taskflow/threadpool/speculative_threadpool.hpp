@@ -26,6 +26,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <optional>
+#include <assert.h>
 
 #include "move_on_copy.hpp"
 

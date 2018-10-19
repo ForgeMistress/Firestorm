@@ -70,6 +70,7 @@ build("Angelscript")
 build("GLFW")
 build("physfs")
 build("imgui")
+--build("taskflow")
 
 ------------------------------------------------------------------------------------------------------------------------
 --  FIRST PARTY LIBRARIES

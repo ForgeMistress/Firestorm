@@ -8,6 +8,7 @@
 #include "Common.h"
 #include "LibraryRegistrar.h"
 #include "Expected.h"
+#include "Assert.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -75,8 +76,28 @@ private:
 
 extern vector<string> SplitString(const string& str, char delim);
 
+namespace details {
+template<class T, class U>
+struct is_same_signedness : public std::integral_constant<bool, eastl::is_signed<T>::value == eastl::is_signed<U>::value>
+{
+};
 
+}
 
+template<class T, class U>
+constexpr T narrow_cast(U&& u)
+{
+	return static_cast<T>(eastl::forward<U>(u));
+}
+
+template<class T, class U>
+T narrow(U u) noexcept(false)
+{
+	T t = narrow_cast<T>(u);
+	FIRE_ASSERT(static_cast<u>(t) == u);
+	FIRE_ASSERT(  (details::is_same_signedness<T, U>::value && ((t < T{}) != (u < U{})))  );
+	return t;
+}
 
 
 template <class Class_t, class Arg_t>

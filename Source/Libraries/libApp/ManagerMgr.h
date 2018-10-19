@@ -18,17 +18,17 @@
 #include <libScene/RenderMgr.h>
 #include <libMirror/ObjectMaker.h>
 #include <libExistence/Entity.h>
-#include <libCore/TaskGraph.h>
+#include <taskflow/taskflow.hpp>
 
 OPEN_NAMESPACE(Firestorm);
 
-#define _FIRE_MGR_VAR(TYPE) _##TYPE##_INSTANCE
+#define _FIRE_MGR_VAR(TYPE) _##TYPE
 
-#define FIRE_MGR_INSTALL(TYPE)\
-private:\
-	class TYPE _FIRE_MGR_VAR(TYPE);\
-public:\
-	class TYPE& Get##TYPE ();
+#define FIRE_MGR_INSTALL(TYPE)      \
+private:                            \
+	class TYPE _FIRE_MGR_VAR(TYPE); \
+public:                             \
+	class TYPE& Get##TYPE();
 
 class ManagerMgr final
 {
@@ -41,14 +41,23 @@ public:
 	void Initialize();
 	void Shutdown();
 
+	class Window&       Window();
+	class UUIDMgr&      UUIDMgr();
+	class ResourceMgr&  ResourceMgr();
+	class RenderMgr&    RenderMgr();
+	class ObjectMaker&  ObjectMaker();
+	class EntityMgr&    EntityMgr();
+	class tf::Taskflow& Taskflow();
+
+private:
 	class Application& _app;
-	FIRE_MGR_INSTALL(Window);
-	FIRE_MGR_INSTALL(UUIDMgr);
-	FIRE_MGR_INSTALL(ResourceMgr);
-	FIRE_MGR_INSTALL(RenderMgr);
-	FIRE_MGR_INSTALL(ObjectMaker);
-	FIRE_MGR_INSTALL(EntityMgr);
-	FIRE_MGR_INSTALL(TaskGraph);
+	class Window       _Window;
+	class UUIDMgr      _UUIDMgr;
+	class ResourceMgr  _ResourceMgr;
+	class RenderMgr    _RenderMgr;
+	class ObjectMaker  _ObjectMaker;
+	class EntityMgr    _EntityMgr;
+	class tf::Taskflow _Taskflow;
 };
 
 

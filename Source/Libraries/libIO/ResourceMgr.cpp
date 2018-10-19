@@ -19,10 +19,8 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-const char* ResourceMgr::RootTask = "ResourceMgr::RootTask";
-
 ResourceMgr::ResourceMgr(Application& app)
-: _taskGraph(app.GetSystems().GetTaskGraph())
+: _taskflow(app.GetSystems().Taskflow())
 {
 }
 

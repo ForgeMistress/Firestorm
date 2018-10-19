@@ -38,9 +38,15 @@
 #include <numeric>
 #include <iomanip>
 #include <cassert>
+#include <assert.h>
+#include <crtdbg.h>
 #include <optional>
 
 #include "threadpool/threadpool.hpp"
+
+#define TF_ASSERT(assertion) \
+	if((!assertion)) \
+		throw std::runtime_error("'"#assertion"' :: assertion hit")
 
 // ============================================================================
 
@@ -327,8 +333,8 @@ inline Topology::Topology(Graph&& t) :
 // Procedure: _dump
 inline void Topology::_dump(std::ostream& os) const {
 
-  assert(_source._subgraph.empty());
-  assert(_target._subgraph.empty());
+  TF_ASSERT(_source._subgraph.empty());
+  TF_ASSERT(_target._subgraph.empty());
   
   os << "digraph Topology {\n"
      << _source.dump() 
@@ -974,7 +980,7 @@ inline auto FlowBuilder::emplace(C&& c) {
           }
         }
         else {
-          assert(r);
+          TF_ASSERT(r);
           p.get().set_value(std::move(*r));
         }
       });
@@ -1124,7 +1130,7 @@ inline Taskflow::Closure& Taskflow::Closure::operator = (Closure&& rhs) {
 // Operator ()
 inline void Taskflow::Closure::operator () () const {
   
-  assert(taskflow && node);
+  TF_ASSERT(taskflow && node);
 
   // Here we need to fetch the num_successors first to avoid the invalid memory
   // access caused by topology clear.
@@ -1145,7 +1151,7 @@ inline void Taskflow::Closure::operator () () const {
   // The second time we enter this context there is no need
   // to re-execute the work.
   else {
-    assert(std::holds_alternative<DynamicWork>(node->_work));
+    TF_ASSERT(std::holds_alternative<DynamicWork>(node->_work));
     
     SubflowBuilder fb(node->_subgraph, taskflow->num_workers());
 

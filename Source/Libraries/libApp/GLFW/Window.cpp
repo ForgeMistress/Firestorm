@@ -103,9 +103,16 @@ static void GLFW_ScrollCallback(GLFWwindow* window, double xOffset, double yOffs
 
 	if(app)
 	{
-		app->Dispatcher.Dispatch(ScrollWheelEvent{ app,Vector2(xOffset,yOffset) });
+		app->Dispatcher.Dispatch(ScrollWheelEvent{ 
+			app,
+			Vector2{
+				narrow_cast<float>(xOffset),
+				narrow_cast<float>(yOffset)
+			}
+		});
 	}
 }
+
 }
 
 Window::Window(Application& app)
@@ -159,13 +166,13 @@ Vector2 Window::GetPosition() const
 	int w, h;
 	if(_windowHandle)
 		glfwGetWindowPos(_windowHandle, &w, &h);
-	return Vector2(w,h);
+	return Vector2(narrow<float>(w), narrow<float>(h));
 }
 
 void Window::SetSize(const Vector2& size, bool useClientArea)
 {
 	if(_windowHandle)
-		glfwSetWindowSize(_windowHandle, size.x, size.y);
+		glfwSetWindowSize(_windowHandle, narrow<int>(size.x), narrow<int>(size.y));
 }
 
 Vector2 Window::GetSize(bool useClientArea) const
@@ -173,7 +180,7 @@ Vector2 Window::GetSize(bool useClientArea) const
 	int width, height;
 	if(_windowHandle)
 		glfwGetWindowSize(_windowHandle, &width, &height);
-	return Vector2(width, height);
+	return Vector2(narrow<float>(width), narrow<float>(height));
 }
 
 void Window::SetTitle(const char* title)

@@ -10,6 +10,9 @@
 
 include("UnitTestMainTemplate")
 
+--[[
+    Global build script variables.
+--]]
 ENGINE_LIB_SOURCE_DIR  = "../Source/Libraries"
 ENGINE_APP_SOURCE_DIR  = "../Source/Applications"
 ENGINE_TST_SOURCE_DIR  = "../Source/Tests"
@@ -21,6 +24,13 @@ ASSETS_DIR = "../Assets"
 ENGINE_LIBS = {}
 ENGINE_GAME_LIBS = {}
 
+VK_SDK_PATH = ""
+VK_SDK_INCLUDES = ""
+VK_SDK_LIB = "vulkan-1"
+
+--[[
+    Locals.
+--]]
 local DIVIDER =
 "------------------------------------------------------------------------------------------------------------------------"
 
@@ -49,33 +59,7 @@ do
     end
 end
 
--- A list of all of the third party libraries that the application executable needs to see.
-THIRD_PARTY_LIBS = {
-    "angelscript",
-    "imgui",
-    "jsoncpp",
-    "physfs",
-    "rttr",
-    "EASTL"
-}
-
-THIRD_PARTY_INCLUDE_DIRS = {
-    THIRD_PARTY_SRC_DIR,
-    THIRD_PARTY_SRC_DIR.."/rttr/src",
-    THIRD_PARTY_SRC_DIR.."/glfw/include",
-    THIRD_PARTY_SRC_DIR.."/glfw/deps",
-    THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include",
-    THIRD_PARTY_SRC_DIR.."/EASTL",
-    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EABase/include/Common",
-    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAAssert/include",
-    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAStdC/include",
-    THIRD_PARTY_SRC_DIR.."/taskflow",
-}
-
 -- Check for all of the third party libraries that are not distributed with this.
-VK_SDK_PATH = ""
-VK_SDK_INCLUDES = ""
-VK_SDK_LIB = "vulkan-1"
 do
     print()
     print("-- Checking for required SDKs.")
@@ -87,7 +71,7 @@ do
         "Please download the Vulkan SDK at https://www.lunarg.com/vulkan-sdk/")
     end
     print("++ Vulkan SDK found at "..VK_SDK_PATH..". Setting paths for build script.")
-    
+
     VK_SDK_INCLUDES = VK_SDK_PATH.."/include"
     VK_SDK_LIBS = VK_SDK_PATH.."/Lib"
     table.insert(THIRD_PARTY_INCLUDE_DIRS, VK_SDK_INCLUDES)
@@ -99,7 +83,9 @@ do
 end
 
 
--- Set up common include directories for all Firestorm libraries.
+--[[
+    Set up common include directories for all Firestorm libraries.
+--]]
 function COMMON_ENGINE_INCLUDE_DIRS()
     includedirs({
         ENGINE_LIB_SOURCE_DIR,
@@ -107,14 +93,19 @@ function COMMON_ENGINE_INCLUDE_DIRS()
     includedirs(THIRD_PARTY_INCLUDE_DIRS)
 end
 
--- Set up common library locations for all Firestorm libraries.
+--[[
+    Set up common library locations for all Firestorm libraries.
+--]]
 function COMMON_ENGINE_LIB_DIRS()
-    libdirs({ 
+    libdirs({
         ENGINE_BIN_OUTPUT_DIR,
         VK_SDK_LIBS
     })
 end
 
+--[[
+    Creates a set of #defines for the active project that are universal to all libraries in Firestorm.
+--]]
 function COMMON_ENGINE_LIB_DEFINES()
     clearFilters()
     if _OPTIONS["gfxapi"] == "Vulkan" then
@@ -124,12 +115,15 @@ function COMMON_ENGINE_LIB_DEFINES()
     end
 end
 
+--[[
+    Links libraries to the active application that are common to all Firestory applications.
+--]]
 function COMMON_ENGINE_APP_LIBS()
     links(ENGINE_LIBS)
     links(THIRD_PARTY_LIBS)
 
     if _OPTIONS["gfxapi"] == "Vulkan" then
-        links({ 
+        links({
             "glfw",
             VK_SDK_LIB
         })
@@ -160,10 +154,12 @@ function configureEngineLib(libName)
         ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.h",
         ENGINE_LIB_SOURCE_DIR.."/"..libName.."/**.cpp"
     })
-    dependson({
+    dependson(THIRD_PARTY_LIBS)
+    --[[dependson({
         "rttr",
-        "EASTL"
-    })
+        "EASTL",
+        "taskflow"
+    })]]
 end
 
 function configureToolsApplication(appName, gameName)
@@ -191,14 +187,14 @@ function configureToolsApplication(appName, gameName)
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
 
-    addDependencies(ENGINE_GAME_LIBS)
+    dependson(ENGINE_GAME_LIBS)
     links({
         "lib"..gameName,
     })
-    dependson({
+    --[[dependson({
         "rttr",
         "EASTL"
-    })
+    })]]
 
     files({
         ENGINE_APP_SOURCE_DIR.."/"..gameName.."/**.h",
@@ -212,6 +208,7 @@ function configureToolsApplication(appName, gameName)
         "--AppName="..gameName
     })
     debugdir(ENGINE_BIN_OUTPUT_DIR)
+    dependson(THIRD_PARTY_LIBS)
 end
 
 function configureGame(gameName)
@@ -239,7 +236,7 @@ function configureGame(gameName)
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/"..gameName.."/stdafx.cpp")
 
-    addDependencies(ENGINE_GAME_LIBS)
+    dependson(ENGINE_GAME_LIBS)
     links({
         "lib"..gameName
     })
@@ -283,15 +280,16 @@ function configureGameLib(gameName)
     COMMON_ENGINE_INCLUDE_DIRS()
     COMMON_ENGINE_LIB_DIRS()
 
-    dependson({
+    --[[dependson({
         "rttr",
         "EASTL"
-    })
+    })]]
+    dependson(THIRD_PARTY_LIBS)
 
     pchheader("stdafx.h")
     pchsource(ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/stdafx.cpp")
 
-    addDependencies(ENGINE_GAME_LIBS)
+    dependson(ENGINE_GAME_LIBS)
 
     files({
         ENGINE_APP_SOURCE_DIR.."/lib"..gameName.."/**.h",
@@ -345,7 +343,7 @@ function configureUnitTestApplication()
     language("C++")
     cppdialect("C++17")
     kind("ConsoleApp")
-    
+
     targetdir(ENGINE_BIN_OUTPUT_DIR)
 
     COMMON_ENGINE_LIB_DEFINES()
@@ -355,6 +353,8 @@ function configureUnitTestApplication()
     COMMON_ENGINE_INCLUDE_DIRS()
     COMMON_ENGINE_LIB_DIRS()
     COMMON_ENGINE_APP_LIBS()
+
+    dependson(THIRD_PARTY_LIBS)
 
     files({
         ENGINE_TST_SOURCE_DIR.."/**.h",
@@ -386,11 +386,7 @@ end
 -- Marks another first party library as a dependency, adding the header search path as well as marking a link against
 -- the built library.
 function addDependencies(deps)
-    local includeDirs = {}
-    for _, dep in ipairs(deps) do
-        table.insert(includeDirs, ENGINE_LIB_SOURCE_DIR.."/"..dep)
-    end
-    includedirs(includeDirs)
+    print("!! addDependencies is deprecated. stop using it...")
     dependson(deps)
 end
 
