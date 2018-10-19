@@ -11,65 +11,40 @@
 #define LIBCORE_TASKGRAPH_H_
 #pragma once
 
-#include "libCore.h"
-#include "SOA.h"
+#include "Common.h"
+#include <taskflow/taskflow.hpp>
 
 OPEN_NAMESPACE(Firestorm);
 
-using Node = size_t;
+using Task = tf::Task;
 
-class TaskGraph final
+class TaskGraph
 {
 public:
-	/**
-		Indices into the SOA for the node.
-	 **/
-	struct NodeI
-	{
-		FIRE_TVI(ID, 0);
-		FIRE_TVI(Operation, 1);
-		FIRE_TVI(Parent, 2);
-	};
+	TaskGraph(class Application& app);
 
-	TaskGraph();
-
-	/**
-		Push a new node into the queue.
-	 **/
-	template<class Function>
-	Node Push(Function&& function)
-	{
-		size_t index = _nodes.size();
-		_nodes.push_back(index, forward<Function>(function), index);
-		return index;
-	}
-
-	/**
-		Check if two nodes are linked.
-	 **/
-	bool AreLinked(Node from, Node to);
-
-	/**
-		Clear the work queue and end the task tree. Calls ThreadPool::Join.
-	 **/
 	void Shutdown();
 
+	const Task& get(const char* name) const;
+
+	template<class Function, class... Parents>
+	Task make_root(const char* name, Function&& func, const Parents&... parents)
+	{
+		if(_graphs.find(name) == _graphs.end())
+		{
+			//_graphs[name] = tw::make_task(tw::root, forward<Function>(func), forward<Parents>(parents)...);
+			return _graphs[name];
+		}
+		return _graphs[name];
+	}
+
+	void operate(const char* name, bool resetAll = true);
+
+	void erase(const char* name);
 private:
-	// connects from->to in the graph.
-	void Link(Node from, Node to);
-
-	string _name;
-	mutex _queueLock;
-
-	// vector<std::thread> _threads;
-	// queue<function<void(void)>> _queue;
-	// std::condition_variable _cv;
-	// bool _quit{ false };
-
-	using NodeEdge = pair<Node, Node>;
-
-	SOA<Node, function<void()>, Node> _nodes; // ID, operation, parent.
-	vector<NodeEdge>                  _edges; // edges between nodes.
+	class Application&          _app;
+	tf::Taskflow                _tf;
+	unordered_map<string, Task> _graphs;
 };
 
 CLOSE_NAMESPACE(Firestorm);

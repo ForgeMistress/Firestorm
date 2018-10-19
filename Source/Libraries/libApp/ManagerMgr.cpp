@@ -21,6 +21,7 @@ ManagerMgr::ManagerMgr(Application& app)
 , _FIRE_MGR_VAR(Window)(_app)
 , _FIRE_MGR_VAR(RenderMgr)(_app)
 , _FIRE_MGR_VAR(EntityMgr)(_app)
+, _FIRE_MGR_VAR(TaskGraph)(_app)
 {
 }
 
@@ -41,6 +42,7 @@ void ManagerMgr::Initialize()
 
 void ManagerMgr::Shutdown()
 {
+	_FIRE_MGR_VAR(TaskGraph).Shutdown();
 	_FIRE_MGR_VAR(ResourceMgr).Shutdown();
 	_FIRE_MGR_VAR(RenderMgr).Shutdown();
 }
@@ -51,5 +53,6 @@ FIRE_MGR_IMPL(ResourceMgr);
 FIRE_MGR_IMPL(RenderMgr);
 FIRE_MGR_IMPL(ObjectMaker);
 FIRE_MGR_IMPL(EntityMgr);
+FIRE_MGR_IMPL(TaskGraph);
 
 CLOSE_NAMESPACE(Firestorm);

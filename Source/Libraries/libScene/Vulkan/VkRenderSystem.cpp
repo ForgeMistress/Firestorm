@@ -173,7 +173,7 @@ void RenderSystem::CreateInstance()
 	// if we're using Vulkan, we're using GLFW.
 	vector<const char*> extensions(GetRequiredExtensions());
 
-	createInfo.enabledExtensionCount = extensions.size();
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 	createInfo.ppEnabledExtensionNames = extensions.data();
 
 #ifndef FIRE_FINAL

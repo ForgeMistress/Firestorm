@@ -18,6 +18,7 @@
 #include <libScene/RenderMgr.h>
 #include <libMirror/ObjectMaker.h>
 #include <libExistence/Entity.h>
+#include <libCore/TaskGraph.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -47,6 +48,7 @@ public:
 	FIRE_MGR_INSTALL(RenderMgr);
 	FIRE_MGR_INSTALL(ObjectMaker);
 	FIRE_MGR_INSTALL(EntityMgr);
+	FIRE_MGR_INSTALL(TaskGraph);
 };
 
 

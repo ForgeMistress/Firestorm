@@ -69,6 +69,7 @@ THIRD_PARTY_INCLUDE_DIRS = {
     THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EABase/include/Common",
     THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAAssert/include",
     THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAStdC/include",
+    THIRD_PARTY_SRC_DIR.."/taskflow",
 }
 
 -- Check for all of the third party libraries that are not distributed with this.
