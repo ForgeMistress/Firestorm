@@ -94,7 +94,7 @@ template<class T, class U>
 T narrow(U u) noexcept(false)
 {
 	T t = narrow_cast<T>(u);
-	FIRE_ASSERT(static_cast<u>(t) == u);
+	FIRE_ASSERT(static_cast<U>(t) == u);
 	FIRE_ASSERT(  (details::is_same_signedness<T, U>::value && ((t < T{}) != (u < U{})))  );
 	return t;
 }

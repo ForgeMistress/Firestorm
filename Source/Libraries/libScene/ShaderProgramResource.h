@@ -13,6 +13,7 @@
 
 #include "RenderMgr.h"
 
+#include <libApp/Application.h>
 #include <libIO/ResourceMgr.h>
 #include <libIO/ResourceLoader.h>
 #include <libIO/IResourceObject.h>
@@ -27,28 +28,39 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ShaderProgramLoader final : public ResourceLoader
-{
-public:
-	ShaderProgramLoader(RenderMgr& renderMgr);
-	~ShaderProgramLoader();
-
-	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref) override;
-private:
-	RenderMgr&                              _renderMgr;
-	Json::CharReaderBuilder                 _builder;
-	Json::CharReader*                       _reader;
-	ObjectPool<class ShaderProgramResource> _shaderPool;
-};
+//class ShaderProgramLoader final : public ResourceLoader
+//{
+//public:
+//	ShaderProgramLoader(RenderMgr& renderMgr);
+//	~ShaderProgramLoader();
+//
+//	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref) override;
+//private:
+//	RenderMgr&                              _renderMgr;
+//	Json::CharReaderBuilder                 _builder;
+//	Json::CharReader*                       _reader;
+//	ObjectPool<class ShaderProgramResource> _shaderPool;
+//};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ShaderProgramResource final : public IResourceObject
+class ShaderProgram final : public IResourceObject
 {
-	FIRE_RESOURCE_TYPE(ShaderProgramResource, ShaderProgramLoader);
+	friend class ResourceMgr;
+	struct LoadOp
+	{
+		ResourceReference Resource;
+		RenderMgr& Mgr;
+		LoadOp(Application& app, const char* filename)
+		: Resource(filename)
+		, Mgr(app.GetSystems().RenderMgr())
+		{
+		}
+		LoadResult operator()(tf::SubflowBuilder& dependencies);
+	};
 public:
-	ShaderProgramResource(RenderMgr& renderMgr);
-	virtual ~ShaderProgramResource();
+	ShaderProgram(RenderMgr& renderMgr);
+	virtual ~ShaderProgram();
 
 	virtual bool IsReady() const;
 private:

@@ -16,14 +16,14 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::LoadResult::LoadResult()
+LoadResult::LoadResult()
 : _resource(nullptr)
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::LoadResult::LoadResult(const LoadResult& other)
+LoadResult::LoadResult(const LoadResult& other)
 : _resource(other._resource)
 , _error(other._error)
 {
@@ -31,42 +31,42 @@ ResourceLoader::LoadResult::LoadResult(const LoadResult& other)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::LoadResult::LoadResult(LoadResult&& other)
-: _resource(std::move(other._resource))
-, _error(std::move(other._error))
+LoadResult::LoadResult(LoadResult&& other)
+: _resource(eastl::move(other._resource))
+, _error(eastl::move(other._error))
 {
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::LoadResult::LoadResult(ResourcePtr&& resource)
-: _resource(std::move(resource))
+LoadResult::LoadResult(ResourcePtr&& resource)
+: _resource(eastl::move(resource))
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::LoadResult::LoadResult(const Error& error)
+LoadResult::LoadResult(const Error& error)
 : _resource(nullptr)
 , _error(error)
 {
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::LoadResult& ResourceLoader::LoadResult::operator=(LoadResult&& other)
+LoadResult& LoadResult::operator=(LoadResult&& other)
 {
 	if(this != &other)
 	{
-		_resource = std::move(other._resource);
-		_error = std::move(other._error);
+		_resource = eastl::move(other._resource);
+		_error = eastl::move(other._error);
 	}
 	return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::LoadResult& ResourceLoader::LoadResult::operator=(const LoadResult& other)
+LoadResult& LoadResult::operator=(const LoadResult& other)
 {
 	if(this != &other)
 	{
@@ -78,43 +78,43 @@ ResourceLoader::LoadResult& ResourceLoader::LoadResult::operator=(const LoadResu
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourcePtr ResourceLoader::LoadResult::GetResource() const
+ResourcePtr LoadResult::GetResource() const
 {
 	return _resource;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Error ResourceLoader::LoadResult::GetError() const
+Error LoadResult::GetError() const
 {
 	return _error;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceLoader::LoadResult::HasError() const
+bool LoadResult::HasError() const
 {
 	return _error.GetCode() != nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::ResourceLoader()
-{
-}
+//ResourceLoader::ResourceLoader()
+//{
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::~ResourceLoader()
-{
-}
+//ResourceLoader::~ResourceLoader()
+//{
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceLoader::LoadResult ResourceLoader::Load(ResourceMgr*,const ResourceReference&)
-{
-	return FIRE_LOAD_FAIL(ResourceIOErrors::DEFAULT_LOADER, "can not use default loader");
-}
+//ResourceLoader::LoadResult ResourceLoader::Load(ResourceMgr*,const ResourceReference&)
+//{
+//	return FIRE_LOAD_FAIL(ResourceIOErrors::DEFAULT_LOADER, "can not use default loader");
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

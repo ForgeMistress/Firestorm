@@ -21,7 +21,7 @@ ManagerMgr::ManagerMgr(Application& app)
 , _ResourceMgr(_app)
 , _RenderMgr(_app)
 , _EntityMgr(_app)
-, _Taskflow(std::thread::hardware_concurrency())
+, _TaskGraph(_app)
 {
 }
 
@@ -32,18 +32,18 @@ ManagerMgr::~ManagerMgr()
 
 void ManagerMgr::Initialize()
 {
-	_FIRE_MGR_VAR(Window).Initialize(WindowDesc{
+	_Window.Initialize(WindowDesc{
 		"Firestorm Application",
 		800,
 		600
 	});
-	_FIRE_MGR_VAR(RenderMgr).Initialize("");
+	_RenderMgr.Initialize("");
 }
 
 void ManagerMgr::Shutdown()
 {
 	FIRE_LOG_DEBUG("!! Shutting down task graph...");
-	_Taskflow.wait_for_all();
+	_TaskGraph.Shutdown();
 
 	FIRE_LOG_DEBUG("!! Shutting down RenderMgr");
 	_RenderMgr.Shutdown();
@@ -79,9 +79,9 @@ class EntityMgr& ManagerMgr::EntityMgr()
 	return _EntityMgr;
 }
 
-class tf::Taskflow& ManagerMgr::Taskflow()
+class TaskGraph& ManagerMgr::TaskGraph()
 {
-	return _Taskflow;
+	return _TaskGraph;
 }
 
 CLOSE_NAMESPACE(Firestorm);

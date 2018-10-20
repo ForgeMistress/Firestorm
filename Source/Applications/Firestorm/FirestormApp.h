@@ -14,7 +14,7 @@ public:
 	virtual ~FirestormApp();
 
 	virtual void OnInitialize(int ac, char** av);
-	virtual void OnUpdate(double deltaT){}
+	virtual void OnUpdate(double deltaT);
 	virtual void OnRender();
 	virtual void OnClose();
 	virtual int  OnShutdown();
@@ -23,6 +23,8 @@ public:
 
 private:
 	void RegisterResourceTypes();
+
+	Resource _shaderResource;
 };
 
 #endif

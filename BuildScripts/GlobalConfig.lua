@@ -28,6 +28,30 @@ VK_SDK_PATH = ""
 VK_SDK_INCLUDES = ""
 VK_SDK_LIB = "vulkan-1"
 
+-- A list of all of the third party libraries that the application executable needs to see.
+THIRD_PARTY_LIBS = {
+    "angelscript",
+    "imgui",
+    "jsoncpp",
+    "physfs",
+    "rttr",
+    "EASTL"
+}
+
+THIRD_PARTY_INCLUDE_DIRS = {
+    THIRD_PARTY_SRC_DIR,
+    THIRD_PARTY_SRC_DIR.."/rttr/src",
+    THIRD_PARTY_SRC_DIR.."/glfw/include",
+    THIRD_PARTY_SRC_DIR.."/glfw/deps",
+    THIRD_PARTY_SRC_DIR.."/LLGL/include",
+    THIRD_PARTY_SRC_DIR.."/angelscript/sdk/angelscript/include",
+    THIRD_PARTY_SRC_DIR.."/EASTL",
+    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EABase/include/Common",
+    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAAssert/include",
+    THIRD_PARTY_SRC_DIR.."/EASTL/Packages/EAStdC/include",
+    THIRD_PARTY_SRC_DIR.."/taskflow",
+}
+
 --[[
     Locals.
 --]]

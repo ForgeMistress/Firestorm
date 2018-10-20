@@ -24,23 +24,24 @@
 
 #include <iostream>
 #include <mutex>
-#include <deque>
-#include <vector>
-#include <algorithm>
+#include "../../EASTL/EASTL/deque.h"
+#include "../../EASTL/EASTL/vector.h"
+#include "../../EASTL/EASTL/algorithm.h"
 #include <thread>
 #include <future>
-#include <functional>
-#include <unordered_map>
-#include <unordered_set>
+#include "../../EASTL/EASTL/functional.h"
+#include "../../EASTL/EASTL/unordered_map.h"
+#include "../../EASTL/EASTL/unordered_set.h"
 #include <sstream>
-#include <list>
-#include <forward_list>
-#include <numeric>
+#include "../../EASTL/EASTL/list.h"
+#include "../../EASTL/EASTL/slist.h"
+#include "../../EASTL/EASTL/numeric.h"
 #include <iomanip>
 #include <cassert>
 #include <assert.h>
 #include <crtdbg.h>
-#include <optional>
+#include "../../EASTL/EASTL/optional.h"
+#include "../../EASTL/EASTL/variant.h"
 
 #include "threadpool/threadpool.hpp"
 
@@ -68,10 +69,10 @@ namespace tf {
 // Procedure: throw_re
 template <typename... ArgsT>
 inline void throw_re(const char* fname, const size_t line, ArgsT&&... args) {
-  std::ostringstream oss(std::ios_base::out);
+  std::ostringstream oss(eastl::ios_base::out);
   oss << '[' << fname << ':' << line << "] ";
-  (oss << ... << std::forward<ArgsT>(args));
-  throw std::runtime_error(oss.str());
+  (oss << ... << eastl::forward<ArgsT>(args));
+  throw eastl::runtime_error(oss.str());
 }
 
 #define TF_THROW(...) throw_re(__FILE__, __LINE__, __VA_ARGS__);
@@ -113,7 +114,7 @@ struct is_iterator {
 template <typename T>
 struct is_iterator<
   T, 
-  std::enable_if_t<!std::is_same_v<typename std::iterator_traits<T>::value_type, void>>
+  eastl::enable_if_t<!eastl::is_same_v<typename eastl::iterator_traits<T>::value_type, void>>
 > {
   static constexpr bool value = true;
 };
@@ -123,13 +124,13 @@ inline constexpr bool is_iterator_v = is_iterator<T>::value;
 
 // Struct: is_iterable
 template <typename T, typename = void>
-struct is_iterable : std::false_type {
+struct is_iterable : eastl::false_type {
 };
 
 template <typename T>
-struct is_iterable<T, std::void_t<decltype(std::declval<T>().begin()),
-                                  decltype(std::declval<T>().end())>>
-  : std::true_type {
+struct is_iterable<T, eastl::void_t<decltype(eastl::declval<T>().begin()),
+                                  decltype(eastl::declval<T>().end())>>
+  : eastl::true_type {
 };
 
 template <typename T>
@@ -147,7 +148,7 @@ class FlowBuilder;
 class SubflowBuilder;
 class Taskflow;
     
-using Graph = std::forward_list<Node>;
+using Graph = eastl::slist<Node>;//eastl::forward_list<Node>;
 
 // ----------------------------------------------------------------------------
 
@@ -158,8 +159,8 @@ class Node {
   friend class Topology;
   friend class Taskflow;
 
-  using StaticWork   = std::function<void()>;
-  using DynamicWork  = std::function<void(SubflowBuilder&)>;
+  using StaticWork   = eastl::function<void()>;
+  using DynamicWork  = eastl::function<void(SubflowBuilder&)>;
 
   public:
 
@@ -168,20 +169,20 @@ class Node {
     template <typename C>
     explicit Node(C&&);
 
-    const std::string& name() const;
+    const eastl::string& name() const;
     
     void precede(Node&);
 
     size_t num_successors() const;
     size_t num_dependents() const;
 
-    std::string dump() const;
+    eastl::string dump() const;
 
   private:
     
-    std::string _name;
-    std::variant<StaticWork, DynamicWork> _work;
-    std::vector<Node*> _successors;
+    eastl::string _name;
+    eastl::variant<StaticWork, DynamicWork> _work;
+    eastl::vector<Node*> _successors;
     std::atomic<int> _dependents;
 
     Graph _subgraph;
@@ -193,21 +194,21 @@ class Node {
 
 // Constructor
 inline Node::Node() {
-  _dependents.store(0, std::memory_order_relaxed);
+  _dependents.store(0, eastl::memory_order_relaxed);
   _topology = nullptr;
 }
 
 // Constructor
 template <typename C>
-inline Node::Node(C&& c) : _work {std::forward<C>(c)} {
-  _dependents.store(0, std::memory_order_relaxed);
+inline Node::Node(C&& c) : _work {eastl::forward<C>(c)} {
+  _dependents.store(0, eastl::memory_order_relaxed);
   _topology = nullptr;
 }
 
 // Procedure: precede
 inline void Node::precede(Node& v) {
   _successors.push_back(&v);
-  v._dependents.fetch_add(1, std::memory_order_relaxed);
+  v._dependents.fetch_add(1, eastl::memory_order_relaxed);
 }
 
 // Function: num_successors
@@ -217,16 +218,16 @@ inline size_t Node::num_successors() const {
 
 // Function: dependents
 inline size_t Node::num_dependents() const {
-  return _dependents.load(std::memory_order_relaxed);
+  return _dependents.load(eastl::memory_order_relaxed);
 }
 
 // Function: name
-inline const std::string& Node::name() const {
+inline const eastl::string& Node::name() const {
   return _name;
 }
 
 // Function: dump
-inline std::string Node::dump() const {
+inline eastl::string Node::dump() const {
   std::ostringstream os;  
   _dump(os);
   return os.str();
@@ -236,18 +237,18 @@ inline std::string Node::dump() const {
 inline void Node::_dump(std::ostream& os) const {
   
   if(_name.empty()) os << '\"' << this << '\"';
-  else os << std::quoted(_name);
+  else os << eastl::quoted(_name);
   os << ";\n";
 
   for(const auto s : _successors) {
 
     if(_name.empty()) os << '\"' << this << '\"';
-    else os << std::quoted(_name);
+    else os << eastl::quoted(_name);
 
     os << " -> ";
     
     if(s->name().empty()) os << '\"' << s << '\"';
-    else os << std::quoted(s->name());
+    else os << eastl::quoted(s->name());
 
     os << ";\n";
   }
@@ -256,12 +257,12 @@ inline void Node::_dump(std::ostream& os) const {
 
     os << "subgraph cluster_";
     if(_name.empty()) os << this;
-    else os << _name;
+    else os << _name.c_str();
     os << " {\n";
 
     os << "label = \"Subflow_";
     if(_name.empty()) os << this;
-    else os << _name;
+    else os << _name.c_str();
 
     os << "\";\n" << "color=blue\n";
 
@@ -283,7 +284,7 @@ class Topology {
 
     Topology(Graph&&);
 
-    std::string dump() const;
+    eastl::string dump() const;
 
   private:
 
@@ -299,16 +300,16 @@ class Topology {
 
 // Constructor
 inline Topology::Topology(Graph&& t) : 
-  _graph(std::move(t)) {
+  _graph(eastl::move(t)) {
 
   _source._topology = this;
   _target._topology = this;
   
-  std::promise<void> promise;
+  eastl::promise<void> promise;
 
   _future = promise.get_future().share();
 
-  _target._work = [p=MoC{std::move(promise)}] () mutable { 
+  _target._work = [p=MoC{eastl::move(promise)}] () mutable { 
     p.get().set_value(); 
   };
 
@@ -348,7 +349,7 @@ inline void Topology::_dump(std::ostream& os) const {
 }
   
 // Function: dump
-inline std::string Topology::dump() const { 
+inline eastl::string Topology::dump() const { 
   std::ostringstream os;
   _dump(os);
   return os.str();
@@ -371,16 +372,16 @@ class Task {
 
     Task& operator = (const Task&);
 
-    const std::string& name() const;
+    const eastl::string& name() const;
 
     size_t num_successors() const;
     size_t num_dependents() const;
 
-    Task& name(const std::string&);
+    Task& name(const eastl::string&);
     Task& precede(Task);
-    Task& broadcast(std::vector<Task>&);
+    Task& broadcast(eastl::vector<Task>&);
     Task& broadcast(std::initializer_list<Task>);
-    Task& gather(std::vector<Task>&);
+    Task& gather(eastl::vector<Task>&);
     Task& gather(std::initializer_list<Task>);
 
     template <typename C>
@@ -433,7 +434,7 @@ inline void Task::_broadcast(S& tgts) {
 }
       
 // Function: broadcast
-inline Task& Task::broadcast(std::vector<Task>& tgts) {
+inline Task& Task::broadcast(eastl::vector<Task>& tgts) {
   _broadcast(tgts);
   return *this;
 }
@@ -460,7 +461,7 @@ inline void Task::_gather(S& tgts) {
 }
 
 // Function: gather
-inline Task& Task::gather(std::vector<Task>& tgts) {
+inline Task& Task::gather(eastl::vector<Task>& tgts) {
   _gather(tgts);
   return *this;
 }
@@ -485,24 +486,24 @@ inline Task::Task(Task&& rhs) : _node{rhs._node} {
 // Function: work
 template <typename C>
 inline Task& Task::work(C&& c) {
-  _node->_work = std::forward<C>(c);
+  _node->_work = eastl::forward<C>(c);
   return *this;
 }
 
 // Function: name
-inline Task& Task::name(const std::string& name) {
+inline Task& Task::name(const eastl::string& name) {
   _node->_name = name;
   return *this;
 }
 
 // Function: name
-inline const std::string& Task::name() const {
+inline const eastl::string& Task::name() const {
   return _node->_name;
 }
 
 // Function: num_dependents
 inline size_t Task::num_dependents() const {
-  return _node->_dependents.load(std::memory_order_relaxed);
+  return _node->_dependents.load(eastl::memory_order_relaxed);
 }
 
 // Function: num_successors
@@ -522,19 +523,19 @@ class FlowBuilder {
     template <typename C>
     auto emplace(C&&);
 
-    template <typename... C, std::enable_if_t<(sizeof...(C)>1), void>* = nullptr>
+    template <typename... C, eastl::enable_if_t<(sizeof...(C)>1), void>* = nullptr>
     auto emplace(C&&...);
 
     template <typename C>
     auto silent_emplace(C&&);
 
-    template <typename... C, std::enable_if_t<(sizeof...(C)>1), void>* = nullptr>
+    template <typename... C, eastl::enable_if_t<(sizeof...(C)>1), void>* = nullptr>
     auto silent_emplace(C&&...);
 
     template <typename I, typename C>
     auto parallel_for(I, I, C&&, size_t = 0);
 
-    template <typename T, typename C, std::enable_if_t<is_iterable_v<T>, void>* = nullptr>
+    template <typename T, typename C, eastl::enable_if_t<is_iterable_v<T>, void>* = nullptr>
     auto parallel_for(T&, C&&, size_t = 0);
 
     template <typename I, typename T, typename B>
@@ -555,11 +556,11 @@ class FlowBuilder {
     auto placeholder();
     
     void precede(Task, Task);
-    void linearize(std::vector<Task>&);
+    void linearize(eastl::vector<Task>&);
     void linearize(std::initializer_list<Task>);
-    void broadcast(Task, std::vector<Task>&);
+    void broadcast(Task, eastl::vector<Task>&);
     void broadcast(Task, std::initializer_list<Task>);
-    void gather(std::vector<Task>&, Task);
+    void gather(eastl::vector<Task>&, Task);
     void gather(std::initializer_list<Task>, Task);  
 
     size_t size() const;
@@ -583,7 +584,7 @@ inline FlowBuilder::FlowBuilder(Graph& graph, size_t f) :
 
 // Procedure: size
 inline size_t FlowBuilder::size() const {
-  return std::distance(_graph.begin(), _graph.end());
+  return eastl::distance(_graph.begin(), _graph.end());
 }
 
 // Function: empty
@@ -597,7 +598,7 @@ inline void FlowBuilder::precede(Task from, Task to) {
 }
 
 // Procedure: broadcast
-inline void FlowBuilder::broadcast(Task from, std::vector<Task>& keys) {
+inline void FlowBuilder::broadcast(Task from, eastl::vector<Task>& keys) {
   from.broadcast(keys);
 }
 
@@ -610,7 +611,7 @@ inline void FlowBuilder::broadcast(
 
 // Function: gather
 inline void FlowBuilder::gather(
-  std::vector<Task>& keys, Task to
+  eastl::vector<Task>& keys, Task to
 ) {
   to.gather(keys);
 }
@@ -629,9 +630,9 @@ inline auto FlowBuilder::placeholder() {
 }
 
 // Function: silent_emplace
-template <typename... C, std::enable_if_t<(sizeof...(C)>1), void>*>
+template <typename... C, eastl::enable_if_t<(sizeof...(C)>1), void>*>
 inline auto FlowBuilder::silent_emplace(C&&... cs) {
-  return std::make_tuple(silent_emplace(std::forward<C>(cs))...);
+  return eastl::make_tuple(silent_emplace(eastl::forward<C>(cs))...);
 }
 
 
@@ -639,11 +640,11 @@ inline auto FlowBuilder::silent_emplace(C&&... cs) {
 template <typename I, typename C>
 inline auto FlowBuilder::parallel_for(I beg, I end, C&& c, size_t g) {
 
-  using category = typename std::iterator_traits<I>::iterator_category;
+  using category = typename eastl::iterator_traits<I>::iterator_category;
   
   if(g == 0) {
-    auto d = std::distance(beg, end);
-    auto w = std::max(size_t{1}, _partition_factor);
+    auto d = eastl::distance(beg, end);
+    auto w = eastl::max(size_t{1}, _partition_factor);
     g = (d + w - 1) / w;
   }
 
@@ -655,9 +656,9 @@ inline auto FlowBuilder::parallel_for(I beg, I end, C&& c, size_t g) {
     auto e = beg;
     
     // Case 1: random access iterator
-    if constexpr(std::is_same_v<category, std::random_access_iterator_tag>) {
-      size_t r = std::distance(beg, end);
-      std::advance(e, std::min(r, g));
+    if constexpr(eastl::is_same_v<category, eastl::random_access_iterator_tag>) {
+      size_t r = eastl::distance(beg, end);
+      eastl::advance(e, eastl::min(r, g));
     }
     // Case 2: non-random access iterator
     else {
@@ -666,7 +667,7 @@ inline auto FlowBuilder::parallel_for(I beg, I end, C&& c, size_t g) {
       
     // Create a task
     auto task = silent_emplace([beg, e, c] () mutable {
-      std::for_each(beg, e, c);
+      eastl::for_each(beg, e, c);
     });
     source.precede(task);
     task.precede(target);
@@ -675,13 +676,13 @@ inline auto FlowBuilder::parallel_for(I beg, I end, C&& c, size_t g) {
     beg = e;
   }
 
-  return std::make_pair(source, target); 
+  return eastl::make_pair(source, target); 
 }
 
 // Function: parallel_for
-template <typename T, typename C, std::enable_if_t<is_iterable_v<T>, void>*>
+template <typename T, typename C, eastl::enable_if_t<is_iterable_v<T>, void>*>
 inline auto FlowBuilder::parallel_for(T& t, C&& c, size_t group) {
-  return parallel_for(t.begin(), t.end(), std::forward<C>(c), group);
+  return parallel_for(t.begin(), t.end(), eastl::forward<C>(c), group);
 }
 
 // Function: reduce_min
@@ -689,7 +690,7 @@ inline auto FlowBuilder::parallel_for(T& t, C&& c, size_t group) {
 template <typename I, typename T>
 inline auto FlowBuilder::reduce_min(I beg, I end, T& result) {
   return reduce(beg, end, result, [] (const auto& l, const auto& r) {
-    return std::min(l, r);
+    return eastl::min(l, r);
   });
 }
 
@@ -698,7 +699,7 @@ inline auto FlowBuilder::reduce_min(I beg, I end, T& result) {
 template <typename I, typename T>
 inline auto FlowBuilder::reduce_max(I beg, I end, T& result) {
   return reduce(beg, end, result, [] (const auto& l, const auto& r) {
-    return std::max(l, r);
+    return eastl::max(l, r);
   });
 }
 
@@ -708,26 +709,26 @@ inline auto FlowBuilder::transform_reduce(
   I beg, I end, T& result, B&& bop, U&& uop
 ) {
 
-  using category = typename std::iterator_traits<I>::iterator_category;
+  using category = typename eastl::iterator_traits<I>::iterator_category;
   
   // Even partition
-  size_t d = std::distance(beg, end);
-  size_t w = std::max(size_t{1}, _partition_factor);
-  size_t g = std::max((d + w - 1) / w, size_t{2});
+  size_t d = eastl::distance(beg, end);
+  size_t w = eastl::max(size_t{1}, _partition_factor);
+  size_t g = eastl::max((d + w - 1) / w, size_t{2});
 
   auto source = placeholder();
   auto target = placeholder();
 
-  std::vector<std::future<T>> futures;
+  eastl::vector<eastl::future<T>> futures;
 
   while(beg != end) {
 
     auto e = beg;
     
     // Case 1: random access iterator
-    if constexpr(std::is_same_v<category, std::random_access_iterator_tag>) {
-      size_t r = std::distance(beg, end);
-      std::advance(e, std::min(r, g));
+    if constexpr(eastl::is_same_v<category, eastl::random_access_iterator_tag>) {
+      size_t r = eastl::distance(beg, end);
+      eastl::advance(e, eastl::min(r, g));
     }
     // Case 2: non-random access iterator
     else {
@@ -738,26 +739,26 @@ inline auto FlowBuilder::transform_reduce(
     auto [task, future] = emplace([beg, e, bop, uop] () mutable {
       auto init = uop(*beg);
       for(++beg; beg != e; ++beg) {
-        init = bop(std::move(init), uop(*beg));          
+        init = bop(eastl::move(init), uop(*beg));          
       }
       return init;
     });
     source.precede(task);
     task.precede(target);
-    futures.push_back(std::move(future));
+    futures.push_back(eastl::move(future));
 
     // adjust the pointer
     beg = e;
   }
 
   // target synchronizer
-  target.work([&result, futures=MoC{std::move(futures)}, bop] () {
+  target.work([&result, futures=MoC{eastl::move(futures)}, bop] () {
     for(auto& fu : futures.object) {
-      result = bop(std::move(result), fu.get());
+      result = bop(eastl::move(result), fu.get());
     }
   });
 
-  return std::make_pair(source, target); 
+  return eastl::make_pair(source, target); 
 }
 
 // Function: transform_reduce    
@@ -766,26 +767,26 @@ inline auto FlowBuilder::transform_reduce(
   I beg, I end, T& result, B&& bop, P&& pop, U&& uop
 ) {
 
-  using category = typename std::iterator_traits<I>::iterator_category;
+  using category = typename eastl::iterator_traits<I>::iterator_category;
   
   // Even partition
-  size_t d = std::distance(beg, end);
-  size_t w = std::max(size_t{1}, _partition_factor);
-  size_t g = std::max((d + w - 1) / w, size_t{2});
+  size_t d = eastl::distance(beg, end);
+  size_t w = eastl::max(size_t{1}, _partition_factor);
+  size_t g = eastl::max((d + w - 1) / w, size_t{2});
 
   auto source = placeholder();
   auto target = placeholder();
 
-  std::vector<std::future<T>> futures;
+  eastl::vector<eastl::future<T>> futures;
 
   while(beg != end) {
 
     auto e = beg;
     
     // Case 1: random access iterator
-    if constexpr(std::is_same_v<category, std::random_access_iterator_tag>) {
-      size_t r = std::distance(beg, end);
-      std::advance(e, std::min(r, g));
+    if constexpr(eastl::is_same_v<category, eastl::random_access_iterator_tag>) {
+      size_t r = eastl::distance(beg, end);
+      eastl::advance(e, eastl::min(r, g));
     }
     // Case 2: non-random access iterator
     else {
@@ -796,33 +797,33 @@ inline auto FlowBuilder::transform_reduce(
     auto [task, future] = emplace([beg, e, uop, pop] () mutable {
       auto init = uop(*beg);
       for(++beg; beg != e; ++beg) {
-        init = pop(std::move(init), *beg);
+        init = pop(eastl::move(init), *beg);
       }
       return init;
     });
     source.precede(task);
     task.precede(target);
-    futures.push_back(std::move(future));
+    futures.push_back(eastl::move(future));
 
     // adjust the pointer
     beg = e;
   }
 
   // target synchronizer
-  target.work([&result, futures=MoC{std::move(futures)}, bop] () {
+  target.work([&result, futures=MoC{eastl::move(futures)}, bop] () {
     for(auto& fu : futures.object) {
-      result = bop(std::move(result), fu.get());
+      result = bop(eastl::move(result), fu.get());
     }
   });
 
-  return std::make_pair(source, target); 
+  return eastl::make_pair(source, target); 
 }
 
 
 // Procedure: _linearize
 template <typename L>
 inline void FlowBuilder::_linearize(L& keys) {
-  (void) std::adjacent_find(
+  (void) eastl::adjacent_find(
     keys.begin(), keys.end(), 
     [] (auto& from, auto& to) {
       from._node->precede(*(to._node));
@@ -832,7 +833,7 @@ inline void FlowBuilder::_linearize(L& keys) {
 }
 
 // Procedure: linearize
-inline void FlowBuilder::linearize(std::vector<Task>& keys) {
+inline void FlowBuilder::linearize(eastl::vector<Task>& keys) {
   _linearize(keys); 
 }
 
@@ -845,25 +846,25 @@ inline void FlowBuilder::linearize(std::initializer_list<Task> keys) {
 template <typename I, typename T, typename B>
 inline auto FlowBuilder::reduce(I beg, I end, T& result, B&& op) {
   
-  using category = typename std::iterator_traits<I>::iterator_category;
+  using category = typename eastl::iterator_traits<I>::iterator_category;
   
-  size_t d = std::distance(beg, end);
-  size_t w = std::max(size_t{1}, _partition_factor);
-  size_t g = std::max((d + w - 1) / w, size_t{2});
+  size_t d = eastl::distance(beg, end);
+  size_t w = eastl::max(size_t{1}, _partition_factor);
+  size_t g = eastl::max((d + w - 1) / w, size_t{2});
 
   auto source = placeholder();
   auto target = placeholder();
 
-  std::vector<std::future<T>> futures;
+  eastl::vector<eastl::future<T>> futures;
   
   while(beg != end) {
 
     auto e = beg;
     
     // Case 1: random access iterator
-    if constexpr(std::is_same_v<category, std::random_access_iterator_tag>) {
-      size_t r = std::distance(beg, end);
-      std::advance(e, std::min(r, g));
+    if constexpr(eastl::is_same_v<category, eastl::random_access_iterator_tag>) {
+      size_t r = eastl::distance(beg, end);
+      eastl::advance(e, eastl::min(r, g));
     }
     // Case 2: non-random access iterator
     else {
@@ -874,26 +875,26 @@ inline auto FlowBuilder::reduce(I beg, I end, T& result, B&& op) {
     auto [task, future] = emplace([beg, e, op] () mutable {
       auto init = *beg;
       for(++beg; beg != e; ++beg) {
-        init = op(std::move(init), *beg);          
+        init = op(eastl::move(init), *beg);          
       }
       return init;
     });
     source.precede(task);
     task.precede(target);
-    futures.push_back(std::move(future));
+    futures.push_back(eastl::move(future));
 
     // adjust the pointer
     beg = e;
   }
   
   // target synchronizer
-  target.work([&result, futures=MoC{std::move(futures)}, op] () {
+  target.work([&result, futures=MoC{eastl::move(futures)}, op] () {
     for(auto& fu : futures.object) {
-      result = op(std::move(result), fu.get());
+      result = op(eastl::move(result), fu.get());
     }
   });
 
-  return std::make_pair(source, target); 
+  return eastl::make_pair(source, target); 
 }
 
 // ----------------------------------------------------------------------------
@@ -920,7 +921,7 @@ class SubflowBuilder : public FlowBuilder {
 // Constructor
 template <typename... Args>
 inline SubflowBuilder::SubflowBuilder(Args&&... args) :
-  FlowBuilder {std::forward<Args>(args)...} {
+  FlowBuilder {eastl::forward<Args>(args)...} {
 }
 
 // Procedure: join
@@ -948,14 +949,14 @@ template <typename C>
 inline auto FlowBuilder::emplace(C&& c) {
     
   // subflow task
-  if constexpr(std::is_invocable_v<C, SubflowBuilder&>) {
+  if constexpr(eastl::is_invocable_v<C, SubflowBuilder&>) {
 
-    using R = std::invoke_result_t<C, SubflowBuilder&>;
-    std::promise<R> p;
+    using R = eastl::invoke_result_t<C, SubflowBuilder&>;
+    eastl::promise<R> p;
     auto fu = p.get_future();
   
-    if constexpr(std::is_same_v<void, R>) {
-      auto& node = _graph.emplace_front([p=MoC(std::move(p)), c=std::forward<C>(c)]
+    if constexpr(eastl::is_same_v<void, R>) {
+      auto& node = _graph.emplace_front([p=MoC(eastl::move(p)), c=eastl::forward<C>(c)]
       (SubflowBuilder& fb) mutable {
         if(fb._graph.empty()) {
           c(fb);
@@ -967,49 +968,49 @@ inline auto FlowBuilder::emplace(C&& c) {
           p.get().set_value();
         }
       });
-      return std::make_pair(Task(node), std::move(fu));
+      return eastl::make_pair(Task(node), eastl::move(fu));
     }
     else {
       auto& node = _graph.emplace_front(
-      [p=MoC(std::move(p)), c=std::forward<C>(c), r=std::optional<R>()]
+      [p=MoC(eastl::move(p)), c=eastl::forward<C>(c), r=eastl::optional<R>()]
       (SubflowBuilder& fb) mutable {
         if(fb._graph.empty()) {
           r.emplace(c(fb));
           if(fb.detached()) {
-            p.get().set_value(std::move(*r)); 
+            p.get().set_value(eastl::move(*r)); 
           }
         }
         else {
           TF_ASSERT(r);
-          p.get().set_value(std::move(*r));
+          p.get().set_value(eastl::move(*r));
         }
       });
-      return std::make_pair(Task(node), std::move(fu));
+      return eastl::make_pair(Task(node), eastl::move(fu));
     }
   }
   // regular task
-  else if constexpr(std::is_invocable_v<C>) {
+  else if constexpr(eastl::is_invocable_v<C>) {
 
-    using R = std::invoke_result_t<C>;
-    std::promise<R> p;
+    using R = eastl::invoke_result_t<C>;
+    eastl::promise<R> p;
     auto fu = p.get_future();
 
-    if constexpr(std::is_same_v<void, R>) {
+    if constexpr(eastl::is_same_v<void, R>) {
       auto& node = _graph.emplace_front(
-        [p=MoC(std::move(p)), c=std::forward<C>(c)]() mutable {
+        [p=MoC(eastl::move(p)), c=eastl::forward<C>(c)]() mutable {
           c(); 
           p.get().set_value();
         }
       );
-      return std::make_pair(Task(node), std::move(fu));
+      return eastl::make_pair(Task(node), eastl::move(fu));
     }
     else {
       auto& node = _graph.emplace_front(
-        [p=MoC(std::move(p)), c=std::forward<C>(c)]() mutable {
+        [p=MoC(eastl::move(p)), c=eastl::forward<C>(c)]() mutable {
           p.get().set_value(c());
         }
       );
-      return std::make_pair(Task(node), std::move(fu));
+      return eastl::make_pair(Task(node), eastl::move(fu));
     }
   }
   else {
@@ -1018,18 +1019,18 @@ inline auto FlowBuilder::emplace(C&& c) {
 }
 
 // Function: emplace
-template <typename... C, std::enable_if_t<(sizeof...(C)>1), void>*>
+template <typename... C, eastl::enable_if_t<(sizeof...(C)>1), void>*>
 inline auto FlowBuilder::emplace(C&&... cs) {
-  return std::make_tuple(emplace(std::forward<C>(cs))...);
+  return eastl::make_tuple(emplace(eastl::forward<C>(cs))...);
 }
 
 // Function: silent_emplace
 template <typename C>
 inline auto FlowBuilder::silent_emplace(C&& c) {
   // subflow task
-  if constexpr(std::is_invocable_v<C, SubflowBuilder&>) {
+  if constexpr(eastl::is_invocable_v<C, SubflowBuilder&>) {
     auto& n = _graph.emplace_front(
-    [c=std::forward<C>(c)] (SubflowBuilder& fb) {
+    [c=eastl::forward<C>(c)] (SubflowBuilder& fb) {
       // first time execution
       if(fb._graph.empty()) {
         c(fb);
@@ -1038,8 +1039,8 @@ inline auto FlowBuilder::silent_emplace(C&& c) {
     return Task(n);
   }
   // regular task
-  else if constexpr(std::is_invocable_v<C>) {
-    auto& n = _graph.emplace_front(std::forward<C>(c));
+  else if constexpr(eastl::is_invocable_v<C>) {
+    auto& n = _graph.emplace_front(eastl::forward<C>(c));
     return Task(n);
   }
   else {
@@ -1092,8 +1093,8 @@ class Taskflow : public FlowBuilder {
     size_t num_workers() const;
     size_t num_topologies() const;
 
-    std::string dump() const;
-    std::string dump_topologies() const;
+    eastl::string dump() const;
+    eastl::string dump_topologies() const;
 
   private:
 
@@ -1101,7 +1102,7 @@ class Taskflow : public FlowBuilder {
 
     Graph _graph;
 
-    std::forward_list<Topology> _topologies;
+    eastl::slist<Topology> _topologies;
 
     void _schedule(Node&);
 };
@@ -1139,8 +1140,8 @@ inline void Taskflow::Closure::operator () () const {
   // regular node type
   // The default node work type. We only need to execute the callback if any.
   if(auto index=node->_work.index(); index == 0) {
-    if(auto &f = std::get<StaticWork>(node->_work); f != nullptr){
-      std::invoke(f);
+    if(auto &f = eastl::get<StaticWork>(node->_work); f != nullptr){
+      eastl::invoke(f);
     }
   }
   // subflow node type 
@@ -1151,13 +1152,13 @@ inline void Taskflow::Closure::operator () () const {
   // The second time we enter this context there is no need
   // to re-execute the work.
   else {
-    TF_ASSERT(std::holds_alternative<DynamicWork>(node->_work));
+    TF_ASSERT(eastl::holds_alternative<DynamicWork>(node->_work));
     
     SubflowBuilder fb(node->_subgraph, taskflow->num_workers());
 
     bool empty_graph = node->_subgraph.empty();
 
-    std::invoke(std::get<DynamicWork>(node->_work), fb);
+    eastl::invoke(eastl::get<DynamicWork>(node->_work), fb);
     
     // Need to create a subflow
     if(empty_graph) {
@@ -1166,7 +1167,7 @@ inline void Taskflow::Closure::operator () () const {
 
       S._topology = node->_topology;
 
-      for(auto i = std::next(node->_subgraph.begin()); i != node->_subgraph.end(); ++i) {
+      for(auto i = eastl::next(node->_subgraph.begin()); i != node->_subgraph.end(); ++i) {
 
         i->_topology = node->_topology;
 
@@ -1220,7 +1221,7 @@ inline Taskflow::~Taskflow() {
 // Function: num_nodes
 inline size_t Taskflow::num_nodes() const {
   //return _nodes.size();
-  return std::distance(_graph.begin(), _graph.end());
+  return eastl::distance(_graph.begin(), _graph.end());
 }
 
 // Function: num_workers
@@ -1230,7 +1231,7 @@ inline size_t Taskflow::num_workers() const {
 
 // Function: num_topologies
 inline size_t Taskflow::num_topologies() const {
-  return std::distance(_topologies.begin(), _topologies.end());
+  return eastl::distance(_topologies.begin(), _topologies.end());
 }
 
 // Procedure: silent_dispatch 
@@ -1238,7 +1239,7 @@ inline void Taskflow::silent_dispatch() {
 
   if(_graph.empty()) return;
 
-  auto& topology = _topologies.emplace_front(std::move(_graph));
+  auto& topology = _topologies.emplace_front(eastl::move(_graph));
 
   // Start the taskflow
   _schedule(topology._source);
@@ -1251,7 +1252,7 @@ inline std::shared_future<void> Taskflow::dispatch() {
     return std::async(std::launch::deferred, [](){}).share();
   }
 
-  auto& topology = _topologies.emplace_front(std::move(_graph));
+  auto& topology = _topologies.emplace_front(eastl::move(_graph));
 
   // Start the taskflow
   _schedule(topology._source);
@@ -1283,7 +1284,7 @@ inline void Taskflow::_schedule(Node& node) {
 }
 
 // Function: dump_topology
-inline std::string Taskflow::dump_topologies() const {
+inline eastl::string Taskflow::dump_topologies() const {
   
   std::ostringstream os;
 
@@ -1308,7 +1309,7 @@ inline void Taskflow::dump(std::ostream& os) const {
 
 // Function: dump
 // Dumps the taskflow in graphviz. The result can be viewed at http://www.webgraphviz.com/.
-inline std::string Taskflow::dump() const {
+inline eastl::string Taskflow::dump() const {
   std::ostringstream os;
   dump(os); 
   return os.str();

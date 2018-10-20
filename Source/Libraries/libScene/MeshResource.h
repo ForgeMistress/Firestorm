@@ -20,38 +20,38 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class MeshLoader final : public ResourceLoader
-{
-public:
-	MeshLoader(RenderMgr& renderMgr);
-	~MeshLoader();
-
-	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref) override;
-
-private:
-	RenderMgr&                     _renderMgr;
-	Json::CharReaderBuilder        _builder;
-	Json::CharReader*              _reader;
-};
-
-
-class MeshResource final : public IResourceObject
-{
-	FIRE_RESOURCE_TYPE(MeshResource, MeshLoader);
-public:
-	MeshResource(RenderMgr& renderMgr);
-	virtual ~MeshResource();
-
-	virtual bool IsReady() const;
-
-private:
-	RenderMgr& _renderMgr;
-	vector<char> _data;
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//class MeshLoader final : public ResourceLoader
+//{
+//public:
+//	MeshLoader(RenderMgr& renderMgr);
+//	~MeshLoader();
+//
+//	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref) override;
+//
+//private:
+//	RenderMgr&                     _renderMgr;
+//	Json::CharReaderBuilder        _builder;
+//	Json::CharReader*              _reader;
+//};
+//
+//
+//class MeshResource final : public IResourceObject
+//{
+//	FIRE_RESOURCE_TYPE(MeshResource, MeshLoader);
+//public:
+//	MeshResource(RenderMgr& renderMgr);
+//	virtual ~MeshResource();
+//
+//	virtual bool IsReady() const;
+//
+//private:
+//	RenderMgr& _renderMgr;
+//	vector<char> _data;
+//};
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CLOSE_NAMESPACE(Firestorm);
 

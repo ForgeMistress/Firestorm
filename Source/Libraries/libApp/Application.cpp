@@ -20,6 +20,8 @@
 
 #include <libScene/RenderMgr.h>
 
+#include <libCore/TaskGraph.h>
+
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +79,7 @@ int Application::Run()
 
 	auto& renderMgr = _managerMgr.RenderMgr();
 	Window& window = _managerMgr.Window();
+	TaskGraph& taskGraph = _managerMgr.TaskGraph();
 	while(isRunning)
 	{
 		window.Process();
@@ -92,6 +95,8 @@ int Application::Run()
 
 		OnUpdate(deltaT);
 		OnRender();
+
+		taskGraph.wait_for_all();
 
 		//_surface->SwapBuffers();
 

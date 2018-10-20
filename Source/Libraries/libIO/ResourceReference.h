@@ -24,9 +24,9 @@ OPEN_NAMESPACE(Firestorm);
 	This class instance does not contain any data. Instead, it merely defines a reference to a resource
 	that can be passed into the ResourceMgr.
  **/
-class ResourceReference final : public Mirror::Object
+class ResourceReference final
 {
-	FIRE_MIRROR_DECLARE(ResourceReference, Mirror::Object);
+	FIRE_MIRROR_DECLARE(ResourceReference);
 public:
 	ResourceReference(const string& path = "");
 	virtual ~ResourceReference();

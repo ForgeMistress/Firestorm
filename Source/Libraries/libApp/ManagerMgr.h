@@ -18,7 +18,7 @@
 #include <libScene/RenderMgr.h>
 #include <libMirror/ObjectMaker.h>
 #include <libExistence/Entity.h>
-#include <taskflow/taskflow.hpp>
+#include <libCore/TaskGraph.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -47,7 +47,7 @@ public:
 	class RenderMgr&    RenderMgr();
 	class ObjectMaker&  ObjectMaker();
 	class EntityMgr&    EntityMgr();
-	class tf::Taskflow& Taskflow();
+	class TaskGraph&    TaskGraph();
 
 private:
 	class Application& _app;
@@ -57,7 +57,7 @@ private:
 	class RenderMgr    _RenderMgr;
 	class ObjectMaker  _ObjectMaker;
 	class EntityMgr    _EntityMgr;
-	class tf::Taskflow _Taskflow;
+	class TaskGraph    _TaskGraph;
 };
 
 

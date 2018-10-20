@@ -15,10 +15,10 @@
 #include <libCore/Result.h>
 
 #define FIRE_LOAD_SUCCESS( PTR ) \
-	::Firestorm::ResourceLoader::LoadResult( PTR )
+	::Firestorm::ResourceMgr::ResultType( PTR )
 
 #define FIRE_LOAD_FAIL( ERROR_CODE, DETAILS ) \
-	::Firestorm::ResourceLoader::LoadResult(  \
+	::Firestorm::LoadResult(  \
 		::Firestorm::Error(                   \
 			ERROR_CODE,                       \
 			DETAILS,                          \
@@ -32,37 +32,37 @@ OPEN_NAMESPACE(Firestorm);
 class ResourceReference;
 class ResourceMgr;
 
-class ResourceLoader
+struct LoadResult
 {
 public:
-	struct LoadResult
-	{
-	public:
-		LoadResult();
-		LoadResult(const LoadResult& other);
-		LoadResult(LoadResult&& other);
-		LoadResult(ResourcePtr&& resource);
-		LoadResult(const Error& error);
+	LoadResult();
+	LoadResult(const LoadResult& other);
+	LoadResult(LoadResult&& other);
+	LoadResult(ResourcePtr&& resource);
+	LoadResult(const Error& error);
 
-		LoadResult& operator=(LoadResult&& other);
-		LoadResult& operator=(const LoadResult& other);
+	LoadResult& operator=(LoadResult&& other);
+	LoadResult& operator=(const LoadResult& other);
 
-		ResourcePtr GetResource() const;
+	ResourcePtr GetResource() const;
 
-		Error GetError() const;
+	Error GetError() const;
 
-		bool HasError() const;
+	bool HasError() const;
 
-	private:
-		ResourcePtr  _resource;
-		Error        _error;
-	};
-
-	ResourceLoader();
-	virtual ~ResourceLoader();
-
-	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref);
+private:
+	ResourcePtr  _resource;
+	Error        _error;
 };
+
+//class ResourceLoader
+//{
+//public:
+//	ResourceLoader();
+//	virtual ~ResourceLoader();
+//
+//	virtual LoadResult Load(ResourceMgr* resourceMgr, const ResourceReference& ref);
+//};
 
 CLOSE_NAMESPACE(Firestorm);
 

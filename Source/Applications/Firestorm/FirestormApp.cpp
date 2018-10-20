@@ -26,10 +26,20 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	FIRE_ASSERT(libIO::FileExists("/Shaders/Triangle.shader"));
 	FIRE_ASSERT(libIO::FileExists("/Models/base-female.gltf"));
 
-	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
+	RenderMgr& renderMgr = GetSystems().RenderMgr();
+	ResourceMgr& resourceMgr = GetSystems().ResourceMgr();
+
 	Dispatcher.Register<ApplicationWantsToCloseEvent>([this](const ApplicationWantsToCloseEvent& e) {
 		HandleApplicationWantsToClose(e);
 	});// &FirestormApp::HandleApplicationWantsToClose, this);
+
+	_shaderResource = resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
+	// while(true)
+	// {
+	// 	FIRE_LOG_DEBUG("?? Waiting for shader resource to finish on main thread...");
+	// 	if(_shaderResource->IsFinished())
+	// 		break;
+	// }
 
 	/*struct Vertex
 	{
@@ -94,6 +104,19 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	FIRE_ASSERT(_commandBuffer != nullptr);*/
 }
 
+void FirestormApp::OnUpdate(double deltaT)
+{
+	static bool message = false;
+	if(!message)
+	{
+		if(_shaderResource->IsFinished())
+		{
+			FIRE_LOG_DEBUG("!! Finished loading shader: '/Shaders/Triangle.shader'");
+		}
+		message = true;
+	}
+}
+
 void FirestormApp::OnRender()
 {
 	/*try
@@ -149,11 +172,11 @@ void FirestormApp::HandleApplicationWantsToClose(const ApplicationWantsToCloseEv
 void FirestormApp::RegisterResourceTypes()
 {
 	// Register the resource types.
-	auto& systems = GetSystems();
-	auto& renderMgr = systems.GetRenderMgr();
-	auto& resourceMgr = systems.GetResourceMgr();
+	// auto& systems = GetSystems();
+	// auto& renderMgr = systems.GetRenderMgr();
+	// auto& resourceMgr = systems.GetResourceMgr();
 
-	resourceMgr.InstallLoader<ShaderProgramResource>(renderMgr);
-	resourceMgr.InstallLoader<MeshResource>(renderMgr);
-	resourceMgr.InstallLoader<SceneGraphResource>(renderMgr);
+	// resourceMgr.InstallLoader<ShaderProgramResource>(renderMgr);
+	// resourceMgr.InstallLoader<MeshResource>(renderMgr);
+	// resourceMgr.InstallLoader<SceneGraphResource>(renderMgr);
 }
