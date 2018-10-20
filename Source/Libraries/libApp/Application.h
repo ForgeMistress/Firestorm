@@ -35,7 +35,7 @@ public:
 class Application
 {
 public:
-	Application(thread::id mainThreadID);
+	Application(std::thread::id mainThreadID);
 	virtual ~Application();
 
 	void Initialize(int ac, char** av);
@@ -97,7 +97,7 @@ private:
 	Vector2 _previousMousePos;
 	Vector2 _currentMousePos;
 
-	thread::id _mainThreadId;
+	std::thread::id _mainThreadId;
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	GLOBAL SYSTEMS

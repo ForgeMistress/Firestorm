@@ -107,13 +107,15 @@ void FirestormApp::OnInitialize(int ac, char** av)
 void FirestormApp::OnUpdate(double deltaT)
 {
 	static bool message = false;
-	if(!message)
+	if(message == false)
 	{
+		FIRE_LOG_DEBUG("?? Waiting for resource: '/Shaders/Triangle.shader'");
+		//if(_shaderResource.second.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
 		if(_shaderResource->IsFinished())
 		{
+			message = true;
 			FIRE_LOG_DEBUG("!! Finished loading shader: '/Shaders/Triangle.shader'");
 		}
-		message = true;
 	}
 }
 

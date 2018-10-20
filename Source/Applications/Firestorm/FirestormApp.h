@@ -13,11 +13,11 @@ public:
 	FirestormApp(std::thread::id mainThreadID);
 	virtual ~FirestormApp();
 
-	virtual void OnInitialize(int ac, char** av);
-	virtual void OnUpdate(double deltaT);
-	virtual void OnRender();
-	virtual void OnClose();
-	virtual int  OnShutdown();
+	virtual void OnInitialize(int ac, char** av) override;
+	virtual void OnUpdate(double deltaT) override;
+	virtual void OnRender() override;
+	virtual void OnClose() override;
+	virtual int  OnShutdown() override;
 
 	void HandleApplicationWantsToClose(const ApplicationWantsToCloseEvent& event);
 

@@ -35,21 +35,9 @@ namespace Firestorm
 
 using namespace eastl;
 
-template<class T>
-using future = std::future<T>;
-
-template<class T>
-using promise = std::promise<T>;
-
 static const string str_Default;
 
 using uchar = unsigned char;
-
-template<class T> using atomic = std::atomic<T>;
-
-using thread = std::thread;
-
-using mutex = std::mutex;
 
 using ID = uint64_t;
 }

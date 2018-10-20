@@ -137,10 +137,10 @@ template<class T>
 template<class... Args_t>
 T* ObjectPool<T>::Get(Args_t&&... args) const
 {
-	std::unique_lock<mutex> recycleLock(_recycleLock);
+	std::unique_lock<std::mutex> recycleLock(_recycleLock);
 	if(_recycle.empty())
 	{
-		std::unique_lock<mutex> poolLock(_poolLock);
+		std::unique_lock<std::mutex> poolLock(_poolLock);
 		T& item = _pool.emplace_front(std::forward<Args_t>(args)...);
 		return &item;
 	}
@@ -172,7 +172,7 @@ void ObjectPool<T>::Return(U* ptr)
 	T* ptrT = static_cast<T*>(ptr);
 	ptrT->~T();
 
-	std::unique_lock<mutex> lock(_recycleLock);
+	std::unique_lock<std::mutex> lock(_recycleLock);
 	_recycle.push_back(ptrT);
 }
 

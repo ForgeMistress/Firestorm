@@ -39,7 +39,7 @@ struct libCore : public Library<libCore>
 {
 	FIRE_LIBRARY(libCore);
 
-	static void SetThreadName(thread& thread, const string& name);
+	static void SetThreadName(std::thread& thread, const string& name);
 
 	template<class T>
 	static T* Alloc(size_t numItems)

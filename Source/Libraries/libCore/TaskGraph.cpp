@@ -18,9 +18,9 @@ TaskGraph::TaskGraph(class Application& app)
 {
 }
 
-tf::Task TaskGraph::operator[](const char* name)
+tf::Task& TaskGraph::operator[](const char* name)
 {
-	return _graphs[name];
+	return _graphs[std::string(name)];
 }
 
 void TaskGraph::Shutdown()

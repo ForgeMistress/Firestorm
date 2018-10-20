@@ -44,22 +44,33 @@ OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct IResourceLoadOp
+{
+	virtual LoadResult operator()(tf::SubflowBuilder& dependencies) = 0;
+};
+
+
 class ShaderProgram final : public IResourceObject
 {
 	friend class ResourceMgr;
-	struct LoadOp
+	FIRE_MIRROR_DECLARE(ShaderProgram);
+	struct LoadOp : public IResourceLoadOp
 	{
-		ResourceReference Resource;
-		RenderMgr& Mgr;
-		LoadOp(Application& app, const char* filename)
-		: Resource(filename)
-		, Mgr(app.GetSystems().RenderMgr())
+		ResourceReference ResourceRef;
+		Application& App;
+		eastl::shared_ptr<ShaderProgram> Resource;
+
+		LoadOp(Application& app, const char* filename, eastl::shared_ptr<ShaderProgram> resource)
+		: ResourceRef(filename)
+		, App(app)
+		, Resource(resource)
 		{
 		}
 		LoadResult operator()(tf::SubflowBuilder& dependencies);
 	};
+	//static IResourceLoadOp* LoadOp(Application& app, const char* filename) { return new ShaderLoadOp(app, filename); }
 public:
-	ShaderProgram(RenderMgr& renderMgr);
+	ShaderProgram(Application& app);
 	virtual ~ShaderProgram();
 
 	virtual bool IsReady() const;

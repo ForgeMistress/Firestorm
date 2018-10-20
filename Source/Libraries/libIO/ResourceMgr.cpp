@@ -26,39 +26,50 @@ FIRE_ERRORCODE_DEF(ResourceHandleErrors::NULL_RESOURCE,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourceType::ResourceType(std::tuple<tf::Task, std::future<LoadResult>>&& tuppy)
-: _tuppy(std::forward<std::tuple<tf::Task, std::future<LoadResult>>>(tuppy))
+Resource_::Resource_(eastl::pair<tf::Task, std::future<LoadResult>>&& tuppy)
+: _tuppy(std::forward<eastl::pair<tf::Task, std::future<LoadResult>>>(tuppy))
+, _hasFuture(true)
 {
+}
 
+Resource_::~Resource_()
+{
+	Release();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Error ResourceType::GetError() const
+Error Resource_::GetError() const
 {
 	return _error;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceType::IsValid() const
+bool Resource_::IsValid() const
 {
 	return _hasFuture;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceType::IsFinished() const
+bool Resource_::IsFinished() const
 {
 	if(!_isFinished)
 	{
 		try
 		{
-			if(_hasFuture)
+			if(!_futurePulled)
 			{
-				if(!_futurePulled)
+				auto status = get<1>(_tuppy).wait_for(std::chrono::milliseconds(0));
+				if(status == std::future_status::ready)
 				{
-					DoPull();
+					_isFinished = true;
+					auto loadResult = get<1>(_tuppy).get();
+					_obj = loadResult.GetResource();
+					_error = loadResult.GetError();
+
+					_futurePulled = true;
 				}
 			}
 		}
@@ -72,14 +83,14 @@ bool ResourceType::IsFinished() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ResourceType::HasError() const
+bool Resource_::HasError() const
 {
 	return _error.GetCode() != nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceType::Release()
+void Resource_::Release()
 {
 	_obj = nullptr;
 	_error.Set(nullptr, "");
@@ -87,7 +98,7 @@ void ResourceType::Release()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ResourceType::DoPull() const
+void Resource_::DoPull() const
 {
 	// check the status of the future.
 	auto status = get<1>(_tuppy).wait_for(std::chrono::milliseconds(0));
@@ -104,21 +115,17 @@ void ResourceType::DoPull() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ResourcePtr ResourceType::PullData() const
+ResourcePtr Resource_::PullData() const
 {
-	if(_hasFuture)
+	if(get<1>(_tuppy).valid())
 	{
-		if(get<1>(_tuppy).valid())
+		if(!_futurePulled)
 		{
-			if(!_futurePulled)
-			{
-				DoPull();
-			}
+			DoPull();
 		}
-
-		return _obj;
 	}
-	return nullptr;
+
+	return _obj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,10 +135,20 @@ const char* ResourceMgr::RootTask = "ResourceMgr::RootTask";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ResourceMgr::ResourceMgr(Application& app)
-: _tg(app.GetSystems().TaskGraph())
+: _app(app)
+, _objectMaker(app.GetSystems().ObjectMaker())
+, _tg(app.GetSystems().TaskGraph())
 {
 }
 
+void ResourceMgr::InstallMaker(FireClassID resType, IResourceMaker* maker)
+{
+	if(_makers.find(resType) == _makers.end())
+	{
+		_makers[resType] = maker;
+	} else
+		delete maker;
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +236,7 @@ ResourceMgr::ResourceMgr(Application& app)
 //		delete promise;
 //	};
 //
-//	std::unique_lock<mutex> lock(_queueLock);
+//	std::unique_lock<std::mutex> lock(_queueLock);
 //	_queue.push(loadOperation);
 //
 //	lock.unlock();

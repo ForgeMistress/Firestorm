@@ -40,7 +40,7 @@ typedef struct tagTHREADNAME_INFO
 OPEN_NAMESPACE(Firestorm);
 
 #ifdef FIRE_PLATFORM_WINDOWS
-void libCore::SetThreadName(thread& thread, const string& name)
+void libCore::SetThreadName(std::thread& thread, const string& name)
 {
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;

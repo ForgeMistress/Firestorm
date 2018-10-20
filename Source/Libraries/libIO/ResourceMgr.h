@@ -22,6 +22,7 @@
 #include <libCore/ObjectPool.h>
 #include <libCore/TaskGraph.h>
 #include <libCore/Logger.h>
+#include <taskflow/taskflow.hpp>
 
 #include <libMirror/EventDispatcher.h>
 
@@ -58,20 +59,20 @@ Defines a handle to a resource. A valid instance of this is only retrievable by 
 #ResourceMgr::Load. Instances can be stored in client classes, however this is done with
 the understanding that they will eventually be assigned to an instance
 **/
-class ResourceType
+class Resource_
 {
 	friend class ResourceCache;
 	friend class ResourceMgr;
 public:
 	// make an empty handle that's waiting for a resource.
-	ResourceType(std::tuple<tf::Task, std::future<LoadResult>>&& tuppy);
+	Resource_(eastl::pair<tf::Task, std::future<LoadResult>>&& tuppy);
 	// ResourceType(future<LoadResult>&& future);
 
 	// move only
 	// ResourceType(ResourceType&& other);
 	// ResourceType(const ResourceType& other);
 
-	virtual ~ResourceType();
+	virtual ~Resource_();
 
 	// ResourceType& operator=(ResourceType&& handle);
 	// ResourceType& operator=(const ResourceType& handle);
@@ -119,7 +120,7 @@ private:
 	void DoPull() const;
 	ResourcePtr PullData() const;
 
-	mutable std::tuple<tf::Task, std::future<LoadResult>> _tuppy;
+	mutable eastl::pair<tf::Task, std::future<LoadResult>> _tuppy;
 	//tf::Task _task;
 	//mutable std::future<LoadResult> _future;
 	// pulled from future.
@@ -131,8 +132,26 @@ private:
 	bool _hasFuture{ false };
 	bool _hasError{ false };
 };
-using Resource = RefPtr<ResourceType>;
-	
+using Resource = RefPtr<Resource_>;
+
+struct IResourceMaker
+{
+	virtual RefPtr<IResourceObject> Make() = 0;
+};
+
+template<class ResType>
+struct SimpleResourceMaker : public IResourceMaker
+{
+	SimpleResourceMaker(class Application& app)
+	: _app(app)
+	{}
+
+	virtual RefPtr<IResourceObject> Make()
+	{
+		return eastl::make_shared<ResType>(_app);
+	}
+	class Application& _app;
+};
 
 class ResourceMgr final
 {
@@ -148,22 +167,42 @@ public:
 
 	ResourceMgr(class Application& app);
 
-	template<class ResourceType>
+	template<class ResType, class MakerType>
+	void InstallMaker()
+	{
+		InstallMaker(ResType::MyType(), new MakerType(_app));
+	}
+
+	void InstallMaker(FireClassID resType, IResourceMaker* maker);
+
+	template<class ResType>
 	Resource QueueLoad(const char* filename)
 	{
 		if(!_tg.has(RootTask))
 		{
-			_tg.emplace(RootTask, [] {
+			_tg.emplace([] {
 				FIRE_LOG_DEBUG("!! Beginning ResourceMgr Load Root");
-			});
+			}, RootTask);
 		}
-		auto[task, fut] = _tg.emplace(ResourceType::LoadOp(filename));
+		auto[task, fut] = _tg.emplace(
+			[&, this, fname = string(filename)] (tf::SubflowBuilder& builder) -> LoadResult {
+				ResType::LoadOp loadOp(_app, fname.c_str(), eastl::make_shared<ResType>(_app));
+				return loadOp(builder);
+			}
+		);
 		_tg[RootTask].precede(task);
-		return make_shared<ResourceType>(make_tuple(task, fut));
+		using pair = eastl::pair<tf::Task, std::future<LoadResult>>;
+		return eastl::make_shared<Resource_>(eastl::forward<pair>(eastl::make_pair(task, eastl::move(fut))));
 	}
 
+	Resource QueueLoad(FireClassID resType, const char* filename);
+
 public:
-	class TaskGraph& _tg;
+	class Application& _app;
+	class ObjectMaker& _objectMaker;
+	class TaskGraph&   _tg;
+
+	unordered_map<FireClassID, IResourceMaker*> _makers;
 };
 
 //**

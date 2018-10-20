@@ -12,6 +12,7 @@
 
 #include "Application.h"
 #include <thread>
+#include <libCore/TaskGraph.h>
 
 OPEN_NAMESPACE(Firestorm);
 

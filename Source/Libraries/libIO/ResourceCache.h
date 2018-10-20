@@ -47,7 +47,7 @@ private:
 	friend class ResourceMgr;
 	bool AddResource(const string& name, const RefPtr<IResourceObject>& object);
 
-	mutable mutex _cacheLock;
+	mutable std::mutex _cacheLock;
 	unordered_map<string, RefPtr<IResourceObject>> _cache;
 };
 

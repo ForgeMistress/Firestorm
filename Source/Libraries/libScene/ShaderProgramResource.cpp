@@ -127,7 +127,7 @@ LoadResult ShaderProgram::LoadOp::operator()(tf::SubflowBuilder& dependencies)
 
 	RefPtr<Json::CharReader> _reader(_s_charReaderBuilder.newCharReader());
 
-	const string& filename = Resource.GetResourcePath();
+	const string& filename = ResourceRef.GetResourcePath();
 	if(libIO::FileExists(filename.c_str()))
 	{
 		Result<vector<char>, Error> result = libIO::LoadFile(filename);
@@ -138,17 +138,19 @@ LoadResult ShaderProgram::LoadOp::operator()(tf::SubflowBuilder& dependencies)
 			JSONCPP_STRING e;
 			if(!_reader->parse(&data[0], &data[data.size() - 1], &root, &e))
 			{
+				FIRE_LOG_ERROR("!! failed! parsing json");
 				string errors(e.c_str());
 				return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, errors);
 			}
 
-			RefPtr<ShaderProgram> shaderProgram(make_shared<ShaderProgram>(Mgr));
+			//RefPtr<ShaderProgram> shaderProgram(make_shared<ShaderProgram>(Mgr));
 			if(root.isMember("vertex"))
 			{
 				string value(root["vertex"].asCString());
 				FIRE_LOG_DEBUG("    :: Loading Vertex Shader %s", value);
 				if(!libIO::FileExists(value.c_str()))
 				{
+					FIRE_LOG_ERROR("!! failed! loading vertex...");
 					return FIRE_LOAD_FAIL(
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"vertex shader could not be loaded");
@@ -170,6 +172,7 @@ LoadResult ShaderProgram::LoadOp::operator()(tf::SubflowBuilder& dependencies)
 				FIRE_LOG_DEBUG("    :: Loading Fragment Shader %s", value);
 				if(!libIO::FileExists(value.c_str()))
 				{
+					FIRE_LOG_ERROR("!! failed! loading fragment...");
 					return FIRE_LOAD_FAIL(
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"fragment shader could not be loaded");
@@ -204,13 +207,14 @@ LoadResult ShaderProgram::LoadOp::operator()(tf::SubflowBuilder& dependencies)
 				//}
 				//shaderProgram->AddShaderData(LLGL::ShaderType::Geometry, result.value());
 			}
+			return Resource;
 		}
 	}
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, "not found, dummy");
 }
 
-ShaderProgram::ShaderProgram(RenderMgr& renderMgr)
-: _renderMgr(renderMgr)
+ShaderProgram::ShaderProgram(Application& app)
+: _renderMgr(app.GetSystems().RenderMgr())
 {
 }
 

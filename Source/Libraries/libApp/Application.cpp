@@ -37,7 +37,7 @@ ApplicationWantsToCloseEvent::ApplicationWantsToCloseEvent(Application* app)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Application::Application(thread::id mainThreadId)
+Application::Application(std::thread::id mainThreadId)
 : _mainThreadId(mainThreadId)
 , _managerMgr(*this)
 {
@@ -96,7 +96,7 @@ int Application::Run()
 		OnUpdate(deltaT);
 		OnRender();
 
-		taskGraph.wait_for_all();
+		taskGraph.dispatch();
 
 		//_surface->SwapBuffers();
 

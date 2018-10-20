@@ -45,142 +45,142 @@ RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av)
 	RefPtr<TestHarness> h(new TestHarness("libExistence"));
 
 
-	h->It("entity managers should register and unregister destructor callbacks as the definitions fall out of scope", 
-		[&](TestCase& t) {
-			UUIDMgr uuidMgr;
-			EntityMgr eMgr(uuidMgr);
-			{
-				PosRotComponent componentMgr(eMgr);
-				t.Assert(eMgr.GetNumRegisteredDestructors() == 1, "the destructor callback was not registered");
-			}
-			t.Assert(eMgr.GetNumRegisteredDestructors() == 0, "the destructor callback was not unregistered");
-		});
+	//h->It("entity managers should register and unregister destructor callbacks as the definitions fall out of scope", 
+	//	[&](TestCase& t) {
+	//		UUIDMgr uuidMgr;
+	//		EntityMgr eMgr(uuidMgr);
+	//		{
+	//			PosRotComponent componentMgr(eMgr);
+	//			t.Assert(eMgr.GetNumRegisteredDestructors() == 1, "the destructor callback was not registered");
+	//		}
+	//		t.Assert(eMgr.GetNumRegisteredDestructors() == 0, "the destructor callback was not unregistered");
+	//	});
 
-	h->It("component definitions should be able to map entities to components", [&](TestCase& t) {
-		UUIDMgr uuidMgr;
-		EntityMgr eMgr(uuidMgr);
-		PosRotComponent componentMgr(eMgr);
-
-		Entity e = eMgr.SpawnEntity();
-		IComponent::Instance eye = componentMgr.Assign(e);
-		t.Assert(eye != FIRE_INVALID_COMPONENT, "received an invalid component for some reason");
-
-		IComponent::Instance i = componentMgr.Lookup(e);
-		t.Assert(eye == i, "the component manager did not properly map the Entity to the component");
-	});
-
-	h->It("component definitions should never double-map entities",[&](TestCase& t) {
-		UUIDMgr uuidMgr;
-		EntityMgr eMgr(uuidMgr);
-		PosRotComponent componentMgr(eMgr);
-		size_t count = 10;
-
-		vector<Entity> entities;
-		entities.reserve(count);
-		vector<IComponent::Instance> components;
-		components.reserve(count);
-
-		for(size_t i=0; i<count; ++i)
-		{
-			entities.push_back(eMgr.SpawnEntity());
-			IComponent::Instance ii = componentMgr.Assign(entities.back());
-			t.Assert(ii == i, Format("the instance index %d was unexpected", ii).c_str());
-
-			// if we're double mapping, the call to Lookup would return a duplicate component index.
-			components.push_back(componentMgr.Lookup(entities.back()));
-		}
-
-		for(size_t i=0; i<count; ++i)
-		{
-			IComponent::Instance ii = components[i];
-			for(size_t j=0; j<count; j++)
-			{
-				if(i == j) continue;
-				IComponent::Instance ji = components[j];
-				t.Assert(ii != ji, "a component was double-mapped");
-			}
-		}
-	});
-
-
-	h->It("component definitions should re-map to their entities once one has been despawned",[&](TestCase& t) {
-		UUIDMgr uuidMgr;
-		EntityMgr eMgr(uuidMgr);
-		PosRotComponent componentMgr(eMgr);
-		size_t count = 10;
-
-		vector<Entity> entities;
-		entities.reserve(count);
-		vector<IComponent::Instance> components;
-		components.reserve(count);
-
-		for(size_t i=0; i<count; ++i)
-		{
-			Entity e = eMgr.SpawnEntity();
-			entities.push_back(e);
-			IComponent::Instance ii = componentMgr.Assign(entities.back());
-			components.push_back(ii);
-		}
-
-		Entity backEnt = entities.back();
-		IComponent::Instance i_last = componentMgr.Lookup(backEnt);
-		componentMgr.SetPosition(i_last, { 9001.0f,9001.0f,9001.0f });
-		{
-			const Vector3& pos_test = componentMgr.GetPosition(i_last);
-			t.Assert(pos_test.x == 9001.0f, "the component did not have the right values");
-			t.Assert(pos_test.y == 9001.0f, "the component did not have the right values");
-			t.Assert(pos_test.z == 9001.0f, "the component did not have the right values");
-		}
-
-		// erase a random entity in the middle of the buffer
-		auto ent = entities.begin() + 4;
-		eMgr.DespawnEntity(*ent);
-		entities.erase(ent);
-
-		Entity testEnt = entities.back();
-		IComponent::Instance i_test = componentMgr.Lookup(testEnt);
-		const Vector3& pos_test = componentMgr.GetPosition(i_test);
-		t.Assert(pos_test.x == 9001.0f, "the component did not have the right values");
-		t.Assert(pos_test.y == 9001.0f, "the component did not have the right values");
-		t.Assert(pos_test.z == 9001.0f, "the component did not have the right values");
-	});
-
-
-	h->It("see above, only we're removing what would be the last component",[&](TestCase& t) {
-		UUIDMgr uuidMgr;
-		EntityMgr eMgr(uuidMgr);
-		PosRotComponent componentMgr(eMgr);
-		size_t count = 10;
-
-		vector<Entity> entities;
-		entities.reserve(count);
-		vector<IComponent::Instance> components;
-		components.reserve(count);
-
-		for(size_t i=0; i<count; ++i)
-		{
-			entities.push_back(eMgr.SpawnEntity());
-			components.push_back(componentMgr.Assign(entities.back()));
-		}
-
-		IComponent::Instance i_last = componentMgr.Lookup(entities.back());
-		componentMgr.SetPosition(i_last, { 9001.0f,9001.0f,9001.0f });
-		{
-			const Vector3& pos_test = componentMgr.GetPosition(i_last);
-			t.Assert(pos_test.x == 9001.0f, "the component did not have the right values");
-			t.Assert(pos_test.y == 9001.0f, "the component did not have the right values");
-			t.Assert(pos_test.z == 9001.0f, "the component did not have the right values");
-		}
-
-		// erase a random entity in the middle of the buffer
-		Entity ent = entities[entities.size()-1];
-		eMgr.DespawnEntity(ent);
-		entities.pop_back();
-
-		Entity testEnt = entities.back();
-		IComponent::Instance i_test = componentMgr.Lookup(testEnt);
-		t.Assert(i_test != i_last, "the last component didn't destroy itself properly");
-	});
+	//h->It("component definitions should be able to map entities to components", [&](TestCase& t) {
+	//	UUIDMgr uuidMgr;
+	//	EntityMgr eMgr(uuidMgr);
+	//	PosRotComponent componentMgr(eMgr);
+	//
+	//	Entity e = eMgr.SpawnEntity();
+	//	IComponent::Instance eye = componentMgr.Assign(e);
+	//	t.Assert(eye != FIRE_INVALID_COMPONENT, "received an invalid component for some reason");
+	//
+	//	IComponent::Instance i = componentMgr.Lookup(e);
+	//	t.Assert(eye == i, "the component manager did not properly map the Entity to the component");
+	//});
+	//
+	//h->It("component definitions should never double-map entities",[&](TestCase& t) {
+	//	UUIDMgr uuidMgr;
+	//	EntityMgr eMgr(uuidMgr);
+	//	PosRotComponent componentMgr(eMgr);
+	//	size_t count = 10;
+	//
+	//	vector<Entity> entities;
+	//	entities.reserve(count);
+	//	vector<IComponent::Instance> components;
+	//	components.reserve(count);
+	//
+	//	for(size_t i=0; i<count; ++i)
+	//	{
+	//		entities.push_back(eMgr.SpawnEntity());
+	//		IComponent::Instance ii = componentMgr.Assign(entities.back());
+	//		t.Assert(ii == i, Format("the instance index %d was unexpected", ii).c_str());
+	//
+	//		// if we're double mapping, the call to Lookup would return a duplicate component index.
+	//		components.push_back(componentMgr.Lookup(entities.back()));
+	//	}
+	//
+	//	for(size_t i=0; i<count; ++i)
+	//	{
+	//		IComponent::Instance ii = components[i];
+	//		for(size_t j=0; j<count; j++)
+	//		{
+	//			if(i == j) continue;
+	//			IComponent::Instance ji = components[j];
+	//			t.Assert(ii != ji, "a component was double-mapped");
+	//		}
+	//	}
+	//});
+	//
+	//
+	//h->It("component definitions should re-map to their entities once one has been despawned",[&](TestCase& t) {
+	//	UUIDMgr uuidMgr;
+	//	EntityMgr eMgr(uuidMgr);
+	//	PosRotComponent componentMgr(eMgr);
+	//	size_t count = 10;
+	//
+	//	vector<Entity> entities;
+	//	entities.reserve(count);
+	//	vector<IComponent::Instance> components;
+	//	components.reserve(count);
+	//
+	//	for(size_t i=0; i<count; ++i)
+	//	{
+	//		Entity e = eMgr.SpawnEntity();
+	//		entities.push_back(e);
+	//		IComponent::Instance ii = componentMgr.Assign(entities.back());
+	//		components.push_back(ii);
+	//	}
+	//
+	//	Entity backEnt = entities.back();
+	//	IComponent::Instance i_last = componentMgr.Lookup(backEnt);
+	//	componentMgr.SetPosition(i_last, { 9001.0f,9001.0f,9001.0f });
+	//	{
+	//		const Vector3& pos_test = componentMgr.GetPosition(i_last);
+	//		t.Assert(pos_test.x == 9001.0f, "the component did not have the right values");
+	//		t.Assert(pos_test.y == 9001.0f, "the component did not have the right values");
+	//		t.Assert(pos_test.z == 9001.0f, "the component did not have the right values");
+	//	}
+	//
+	//	// erase a random entity in the middle of the buffer
+	//	auto ent = entities.begin() + 4;
+	//	eMgr.DespawnEntity(*ent);
+	//	entities.erase(ent);
+	//
+	//	Entity testEnt = entities.back();
+	//	IComponent::Instance i_test = componentMgr.Lookup(testEnt);
+	//	const Vector3& pos_test = componentMgr.GetPosition(i_test);
+	//	t.Assert(pos_test.x == 9001.0f, "the component did not have the right values");
+	//	t.Assert(pos_test.y == 9001.0f, "the component did not have the right values");
+	//	t.Assert(pos_test.z == 9001.0f, "the component did not have the right values");
+	//});
+	//
+	//
+	//h->It("see above, only we're removing what would be the last component",[&](TestCase& t) {
+	//	UUIDMgr uuidMgr;
+	//	EntityMgr eMgr(uuidMgr);
+	//	PosRotComponent componentMgr(eMgr);
+	//	size_t count = 10;
+	//
+	//	vector<Entity> entities;
+	//	entities.reserve(count);
+	//	vector<IComponent::Instance> components;
+	//	components.reserve(count);
+	//
+	//	for(size_t i=0; i<count; ++i)
+	//	{
+	//		entities.push_back(eMgr.SpawnEntity());
+	//		components.push_back(componentMgr.Assign(entities.back()));
+	//	}
+	//
+	//	IComponent::Instance i_last = componentMgr.Lookup(entities.back());
+	//	componentMgr.SetPosition(i_last, { 9001.0f,9001.0f,9001.0f });
+	//	{
+	//		const Vector3& pos_test = componentMgr.GetPosition(i_last);
+	//		t.Assert(pos_test.x == 9001.0f, "the component did not have the right values");
+	//		t.Assert(pos_test.y == 9001.0f, "the component did not have the right values");
+	//		t.Assert(pos_test.z == 9001.0f, "the component did not have the right values");
+	//	}
+	//
+	//	// erase a random entity in the middle of the buffer
+	//	Entity ent = entities[entities.size()-1];
+	//	eMgr.DespawnEntity(ent);
+	//	entities.pop_back();
+	//
+	//	Entity testEnt = entities.back();
+	//	IComponent::Instance i_test = componentMgr.Lookup(testEnt);
+	//	t.Assert(i_test != i_last, "the last component didn't destroy itself properly");
+	//});
 
 	return h;
 }

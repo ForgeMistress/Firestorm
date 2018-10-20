@@ -141,7 +141,7 @@ public:
 private:
 	void Unregister(IEvent* event);
 
-	mutex          _mutex;
+	std::mutex     _mutex;
 	EventMap       _events;
 	int            _numRegisteredEvents;
 	ReceiptPtrList _receipts;
