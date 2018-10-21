@@ -6,7 +6,6 @@
 #include <libHarnessed/libHarnessed.h>
 #include <libIO/libIO.h>
 #include <libMath/libMath.h>
-#include <libMirror/libMirror.h>
 #include <libScene/libScene.h>
 #include <libScript/libScript.h>
 #include <libSerial/libSerial.h>
@@ -22,7 +21,6 @@ RefPtr<TestHarness> libCorePrepareHarness(int ac, char** av);
 RefPtr<TestHarness> libExistencePrepareHarness(int ac, char** av);
 RefPtr<TestHarness> libHarnessedPrepareHarness(int ac, char** av);
 RefPtr<TestHarness> libIOPrepareHarness(int ac, char** av);
-RefPtr<TestHarness> libMirrorPrepareHarness(int ac, char** av);
 RefPtr<TestHarness> libScriptPrepareHarness(int ac, char** av);
 
 int main(int ac, char** av)
@@ -34,7 +32,6 @@ int main(int ac, char** av)
     Library<::Firestorm::libHarnessed>::Initialize(ac,av);
     Library<::Firestorm::libIO>::Initialize(ac,av);
     Library<::Firestorm::libMath>::Initialize(ac,av);
-    Library<::Firestorm::libMirror>::Initialize(ac,av);
     Library<::Firestorm::libScene>::Initialize(ac,av);
     Library<::Firestorm::libScript>::Initialize(ac,av);
     Library<::Firestorm::libSerial>::Initialize(ac,av);
@@ -45,7 +42,6 @@ int main(int ac, char** av)
         libExistencePrepareHarness(ac, av),
         libHarnessedPrepareHarness(ac, av),
         libIOPrepareHarness(ac, av),
-        libMirrorPrepareHarness(ac, av),
         libScriptPrepareHarness(ac, av)
     };
 

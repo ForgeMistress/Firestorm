@@ -62,10 +62,12 @@ local WINDOWS_SDK_VERSION = "10.0.171340"
 
 local ENGINE_IGNORES = {
     libHarnessed = true,
-    libJson = true
+    libJson = true,
+    libMirror = true
 }
 local LIB_IGNORES = {
-    libJson = true
+    libJson = true,
+    libMirror = true
 }
 
 -- gather the names of all of the first party static library projects.

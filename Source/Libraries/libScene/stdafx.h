@@ -7,8 +7,7 @@
 #pragma once
 
 #include <libCore/libCore.h>
-
-#include <libMirror/Object.h>
+#include <libCore/Object.h>
 
 #include <libIO/libIO.h>
 #include <libIO/IResourceObject.h>

@@ -11,8 +11,7 @@
 #define LIBEXISTENCE_SYSTEM_H_
 #pragma once
 
-#include <libMirror/IInspectableObject.h>
-#include <libMirror/EventDispatcher.h>
+#include <libCore/EventDispatcher.h>
 
 #include <libCore/SOA.h>
 

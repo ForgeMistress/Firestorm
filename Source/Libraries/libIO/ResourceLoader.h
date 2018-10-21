@@ -38,21 +38,18 @@ public:
 	LoadResult();
 	LoadResult(const LoadResult& other);
 	LoadResult(LoadResult&& other);
-	LoadResult(ResourcePtr&& resource);
 	LoadResult(const Error& error);
 
 	LoadResult& operator=(LoadResult&& other);
 	LoadResult& operator=(const LoadResult& other);
 
-	ResourcePtr GetResource() const;
-
 	Error GetError() const;
 
 	bool HasError() const;
+	bool IsOk() const { return !HasError(); }
 
 private:
-	ResourcePtr  _resource;
-	Error        _error;
+	Error _error;
 };
 
 //class ResourceLoader

@@ -35,7 +35,7 @@ ResourceReference::~ResourceReference()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const string& ResourceReference::GetResourcePath() const
+const string& ResourceReference::GetPath() const
 {
 	return _resourcePath;
 }

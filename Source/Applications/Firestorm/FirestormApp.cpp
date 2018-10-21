@@ -34,6 +34,12 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	});// &FirestormApp::HandleApplicationWantsToClose, this);
 
 	_shaderResource = resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
+	_shaderResource2 = resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
+
+	for(size_t i=0; i<1000; ++i)
+	{
+		resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
+	}
 	// while(true)
 	// {
 	// 	FIRE_LOG_DEBUG("?? Waiting for shader resource to finish on main thread...");
@@ -109,13 +115,26 @@ void FirestormApp::OnUpdate(double deltaT)
 	static bool message = false;
 	if(message == false)
 	{
-		FIRE_LOG_DEBUG("?? Waiting for resource: '/Shaders/Triangle.shader'");
-		//if(_shaderResource.second.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
-		if(_shaderResource->IsFinished())
+		if(_shaderResource.IsFinished())
 		{
 			message = true;
 			FIRE_LOG_DEBUG("!! Finished loading shader: '/Shaders/Triangle.shader'");
 		}
+	}
+
+	static bool message2 = false;
+	if(message2 == false)
+	{
+		if(_shaderResource2.IsFinished())
+		{
+			message2 = true;
+			FIRE_LOG_DEBUG("!! Finished loading cached shader: '/Shaders/Triangle.shader'");
+		}
+	}
+	if(_shaderResource.IsFinished() && _shaderResource2.IsFinished())
+	{
+		FIRE_ASSERT_MSG(_shaderResource.get() == _shaderResource2.get(), "the two resources were not the same pointer");
+		_shaderResource->PrintNumShaders();
 	}
 }
 

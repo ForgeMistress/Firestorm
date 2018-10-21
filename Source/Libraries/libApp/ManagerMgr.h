@@ -12,11 +12,10 @@
 #pragma once
 
 #include "Window.h"
-#include <libMirror/ObjectMaker.h>
+#include <libCore/ObjectMaker.h>
 #include <libCore/UUIDMgr.h>
 #include <libIO/ResourceMgr.h>
 #include <libScene/RenderMgr.h>
-#include <libMirror/ObjectMaker.h>
 #include <libExistence/Entity.h>
 #include <libCore/TaskGraph.h>
 
@@ -39,6 +38,7 @@ private:
 
 public:
 	void Initialize();
+	void UpdateSystems(double deltaT);
 	void Shutdown();
 
 	class Window&       Window();

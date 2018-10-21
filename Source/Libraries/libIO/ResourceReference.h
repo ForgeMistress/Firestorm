@@ -14,7 +14,7 @@
 #include "IResourceObject.h"
 #include "ResourceLoader.h"
 #include "ResourceCache.h"
-#include <libMirror/Object.h>
+#include <libCore/Object.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -34,7 +34,7 @@ public:
 	/**
 		Retrieve the path to the resource on disk.
 	 **/
-	const string& GetResourcePath() const;
+	const string& GetPath() const;
 
 	/**
 		Retrieve the path to this resource without the filename.

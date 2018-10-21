@@ -24,12 +24,11 @@
 #include <libCore/Logger.h>
 #include <taskflow/taskflow.hpp>
 
-#include <libMirror/EventDispatcher.h>
+#include <libCore/EventDispatcher.h>
 
 OPEN_NAMESPACE(Firestorm);
 
 class ResourceLoader;
-class ResourceCache;
 
 struct ResourceTypeID
 {
@@ -37,102 +36,6 @@ struct ResourceTypeID
 	const char* Name;
 #endif
 };
-
-#define FIRE_RESOURCE_DECLARE( CLASS )                                       \
-private:                                                                     \
-	using ResultType = Result<ResourcePtr, Error>; \
-	using FutureType = std::future<ResultType>; \
-	using AsyncType = tuple<tf::Task, FutureType>>;         \
-	using FuncType = function<ResultType(const char* filename)>; \
-	static FuncType _s_loadFunction;
-	//static GenType Generate(ResourceMgr& resourceMgr, const char* filename); \
-
-#define FIRE_RESOURCE_DEFINE( CLASS )
-
-struct ResourceHandleErrors
-{
-	FIRE_ERRORCODE(NULL_RESOURCE);
-};
-
-/**
-Defines a handle to a resource. A valid instance of this is only retrievable by a call to
-#ResourceMgr::Load. Instances can be stored in client classes, however this is done with
-the understanding that they will eventually be assigned to an instance
-**/
-class Resource_
-{
-	friend class ResourceCache;
-	friend class ResourceMgr;
-public:
-	// make an empty handle that's waiting for a resource.
-	Resource_(eastl::pair<tf::Task, std::future<LoadResult>>&& tuppy);
-	// ResourceType(future<LoadResult>&& future);
-
-	// move only
-	// ResourceType(ResourceType&& other);
-	// ResourceType(const ResourceType& other);
-
-	virtual ~Resource_();
-
-	// ResourceType& operator=(ResourceType&& handle);
-	// ResourceType& operator=(const ResourceType& handle);
-
-	template<class T>
-	const RefPtr<T> Get() const
-	{
-		return eastl::dynamic_pointer_cast<T>(PullData());
-	}
-
-	template<class T>
-	RefPtr<T> Get()
-	{
-		return eastl::dynamic_pointer_cast<T>(PullData());
-	}
-
-	/**
-		Retrieve the error.
-	**/
-	Error GetError() const;
-
-	/**
-		Check whether or not this instance of the Resource is valid.
-		\note A Resource is valid when the following conditions are met.
-		- A Future object was passed to the instance either through an assignment or construction (or both).
-	**/
-	bool IsValid() const;
-
-	/**
-		Retrieve whether or not this Resource has been passed through the loader and has some kind of state.
-	**/
-	bool IsFinished() const;
-
-	/**
-		Retrieve whether or not the Resource is reporting an error.
-	**/
-	bool HasError() const;
-
-	/**
-		Release the resource from this handle as well as the active error.
-	**/
-	void Release();
-
-private:
-	void DoPull() const;
-	ResourcePtr PullData() const;
-
-	mutable eastl::pair<tf::Task, std::future<LoadResult>> _tuppy;
-	//tf::Task _task;
-	//mutable std::future<LoadResult> _future;
-	// pulled from future.
-	mutable ResourcePtr                        _obj;
-	mutable Error                              _error;
-	mutable bool                               _futurePulled{ false };
-	mutable bool                               _isFinished{ false };
-
-	bool _hasFuture{ false };
-	bool _hasError{ false };
-};
-using Resource = RefPtr<Resource_>;
 
 struct IResourceMaker
 {
@@ -150,8 +53,43 @@ struct SimpleResourceMaker : public IResourceMaker
 	{
 		return eastl::make_shared<ResType>(_app);
 	}
+
 	class Application& _app;
 };
+
+#define FIRE_RESOURCE_DECLARE(RES)                                                   \
+private:                                                                             \
+	friend class ResourceMgr;														 \
+	using PtrType = eastl::shared_ptr<RES>;                                          \
+	FIRE_MIRROR_DECLARE(RES);														 \
+	struct LoadOp																	 \
+	{																				 \
+		ResourceReference ResourceRef;												 \
+		class Application& App;														 \
+		class ResourceMgr& Mgr;                                                      \
+																					 \
+		LoadOp(Application& app, ResourceMgr& mgr, const char* filename);            \
+		LoadResult operator()(tf::SubflowBuilder& Dependencies);					 \
+		LoadResult DoOperation(PtrType& Resource, ResMgrProxy ResMgr);               \
+	};                                                                               \
+	static ResourceCache<RES> _s_cache;                                              \
+private:
+	
+
+#define FIRE_RESOURCE_DEFINE(RES)                                                       \
+ResourceCache<RES> RES::_s_cache;                                                       \
+RES::LoadOp::LoadOp(Application& app, ResourceMgr& mgr, const char* filename)	        \
+: ResourceRef(filename)															        \
+, App(app)																		        \
+, Mgr(mgr)                                                                              \
+{																				        \
+}																				        \
+LoadResult RES::LoadOp::operator()(tf::SubflowBuilder& sub)								\
+{																						\
+	eastl::string path(ResourceRef.GetPath());                                          \
+	return DoOperation(_s_cache.GetCached(path.c_str()).GetShared(), ResMgrProxy(Mgr, sub));  \
+}																						\
+LoadResult RES::LoadOp::DoOperation(PtrType& Resource, ResMgrProxy ResMgr)
 
 class ResourceMgr final
 {
@@ -167,42 +105,79 @@ public:
 
 	ResourceMgr(class Application& app);
 
-	template<class ResType, class MakerType>
-	void InstallMaker()
-	{
-		InstallMaker(ResType::MyType(), new MakerType(_app));
-	}
-
-	void InstallMaker(FireClassID resType, IResourceMaker* maker);
-
+	/**
+		Schedule a resource of the provided type and the supplied filename for load and return a Resource
+		handle that can be used to track the progress of that load. For furthher details on tracking loads, see
+		the Resource type itself.
+	 **/
 	template<class ResType>
-	Resource QueueLoad(const char* filename)
+	Resource<ResType> QueueLoad(const char* filename)
 	{
-		if(!_tg.has(RootTask))
+		if(ResType::_s_cache.IsCached(filename))
 		{
-			_tg.emplace([] {
-				FIRE_LOG_DEBUG("!! Beginning ResourceMgr Load Root");
-			}, RootTask);
+			FIRE_LOG_DEBUG("/!\\ RETURNING CACHED '%s' /!\\", filename);
+			return ResType::_s_cache.GetCached(filename);
 		}
 		auto[task, fut] = _tg.emplace(
 			[&, this, fname = string(filename)] (tf::SubflowBuilder& builder) -> LoadResult {
-				ResType::LoadOp loadOp(_app, fname.c_str(), eastl::make_shared<ResType>(_app));
+				ResType::LoadOp loadOp(_app, *this, fname.c_str());
 				return loadOp(builder);
 			}
 		);
-		_tg[RootTask].precede(task);
-		using pair = eastl::pair<tf::Task, std::future<LoadResult>>;
-		return eastl::make_shared<Resource_>(eastl::forward<pair>(eastl::make_pair(task, eastl::move(fut))));
+		return ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
 	}
 
-	Resource QueueLoad(FireClassID resType, const char* filename);
+	/**
+		Load a resource while within another resource load operation.
+
+		Sometimes resources depend on other resources. We get it. It happens. Luckily, this function is here to help.
+		Every load operation takes in a tf::SubflowBuilder under the variable 
+	 **/
+	template<class ResType>
+	Resource<ResType> QueueLoad(tf::SubflowBuilder& subflow, const char* filename)
+	{
+		if(ResType::_s_cache.IsCached(filename))
+		{
+			FIRE_LOG_DEBUG("/!\\ RETURNING CACHED '%s' /!\\", filename);
+			// need to figure out how to get thhese resource handles to reference the same pointer
+			return ResType::_s_cache.GetCached(filename);
+		}
+
+		auto[task, fut] = subflow.emplace(
+			[&, this, fname = string(filename)] (tf::SubflowBuilder& builder) -> LoadResult {
+				ResType::LoadOp loadOp(_app, *this, fname.c_str());
+				return loadOp(builder);
+			}
+		);
+		return ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
+	}
+
+	void CleanOldResources()
+	{
+
+	}
 
 public:
 	class Application& _app;
 	class ObjectMaker& _objectMaker;
 	class TaskGraph&   _tg;
+};
 
-	unordered_map<FireClassID, IResourceMaker*> _makers;
+struct ResMgrProxy
+{
+	ResourceMgr& _mgr;
+	tf::SubflowBuilder& _builder;
+	ResMgrProxy(ResourceMgr& mgr, tf::SubflowBuilder& builder)
+	: _mgr(mgr)
+	, _builder(builder)
+	{
+	}
+
+	template<class ResType>
+	Resource<ResType> LoadDependency(const char* filename)
+	{
+		return _mgr.QueueLoad<ResType>(_builder, filename);
+	}
 };
 
 //**

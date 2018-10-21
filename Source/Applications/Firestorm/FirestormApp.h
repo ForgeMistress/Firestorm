@@ -5,6 +5,8 @@
 #include <libIO/ResourceHandle.h>
 #include <libCore/SOA.h>
 
+#include <libScene/ShaderProgramResource.h>
+
 using namespace Firestorm;
 
 class FirestormApp : public Application
@@ -24,7 +26,9 @@ public:
 private:
 	void RegisterResourceTypes();
 
-	Resource _shaderResource;
+	Resource<ShaderProgram> _shaderResource;
+	Resource<ShaderProgram> _shaderResource2;
+
 };
 
 #endif

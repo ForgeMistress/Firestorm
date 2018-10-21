@@ -32,11 +32,13 @@ void TaskGraph::Shutdown()
 void TaskGraph::wait_for_all()
 {
 	_tf.wait_for_all();
+	_dispatcher.Dispatch<GraphDispatchedMessage>(GraphDispatchedMessage{ *this });
 	_graphs.clear();
 }
 
 std::shared_future<void> TaskGraph::dispatch()
 {
+	_dispatcher.Dispatch<GraphDispatchedMessage>(GraphDispatchedMessage{ *this });
 	return _tf.dispatch();
 }
 

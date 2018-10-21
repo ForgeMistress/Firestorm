@@ -10,7 +10,7 @@
 #include "RenderMgr.h"
 
 #include <libCore/Logger.h>
-#include <libMirror/ObjectMaker.h>
+#include <libCore/ObjectMaker.h>
 #include <libIO/ResourceMgr.h>
 
 #include <libApp/Application.h>

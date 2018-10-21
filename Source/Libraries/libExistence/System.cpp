@@ -11,7 +11,7 @@
 #include "System.h"
 #include "Universe.h"
 
-#include <libMirror/Object.h>
+#include <libCore/Object.h>
 
 OPEN_NAMESPACE(Firestorm);
 

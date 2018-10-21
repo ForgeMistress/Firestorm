@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "ScriptComponent.h"
 
-#include <libMirror/Object.h>
+#include <libCore/Object.h>
 
 OPEN_NAMESPACE(Firestorm);
 

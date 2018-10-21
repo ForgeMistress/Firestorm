@@ -10,7 +10,6 @@
 #include <libCore/Result.h>
 #include <libCore/Expected.h>
 #include <libCore/RefPtr.h>
-
-#include <libMirror/Object.h>
+#include <libCore/Object.h>
 
 #endif

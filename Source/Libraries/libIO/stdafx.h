@@ -11,8 +11,7 @@
 #include <libCore/Expected.h>
 #include <libCore/RefPtr.h>
 
-#include <libMirror/libMirror.h>
-#include <libMirror/Object.h>
+#include <libCore/Object.h>
 
 #include <physfs/physfs.h>
 

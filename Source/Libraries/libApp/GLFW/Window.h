@@ -15,7 +15,7 @@
 #include <GLFW/glfw3.h>
 
 #include <libMath/Vector.h>
-#include <libMirror/EventDispatcher.h>
+#include <libCore/EventDispatcher.h>
 
 OPEN_NAMESPACE(Firestorm);
 

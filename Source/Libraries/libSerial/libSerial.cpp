@@ -4,7 +4,7 @@
 #include <rttr/variant.h>
 #include <json/value.h>
 
-#include <libMirror/Object.h>
+#include <libCore/Object.h>
 
 OPEN_NAMESPACE(Firestorm);
 

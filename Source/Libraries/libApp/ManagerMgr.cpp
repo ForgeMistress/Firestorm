@@ -41,6 +41,14 @@ void ManagerMgr::Initialize()
 	_RenderMgr.Initialize("");
 }
 
+void ManagerMgr::UpdateSystems(double deltaT)
+{
+	_TaskGraph.wait_for_all();
+	_TaskGraph.clear();
+
+	_ResourceMgr.CleanOldResources();
+}
+
 void ManagerMgr::Shutdown()
 {
 	FIRE_LOG_DEBUG("!! Shutting down task graph...");

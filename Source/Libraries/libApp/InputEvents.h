@@ -12,7 +12,7 @@
 #pragma once
 
 #include <libMath/Vector.h>
-#include <libMirror/Object.h>
+#include <libCore/Object.h>
 
 OPEN_NAMESPACE(Firestorm);
 

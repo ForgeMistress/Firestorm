@@ -16,8 +16,8 @@
 
 #include "ManagerMgr.h"
 
-#include <libMirror/ObjectMaker.h>
-#include <libMirror/EventDispatcher.h>
+#include <libCore/ObjectMaker.h>
+#include <libCore/EventDispatcher.h>
 #include <libCore/ArgParser.h>
 
 OPEN_NAMESPACE(Firestorm);
@@ -121,7 +121,6 @@ CLOSE_NAMESPACE(Firestorm);
 		::Firestorm::InitializeLib<::Firestorm::libExistence>(ac,av);           		\
 		::Firestorm::InitializeLib<::Firestorm::libIO>(ac,av);           			    \
 		::Firestorm::InitializeLib<::Firestorm::libMath>(ac,av);           			    \
-		::Firestorm::InitializeLib<::Firestorm::libMirror>(ac,av);           			\
 		::Firestorm::InitializeLib<::Firestorm::libScene>(ac,av);           			\
 		::Firestorm::InitializeLib<::Firestorm::libScript>(ac,av);           			\
 		::Firestorm::InitializeLib<::Firestorm::libSerial>(ac,av);           			\
