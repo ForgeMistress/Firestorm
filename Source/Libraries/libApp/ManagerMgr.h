@@ -41,23 +41,23 @@ public:
 	void UpdateSystems(double deltaT);
 	void Shutdown();
 
-	class Window&       Window();
-	class UUIDMgr&      UUIDMgr();
-	class ResourceMgr&  ResourceMgr();
-	class RenderMgr&    RenderMgr();
-	class ObjectMaker&  ObjectMaker();
-	class EntityMgr&    EntityMgr();
-	class TaskGraph&    TaskGraph();
+	class Window&       GetWindow();
+	class UUIDMgr&      GetUUIDMgr();
+	class ResourceMgr&  GetResourceMgr();
+	class RenderMgr&    GetRenderMgr();
+	class ObjectMaker&  GetObjectMaker();
+	class EntityMgr&    GetEntityMgr();
+	class TaskGraph&    GetTaskGraph();
 
 private:
 	class Application& _app;
-	class Window       _Window;
-	class UUIDMgr      _UUIDMgr;
-	class ResourceMgr  _ResourceMgr;
-	class RenderMgr    _RenderMgr;
-	class ObjectMaker  _ObjectMaker;
-	class EntityMgr    _EntityMgr;
-	class TaskGraph    _TaskGraph;
+	Window       _Window;
+	UUIDMgr      _UUIDMgr;
+	ResourceMgr  _ResourceMgr;
+	RenderMgr    _RenderMgr;
+	ObjectMaker  _ObjectMaker;
+	EntityMgr    _EntityMgr;
+	TaskGraph    _TaskGraph;
 };
 
 

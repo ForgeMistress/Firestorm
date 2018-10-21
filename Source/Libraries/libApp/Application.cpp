@@ -77,9 +77,9 @@ int Application::Run()
 	bool isRunning{ true };
 	bool eventDispatched{ false };
 
-	auto& renderMgr = _managerMgr.RenderMgr();
-	Window& window = _managerMgr.Window();
-	TaskGraph& taskGraph = _managerMgr.TaskGraph();
+	auto& renderMgr = _managerMgr.GetRenderMgr();
+	Window& window = _managerMgr.GetWindow();
+	TaskGraph& taskGraph = _managerMgr.GetTaskGraph();
 	while(isRunning)
 	{
 		window.Process();

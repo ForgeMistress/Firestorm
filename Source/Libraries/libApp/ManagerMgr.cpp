@@ -38,6 +38,7 @@ void ManagerMgr::Initialize()
 		800,
 		600
 	});
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	_RenderMgr.Initialize("");
 }
 
@@ -58,37 +59,37 @@ void ManagerMgr::Shutdown()
 	_RenderMgr.Shutdown();
 }
 
-class Window& ManagerMgr::Window()
+class Window& ManagerMgr::GetWindow()
 {
 	return _Window;
 }
 
-class UUIDMgr& ManagerMgr::UUIDMgr()
+class UUIDMgr& ManagerMgr::GetUUIDMgr()
 {
 	return _UUIDMgr;
 }
 
-class ResourceMgr& ManagerMgr::ResourceMgr()
+class ResourceMgr& ManagerMgr::GetResourceMgr()
 {
 	return _ResourceMgr;
 }
 
-class RenderMgr& ManagerMgr::RenderMgr()
+class RenderMgr& ManagerMgr::GetRenderMgr()
 {
 	return _RenderMgr;
 }
 
-class ObjectMaker& ManagerMgr::ObjectMaker()
+class ObjectMaker& ManagerMgr::GetObjectMaker()
 {
 	return _ObjectMaker;
 }
 
-class EntityMgr& ManagerMgr::EntityMgr()
+class EntityMgr& ManagerMgr::GetEntityMgr()
 {
 	return _EntityMgr;
 }
 
-class TaskGraph& ManagerMgr::TaskGraph()
+class TaskGraph& ManagerMgr::GetTaskGraph()
 {
 	return _TaskGraph;
 }

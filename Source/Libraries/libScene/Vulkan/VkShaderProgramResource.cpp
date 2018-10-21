@@ -28,7 +28,7 @@ FIRE_RESOURCE_DEFINE(Shader)
 }
 
 Shader::Shader(Application& app)
-: _renderMgr(app.GetSystems().RenderMgr())
+: _renderMgr(app.GetSystems().GetRenderMgr())
 {
 
 }
@@ -46,9 +46,8 @@ bool Shader::IsReady() const
 
 FIRE_RESOURCE_DEFINE(ShaderProgram)
 {
-	static Json::CharReaderBuilder  _s_charReaderBuilder;
-
-	RefPtr<Json::CharReader> _reader(_s_charReaderBuilder.newCharReader());
+	Json::CharReaderBuilder charReaderBuilder;
+	RefPtr<Json::CharReader> _reader(charReaderBuilder.newCharReader());
 
 	const string filename = ResourceRef.GetPath();
 	if(libIO::FileExists(filename.c_str()))
@@ -114,7 +113,7 @@ FIRE_RESOURCE_DEFINE(ShaderProgram)
 }
 
 ShaderProgram::ShaderProgram(Application& app)
-: _renderMgr(app.GetSystems().RenderMgr())
+: _renderMgr(app.GetSystems().GetRenderMgr())
 {
 }
 

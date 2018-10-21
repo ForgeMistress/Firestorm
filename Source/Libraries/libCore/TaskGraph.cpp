@@ -44,7 +44,7 @@ std::shared_future<void> TaskGraph::dispatch()
 
 bool TaskGraph::has(const char* name) const
 {
-	return _graphs.find(name) != _graphs.end();
+	return _graphs.find(std::string(name)) != _graphs.end();
 }
 
 CLOSE_NAMESPACE(Firestorm);

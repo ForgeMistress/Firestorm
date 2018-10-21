@@ -75,18 +75,11 @@ public:
 	Resource() {}
 
 	// make an empty handle that's waiting for a resource.
-	Resource(RefPtr<ResourceType>& obj, std::future<LoadResult>&& fut, const eastl::string& name)
-	: _sFut(std::move(fut))
+	Resource(RefPtr<ResourceType>& obj, std::shared_future<LoadResult>& fut, const eastl::string& name)
+	: _sFut(fut)
 	, _name(name)
 	, _obj(obj)
 	, _hasFuture(true)
-	{}
-
-	Resource(RefPtr<ResourceType>& obj)
-	: _name(name)
-	, _obj(obj)
-	, _hasFuture(false)
-	, _isReady(true)
 	{}
 
 public:

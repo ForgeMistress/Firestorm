@@ -26,8 +26,8 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	FIRE_ASSERT(libIO::FileExists("/Shaders/Triangle.shader"));
 	FIRE_ASSERT(libIO::FileExists("/Models/base-female.gltf"));
 
-	RenderMgr& renderMgr = GetSystems().RenderMgr();
-	ResourceMgr& resourceMgr = GetSystems().ResourceMgr();
+	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
+	ResourceMgr& resourceMgr = GetSystems().GetResourceMgr();
 
 	Dispatcher.Register<ApplicationWantsToCloseEvent>([this](const ApplicationWantsToCloseEvent& e) {
 		HandleApplicationWantsToClose(e);
@@ -36,10 +36,10 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	_shaderResource = resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
 	_shaderResource2 = resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
 
-	for(size_t i=0; i<1000; ++i)
-	{
-		resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
-	}
+	//for(size_t i=0; i<1000; ++i)
+	//{
+	//	resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
+	//}
 	// while(true)
 	// {
 	// 	FIRE_LOG_DEBUG("?? Waiting for shader resource to finish on main thread...");
@@ -134,7 +134,7 @@ void FirestormApp::OnUpdate(double deltaT)
 	if(_shaderResource.IsFinished() && _shaderResource2.IsFinished())
 	{
 		FIRE_ASSERT_MSG(_shaderResource.get() == _shaderResource2.get(), "the two resources were not the same pointer");
-		_shaderResource->PrintNumShaders();
+		//_shaderResource->PrintNumShaders();
 	}
 }
 

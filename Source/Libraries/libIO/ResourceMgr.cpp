@@ -27,8 +27,7 @@ const char* ResourceMgr::RootTask = "ResourceMgr::RootTask";
 
 ResourceMgr::ResourceMgr(Application& app)
 : _app(app)
-, _objectMaker(app.GetSystems().ObjectMaker())
-, _tg(app.GetSystems().TaskGraph())
+, _tg(_app.GetSystems().GetTaskGraph())
 {
 }
 

@@ -55,8 +55,8 @@ public:
 private:
 	void AddShader(Resource<Shader>& shader);
 
-	RenderMgr&                _renderMgr;
-	std::mutex                _slock;
+	RenderMgr&               _renderMgr;
+	std::mutex               _slock;
 	vector<Resource<Shader>> _shaders;
 	bool                     _isCompiled{ false };
 };

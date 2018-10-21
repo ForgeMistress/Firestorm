@@ -15,7 +15,7 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-class Entity;
+struct Entity;
 
 /**
 	Contains a reference to a script resource.

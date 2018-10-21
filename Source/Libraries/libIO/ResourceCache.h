@@ -15,6 +15,8 @@
 #include <libCore/Result.h>
 #include <libCore/RefPtr.h>
 
+#include <future>
+
 #include "ResourceHandle.h"
 #include "IResourceObject.h"
 
@@ -23,45 +25,74 @@ OPEN_NAMESPACE(Firestorm);
 struct IResourceCache
 {
 protected:
-	virtual ~IResourceCache() {}
-	template<class Res>
-	eastl::shared_ptr<IResourceObject> MakeResource(class Application& app, const char* filename)
-	{
-		eastl::shared_ptr<IResourceObject> resource(eastl::make_shared<Res>(app));
-		_baseCache[filename] = resource;
-		return resource;
-	}
+	friend class ResourceMgr;
 
-	eastl::unordered_map<eastl::string, eastl::weak_ptr<IResourceObject>> _baseCache;
+	virtual ~IResourceCache() {}
+
+	virtual bool IsCached(const char* filename) = 0;
+
+	virtual void CacheResourceInstance(class Application& app, const char* filename, std::future<LoadResult>&& future) = 0;
+
+	virtual void ClearUnusedResources() = 0;
 };
 
 template<class Res>
-struct ResourceCache
+struct ResourceCache : public IResourceCache
 {
-	bool IsCached(const char* filename)
-	{
-		std::unique_lock<std::mutex> lock(_cacheLock);                                    
-		return _cache.find(string(filename)) != _cache.end();
-	}
-
-	Resource<Res> CacheResourceInstance(class Application& app, const char* filename, std::future<LoadResult>&& future)
-	{
-		Resource<Res> resource(eastl::make_shared<Res>(app), eastl::forward<std::future<LoadResult>>(future), filename);
-		std::unique_lock<std::mutex> lock(_cacheLock);
-		//_cacheLock.lock();
-		//_cache[filename] = eastl::forward<Resource<Res>>(resource);
-
-		_cacheLock.unlock();
-		return _cache[filename];
-	}
+	virtual ~ResourceCache() {}
 
 	Resource<Res> GetCached(const char* filename)
 	{
 		std::unique_lock<std::mutex> lock(_cacheLock);
-		return _cache[string(filename)];
+		auto& cacheEntry = _cache[filename];
+		eastl::shared_ptr<Res> ptr(eastl::dynamic_pointer_cast<Res>(cacheEntry._ptr));
+		return Resource<Res>(ptr, cacheEntry._sharedFuture, filename);
 	}
-	eastl::unordered_map<eastl::string, Resource<Res>> _cache;
+
+	virtual void CacheResourceInstance(class Application& app, const char* filename, std::future<LoadResult>&& future) override
+	{
+		using shared_future = std::shared_future<LoadResult>;
+
+		std::unique_lock<std::mutex> lock(_cacheLock);
+		eastl::shared_ptr<Res> ptr(nullptr);
+		if(_cache.find(filename) == _cache.end())
+		{
+			shared_future fut(eastl::forward<std::future<LoadResult>>(future));
+
+			ptr = eastl::make_shared<Res>(eastl::forward<Application>(app));
+
+			_cache[filename] = ResourceCacheEntry{ fut, ptr };
+		}
+	}
+
+	virtual bool IsCached(const char* filename) override
+	{
+		std::unique_lock<std::mutex> lock(_cacheLock);
+		return _cache.find(string(filename)) != _cache.end();
+	}
+
+	virtual void ClearUnusedResources() override
+	{
+		std::unique_lock<std::mutex> lock(_cacheLock);
+		for(auto cacheItr : _cache)
+		{
+			if(cacheItr.second._ptr.use_count() == 1)
+			{
+				// erase one and return
+				_cache.erase(cacheItr.first);
+				return;
+			}
+		}
+	}
+
 	std::mutex _cacheLock;
+
+	struct ResourceCacheEntry
+	{
+		std::shared_future<LoadResult> _sharedFuture;
+		eastl::shared_ptr<IResourceObject> _ptr;
+	};
+	eastl::unordered_map<eastl::string, ResourceCacheEntry> _cache;
 };
 
 //class ResourceCache final

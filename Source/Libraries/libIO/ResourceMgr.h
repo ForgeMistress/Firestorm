@@ -12,14 +12,12 @@
 #pragma once
 
 #include "ResourceLoader.h"
-#include "ResourceCache.h"
 #include "ResourceReference.h"
 #include "ResourceHandle.h"
 #include "IResourceObject.h"
 
 #include <libCore/Result.h>
 #include <libCore/Expected.h>
-#include <libCore/ObjectPool.h>
 #include <libCore/TaskGraph.h>
 #include <libCore/Logger.h>
 #include <taskflow/taskflow.hpp>
@@ -35,26 +33,6 @@ struct ResourceTypeID
 #ifndef FIRE_FINAL
 	const char* Name;
 #endif
-};
-
-struct IResourceMaker
-{
-	virtual RefPtr<IResourceObject> Make() = 0;
-};
-
-template<class ResType>
-struct SimpleResourceMaker : public IResourceMaker
-{
-	SimpleResourceMaker(class Application& app)
-	: _app(app)
-	{}
-
-	virtual RefPtr<IResourceObject> Make()
-	{
-		return eastl::make_shared<ResType>(_app);
-	}
-
-	class Application& _app;
 };
 
 #define FIRE_RESOURCE_DECLARE(RES)                                                   \
@@ -76,19 +54,19 @@ private:                                                                        
 private:
 	
 
-#define FIRE_RESOURCE_DEFINE(RES)                                                       \
-ResourceCache<RES> RES::_s_cache;                                                       \
-RES::LoadOp::LoadOp(Application& app, ResourceMgr& mgr, const char* filename)	        \
-: ResourceRef(filename)															        \
-, App(app)																		        \
-, Mgr(mgr)                                                                              \
-{																				        \
-}																				        \
-LoadResult RES::LoadOp::operator()(tf::SubflowBuilder& sub)								\
-{																						\
-	eastl::string path(ResourceRef.GetPath());                                          \
-	return DoOperation(_s_cache.GetCached(path.c_str()).GetShared(), ResMgrProxy(Mgr, sub));  \
-}																						\
+#define FIRE_RESOURCE_DEFINE(RES)                                                                  \
+ResourceCache<RES> RES::_s_cache;                                                                  \
+RES::LoadOp::LoadOp(Application& app, ResourceMgr& mgr, const char* filename)	                   \
+: ResourceRef(filename)															                   \
+, App(app)																		                   \
+, Mgr(mgr)                                                                                         \
+{																				                   \
+}																				                   \
+LoadResult RES::LoadOp::operator()(tf::SubflowBuilder& sub)								           \
+{																						           \
+	eastl::string path(ResourceRef.GetPath());                                                     \
+	return DoOperation(_s_cache.GetCached(path.c_str()).GetShared(), ResMgrProxy(Mgr, sub));       \
+}																						           \
 LoadResult RES::LoadOp::DoOperation(PtrType& Resource, ResMgrProxy ResMgr)
 
 class ResourceMgr final
@@ -118,13 +96,20 @@ public:
 			FIRE_LOG_DEBUG("/!\\ RETURNING CACHED '%s' /!\\", filename);
 			return ResType::_s_cache.GetCached(filename);
 		}
+		if(!_tg.has(RootTask))
+		{
+			_tg.emplace([](tf::SubflowBuilder& builder) {
+			}, RootTask);
+		}
 		auto[task, fut] = _tg.emplace(
 			[&, this, fname = string(filename)] (tf::SubflowBuilder& builder) -> LoadResult {
 				ResType::LoadOp loadOp(_app, *this, fname.c_str());
 				return loadOp(builder);
 			}
 		);
-		return ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
+		_tg[RootTask].precede(task);
+		ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
+		return ResType::_s_cache.GetCached(filename);
 	}
 
 	/**
@@ -149,7 +134,8 @@ public:
 				return loadOp(builder);
 			}
 		);
-		return ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
+		ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
+		return ResType::_s_cache.GetCached(filename);
 	}
 
 	void CleanOldResources()
@@ -159,7 +145,6 @@ public:
 
 public:
 	class Application& _app;
-	class ObjectMaker& _objectMaker;
 	class TaskGraph&   _tg;
 };
 
