@@ -83,7 +83,7 @@ bool libIO::Mount(const string& dir, const string& mountPoint)
 
 bool libIO::FileExists(const char* filename)
 {
-	FIRE_LOG_DEBUG("Checking for file %s", filename);
+	//FIRE_LOG_DEBUG("Checking for file %s", filename);
 	if(PHYSFS_exists(filename) == 0)
 	{
 		LogLastPhysfsError(Format("Error finding file %s", filename));

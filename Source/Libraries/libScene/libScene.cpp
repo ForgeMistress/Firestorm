@@ -2,7 +2,7 @@
 #include "libScene.h"
 
 #include "MeshResource.h"
-#include "ShaderProgramResource.h"
+#include "ShaderProgram.h"
 
 OPEN_NAMESPACE(Firestorm);
 

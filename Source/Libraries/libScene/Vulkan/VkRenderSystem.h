@@ -25,14 +25,19 @@
 #endif
 
 #include <EASTL/optional.h>
+#include <EASTL/vector.h>
 
 OPEN_NAMESPACE(Firestorm);
+
+using namespace eastl;
 
 /**
 	\brief A wrapper around the initialization and deinitialization of the graphics backend.
 
 	The RenderSystem wraps the initialization and deinitialization of the graphics backend. In this version,
 	we are wrapping the Vulkan backend.
+
+	All things that are public should be made virtual and dumped into an interface.
  **/
 class RenderSystem final
 {
@@ -42,6 +47,12 @@ public:
 
 	void Initialize();
 	void Shutdown();
+
+	// creation functions.
+	bool Create(class Shader* shader, const vector<char>& data);
+
+	// release functions.
+	void Release(class Shader* shader);
 private:
 	void CheckValidationLayers();
 	void CreateInstance();

@@ -1,4 +1,4 @@
 {
-    "fragment": "/Shaders/Triangle.frag",
-    "vertex": "/Shaders/Triangle.vert"
+    "fragment": "/Shaders/Triangle.frag.spv",
+    "vertex": "/Shaders/Triangle.vert.spv"
 }

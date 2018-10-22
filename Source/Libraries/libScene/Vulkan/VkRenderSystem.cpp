@@ -9,6 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "VkRenderSystem.h"
+#include "VkShaderProgram.h"
 #include <libCore/Logger.h>
 #include "../RenderMgr.h"
 
@@ -126,6 +127,25 @@ void RenderSystem::Shutdown()
 	DestroyDebugUtilsMessengerEXT(_instance, _callback, nullptr);
 #endif
 	vkDestroyInstance(_instance, nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool RenderSystem::Create(Shader* shader, const vector<char>& data)
+{
+	VkShaderModuleCreateInfo info ={};
+	info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	info.codeSize = data.size();
+	info.pCode = reinterpret_cast<const uint32_t*>(data.data());
+	FIRE_VALIDATE_VK_CALL(vkCreateShaderModule, _device, &info, nullptr, &shader->_shader);
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::Release(class Shader* shader)
+{
+	vkDestroyShaderModule(_device, shader->_shader, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

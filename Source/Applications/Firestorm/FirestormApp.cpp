@@ -6,7 +6,7 @@
 #include <libIO/libIO.h>
 #include <libIO/ResourceMgr.h>
 
-#include <libScene/ShaderProgramResource.h>
+#include <libScene/ShaderProgram.h>
 #include <libScene/MeshResource.h>
 #include <libScene/SceneGraphResource.h>
 
@@ -29,12 +29,15 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
 	ResourceMgr& resourceMgr = GetSystems().GetResourceMgr();
 
+	resourceMgr.AddResourceCache<Shader>();
+	resourceMgr.AddResourceCache<ShaderProgram>();
+
 	Dispatcher.Register<ApplicationWantsToCloseEvent>([this](const ApplicationWantsToCloseEvent& e) {
 		HandleApplicationWantsToClose(e);
 	});// &FirestormApp::HandleApplicationWantsToClose, this);
 
-	_shaderResource = resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
-	_shaderResource2 = resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");
+	_shaderResource = resourceMgr.Load<ShaderProgram>("/Shaders/Triangle.shader");
+	_shaderResource2 = resourceMgr.Load<ShaderProgram>("/Shaders/Triangle.shader");
 
 	//for(size_t i=0; i<1000; ++i)
 	//{

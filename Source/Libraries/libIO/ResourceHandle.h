@@ -72,36 +72,34 @@ class Resource final
 {
 	friend class ResourceMgr;
 public:
+	// make an empty handle that's waiting for a resource.
 	Resource() {}
 
-	// make an empty handle that's waiting for a resource.
-	Resource(RefPtr<ResourceType>& obj, std::shared_future<LoadResult>& fut, const eastl::string& name)
-	: _sFut(fut)
-	, _name(name)
+	Resource(ErrorCode* code, const eastl::string& name)
+	: _name(name)
+	, _obj(nullptr)
+	, _hasError(true)
+	{
+
+	}
+
+	Resource(RefPtr<ResourceType>& obj, const eastl::string& name)
+	: _name(name)
 	, _obj(obj)
-	, _hasFuture(true)
 	{}
 
 public:
 	Resource(Resource<ResourceType>&& other)
-	: _sFut(eastl::move(other._sFut))
-	, _name(eastl::move(other._name))
+	: _name(eastl::move(other._name))
 	, _obj(eastl::move(other._obj))
 	, _error(eastl::move(other._error))
-	, _futurePulled(other._futurePulled)
-	, _isFinished(other._isFinished)
-	, _hasFuture(other._hasFuture)
 	, _hasError(other._hasError)
 	{}
 
 	Resource(const Resource<ResourceType>& other)
 	: _name(other._name)
-	, _sFut(other._sFut)
 	, _obj(other._obj)
 	, _error(other._error)
-	, _futurePulled(other._futurePulled)
-	, _isFinished(other._isFinished)
-	, _hasFuture(other._hasFuture)
 	, _hasError(other._hasError)
 	{
 	}
@@ -110,13 +108,9 @@ public:
 	{
 		if(this != &other)
 		{
-			_sFut = eastl::move(other._sFut);
 			_name = eastl::move(other._name);
 			_obj = eastl::move(other._obj);
 			_error = eastl::move(other._error);
-			_futurePulled = other._futurePulled;
-			_isFinished = other._isFinished;
-			_hasFuture = other._hasFuture;
 			_hasError = other._hasError;
 		}
 		return *this;
@@ -126,13 +120,9 @@ public:
 	{
 		if(this != &other)
 		{
-			_sFut = other._sFut;
 			_name = other._name;
 			_obj = other._obj;
 			_error = other._error;
-			_futurePulled = other._futurePulled;
-			_isFinished = other._isFinished;
-			_hasFuture = other._hasFuture;
 			_hasError = other._hasError;
 		}
 		return *this;
@@ -168,11 +158,6 @@ public:
 		return _obj.get();
 	}
 
-	eastl::shared_ptr<ResourceType> GetShared()
-	{
-		return _obj;
-	}
-
 	/**
 		Retrieve the error.
 	**/
@@ -188,7 +173,7 @@ public:
 	**/
 	bool IsValid() const
 	{
-		return _hasFuture;
+		return _obj != nullptr;
 	}
 
 	/**
@@ -196,30 +181,7 @@ public:
 	**/
 	bool IsFinished() const
 	{
-		if(!_isFinished)
-		{
-			try
-			{
-				if(!_futurePulled)
-				{
-					auto status = _sFut.wait_for(std::chrono::milliseconds(0));
-					if(status == std::future_status::ready)
-					{
-						_isFinished = true;
-						auto loadResult = _sFut.get();//eastl::get<1>(_tuppy).get();
-						//_obj = loadResult.GetResource<ResourceType>();
-						_error = loadResult.GetError();
-
-						_futurePulled = true;
-					}
-				}
-			}
-			catch(std::exception& e)
-			{
-				FIRE_LOG_ERROR("Exception in Resource::IsFinished: %s", e.what());
-			}
-		}
-		return _isFinished && _obj->IsReady();
+		return _obj->IsReady();
 	}
 
 	/**
@@ -239,45 +201,17 @@ public:
 		_error.Set(nullptr, "");
 	}
 
-private:
-	void DoPull() const
+	shared_ptr<ResourceType> GetShared()
 	{
-		// check the status of the future.
-		auto status = _sFut.wait_for(std::chrono::milliseconds(0));
-		if(status == std::future_status::ready)
-		{
-			_isFinished = true;
-			auto loadResult = _sFut.get();//eastl::get<1>(_tuppy).get();
-			_obj = loadResult.GetResource();
-			_error = loadResult.GetError();
-
-			_futurePulled = true;
-		}
-	}
-
-	ResourcePtr PullData() const
-	{
-		if(_sFut.valid())
-		{
-			if(!_futurePulled)
-			{
-				DoPull();
-			}
-		}
-
 		return _obj;
 	}
 
-	std::shared_future<LoadResult> _sFut;
-	eastl::string _name;
-	// pulled from future.
-	mutable eastl::shared_ptr<ResourceType>    _obj;
-	mutable Error                              _error;
-	mutable bool                               _futurePulled{ false };
-	mutable bool                               _isFinished{ false };
-
-	bool _hasFuture{ false };
-	bool _hasError{ false };
+private:
+	string                      _name;
+	shared_ptr<ResourceType>    _obj;
+	Error                       _error;
+	bool                        _isFinished{ false };
+	bool                        _hasError{ false };
 };
 
 CLOSE_NAMESPACE(Firestorm);

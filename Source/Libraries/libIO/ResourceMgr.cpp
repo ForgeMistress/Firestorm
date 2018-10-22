@@ -31,5 +31,13 @@ ResourceMgr::ResourceMgr(Application& app)
 {
 }
 
+ResMgrProxy::ResMgrProxy(Application& app, ResourceMgr& mgr, tf::SubflowBuilder& builder, const char* filename)
+: _app(app)
+, _mgr(mgr)
+, _tf(_app.GetSystems().GetTaskGraph())
+, _builder(builder)
+, _thisFilename(filename)
+{
+}
 
 CLOSE_NAMESPACE(Firestorm);

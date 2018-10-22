@@ -38,6 +38,7 @@ struct ResourceTypeID
 #define FIRE_RESOURCE_DECLARE(RES)                                                   \
 private:                                                                             \
 	friend class ResourceMgr;														 \
+	friend struct ResMgrProxy;                                                       \
 	using PtrType = eastl::shared_ptr<RES>;                                          \
 	FIRE_MIRROR_DECLARE(RES);														 \
 	struct LoadOp																	 \
@@ -47,8 +48,8 @@ private:                                                                        
 		class ResourceMgr& Mgr;                                                      \
 																					 \
 		LoadOp(Application& app, ResourceMgr& mgr, const char* filename);            \
-		LoadResult operator()(tf::SubflowBuilder& Dependencies);					 \
-		LoadResult DoOperation(PtrType& Resource, ResMgrProxy ResMgr);               \
+		LoadResult operator()();					                                 \
+		LoadResult DoOperation(PtrType& Resource);                                   \
 	};                                                                               \
 	static ResourceCache<RES> _s_cache;                                              \
 private:
@@ -62,12 +63,12 @@ RES::LoadOp::LoadOp(Application& app, ResourceMgr& mgr, const char* filename)	  
 , Mgr(mgr)                                                                                         \
 {																				                   \
 }																				                   \
-LoadResult RES::LoadOp::operator()(tf::SubflowBuilder& sub)								           \
+LoadResult RES::LoadOp::operator()()								           \
 {																						           \
 	eastl::string path(ResourceRef.GetPath());                                                     \
-	return DoOperation(_s_cache.GetCached(path.c_str()).GetShared(), ResMgrProxy(Mgr, sub));       \
+	return DoOperation(_s_cache.GetCached(path.c_str()).GetShared());                              \
 }																						           \
-LoadResult RES::LoadOp::DoOperation(PtrType& Resource, ResMgrProxy ResMgr)
+LoadResult RES::LoadOp::DoOperation(PtrType& Resource)
 
 class ResourceMgr final
 {
@@ -85,41 +86,68 @@ public:
 
 	/**
 		Schedule a resource of the provided type and the supplied filename for load and return a Resource
-		handle that can be used to track the progress of that load. For furthher details on tracking loads, see
+		handle that can be used to track the progress of that load. For further details on tracking loads, see
 		the Resource type itself.
 	 **/
 	template<class ResType>
-	Resource<ResType> QueueLoad(const char* filename)
+	Resource<ResType> Load(const char* filename)
 	{
 		if(ResType::_s_cache.IsCached(filename))
 		{
 			FIRE_LOG_DEBUG("/!\\ RETURNING CACHED '%s' /!\\", filename);
 			return ResType::_s_cache.GetCached(filename);
 		}
-		if(!_tg.has(RootTask))
-		{
-			_tg.emplace([](tf::SubflowBuilder& builder) {
-			}, RootTask);
-		}
-		auto[task, fut] = _tg.emplace(
-			[&, this, fname = string(filename)] (tf::SubflowBuilder& builder) -> LoadResult {
-				ResType::LoadOp loadOp(_app, *this, fname.c_str());
-				return loadOp(builder);
-			}
-		);
-		_tg[RootTask].precede(task);
-		ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
+
+		ResType::_s_cache.CacheResourceInstance(_app, filename);
+
+		ResType::LoadOp loadOp(_app, *this, filename);
+		LoadResult result(loadOp());
+		
 		return ResType::_s_cache.GetCached(filename);
 	}
 
-	/**
-		Load a resource while within another resource load operation.
-
-		Sometimes resources depend on other resources. We get it. It happens. Luckily, this function is here to help.
-		Every load operation takes in a tf::SubflowBuilder under the variable 
-	 **/
 	template<class ResType>
-	Resource<ResType> QueueLoad(tf::SubflowBuilder& subflow, const char* filename)
+	void AddResourceCache()
+	{
+		std::unique_lock<std::mutex> lock(_cacheLock);
+		for(size_t i=0; i<_caches.size(); ++i)
+		{
+			if(_caches[i] == &ResType::_s_cache)
+			{
+				return;
+			}
+		}
+		_caches.push_back(&ResType::_s_cache);
+	}
+
+	void CleanOldResources()
+	{
+		std::unique_lock<std::mutex> lock(_cacheLock);
+		for(size_t i=0; i<_caches.size(); ++i)
+		{
+			_caches[i]->ClearUnusedResources();
+		}
+	}
+
+public:
+	class Application& _app;
+	class TaskGraph&   _tg;
+	std::mutex _cacheLock;
+	vector<IResourceCache*> _caches;
+};
+
+struct ResMgrProxy
+{
+	Application& _app;
+	ResourceMgr& _mgr;
+	TaskGraph& _tf;
+	tf::SubflowBuilder& _builder;
+	string _thisFilename;
+
+	ResMgrProxy(Application& app, ResourceMgr& mgr, tf::SubflowBuilder& builder, const char* thisFilename);
+
+	template<class ResType>
+	Resource<ResType> LoadDependency(const char* filename)
 	{
 		if(ResType::_s_cache.IsCached(filename))
 		{
@@ -127,41 +155,15 @@ public:
 			// need to figure out how to get thhese resource handles to reference the same pointer
 			return ResType::_s_cache.GetCached(filename);
 		}
-
-		auto[task, fut] = subflow.emplace(
+	
+		FIRE_ASSERT(_tf.has(_thisFilename.c_str()));
+		auto[task, fut] = _tf.emplace(
 			[&, this, fname = string(filename)] (tf::SubflowBuilder& builder) -> LoadResult {
 				ResType::LoadOp loadOp(_app, *this, fname.c_str());
 				return loadOp(builder);
-			}
-		);
+			}, filename);
 		ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
 		return ResType::_s_cache.GetCached(filename);
-	}
-
-	void CleanOldResources()
-	{
-
-	}
-
-public:
-	class Application& _app;
-	class TaskGraph&   _tg;
-};
-
-struct ResMgrProxy
-{
-	ResourceMgr& _mgr;
-	tf::SubflowBuilder& _builder;
-	ResMgrProxy(ResourceMgr& mgr, tf::SubflowBuilder& builder)
-	: _mgr(mgr)
-	, _builder(builder)
-	{
-	}
-
-	template<class ResType>
-	Resource<ResType> LoadDependency(const char* filename)
-	{
-		return _mgr.QueueLoad<ResType>(_builder, filename);
 	}
 };
 

@@ -31,7 +31,7 @@ protected:
 
 	virtual bool IsCached(const char* filename) = 0;
 
-	virtual void CacheResourceInstance(class Application& app, const char* filename, std::future<LoadResult>&& future) = 0;
+	virtual void CacheResourceInstance(class Application& app, const char* filename) = 0;
 
 	virtual void ClearUnusedResources() = 0;
 };
@@ -46,10 +46,10 @@ struct ResourceCache : public IResourceCache
 		std::unique_lock<std::mutex> lock(_cacheLock);
 		auto& cacheEntry = _cache[filename];
 		eastl::shared_ptr<Res> ptr(eastl::dynamic_pointer_cast<Res>(cacheEntry._ptr));
-		return Resource<Res>(ptr, cacheEntry._sharedFuture, filename);
+		return Resource<Res>(ptr, filename);
 	}
 
-	virtual void CacheResourceInstance(class Application& app, const char* filename, std::future<LoadResult>&& future) override
+	virtual void CacheResourceInstance(class Application& app, const char* filename) override
 	{
 		using shared_future = std::shared_future<LoadResult>;
 
@@ -57,11 +57,11 @@ struct ResourceCache : public IResourceCache
 		eastl::shared_ptr<Res> ptr(nullptr);
 		if(_cache.find(filename) == _cache.end())
 		{
-			shared_future fut(eastl::forward<std::future<LoadResult>>(future));
+			//shared_future fut(eastl::forward<std::future<LoadResult>>(future));
 
 			ptr = eastl::make_shared<Res>(eastl::forward<Application>(app));
 
-			_cache[filename] = ResourceCacheEntry{ fut, ptr };
+			_cache[filename] = ResourceCacheEntry{ ptr };
 		}
 	}
 
@@ -89,7 +89,6 @@ struct ResourceCache : public IResourceCache
 
 	struct ResourceCacheEntry
 	{
-		std::shared_future<LoadResult> _sharedFuture;
 		eastl::shared_ptr<IResourceObject> _ptr;
 	};
 	eastl::unordered_map<eastl::string, ResourceCacheEntry> _cache;

@@ -36,6 +36,9 @@ public:
 
 	Application& GetApp() const { return _app; }
 
+	RenderSystem& GetSystem() { return _system; }
+	const RenderSystem& GetSystem() const { return _system; }
+
 private:
 	Application& _app;
 	RenderSystem _system;
