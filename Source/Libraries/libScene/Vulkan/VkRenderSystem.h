@@ -49,7 +49,7 @@ public:
 	void Shutdown();
 
 	// creation functions.
-	bool Create(class Shader* shader, const vector<char>& data);
+	bool MakeWhole(class Shader* shader, const vector<char>& data);
 
 	// release functions.
 	void Release(class Shader* shader);

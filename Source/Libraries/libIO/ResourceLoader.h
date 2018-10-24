@@ -14,8 +14,7 @@
 #include "IResourceObject.h"
 #include <libCore/Result.h>
 
-#define FIRE_LOAD_SUCCESS( PTR ) \
-	::Firestorm::ResourceMgr::ResultType( PTR )
+#define FIRE_LOAD_SUCCESS ::Firestorm::LoadResult()
 
 #define FIRE_LOAD_FAIL( ERROR_CODE, DETAILS ) \
 	::Firestorm::LoadResult(  \

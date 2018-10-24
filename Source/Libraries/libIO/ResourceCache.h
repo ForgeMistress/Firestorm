@@ -31,7 +31,8 @@ protected:
 
 	virtual bool IsCached(const char* filename) = 0;
 
-	virtual void CacheResourceInstance(class Application& app, const char* filename) = 0;
+	virtual void CacheResourceInstance(const char* filename, eastl::shared_ptr<IResourceObject> resourcePtr) = 0;
+		//class Application& app, const char* filename) = 0;
 
 	virtual void ClearUnusedResources() = 0;
 };
@@ -49,7 +50,7 @@ struct ResourceCache : public IResourceCache
 		return Resource<Res>(ptr, filename);
 	}
 
-	virtual void CacheResourceInstance(class Application& app, const char* filename) override
+	virtual void CacheResourceInstance(const char* filename, eastl::shared_ptr<IResourceObject> resourcePtr)//class Application& app, const char* filename, Args&&... args) override
 	{
 		using shared_future = std::shared_future<LoadResult>;
 
@@ -58,10 +59,9 @@ struct ResourceCache : public IResourceCache
 		if(_cache.find(filename) == _cache.end())
 		{
 			//shared_future fut(eastl::forward<std::future<LoadResult>>(future));
+			//ptr = eastl::make_shared<Res>(eastl::forward<Application>(app), eastl::forward<Args>(args)...);
 
-			ptr = eastl::make_shared<Res>(eastl::forward<Application>(app));
-
-			_cache[filename] = ResourceCacheEntry{ ptr };
+			_cache[filename] = ResourceCacheEntry{ resourcePtr };
 		}
 	}
 

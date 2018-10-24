@@ -131,8 +131,9 @@ void RenderSystem::Shutdown()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool RenderSystem::Create(Shader* shader, const vector<char>& data)
+bool RenderSystem::MakeWhole(Shader* shader, const vector<char>& data)
 {
+	FIRE_ASSERT_MSG(shader, "need to pass in an allocated shader b-baka");
 	VkShaderModuleCreateInfo info ={};
 	info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 	info.codeSize = data.size();

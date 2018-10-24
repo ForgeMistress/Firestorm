@@ -73,15 +73,6 @@ LoadResult RES::LoadOp::DoOperation(PtrType& Resource)
 class ResourceMgr final
 {
 public:
-	static const char* RootTask;
-
-	using ResultType = Result<ResourcePtr, Error>;
-	using FutureType = std::future<ResultType>;
-	using AsyncType = tuple<tf::Task, FutureType>;
-	using FuncType = function<ResultType()>;
-
-	using TupleType = std::tuple<tf::Task, std::future<LoadResult>>;
-
 	ResourceMgr(class Application& app);
 
 	/**
@@ -89,8 +80,8 @@ public:
 		handle that can be used to track the progress of that load. For further details on tracking loads, see
 		the Resource type itself.
 	 **/
-	template<class ResType>
-	Resource<ResType> Load(const char* filename)
+	template<class ResType, class... Args>
+	Resource<ResType> Load(const char* filename, Args&&... args)
 	{
 		if(ResType::_s_cache.IsCached(filename))
 		{
@@ -98,9 +89,15 @@ public:
 			return ResType::_s_cache.GetCached(filename);
 		}
 
-		ResType::_s_cache.CacheResourceInstance(_app, filename);
+		ResType::_s_cache.CacheResourceInstance(
+			filename,
+			eastl::make_shared<ResType>(
+				_app,
+				eastl::forward<Args>(args)...
+			)
+		);
 
-		ResType::LoadOp loadOp(_app, *this, filename);
+		typename ResType::LoadOp loadOp(_app, *this, filename);
 		LoadResult result(loadOp());
 		
 		return ResType::_s_cache.GetCached(filename);
@@ -133,7 +130,7 @@ public:
 	class Application& _app;
 	class TaskGraph&   _tg;
 	std::mutex _cacheLock;
-	vector<IResourceCache*> _caches;
+	mutable vector<IResourceCache*> _caches;
 };
 
 struct ResMgrProxy
