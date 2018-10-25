@@ -28,8 +28,6 @@ public:
 
 	virtual ~Vk_PipelineLayout();
 
-	virtual void Initialize(const CreateInfo& createInfo) override;
-
 private:
 	friend class RenderSystem;
 	class RenderSystem& _renderSystem;

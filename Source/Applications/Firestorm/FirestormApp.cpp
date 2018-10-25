@@ -10,6 +10,9 @@
 #include <libScene/MeshResource.h>
 #include <libScene/SceneGraphResource.h>
 
+#include <string>
+#include <variant>
+
 FirestormApp::FirestormApp(std::thread::id mainThreadID)
 : Application(mainThreadID)
 {
@@ -29,23 +32,64 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
 	ResourceMgr& resourceMgr = GetSystems().GetResourceMgr();
 
-	resourceMgr.AddResourceCache<Shader>();
-	resourceMgr.AddResourceCache<ShaderProgram>();
-
 	Dispatcher.Register<ApplicationWantsToCloseEvent>([this](const ApplicationWantsToCloseEvent& e) {
 		HandleApplicationWantsToClose(e);
-	});// &FirestormApp::HandleApplicationWantsToClose, this);
+	});
 
-	_shaderResource = resourceMgr.Load<ShaderProgram>("/Shaders/Triangle.shader");
-	_shaderResource2 = resourceMgr.Load<ShaderProgram>("/Shaders/Triangle.shader");
+	_shaderResource = resourceMgr.Load<Vk_ShaderProgram>("/Shaders/Triangle.shader");
+	_shaderResource2 = resourceMgr.Load<Vk_ShaderProgram>("/Shaders/Triangle.shader");
 
 	IPipelineLayout::CreateInfo layoutInfo{};
 	IPipelineLayout* layout = renderMgr.GetSystem().Make(layoutInfo);
 
-	IPipeline::CreateInfo pipelineInfo{
+	IRenderPass::CreateInfo renderPassInfo(renderMgr.GetSystem());
 
-	};
+	IRenderPass::CreateInfo::AttachmentDescription attachDesc{};
+	attachDesc.Flags = static_cast<AttachmentDescriptionFlags>(0);
+	attachDesc.Format = renderMgr.GetSystem().GetSwapchainImageFormat();
+	attachDesc.FinalLayout = ImageLayout::kPRESENT_SRC;
+	renderPassInfo.AddAttachmentDesc(attachDesc);
+
+	IRenderPass::CreateInfo::AttachmentReference colorRef;
+	colorRef.Attachment = 0;
+	colorRef.Layout = ImageLayout::kCOLOR_ATTACHMENT_OPTIMAL;
+
+	IRenderPass::CreateInfo::SubpassDescription subpass;
+	subpass.ColorAttachments.push_back(colorRef);
+
+	renderPassInfo.AddSubpass(subpass);
+
+	IRenderPass* renderPass = renderMgr.GetSystem().Make(renderPassInfo);
+
+	IPipeline::CreateInfo pipelineInfo{ renderMgr.GetSystem() };
+	pipelineInfo.ShaderStage = _shaderResource;
+	pipelineInfo.Layout = layout;
+	pipelineInfo.RenderPass = renderPass;
 	IPipeline* pipeline = renderMgr.GetSystem().Make(pipelineInfo);
+
+	FIRE_LOG_DEBUG("+++++ SIZEOF tf::Node: %d", sizeof(tf::Node));
+
+	using StaticWork   = std::function<void()>;
+	using DynamicWork  = std::function<void(tf::SubflowBuilder&)>;
+	using Graph = std::forward_list<tf::Node>;
+	using tfNodeVariant = std::variant<StaticWork, DynamicWork>;
+	union WorkUnion
+	{
+		StaticWork _static;
+		DynamicWork _dynamic;
+	};
+
+#define printsize(tag, type) FIRE_LOG_DEBUG("+++++    SIZEOF "#tag" ("#type"): %d", sizeof(type));
+
+	printsize(_name, std::string);
+	printsize(_work, tfNodeVariant);
+	printsize(_workUnion, WorkUnion);
+	printsize(_successors, std::vector<tf::Node*>);
+	printsize(_dependents, std::atomic<int>);
+	printsize(_dependents_SMALLER, std::atomic<uint8_t>);
+	printsize(_subgraph, std::optional<Graph>);
+	printsize(_subgraphRaw, Graph);
+	printsize(_topology, tf::Topology*);
 
 	//for(size_t i=0; i<1000; ++i)
 	//{

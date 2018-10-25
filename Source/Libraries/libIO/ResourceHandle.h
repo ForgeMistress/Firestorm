@@ -89,13 +89,18 @@ public:
 	{}
 
 public:
-	Resource(Resource<ResourceType>&& other)
-	: _name(eastl::move(other._name))
-	, _obj(eastl::move(other._obj))
-	, _error(eastl::move(other._error))
+	// copy cast
+	template<class U>
+	Resource(const Resource<U>& other)
+	: _name(other._name)
+	, _obj(other._obj)
+	, _error(other._error)
 	, _hasError(other._hasError)
-	{}
+	{
+		static_assert(eastl::is_base_of_v<ResourceType, U>, "invalid types");
+	}
 
+	// copy
 	Resource(const Resource<ResourceType>& other)
 	: _name(other._name)
 	, _obj(other._obj)
@@ -104,6 +109,42 @@ public:
 	{
 	}
 
+	// move cast
+	template<class U>
+	Resource(Resource<U>&& other)
+	: _name(eastl::move(other._name))
+	, _obj(eastl::move(other._obj))
+	, _error(eastl::move(other._error))
+	, _hasError(other._hasError)
+	{
+		static_assert(eastl::is_base_of_v<ResourceType, U>, "invalid types");
+	}
+
+	// move
+	Resource(Resource<ResourceType>&& other)
+	: _name(eastl::move(other._name))
+	, _obj(eastl::move(other._obj))
+	, _error(eastl::move(other._error))
+	, _hasError(other._hasError)
+	{
+	}
+
+	// assign-move cast
+	template<class U>
+	Resource& operator=(Resource<U>&& other)
+	{
+		static_assert(eastl::is_base_of_v<ResourceType, U>, "invalid types");
+		if(this != &other)
+		{
+			_name = eastl::move(other._name);
+			_obj = eastl::move(other._obj);
+			_error = eastl::move(other._error);
+			_hasError = other._hasError;
+		}
+		return *this;
+	}
+
+	// assign-move
 	Resource& operator=(Resource<ResourceType>&& other)
 	{
 		if(this != &other)
@@ -111,6 +152,20 @@ public:
 			_name = eastl::move(other._name);
 			_obj = eastl::move(other._obj);
 			_error = eastl::move(other._error);
+			_hasError = other._hasError;
+		}
+		return *this;
+	}
+
+	template<class U>
+	Resource& operator=(const Resource<U>& other)
+	{
+		static_assert(eastl::is_base_of_v<ResourceType, U>, "invalid types");
+		if(this != &other)
+		{
+			_name = other._name;
+			_obj = other._obj;
+			_error = other._error;
 			_hasError = other._hasError;
 		}
 		return *this;
@@ -128,6 +183,13 @@ public:
 		return *this;
 	}
 
+	template<class U>
+	bool operator==(const Resource<U>& other)
+	{
+		static_assert(eastl::is_base_of_v<ResourceType, U>, "invalid types");
+		return _name == other._name;
+	}
+
 	bool operator==(const Resource<ResourceType>& other)
 	{
 		return _name == other._name;
@@ -136,6 +198,18 @@ public:
 	~Resource()
 	{
 		Release();
+	}
+
+	template<class T>
+	T* get()
+	{
+		return static_cast<T*>(_obj.get());
+	}
+
+	template<class T>
+	const T* get() const
+	{
+		return static_cast<T*>(_obj.get());
 	}
 
 	const ResourceType* get() const
@@ -206,12 +280,16 @@ public:
 		return _obj;
 	}
 
-private:
-	string                      _name;
-	shared_ptr<ResourceType>    _obj;
-	Error                       _error;
-	bool                        _isFinished{ false };
-	bool                        _hasError{ false };
+	// don't touch this
+	string _name;
+	// don't touch this
+	shared_ptr<ResourceType> _obj{ nullptr };
+	// don't touch this
+	Error _error;
+	// don't touch this
+	bool _isFinished{ false };
+	// don't touch this
+	bool _hasError{ false };
 };
 
 CLOSE_NAMESPACE(Firestorm);

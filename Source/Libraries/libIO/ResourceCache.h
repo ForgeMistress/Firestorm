@@ -46,8 +46,7 @@ struct ResourceCache : public IResourceCache
 	{
 		std::unique_lock<std::mutex> lock(_cacheLock);
 		auto& cacheEntry = _cache[filename];
-		eastl::shared_ptr<Res> ptr(eastl::dynamic_pointer_cast<Res>(cacheEntry._ptr));
-		return Resource<Res>(ptr, filename);
+		return Resource<Res>(eastl::dynamic_pointer_cast<Res>(cacheEntry._ptr), filename);
 	}
 
 	virtual void CacheResourceInstance(const char* filename, eastl::shared_ptr<IResourceObject> resourcePtr)//class Application& app, const char* filename, Args&&... args) override

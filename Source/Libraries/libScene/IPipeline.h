@@ -34,8 +34,6 @@ public:
 	};
 
 	virtual ~IPipelineLayout() = default;
-
-	virtual void Initialize(const CreateInfo& createInfo) = 0;
 };
 
 class IPipeline
@@ -45,15 +43,17 @@ public:
 	{
 		struct VertexInputState
 		{
-		} VertexInputState;
+		};
+		VertexInputState VertexInputState;
 
-		struct
+		struct InputAssembly
 		{
 			//const void*                                pNext;
 			//VkPipelineInputAssemblyStateCreateFlags    flags;
 			PrimitiveTopology Topology{ PrimitiveTopology::kTRIANGLE_STRIP };
 			bool PrimitiveRestartEnable{ false };
-		} InputAssembly;
+		};
+		InputAssembly InputAssembly;
 
 		struct Viewport
 		{
@@ -128,7 +128,7 @@ public:
 
 		CreateInfo(class RenderSystem& renderSystem);
 
-		Resource<ShaderProgram>   ShaderStage;
+		Resource<Vk_ShaderProgram>   ShaderStage;
 		IPipelineLayout*          Layout{ nullptr };
 		IRenderPass*              RenderPass{ nullptr };
 	};

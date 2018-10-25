@@ -18,7 +18,7 @@ OPEN_NAMESPACE(Firestorm);
 class IResourceObject
 {
 public:
-	virtual ~IResourceObject() {}
+	virtual ~IResourceObject() = default;
 
 	/**
 		This should return whether or not the resource is ready for use.

@@ -12,6 +12,22 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+IRenderPass::CreateInfo::CreateInfo(class RenderSystem& renderSystem)
+: _renderSystem(renderSystem)
+{
+
+}
+
+void IRenderPass::CreateInfo::AddAttachmentDesc(const IRenderPass::CreateInfo::AttachmentDescription& attachmentDesc)
+{
+	Attachments.push_back(attachmentDesc);
+}
+
+void IRenderPass::CreateInfo::AddSubpass(const SubpassDescription& subpass)
+{
+	Subpasses.push_back(subpass);
+}
+
 Vk_RenderPass::Vk_RenderPass(class RenderSystem& renderSystem)
 : _renderSystem(renderSystem)
 {

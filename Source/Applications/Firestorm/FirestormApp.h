@@ -26,8 +26,8 @@ public:
 private:
 	void RegisterResourceTypes();
 
-	Resource<ShaderProgram> _shaderResource;
-	Resource<ShaderProgram> _shaderResource2;
+	Resource<Vk_ShaderProgram> _shaderResource;
+	Resource<Vk_ShaderProgram> _shaderResource2;
 
 };
 

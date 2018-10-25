@@ -10,15 +10,20 @@
 #include "stdafx.h"
 #include "VkShaderProgram.h"
 
-#include "../PrimitiveTopology.h"
+#include "../RenderMgr.h"
+#include "../Enumerations.h"
 
+#include <libApp/Application.h>
 #include <libIO/libIO.h>
 #include <libIO/ResourceIOErrors.h>
 #include <libIO/ResourceMgr.h>
 
+#include <json/json.h>
+#include <json/reader.h>
+
 OPEN_NAMESPACE(Firestorm);
 
-FIRE_RESOURCE_DEFINE(Shader)
+FIRE_RESOURCE_DEFINE(Vk_Shader)
 {
 	auto& renderSystem = App.GetSystems().GetRenderMgr().GetSystem();
 
@@ -28,35 +33,37 @@ FIRE_RESOURCE_DEFINE(Shader)
 		Result<vector<char>, Error> loadedFileResult(libIO::LoadFile(filename));
 		if(loadedFileResult.has_value())
 		{
-			renderSystem.MakeWhole(Resource.get(), loadedFileResult.value());
+			renderSystem.MakeWhole(Resource.get(), IShader::CreateInfo{
+				Resource->_type,
+				loadedFileResult.value()
+			});
 
-			FIRE_LOG_DEBUG("!!!!! LOAD LOGIC FOR Shader RUN! '%s'", filename.c_str());
+			FIRE_LOG_DEBUG("!!!!! LOAD LOGIC FOR Vk_Shader RUN! '%s'", filename.c_str());
 		}
 		return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_READ_ERROR, Format("could not read file '%s'", filename.c_str()));
 	}
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, Format("could not find file '%s'", filename.c_str()));
 }
 
-Shader::Shader(Application& app, ShaderType type)
+Vk_Shader::Vk_Shader(Application& app, ShaderType type)
 : _renderSystem(app.GetSystems().GetRenderMgr().GetSystem())
 , _shader(VK_NULL_HANDLE)
 , _type(type)
 {
 }
 
-Shader::~Shader()
+Vk_Shader::~Vk_Shader()
 {
-	_renderSystem.Release(this);
 }
 
-bool Shader::IsReady() const
+bool Vk_Shader::IsReady() const
 {
 	return _shader != VK_NULL_HANDLE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FIRE_RESOURCE_DEFINE(ShaderProgram)
+FIRE_RESOURCE_DEFINE(Vk_ShaderProgram)
 {
 	Json::CharReaderBuilder charReaderBuilder;
 	RefPtr<Json::CharReader> _reader(charReaderBuilder.newCharReader());
@@ -85,7 +92,7 @@ FIRE_RESOURCE_DEFINE(ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"vertex shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kVERTEX));
+				Resource->AddShader(Mgr.Load<Vk_Shader, IShader>(value.c_str(), ShaderType::kVERTEX));
 			}
 			
 			if(root.isMember("fragment"))
@@ -97,7 +104,7 @@ FIRE_RESOURCE_DEFINE(ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"fragment shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kFRAGMENT));
+				Resource->AddShader(Mgr.Load<Vk_Shader, IShader>(value.c_str(), ShaderType::kFRAGMENT));
 			}
 			
 			if(root.isMember("geometry"))
@@ -109,10 +116,10 @@ FIRE_RESOURCE_DEFINE(ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"geometry shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kGEOMETRY));
+				Resource->AddShader(Mgr.Load<Vk_Shader, IShader>(value.c_str(), ShaderType::kGEOMETRY));
 			}
 
-			FIRE_LOG_DEBUG("!!!!! LOAD LOGIC FOR ShaderProgram RUN! '%s'", filename.c_str());
+			FIRE_LOG_DEBUG("!!!!! LOAD LOGIC FOR Vk_ShaderProgram RUN! '%s'", filename.c_str());
 			Resource->Compile();
 			return FIRE_LOAD_SUCCESS;
 		}
@@ -120,20 +127,20 @@ FIRE_RESOURCE_DEFINE(ShaderProgram)
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, "not found, dummy");
 }
 
-ShaderProgram::ShaderProgram(Application& app)
+Vk_ShaderProgram::Vk_ShaderProgram(Application& app)
 : _renderMgr(app.GetSystems().GetRenderMgr())
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ShaderProgram::~ShaderProgram()
+Vk_ShaderProgram::~Vk_ShaderProgram()
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ShaderProgram::IsReady() const
+bool Vk_ShaderProgram::IsReady() const
 {
 	for(const auto& shader : _shaders)
 	{
@@ -148,7 +155,7 @@ bool ShaderProgram::IsReady() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ShaderProgram::Compile()
+void Vk_ShaderProgram::Compile()
 {
 	vector<VkPipelineShaderStageCreateInfo> stages(_shaders.size());
 	for(auto shader : _shaders)
@@ -167,7 +174,7 @@ void ShaderProgram::Compile()
 			info.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
 			break;
 		}
-		info.module = shader->_shader;
+		info.module = shader.get<Vk_Shader>()->_shader;
 		info.pName = "main";
 		stages.push_back(info);
 	}
@@ -176,7 +183,7 @@ void ShaderProgram::Compile()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ShaderProgram::AddShader(Resource<Shader>& shader)
+void Vk_ShaderProgram::AddShader(Resource<IShader>& shader)
 {
 	//if(shader->GetType() == ShaderType::kVertex)
 	//{

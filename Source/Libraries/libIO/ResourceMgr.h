@@ -35,23 +35,24 @@ struct ResourceTypeID
 #endif
 };
 
-#define FIRE_RESOURCE_DECLARE(RES)                                                   \
-private:                                                                             \
-	friend class ResourceMgr;														 \
-	friend struct ResMgrProxy;                                                       \
-	using PtrType = eastl::shared_ptr<RES>;                                          \
-	FIRE_MIRROR_DECLARE(RES);														 \
-	struct LoadOp																	 \
-	{																				 \
-		ResourceReference ResourceRef;												 \
-		class Application& App;														 \
-		class ResourceMgr& Mgr;                                                      \
-																					 \
-		LoadOp(Application& app, ResourceMgr& mgr, const char* filename);            \
-		LoadResult operator()();					                                 \
-		LoadResult DoOperation(PtrType& Resource);                                   \
-	};                                                                               \
-	static ResourceCache<RES> _s_cache;                                              \
+#define FIRE_RESOURCE_DECLARE(RES)                                                    \
+private:                                                                              \
+	friend class ResourceMgr;														  \
+	friend struct ResMgrProxy;                                                        \
+	using PtrType = eastl::shared_ptr<RES>;                                           \
+	FIRE_MIRROR_DECLARE(RES);														  \
+	struct LoadOp																	  \
+	{																				  \
+		ResourceReference ResourceRef;												  \
+		class Application& App;														  \
+		class ResourceMgr& Mgr;                                                       \
+																					  \
+		LoadOp(class Application& app, class ResourceMgr& mgr, const char* filename); \
+		LoadResult operator()();					                                  \
+		LoadResult DoOperation(PtrType& Resource);                                    \
+	};                                                                                \
+	static ResourceCache<RES> _s_cache;                                               \
+	virtual IResourceCache* GetCache() const { return &_s_cache; }                    \
 private:
 	
 
@@ -63,7 +64,7 @@ RES::LoadOp::LoadOp(Application& app, ResourceMgr& mgr, const char* filename)	  
 , Mgr(mgr)                                                                                         \
 {																				                   \
 }																				                   \
-LoadResult RES::LoadOp::operator()()								           \
+LoadResult RES::LoadOp::operator()()								                               \
 {																						           \
 	eastl::string path(ResourceRef.GetPath());                                                     \
 	return DoOperation(_s_cache.GetCached(path.c_str()).GetShared());                              \
@@ -80,13 +81,14 @@ public:
 		handle that can be used to track the progress of that load. For further details on tracking loads, see
 		the Resource type itself.
 	 **/
-	template<class ResType, class... Args>
-	Resource<ResType> Load(const char* filename, Args&&... args)
+	template<class ResType, class ReturnType = ResType, class... Args>
+	Resource<ReturnType> Load(const char* filename, Args&&... args)
 	{
+		AddResourceCache(&ResType::_s_cache);
 		if(ResType::_s_cache.IsCached(filename))
 		{
 			FIRE_LOG_DEBUG("/!\\ RETURNING CACHED '%s' /!\\", filename);
-			return ResType::_s_cache.GetCached(filename);
+			return Resource<ReturnType>(ResType::_s_cache.GetCached(filename));
 		}
 
 		ResType::_s_cache.CacheResourceInstance(
@@ -100,21 +102,20 @@ public:
 		typename ResType::LoadOp loadOp(_app, *this, filename);
 		LoadResult result(loadOp());
 		
-		return ResType::_s_cache.GetCached(filename);
+		return Resource<ReturnType>(ResType::_s_cache.GetCached(filename));
 	}
 
-	template<class ResType>
-	void AddResourceCache()
+	void AddResourceCache(IResourceCache* cache)
 	{
 		std::unique_lock<std::mutex> lock(_cacheLock);
 		for(size_t i=0; i<_caches.size(); ++i)
 		{
-			if(_caches[i] == &ResType::_s_cache)
+			if(_caches[i] == cache)
 			{
 				return;
 			}
 		}
-		_caches.push_back(&ResType::_s_cache);
+		_caches.push_back(cache);
 	}
 
 	void CleanOldResources()

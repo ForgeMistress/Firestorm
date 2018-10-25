@@ -22,6 +22,9 @@
 
 #include <EASTL/sort.h>
 
+#define FIRE_VK_ALLOC nullptr
+#define FIRE_VK_FREE nullptr
+
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,6 +75,81 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFl
 	return VK_FALSE;
 }
 
+
+
+namespace {
+
+VkPolygonMode map(PolyMode mode)
+{
+	static VkPolygonMode polyModes[] ={
+		VK_POLYGON_MODE_FILL,// kFill,
+		VK_POLYGON_MODE_LINE,// kLine,
+		VK_POLYGON_MODE_POINT,// kPoint
+	};
+	return polyModes[(uint8_t)mode];
+}
+
+VkViewport map(const IPipeline::CreateInfo::Viewport& viewport)
+{
+	return VkViewport{
+		viewport.PosY,
+		viewport.PosX,
+		viewport.ExtentX,
+		viewport.ExtentY,
+		viewport.MinDepth,
+		viewport.MaxDepth
+	};
+}
+
+VkRect2D map(const IPipeline::CreateInfo::Scissor& scissor)
+{
+	VkRect2D rect;
+	rect.offset = VkOffset2D{scissor.OffsetX, scissor.OffsetY};
+	rect.extent = VkExtent2D{scissor.ExtentX, scissor.ExtentY};
+	return rect;
+}
+
+VkPipelineShaderStageCreateInfo map(const Resource<IShader>& shader)
+{
+	VkPipelineShaderStageCreateInfo stageInfo = {};
+	stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	stageInfo.stage = static_cast<VkShaderStageFlagBits>(shader->GetType());
+	stageInfo.module = shader.get<Vk_Shader>()->GetModule();
+	stageInfo.pName = "main";
+	return stageInfo;
+}
+
+void print(const VkAttachmentDescription& desc)
+{
+	FIRE_LOG_DEBUG("=== VkAttachmentDescription ===");
+	FIRE_LOG_DEBUG("    format:         %d", desc.format);
+	FIRE_LOG_DEBUG("    samples:        %d", desc.samples);
+	FIRE_LOG_DEBUG("    loadOp:         %d", desc.loadOp);
+	FIRE_LOG_DEBUG("    storeOp:        %d", desc.storeOp);
+	FIRE_LOG_DEBUG("    stencilLoadOp:  %d", desc.stencilLoadOp);
+	FIRE_LOG_DEBUG("    stencilStoreOp: %d", desc.stencilStoreOp);
+	FIRE_LOG_DEBUG("    initialLayout:  %d", desc.initialLayout);
+	FIRE_LOG_DEBUG("    finalLayout:    %d", desc.finalLayout);
+}
+
+vector<VkAttachmentReference> map(const vector<IRenderPass::CreateInfo::AttachmentReference>& refs)
+{
+	vector<VkAttachmentReference> outrefs;
+	outrefs.reserve(refs.size());
+	for(size_t i=0; i<refs.size(); ++i)
+	{
+		outrefs.push_back(VkAttachmentReference{
+			refs[i].Attachment,
+			static_cast<VkImageLayout>(refs[i].Layout)
+		});
+	}
+	return outrefs;
+}
+
+}
+
+
+
 #define FIRE_VALIDATE_VK_CALL(function, ...)                                \
 {                                                                           \
 	VkResult result = function ( __VA_ARGS__ );                             \
@@ -114,7 +192,6 @@ void RenderSystem::Initialize()
 	CreateLogicalDevice();
 	CreateSwapChain();
 	CreateImageViews();
-	CreateGraphicsPipeline();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,84 +200,64 @@ void RenderSystem::Shutdown()
 {
 	for(auto imageView : _swapChainImageViews)
 	{
-		vkDestroyImageView(_device, imageView, nullptr);
+		vkDestroyImageView(_device, imageView, FIRE_VK_FREE);
 	}
-	vkDestroySwapchainKHR(_device, _swapChain, nullptr);
-	vkDestroySurfaceKHR(_instance, _surface, nullptr);
-	vkDestroyDevice(_device, nullptr);
+	vkDestroySwapchainKHR(_device, _swapChain, FIRE_VK_FREE);
+	vkDestroySurfaceKHR(_instance, _surface, FIRE_VK_FREE);
+	vkDestroyDevice(_device, FIRE_VK_FREE);
 #ifndef FIRE_FINAL
-	DestroyDebugUtilsMessengerEXT(_instance, _callback, nullptr);
+	DestroyDebugUtilsMessengerEXT(_instance, _callback, FIRE_VK_FREE);
 #endif
-	vkDestroyInstance(_instance, nullptr);
+	vkDestroyInstance(_instance, FIRE_VK_FREE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool RenderSystem::MakeWhole(Shader* shader, const vector<char>& data)
+bool RenderSystem::MakeWhole(IShader* sshader, const IShader::CreateInfo& info)
 {
-	FIRE_ASSERT_MSG(shader, "need to pass in an allocated shader b-baka");
-	VkShaderModuleCreateInfo info ={};
-	info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	info.codeSize = data.size();
-	info.pCode = reinterpret_cast<const uint32_t*>(data.data());
-	FIRE_VALIDATE_VK_CALL(vkCreateShaderModule, _device, &info, nullptr, &shader->_shader);
+	FIRE_ASSERT_MSG(sshader, "need to pass in an allocated shader b-baka");
+	Vk_Shader* shader = dynamic_cast<Vk_Shader*>(sshader);
+	FIRE_ASSERT_MSG(shader != nullptr, "shader was not a Vk_Shader");
+
+	VkShaderModuleCreateInfo shaderModule ={};
+	shaderModule.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	shaderModule.codeSize = info.Data.size();
+	shaderModule.pCode = reinterpret_cast<const uint32_t*>(info.Data.data());
+	shader->_type = info.Type;
+
+	FIRE_VALIDATE_VK_CALL(vkCreateShaderModule, _device, &shaderModule, FIRE_VK_ALLOC, &shader->_shader);
 	return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-VkPolygonMode map(PolyMode mode)
+IPipelineLayout* RenderSystem::Make(const IPipelineLayout::CreateInfo& info)
 {
-	static VkPolygonMode polyModes[] ={
-		VK_POLYGON_MODE_FILL,// kFill,
-		VK_POLYGON_MODE_LINE,// kLine,
-		VK_POLYGON_MODE_POINT,// kPoint
-	};
-	return polyModes[(uint8_t)mode];
+	Vk_PipelineLayout* layout = new Vk_PipelineLayout(*this);
+
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 0;//info.Layout.size();
+	pipelineLayoutInfo.pushConstantRangeCount = 0; //info.constantrangecount;
+	vkCreatePipelineLayout(_device, &pipelineLayoutInfo, FIRE_VK_ALLOC, &layout->_vkLayout);
+
+	return layout;
 }
 
-VkViewport map(const IPipeline::CreateInfo::Viewport& viewport)
-{
-	return VkViewport{
-		viewport.PosY,
-		viewport.PosX,
-		viewport.ExtentX,
-		viewport.ExtentY,
-		viewport.MinDepth,
-		viewport.MaxDepth
-	};
-}
-
-VkRect2D map(const IPipeline::CreateInfo::Scissor& scissor)
-{
-	VkRect2D rect;
-	rect.offset = VkOffset2D{scissor.OffsetX, scissor.OffsetY};
-	rect.extent = VkExtent2D{scissor.ExtentX, scissor.ExtentY};
-	return rect;
-}
-
-VkPipelineShaderStageCreateInfo map(const Resource<Shader>& shader)
-{
-	VkPipelineShaderStageCreateInfo stageInfo = {};
-	stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	stageInfo.stage = static_cast<VkShaderStageFlagBits>(shader->GetType());
-	stageInfo.module = shader->GetModule();
-	stageInfo.pName = "main";
-	return stageInfo;
-}
-
-}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
 {
-	Vk_Pipeline* pipeline = new Vk_Pipeline(*this);
+	FIRE_ASSERT_MSG(info.ShaderStage.IsValid(), "no shader stage was specified for this pipeline");
+	FIRE_ASSERT_MSG(info.Layout != nullptr,     "no pipeline layout was specified for this pipeline");
+	FIRE_ASSERT_MSG(info.RenderPass != nullptr, "no render pass was specified for this pipeline");
 	// whoof... ok, here we go... let's do this...
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// VkPipelineShaderStageCreateInfo
-	vector<VkPipelineShaderStageCreateInfo> shaderStages(info.ShaderStage->_shaders.size());
+	size_t numShaders = info.ShaderStage->_shaders.size();
+	vector<VkPipelineShaderStageCreateInfo> shaderStages;
+	shaderStages.reserve(numShaders);
 	for(size_t i=0; i<info.ShaderStage->_shaders.size(); ++i)
 	{
 		shaderStages.push_back(map(info.ShaderStage->_shaders[i]));
@@ -229,21 +286,23 @@ IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// VkPipelineViewportStateCreateInfo
-	vector<VkViewport> viewports(info.Viewports.size());
+	vector<VkViewport> viewports;
+	viewports.reserve(info.Viewports.size());
 	for(size_t i=0; i<info.Viewports.size(); ++i)
 	{
 		viewports.push_back(map(info.Viewports[i]));
 	}
-	vector<VkRect2D> scissors(info.Scissors.size());
+	vector<VkRect2D> scissors;
+	scissors.reserve(info.Scissors.size());
 	for(size_t i=0; i<info.Scissors.size(); ++i)
 	{
 		scissors.push_back(map(info.Scissors[i]));
 	}
 	VkPipelineViewportStateCreateInfo viewportState = {};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-	viewportState.viewportCount = viewports.size();
+	viewportState.viewportCount = narrow_cast<uint32_t>(viewports.size());
 	viewportState.pViewports = viewports.data();
-	viewportState.scissorCount = scissors.size();
+	viewportState.scissorCount = narrow_cast<uint32_t>(scissors.size());
 	viewportState.pScissors = scissors.data();
 	// END VkPipelineMultisampleStateCreateInfo
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +350,7 @@ IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
 	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 	colorBlending.logicOpEnable = info.PipelineColorBlendState.LogicOpEnable;
 	colorBlending.logicOp = static_cast<VkLogicOp>(info.PipelineColorBlendState.LogicOp);
-	colorBlending.attachmentCount = attachmentStates.size();
+	colorBlending.attachmentCount = narrow_cast<uint32_t>(attachmentStates.size());
 	colorBlending.pAttachments = attachmentStates.data();
 	eastl::copy(
 		&info.PipelineColorBlendState.BlendConstants[0],
@@ -303,7 +362,7 @@ IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
 
 	VkGraphicsPipelineCreateInfo pipelineInfo = {};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipelineInfo.stageCount = shaderStages.size();
+	pipelineInfo.stageCount = narrow_cast<uint32_t>(shaderStages.size());
 	pipelineInfo.pStages = shaderStages.data();
 	pipelineInfo.pVertexInputState = &vertexInputInfo;
 	pipelineInfo.pInputAssemblyState = &inputAssembly;
@@ -315,157 +374,125 @@ IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
 	pipelineInfo.renderPass = static_cast<Vk_RenderPass*>(info.RenderPass)->_vkRenderPass;
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+	Vk_Pipeline* pipeline = new Vk_Pipeline(*this);
+	FIRE_VALIDATE_VK_CALL(
+		vkCreateGraphicsPipelines, 
+		_device, 
+		VK_NULL_HANDLE, 
+		1, 
+		&pipelineInfo, 
+		FIRE_VK_ALLOC, 
+		&pipeline->_pipeline);
 	
 	return pipeline;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-IPipelineLayout* RenderSystem::Make(const IPipelineLayout::CreateInfo& info)
-{
-	Vk_PipelineLayout* layout = new Vk_PipelineLayout(*this);
-
-	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
-	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 0;//info.Layout.size();
-	pipelineLayoutInfo.pushConstantRangeCount = 0; //info.constantrangecount;
-	vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr, &layout->_vkLayout);
-	
-	return layout;
-}
-
-namespace {
-
-VkAttachmentDescription map(VkFormat swapChainImageFormat, const IRenderPass::CreateInfo::AttachmentDescription& desc)
-{
-	VkAttachmentDescription output = {};
-	output.format = swapChainImageFormat;
-	output.samples = static_cast<VkSampleCountFlagBits>(desc.Samples);
-	output.loadOp = static_cast<VkAttachmentLoadOp>(desc.LoadOp);
-	output.storeOp = static_cast<VkAttachmentStoreOp>(desc.StoreOp);
-	output.stencilLoadOp = static_cast<VkAttachmentLoadOp>(desc.StencilLoadOp);
-	output.stencilStoreOp = static_cast<VkAttachmentStoreOp>(desc.StencilStoreOp);
-	output.initialLayout = static_cast<VkImageLayout>(desc.InitialLayout);
-	output.finalLayout = static_cast<VkImageLayout>(desc.FinalLayout);
-	return output;
-}
-
-vector<VkAttachmentReference> map(const vector<IRenderPass::CreateInfo::AttachmentReference>& refs)
-{
-
-	vector<VkAttachmentReference> outrefs(refs.size());
-	for(size_t i=0; i<refs.size(); ++i)
-	{
-		outrefs.push_back(VkAttachmentReference{
-			refs[i].Attachment,
-			static_cast<VkImageLayout>(refs[i].Layout)
-		});
-	}
-	return outrefs;
-}
-
-}
-
 IRenderPass* RenderSystem::Make(const IRenderPass::CreateInfo& info)
 {
-	//vector<VkAttachmentDescription> colorAttachments(info.AttachmentDescriptions.size());
-	//for(size_t i=0; i<info.AttachmentDescriptions.size(); ++i)
-	//{
-	//	colorAttachments.push_back(map(_swapChainImageFormat, info.AttachmentDescriptions[0]));
-	//}
-	//VkAttachmentReference colorAttachmentRef = {};
-	//colorAttachmentRef.attachment = 0;
-	//colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	vector<VkAttachmentDescription> attachments;
+	attachments.reserve(info.Attachments.size());
+	for(size_t i=0; i<info.Attachments.size(); ++i)
+	{
+		const auto& a = info.Attachments[i];
+		attachments.push_back(VkAttachmentDescription{
+			static_cast<VkAttachmentDescriptionFlags>(a.Flags),
+			static_cast<VkFormat>(a.Format),
+			static_cast<VkSampleCountFlagBits>(a.Samples),
+			static_cast<VkAttachmentLoadOp>(a.LoadOp),
+			static_cast<VkAttachmentStoreOp>(a.StoreOp),
+			static_cast<VkAttachmentLoadOp>(a.StencilLoadOp),
+			static_cast<VkAttachmentStoreOp>(a.StencilStoreOp),
+			static_cast<VkImageLayout>(a.InitialLayout),
+			static_cast<VkImageLayout>(a.FinalLayout)
+		});
+	}
 
-	//vector<VkSubpassDescription>          subpasses(info.Subpasses.size());
-	Vk_RenderPass* outRenderPass = new Vk_RenderPass(*this);
+	vector<vector<VkAttachmentReference>> attachmentRefs;
+	size_t numSubpasses = info.Subpasses.size();
+	vector<VkSubpassDescription> subpasses;
+	subpasses.reserve(numSubpasses);
+	for(size_t i=0; i<numSubpasses; ++i)
+	{
+		const auto& subpassInfo = info.Subpasses[i];
+		VkSubpassDescription subpass = {};
+		subpass.pipelineBindPoint = static_cast<VkPipelineBindPoint>(info.Subpasses[i].PipelineBindPoint);
 
-	VkAttachmentDescription colorAttachment(map(_swapChainImageFormat, info.SubpassDescription.ColorAttachment));
+		if(!subpassInfo.ColorAttachments.empty())
+		{
+			attachmentRefs.push_back(map(subpassInfo.ColorAttachments));
+			subpass.colorAttachmentCount = static_cast<uint32_t>(attachmentRefs.back().size());
+			subpass.pColorAttachments = attachmentRefs.back().data();
+		}
 
-	VkAttachmentReference colorAttachmentRef ={};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		if(!subpassInfo.InputAttachments.empty())
+		{
+			attachmentRefs.push_back(map(subpassInfo.InputAttachments));
+			subpass.inputAttachmentCount = static_cast<uint32_t>(attachmentRefs.back().size());
+			subpass.pInputAttachments = attachmentRefs.back().data();
+		}
 
-	VkSubpassDescription subpass ={};
-	subpass.pipelineBindPoint = static_cast<VkPipelineBindPoint>(info.SubpassDescription.PipelineBindPoint);
-	subpass.pColorAttachments = &colorAttachmentRef;
+		if(!subpassInfo.ResolveAttachments.empty())
+		{
+			attachmentRefs.push_back(map(subpassInfo.ResolveAttachments));
+			subpass.pResolveAttachments = attachmentRefs.back().data();
+		}
 
-	VkRenderPassCreateInfo renderPass ={};
-	renderPass.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPass.attachmentCount = 1;
-	renderPass.pAttachments = &colorAttachment;
-	renderPass.subpassCount = 1;
-	renderPass.pSubpasses = &subpass;
+		if(!subpassInfo.DepthStencilAttachments.empty())
+		{
+			attachmentRefs.push_back(map(subpassInfo.DepthStencilAttachments));
+			subpass.pDepthStencilAttachment = attachmentRefs.back().data();
+			subpass.preserveAttachmentCount = static_cast<uint32_t>(attachmentRefs.back().size());
+		}
 
-	FIRE_VALIDATE_VK_CALL(vkCreateRenderPass, _device, &renderPass, nullptr, &outRenderPass->_vkRenderPass);
-	return outRenderPass;
+		if(!subpassInfo.PreserveAttachments.empty())
+		{
+			subpass.pPreserveAttachments = subpassInfo.PreserveAttachments.data();
+		}
+
+		subpasses.push_back(subpass);
+	}
+
+	VkRenderPassCreateInfo renderPassInfo ={};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+	renderPassInfo.pAttachments = attachments.data();
+	renderPassInfo.subpassCount = static_cast<uint32_t>(subpasses.size());
+	renderPassInfo.pSubpasses = subpasses.data();
+
+	Vk_RenderPass* renderPass = new Vk_RenderPass(*this);
+	FIRE_VALIDATE_VK_CALL(vkCreateRenderPass, _device, &renderPassInfo, FIRE_VK_ALLOC, &renderPass->_vkRenderPass);
+	return renderPass;
 }
-
-	//vector<vector<VkAttachmentReference>> attachments(info.Subpasses.size());
-	//vector<vector<VkAttachmentReference>> inputAttachments(info.Subpasses.size());
-	//vector<vector<VkAttachmentReference>> resolveAttachments(info.Subpasses.size());
-	//vector<vector<VkAttachmentReference>> depthStencilAttachments(info.Subpasses.size());
-	//vector<vector<uint32_t>>              preserveAttachments(info.Subpasses.size());
-	//vector<vector<VkAttachmentReference>> colorAttachments(info.Subpasses.size());
-	//for(size_t i=0; i<info.Subpasses.size(); ++i)
-	//{
-	//	const auto& desc = info.Subpasses[i];
-	//
-	//	VkSubpassDescription subpass ={};
-	//	subpass.flags = static_cast<VkSubpassDescriptionFlags>(desc.Flags);
-	//	subpass.pipelineBindPoint = static_cast<VkPipelineBindPoint>(desc.PipelineBindPoint);
-	//
-	//	attachments.push_back(map(desc.InputAttachments));
-	//	subpass.inputAttachmentCount = attachments.back().size();
-	//	subpass.pInputAttachments = attachments.back().data();
-	//
-	//	attachments.push_back(map(desc.ResolveAttachments));
-	//	subpass.pResolveAttachments = attachments.back().data();
-	//
-	//	attachments.push_back(map(desc.ResolveAttachments));
-	//	subpass.pDepthStencilAttachment = attachments.back().data();
-	//
-	//	attachments.push_back(desc.PreserveAttachments);
-	//	subpass.pPreserveAttachments = attachments.back().data();
-	//
-	//	subpass.pipelineBindPoint = static_cast<VkPipelineBindPoint>(desc.PipelineBindPoint);
-	//
-	//	attachments.push_back(map(desc.ColorAttachments));
-	//	subpass.colorAttachmentCount = attachments.back().size();
-	//	subpass.pColorAttachments = attachments.back().data();
-	//
-	//	subpasses.push_back(subpass);
-	//}
-	//
-	//VkRenderPassCreateInfo renderPassInfo = {};
-	//renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	//renderPassInfo.attachmentCount = attachments.size();
-	//renderPassInfo.pAttachments = attachments.data();
-	//renderPassInfo.subpassCount = subpasses.size();
-	//renderPassInfo.pSubpasses = subpasses.data();
-//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderSystem::Release(class Shader* shader)
+void RenderSystem::Release(class Vk_Shader* shader)
 {
-	vkDestroyShaderModule(_device, shader->_shader, nullptr);
+	vkDestroyShaderModule(_device, shader->_shader, FIRE_VK_FREE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderSystem::Release(IPipeline* pipeline)
 {
-	vkDestroyPipeline(_device, static_cast<Vk_Pipeline*>(pipeline)->_pipeline, nullptr);
-	delete pipeline;
+	vkDestroyPipeline(_device, static_cast<Vk_Pipeline*>(pipeline)->_pipeline, FIRE_VK_FREE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderSystem::Release(IPipelineLayout* layout)
 {
-	vkDestroyPipelineLayout(_device, static_cast<Vk_PipelineLayout*>(layout)->_vkLayout, nullptr);
-	delete layout;
+	vkDestroyPipelineLayout(_device, static_cast<Vk_PipelineLayout*>(layout)->_vkLayout, FIRE_VK_FREE);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::Release(IRenderPass* renderPass)
+{
+	vkDestroyRenderPass(_device, static_cast<Vk_RenderPass*>(renderPass)->_vkRenderPass, FIRE_VK_FREE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -711,13 +738,6 @@ void RenderSystem::CreateImageViews()
 		FIRE_VALIDATE_VK_CALL(vkCreateImageView, _device, &createInfo, nullptr, &_swapChainImageViews[i]);
 
 	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void RenderSystem::CreateGraphicsPipeline()
-{
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

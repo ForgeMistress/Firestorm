@@ -13,6 +13,32 @@
 
 OPEN_NAMESPACE(Firestorm);
 
+enum struct PrimitiveTopology : uint8_t
+{
+	kPOINT_LIST = 0,
+	kLINE_LIST = 1,
+	kLINE_STRIP = 2,
+	kTRIANGLE_LIST = 3,
+	kTRIANGLE_STRIP = 4,
+	kTRIANGLE_FAN = 5,
+	kLINE_LIST_WITH_ADJACENCY = 6,
+	kLINE_STRIP_WITH_ADJACENCY = 7,
+	kTRIANGLE_LIST_WITH_ADJACENCY = 8,
+	kTRIANGLE_STRIP_WITH_ADJACENCY = 9,
+	kPATCH_LIST = 10,
+};
+
+enum struct ShaderType
+{
+	kVERTEX = 0x00000001,
+	kTESSELLATION_CONTROL = 0x00000002,
+	kTESSELLATION_EVALUATION = 0x00000004,
+	kGEOMETRY = 0x00000008,
+	kFRAGMENT = 0x00000010,
+	kCOMPUTE = 0x00000020,
+	kALL_GRAPHICS = 0x0000001F,
+};
+
 enum struct PolyMode : uint8_t
 {
 	kFill,
@@ -158,15 +184,24 @@ enum struct AttachmentDescriptionFlags
 	kBITS_MAX_ENUM = 0x7FFFFFFF
 };
 
-enum struct AttachmentLoadOp {
+enum struct AttachmentLoadOp
+{
+	/// Preserve the existing contents of the attachment
 	kLOAD = 0,
+
+	/// Clear the values to a constant at the start
 	kCLEAR = 1,
+
+	/// Existing contents are undefined; we don't care about them
 	kDONT_CARE = 2,
 };
 
 enum struct AttachmentStoreOp
 {
+	/// Rendered contents will be stored in memory and can be read later
 	kSTORE = 0,
+
+	/// Contents of the framebuffer will be undefined after the rendering operation
 	kDONT_CARE = 1,
 };
 
@@ -183,10 +218,8 @@ enum struct ImageLayout
 	kPREINITIALIZED = 8,
 	kDEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL = 1000117000,
 	kDEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL = 1000117001,
-	kPRESENT_SRC_KHR = 1000001002,
-	kSHARED_PRESENT_KHR = 1000111000,
-	kDEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL_KHR = kDEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL,
-	kDEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL_KHR = kDEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL,
+	kPRESENT_SRC = 1000001002,
+	kSHARED_PRESENT = 1000111000,
 };
 
 enum struct PipelineBindPoint

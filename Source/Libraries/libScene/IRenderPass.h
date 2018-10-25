@@ -23,36 +23,46 @@ public:
 		struct AttachmentDescription
 		{
 			AttachmentDescriptionFlags    Flags;
-			VkFormat                      Format;
-			SampleCountFlags              Samples;
-			AttachmentLoadOp              LoadOp;
-			AttachmentStoreOp             StoreOp;
-			AttachmentLoadOp              StencilLoadOp;
-			AttachmentStoreOp             StencilStoreOp;
-			ImageLayout                   InitialLayout;
-			ImageLayout                   FinalLayout;
+			size_t                        Format;
+			SampleCountFlags              Samples{ SampleCountFlags::k1_BIT };
+			AttachmentLoadOp              LoadOp{ AttachmentLoadOp::kCLEAR };
+			AttachmentStoreOp             StoreOp{ AttachmentStoreOp::kSTORE };
+			AttachmentLoadOp              StencilLoadOp{ AttachmentLoadOp::kDONT_CARE };
+			AttachmentStoreOp             StencilStoreOp{ AttachmentStoreOp::kDONT_CARE };
+
+			/// specifies which layout the image will have before the render pass begins
+			ImageLayout InitialLayout{ ImageLayout::kUNDEFINED };
+
+			/// specifies the layout to automatically transition to when the render pass finishes
+			ImageLayout FinalLayout{ ImageLayout::kPRESENT_SRC };
 		};
+		vector<AttachmentDescription> Attachments;
+		void AddAttachmentDesc(const AttachmentDescription& attachmentDesc);
 		
 
 		struct AttachmentReference
 		{
-			uint32_t       Attachment;
-			ImageLayout    Layout;
+			uint32_t    Attachment{ 9001 };
+			ImageLayout Layout{ ImageLayout::kUNDEFINED };
 		};
 
-		struct
+		struct SubpassDescription
 		{
 
 			//RenderFlags                     Flags;
-			PipelineBindPoint               PipelineBindPoint;
-			AttachmentDescription ColorAttachment;
-			//vector<AttachmentReference>     InputAttachments;
-			//vector<AttachmentReference>     ColorAttachments;
-			//vector<AttachmentReference>     ResolveAttachments;
-			//vector<AttachmentReference>     DepthStencilAttachments;
-			//vector<uint32_t>                PreserveAttachments;
-		} SubpassDescription;
-		//vector<SubpassDescription> Subpasses;
+			PipelineBindPoint               PipelineBindPoint{ PipelineBindPoint::kGRAPHICS };
+			vector<AttachmentReference>     ColorAttachments;
+			vector<AttachmentReference>     InputAttachments;
+			vector<AttachmentReference>     ResolveAttachments;
+			vector<AttachmentReference>     DepthStencilAttachments;
+			vector<uint32_t>                PreserveAttachments;
+		};
+		vector<SubpassDescription> Subpasses;
+		void AddSubpass(const SubpassDescription& subpass);
+
+		CreateInfo(class RenderSystem& renderSystem);
+
+		class RenderSystem& _renderSystem;
 	};
 
 	virtual ~IRenderPass() = default;

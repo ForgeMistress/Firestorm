@@ -11,24 +11,14 @@
 #define LIBSCENE_VKRENDERSYSTEM_H_
 #pragma once
 
-#include <vulkan/vulkan.h>
-
-#define GLFW_EXPOSE_NATIVE_WIN32
-#ifdef FIRE_PLATFORM_WINDOWS
-#include <vulkan/vulkan_win32.h>
-#endif
-
-#include <GLFW/glfw3.h>
-
-#ifdef FIRE_PLATFORM_WINDOWS
-#include <GLFW/glfw3native.h>
-#endif
+#include "VulkanPlatform.h"
 
 #include <EASTL/optional.h>
 #include <EASTL/vector.h>
 
 #include "../IPipeline.h"
 #include "../IRenderPass.h"
+#include "../IShader.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -52,19 +42,31 @@ public:
 	void Shutdown();
 
 	// creation functions.
-	bool MakeWhole(class Shader* shader, const vector<char>& data);
+	/**
+		Creation function for a shader instance that is used by the resource loader routines.
+	 **/
+	bool MakeWhole(class IShader* shader, const IShader::CreateInfo& info);
 
-	class IPipeline* Make(const IPipeline::CreateInfo& info);
-	class IPipelineLayout* Make(const IPipelineLayout::CreateInfo& info);
-	class IRenderPass* Make(const IRenderPass::CreateInfo& info);
+	/**
+		Creation function for a shader program instance that is used by the resource loader routines.
+	**/
+	bool MakeWhole(class IShaderProgram* shaderProgram, const IShaderProgram::CreateInfo& info);
+
+	owner<class IShaderProgram*>  Make(const IShaderProgram::CreateInfo& info);
+	owner<class IPipelineLayout*> Make(const IPipelineLayout::CreateInfo& info);
+	owner<class IPipeline*>       Make(const IPipeline::CreateInfo& info);
+	owner<class IRenderPass*>     Make(const IRenderPass::CreateInfo& info);
 
 	// release functions.
-	void Release(class Shader* shader);
+	void Release(class Vk_Shader* shader);
 	void Release(IPipeline* pipeline);
 	void Release(IPipelineLayout* layout);
+	void Release(IRenderPass* renderPass);
 
 	// do not add to interface below this comment
 	const VkExtent2D& GetSwapchainExtent() const { return _swapChainExtent; }
+
+	size_t GetSwapchainImageFormat() const { return _swapChainImageFormat; }
 private:
 	void CheckValidationLayers();
 	void CreateInstance();
@@ -74,7 +76,6 @@ private:
 	void CreateSurface();
 	void CreateSwapChain();
 	void CreateImageViews();
-	void CreateGraphicsPipeline();
 
 	struct QueueFamilyIndices
 	{

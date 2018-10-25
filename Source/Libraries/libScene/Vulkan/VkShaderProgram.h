@@ -11,70 +11,58 @@
 #define LIBSCENE_VKSHADERPROGRAMRESOURCE_H_
 #pragma once
 
-#include "../RenderMgr.h"
+#include "VulkanPlatform.h"
+#include "../Enumerations.h"
+#include "../IShader.h"
 
-#include <libApp/Application.h>
 #include <libIO/ResourceMgr.h>
 #include <libIO/ResourceLoader.h>
-#include <libIO/IResourceObject.h>
 #include <libIO/ResourceReference.h>
 #include <libIO/ResourceHandle.h>
-
-#include <json/json.h>
-#include <json/reader.h>
-#include <libCore/ObjectPool.h>
 
 OPEN_NAMESPACE(Firestorm);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-enum struct ShaderType
+
+class Vk_Shader final : public IShader
 {
-	kVERTEX = 0x00000001,
-	kTESSELLATION_CONTROL = 0x00000002,
-	kTESSELLATION_EVALUATION = 0x00000004,
-	kGEOMETRY = 0x00000008,
-	kFRAGMENT = 0x00000010,
-	kCOMPUTE = 0x00000020,
-	kALL_GRAPHICS = 0x0000001F,
-};
-class Shader final : public IResourceObject
-{
-	FIRE_RESOURCE_DECLARE(Shader);
+	FIRE_RESOURCE_DECLARE(Vk_Shader);
 public:
-	Shader(Application& app, ShaderType type);
-	virtual ~Shader();
+	Vk_Shader(class Application& app, ShaderType type);
+	virtual ~Vk_Shader();
 
 	virtual bool IsReady() const;
 
-	ShaderType GetType() const { return _type; }
+	virtual ShaderType GetType() const override { return _type; }
+
 	VkShaderModule GetModule() const { return _shader; }
 private:
 	friend class RenderSystem;
-	friend class ShaderProgram;
+	friend class Vk_ShaderProgram;
 
-	RenderSystem&  _renderSystem;
-	ShaderType     _type{ ShaderType::kVERTEX };
-	VkShaderModule _shader;
-	bool           _isCompiled{ false };
+	class RenderSystem& _renderSystem;
+	ShaderType          _type{ ShaderType::kVERTEX };
+	VkShaderModule      _shader;
+	bool                _isCompiled{ false };
 };
 
-class ShaderProgram final : public IResourceObject
+class Vk_ShaderProgram final : public IShaderProgram//IResourceObject
 {
-	FIRE_RESOURCE_DECLARE(ShaderProgram);
+	FIRE_RESOURCE_DECLARE(Vk_ShaderProgram);
 public:
-	ShaderProgram(Application& app);
-	virtual ~ShaderProgram();
+	Vk_ShaderProgram(class Application& app);
+	virtual ~Vk_ShaderProgram();
 
 	virtual bool IsReady() const;
 	void Compile();
 private:
 	friend class RenderSystem;
-	void AddShader(Resource<Shader>& shader);
+	void AddShader(Resource<IShader>& shader);
 
-	class RenderMgr&         _renderMgr;
-	std::mutex               _slock;
-	vector<Resource<Shader>> _shaders;
-	bool                     _isCompiled{ false };
+	class RenderMgr&          _renderMgr;
+	std::mutex                _slock;
+	vector<Resource<IShader>> _shaders;
+	bool                      _isCompiled{ false };
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

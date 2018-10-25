@@ -22,7 +22,7 @@ class Vector2
 public:
 	Vector2();
 	Vector2(float x, float y);
-	explicit Vector2(const Vector2& v);
+	Vector2(const Vector2& v);
 	explicit Vector2(const Vector3& v);
 	explicit Vector2(const Vector4& v);
 
