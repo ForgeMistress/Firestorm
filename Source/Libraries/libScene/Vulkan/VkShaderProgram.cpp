@@ -5,7 +5,7 @@
 //  Loads up and stores Shader data.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) Project Elflord 2018
+// Copyright (c) Project Firestorm 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "VkShaderProgram.h"
@@ -85,7 +85,7 @@ FIRE_RESOURCE_DEFINE(ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"vertex shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kVertex));
+				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kVERTEX));
 			}
 			
 			if(root.isMember("fragment"))
@@ -97,7 +97,7 @@ FIRE_RESOURCE_DEFINE(ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"fragment shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kFragment));
+				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kFRAGMENT));
 			}
 			
 			if(root.isMember("geometry"))
@@ -109,7 +109,7 @@ FIRE_RESOURCE_DEFINE(ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"geometry shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kGeometry));
+				Resource->AddShader(Mgr.Load<Shader>(value.c_str(), ShaderType::kGEOMETRY));
 			}
 
 			FIRE_LOG_DEBUG("!!!!! LOAD LOGIC FOR ShaderProgram RUN! '%s'", filename.c_str());
@@ -157,13 +157,13 @@ void ShaderProgram::Compile()
 		info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		switch(shader->GetType())
 		{
-		case ShaderType::kVertex:
+		case ShaderType::kVERTEX:
 			info.stage = VK_SHADER_STAGE_VERTEX_BIT;
 			break;
-		case ShaderType::kFragment:
+		case ShaderType::kFRAGMENT:
 			info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 			break;
-		case ShaderType::kGeometry:
+		case ShaderType::kGEOMETRY:
 			info.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
 			break;
 		}

@@ -5,7 +5,7 @@
 //  3D/2D Vector classes and their operations.
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Copyright (c) Project Elflord 2018
+//  Copyright (c) Project Firestorm 2018
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef LIBMATH_VECTOR_H_
 #define LIBMATH_VECTOR_H_
@@ -20,7 +20,9 @@ class Vector4;
 class Vector2
 {
 public:
-	Vector2(float x = 0.0f, float y = 0.0f);
+	Vector2();
+	Vector2(float x, float y);
+	explicit Vector2(const Vector2& v);
 	explicit Vector2(const Vector3& v);
 	explicit Vector2(const Vector4& v);
 

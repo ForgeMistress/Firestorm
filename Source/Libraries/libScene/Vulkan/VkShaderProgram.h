@@ -5,7 +5,7 @@
 //  Loads up and stores Shader data.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) Project Elflord 2018
+// Copyright (c) Project Firestorm 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef LIBSCENE_VKSHADERPROGRAMRESOURCE_H_
 #define LIBSCENE_VKSHADERPROGRAMRESOURCE_H_
@@ -29,9 +29,13 @@ OPEN_NAMESPACE(Firestorm);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 enum struct ShaderType
 {
-	kVertex,
-	kFragment,
-	kGeometry
+	kVERTEX = 0x00000001,
+	kTESSELLATION_CONTROL = 0x00000002,
+	kTESSELLATION_EVALUATION = 0x00000004,
+	kGEOMETRY = 0x00000008,
+	kFRAGMENT = 0x00000010,
+	kCOMPUTE = 0x00000020,
+	kALL_GRAPHICS = 0x0000001F,
 };
 class Shader final : public IResourceObject
 {
@@ -43,12 +47,13 @@ public:
 	virtual bool IsReady() const;
 
 	ShaderType GetType() const { return _type; }
+	VkShaderModule GetModule() const { return _shader; }
 private:
 	friend class RenderSystem;
 	friend class ShaderProgram;
 
 	RenderSystem&  _renderSystem;
-	ShaderType     _type{ ShaderType::kVertex };
+	ShaderType     _type{ ShaderType::kVERTEX };
 	VkShaderModule _shader;
 	bool           _isCompiled{ false };
 };
@@ -63,9 +68,10 @@ public:
 	virtual bool IsReady() const;
 	void Compile();
 private:
+	friend class RenderSystem;
 	void AddShader(Resource<Shader>& shader);
 
-	RenderMgr&               _renderMgr;
+	class RenderMgr&         _renderMgr;
 	std::mutex               _slock;
 	vector<Resource<Shader>> _shaders;
 	bool                     _isCompiled{ false };

@@ -39,6 +39,14 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	_shaderResource = resourceMgr.Load<ShaderProgram>("/Shaders/Triangle.shader");
 	_shaderResource2 = resourceMgr.Load<ShaderProgram>("/Shaders/Triangle.shader");
 
+	IPipelineLayout::CreateInfo layoutInfo{};
+	IPipelineLayout* layout = renderMgr.GetSystem().Make(layoutInfo);
+
+	IPipeline::CreateInfo pipelineInfo{
+
+	};
+	IPipeline* pipeline = renderMgr.GetSystem().Make(pipelineInfo);
+
 	//for(size_t i=0; i<1000; ++i)
 	//{
 	//	resourceMgr.QueueLoad<ShaderProgram>("/Shaders/Triangle.shader");

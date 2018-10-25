@@ -8,10 +8,15 @@
 //  Copyright (c) Project Firestorm 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "../RenderMgr.h"
+
+#include "../Enumerations.h"
 #include "VkRenderSystem.h"
 #include "VkShaderProgram.h"
+#include "VkPipeline.h"
+#include "VkRenderPass.h"
+
 #include <libCore/Logger.h>
-#include "../RenderMgr.h"
 
 #include <libApp/Window.h>
 
@@ -144,9 +149,323 @@ bool RenderSystem::MakeWhole(Shader* shader, const vector<char>& data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+VkPolygonMode map(PolyMode mode)
+{
+	static VkPolygonMode polyModes[] ={
+		VK_POLYGON_MODE_FILL,// kFill,
+		VK_POLYGON_MODE_LINE,// kLine,
+		VK_POLYGON_MODE_POINT,// kPoint
+	};
+	return polyModes[(uint8_t)mode];
+}
+
+VkViewport map(const IPipeline::CreateInfo::Viewport& viewport)
+{
+	return VkViewport{
+		viewport.PosY,
+		viewport.PosX,
+		viewport.ExtentX,
+		viewport.ExtentY,
+		viewport.MinDepth,
+		viewport.MaxDepth
+	};
+}
+
+VkRect2D map(const IPipeline::CreateInfo::Scissor& scissor)
+{
+	VkRect2D rect;
+	rect.offset = VkOffset2D{scissor.OffsetX, scissor.OffsetY};
+	rect.extent = VkExtent2D{scissor.ExtentX, scissor.ExtentY};
+	return rect;
+}
+
+VkPipelineShaderStageCreateInfo map(const Resource<Shader>& shader)
+{
+	VkPipelineShaderStageCreateInfo stageInfo = {};
+	stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	stageInfo.stage = static_cast<VkShaderStageFlagBits>(shader->GetType());
+	stageInfo.module = shader->GetModule();
+	stageInfo.pName = "main";
+	return stageInfo;
+}
+
+}
+
+IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
+{
+	Vk_Pipeline* pipeline = new Vk_Pipeline(*this);
+	// whoof... ok, here we go... let's do this...
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// VkPipelineShaderStageCreateInfo
+	vector<VkPipelineShaderStageCreateInfo> shaderStages(info.ShaderStage->_shaders.size());
+	for(size_t i=0; i<info.ShaderStage->_shaders.size(); ++i)
+	{
+		shaderStages.push_back(map(info.ShaderStage->_shaders[i]));
+	}
+	// END VkPipelineShaderStageCreateInfo
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// VkPipelineVertexInputStateCreateInfo
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputInfo.vertexBindingDescriptionCount = 0;
+	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+	// END VkPipelineVertexInputStateCreateInfo
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// VkPipelineInputAssemblyStateCreateInfo
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
+	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	// inputAssembly.flags = info.InputAssembly.Flags;
+	inputAssembly.topology = static_cast<VkPrimitiveTopology>(info.InputAssembly.Topology);
+	inputAssembly.primitiveRestartEnable = info.InputAssembly.PrimitiveRestartEnable;
+	// END VkPipelineViewportStateCreateInfo
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// VkPipelineViewportStateCreateInfo
+	vector<VkViewport> viewports(info.Viewports.size());
+	for(size_t i=0; i<info.Viewports.size(); ++i)
+	{
+		viewports.push_back(map(info.Viewports[i]));
+	}
+	vector<VkRect2D> scissors(info.Scissors.size());
+	for(size_t i=0; i<info.Scissors.size(); ++i)
+	{
+		scissors.push_back(map(info.Scissors[i]));
+	}
+	VkPipelineViewportStateCreateInfo viewportState = {};
+	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportState.viewportCount = viewports.size();
+	viewportState.pViewports = viewports.data();
+	viewportState.scissorCount = scissors.size();
+	viewportState.pScissors = scissors.data();
+	// END VkPipelineMultisampleStateCreateInfo
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// VkPipelineRasterizationStateCreateInfo
+	VkPipelineRasterizationStateCreateInfo rasterizer = {};
+	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterizer.depthClampEnable = info.RasterizerState.DepthClampEnable;
+	rasterizer.rasterizerDiscardEnable = info.RasterizerState.RasterizerDiscardEnable;
+	rasterizer.polygonMode = map(info.RasterizerState.PolygonMode);
+	rasterizer.lineWidth = info.RasterizerState.LineWidth;
+	rasterizer.cullMode = static_cast<VkCullModeFlags>(info.RasterizerState.CullMode);
+	rasterizer.frontFace = static_cast<VkFrontFace>(info.RasterizerState.FrontFace);
+	rasterizer.depthBiasEnable = info.RasterizerState.DepthBiasEnable;
+	// END VkPipelineMultisampleStateCreateInfo
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// VkPipelineMultisampleStateCreateInfo
+	VkPipelineMultisampleStateCreateInfo multisampling = {};
+	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampling.sampleShadingEnable = info.MultisampleState.SampleShadingEnable;
+	multisampling.rasterizationSamples = static_cast<VkSampleCountFlagBits>(info.MultisampleState.RasterSamples);
+	// END VkPipelineMultisampleStateCreateInfo
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// VkPipelineColorBlendStateCreateInfo
+	vector<VkPipelineColorBlendAttachmentState> attachmentStates(info.PipelineColorBlendState.Attachments.size());
+	for(size_t i=0; i<info.PipelineColorBlendState.Attachments.size(); ++i)
+	{
+		const auto& state = info.PipelineColorBlendState.Attachments[i];
+		attachmentStates[i].alphaBlendOp = static_cast<VkBlendOp>(state.AlphaBlendOp);
+		attachmentStates[i].blendEnable = state.BlendEnable;
+		attachmentStates[i].colorBlendOp = static_cast<VkBlendOp>(state.ColorBlendOp);
+		attachmentStates[i].colorWriteMask = state.ColorWriteMask;
+		attachmentStates[i].dstAlphaBlendFactor = static_cast<VkBlendFactor>(state.DstAlphaBlendFactor);
+		attachmentStates[i].dstColorBlendFactor = static_cast<VkBlendFactor>(state.DstColorBlendFactor);
+		attachmentStates[i].srcAlphaBlendFactor = static_cast<VkBlendFactor>(state.SrcAlphaBlendFactor);
+		attachmentStates[i].srcColorBlendFactor = static_cast<VkBlendFactor>(state.SrcColorBlendFactor);
+	}
+
+	VkPipelineColorBlendStateCreateInfo colorBlending = {};
+	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlending.logicOpEnable = info.PipelineColorBlendState.LogicOpEnable;
+	colorBlending.logicOp = static_cast<VkLogicOp>(info.PipelineColorBlendState.LogicOp);
+	colorBlending.attachmentCount = attachmentStates.size();
+	colorBlending.pAttachments = attachmentStates.data();
+	eastl::copy(
+		&info.PipelineColorBlendState.BlendConstants[0],
+		&info.PipelineColorBlendState.BlendConstants[4], 
+		colorBlending.blendConstants);
+	// END VkPipelineColorBlendStateCreateInfo
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	VkGraphicsPipelineCreateInfo pipelineInfo = {};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = shaderStages.size();
+	pipelineInfo.pStages = shaderStages.data();
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	pipelineInfo.pViewportState = &viewportState;
+	pipelineInfo.pRasterizationState = &rasterizer;
+	pipelineInfo.pMultisampleState = &multisampling;
+	pipelineInfo.pColorBlendState = &colorBlending;
+	pipelineInfo.layout = static_cast<Vk_PipelineLayout*>(info.Layout)->_vkLayout;
+	pipelineInfo.renderPass = static_cast<Vk_RenderPass*>(info.RenderPass)->_vkRenderPass;
+	pipelineInfo.subpass = 0;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+	
+	return pipeline;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+IPipelineLayout* RenderSystem::Make(const IPipelineLayout::CreateInfo& info)
+{
+	Vk_PipelineLayout* layout = new Vk_PipelineLayout(*this);
+
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 0;//info.Layout.size();
+	pipelineLayoutInfo.pushConstantRangeCount = 0; //info.constantrangecount;
+	vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr, &layout->_vkLayout);
+	
+	return layout;
+}
+
+namespace {
+
+VkAttachmentDescription map(VkFormat swapChainImageFormat, const IRenderPass::CreateInfo::AttachmentDescription& desc)
+{
+	VkAttachmentDescription output = {};
+	output.format = swapChainImageFormat;
+	output.samples = static_cast<VkSampleCountFlagBits>(desc.Samples);
+	output.loadOp = static_cast<VkAttachmentLoadOp>(desc.LoadOp);
+	output.storeOp = static_cast<VkAttachmentStoreOp>(desc.StoreOp);
+	output.stencilLoadOp = static_cast<VkAttachmentLoadOp>(desc.StencilLoadOp);
+	output.stencilStoreOp = static_cast<VkAttachmentStoreOp>(desc.StencilStoreOp);
+	output.initialLayout = static_cast<VkImageLayout>(desc.InitialLayout);
+	output.finalLayout = static_cast<VkImageLayout>(desc.FinalLayout);
+	return output;
+}
+
+vector<VkAttachmentReference> map(const vector<IRenderPass::CreateInfo::AttachmentReference>& refs)
+{
+
+	vector<VkAttachmentReference> outrefs(refs.size());
+	for(size_t i=0; i<refs.size(); ++i)
+	{
+		outrefs.push_back(VkAttachmentReference{
+			refs[i].Attachment,
+			static_cast<VkImageLayout>(refs[i].Layout)
+		});
+	}
+	return outrefs;
+}
+
+}
+
+IRenderPass* RenderSystem::Make(const IRenderPass::CreateInfo& info)
+{
+	//vector<VkAttachmentDescription> colorAttachments(info.AttachmentDescriptions.size());
+	//for(size_t i=0; i<info.AttachmentDescriptions.size(); ++i)
+	//{
+	//	colorAttachments.push_back(map(_swapChainImageFormat, info.AttachmentDescriptions[0]));
+	//}
+	//VkAttachmentReference colorAttachmentRef = {};
+	//colorAttachmentRef.attachment = 0;
+	//colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	//vector<VkSubpassDescription>          subpasses(info.Subpasses.size());
+	Vk_RenderPass* outRenderPass = new Vk_RenderPass(*this);
+
+	VkAttachmentDescription colorAttachment(map(_swapChainImageFormat, info.SubpassDescription.ColorAttachment));
+
+	VkAttachmentReference colorAttachmentRef ={};
+	colorAttachmentRef.attachment = 0;
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass ={};
+	subpass.pipelineBindPoint = static_cast<VkPipelineBindPoint>(info.SubpassDescription.PipelineBindPoint);
+	subpass.pColorAttachments = &colorAttachmentRef;
+
+	VkRenderPassCreateInfo renderPass ={};
+	renderPass.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPass.attachmentCount = 1;
+	renderPass.pAttachments = &colorAttachment;
+	renderPass.subpassCount = 1;
+	renderPass.pSubpasses = &subpass;
+
+	FIRE_VALIDATE_VK_CALL(vkCreateRenderPass, _device, &renderPass, nullptr, &outRenderPass->_vkRenderPass);
+	return outRenderPass;
+}
+
+	//vector<vector<VkAttachmentReference>> attachments(info.Subpasses.size());
+	//vector<vector<VkAttachmentReference>> inputAttachments(info.Subpasses.size());
+	//vector<vector<VkAttachmentReference>> resolveAttachments(info.Subpasses.size());
+	//vector<vector<VkAttachmentReference>> depthStencilAttachments(info.Subpasses.size());
+	//vector<vector<uint32_t>>              preserveAttachments(info.Subpasses.size());
+	//vector<vector<VkAttachmentReference>> colorAttachments(info.Subpasses.size());
+	//for(size_t i=0; i<info.Subpasses.size(); ++i)
+	//{
+	//	const auto& desc = info.Subpasses[i];
+	//
+	//	VkSubpassDescription subpass ={};
+	//	subpass.flags = static_cast<VkSubpassDescriptionFlags>(desc.Flags);
+	//	subpass.pipelineBindPoint = static_cast<VkPipelineBindPoint>(desc.PipelineBindPoint);
+	//
+	//	attachments.push_back(map(desc.InputAttachments));
+	//	subpass.inputAttachmentCount = attachments.back().size();
+	//	subpass.pInputAttachments = attachments.back().data();
+	//
+	//	attachments.push_back(map(desc.ResolveAttachments));
+	//	subpass.pResolveAttachments = attachments.back().data();
+	//
+	//	attachments.push_back(map(desc.ResolveAttachments));
+	//	subpass.pDepthStencilAttachment = attachments.back().data();
+	//
+	//	attachments.push_back(desc.PreserveAttachments);
+	//	subpass.pPreserveAttachments = attachments.back().data();
+	//
+	//	subpass.pipelineBindPoint = static_cast<VkPipelineBindPoint>(desc.PipelineBindPoint);
+	//
+	//	attachments.push_back(map(desc.ColorAttachments));
+	//	subpass.colorAttachmentCount = attachments.back().size();
+	//	subpass.pColorAttachments = attachments.back().data();
+	//
+	//	subpasses.push_back(subpass);
+	//}
+	//
+	//VkRenderPassCreateInfo renderPassInfo = {};
+	//renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	//renderPassInfo.attachmentCount = attachments.size();
+	//renderPassInfo.pAttachments = attachments.data();
+	//renderPassInfo.subpassCount = subpasses.size();
+	//renderPassInfo.pSubpasses = subpasses.data();
+//}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void RenderSystem::Release(class Shader* shader)
 {
 	vkDestroyShaderModule(_device, shader->_shader, nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::Release(IPipeline* pipeline)
+{
+	vkDestroyPipeline(_device, static_cast<Vk_Pipeline*>(pipeline)->_pipeline, nullptr);
+	delete pipeline;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::Release(IPipelineLayout* layout)
+{
+	vkDestroyPipelineLayout(_device, static_cast<Vk_PipelineLayout*>(layout)->_vkLayout, nullptr);
+	delete layout;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

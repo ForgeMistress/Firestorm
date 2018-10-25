@@ -27,6 +27,9 @@
 #include <EASTL/optional.h>
 #include <EASTL/vector.h>
 
+#include "../IPipeline.h"
+#include "../IRenderPass.h"
+
 OPEN_NAMESPACE(Firestorm);
 
 using namespace eastl;
@@ -51,8 +54,17 @@ public:
 	// creation functions.
 	bool MakeWhole(class Shader* shader, const vector<char>& data);
 
+	class IPipeline* Make(const IPipeline::CreateInfo& info);
+	class IPipelineLayout* Make(const IPipelineLayout::CreateInfo& info);
+	class IRenderPass* Make(const IRenderPass::CreateInfo& info);
+
 	// release functions.
 	void Release(class Shader* shader);
+	void Release(IPipeline* pipeline);
+	void Release(IPipelineLayout* layout);
+
+	// do not add to interface below this comment
+	const VkExtent2D& GetSwapchainExtent() const { return _swapChainExtent; }
 private:
 	void CheckValidationLayers();
 	void CreateInstance();

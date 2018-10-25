@@ -1,53 +1,37 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  VkPipeline
+//  VkRenderPass
 //
-//  Implementation of the RenderSystem class for the Vulkan backend.
+//  Implementation of the RenderPass class for the Vulkan backend.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) Project Firestorm 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBSCENE_VKPIPELINE_H_
-#define LIBSCENE_VKPIPELINE_H_
+#ifndef LIBSCENE_VKRENDERPASS_H_
+#define LIBSCENE_VKRENDERPASS_H_
 #pragma once
 
 #include "../RenderMgr.h"
 #include "../PrimitiveTopology.h"
 
-#include "../IPipeline.h"
+#include "../IRenderPass.h"
 
-#include "VkShaderProgram.h"
+#include "VkRenderSystem.h"
+
 #include <libMath/Vector.h>
 
 OPEN_NAMESPACE(Firestorm);
 
-class Vk_PipelineLayout final : public IPipelineLayout
+class Vk_RenderPass final : public IRenderPass
 {
 public:
-	Vk_PipelineLayout(class RenderSystem& renderSystem);
-
-	virtual ~Vk_PipelineLayout();
-
-	virtual void Initialize(const CreateInfo& createInfo) override;
+	Vk_RenderPass(class RenderSystem& renderSystem);
+	virtual ~Vk_RenderPass();
 
 private:
 	friend class RenderSystem;
 	class RenderSystem& _renderSystem;
-
-	VkPipelineLayout _vkLayout;
-};
-
-class Vk_Pipeline final : public IPipeline
-{
-public:
-	Vk_Pipeline(class RenderSystem& renderSystem);
-	virtual ~Vk_Pipeline();
-
-private:
-	friend class RenderSystem;
-	class RenderSystem& _renderSystem;
-
-	VkPipeline _pipeline;
+	VkRenderPass _vkRenderPass;
 };
 
 CLOSE_NAMESPACE(Firestorm);
