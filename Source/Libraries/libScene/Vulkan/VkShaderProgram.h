@@ -26,9 +26,9 @@ OPEN_NAMESPACE(Firestorm);
 
 class Vk_Shader final : public IShader
 {
-	FIRE_RESOURCE_DECLARE(Vk_Shader);
+	FIRE_RESOURCE_DECLARE(Vk_Shader, IShader);
 public:
-	Vk_Shader(class Application& app, ShaderType type);
+	Vk_Shader(class Application& app);
 	virtual ~Vk_Shader();
 
 	virtual bool IsReady() const;
@@ -46,18 +46,18 @@ private:
 	bool                _isCompiled{ false };
 };
 
-class Vk_ShaderProgram final : public IShaderProgram//IResourceObject
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Vk_ShaderProgram final : public IShaderProgram
 {
-	FIRE_RESOURCE_DECLARE(Vk_ShaderProgram);
+	FIRE_RESOURCE_DECLARE(Vk_ShaderProgram, IShaderProgram);
 public:
 	Vk_ShaderProgram(class Application& app);
 	virtual ~Vk_ShaderProgram();
 
 	virtual bool IsReady() const;
-	void Compile();
 private:
 	friend class RenderSystem;
-	void AddShader(Resource<IShader>& shader);
 
 	class RenderMgr&          _renderMgr;
 	std::mutex                _slock;

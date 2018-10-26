@@ -25,16 +25,23 @@ OPEN_NAMESPACE(Firestorm);
 
 FIRE_RESOURCE_DEFINE(Vk_Shader)
 {
-	auto& renderSystem = App.GetSystems().GetRenderMgr().GetSystem();
+	auto& renderSystem = App->GetSystems().GetRenderMgr().GetSystem();
 
 	const string filename = ResourceRef.GetPath();
 	if(libIO::FileExists(filename.c_str()))
 	{
+		const string extension = ResourceRef.GetExtension();
 		Result<vector<char>, Error> loadedFileResult(libIO::LoadFile(filename));
 		if(loadedFileResult.has_value())
 		{
-			renderSystem.MakeWhole(Resource.get(), IShader::CreateInfo{
-				Resource->_type,
+			ShaderType type;
+			if(extension == "vert.spv") type = ShaderType::kVERTEX;
+			if(extension == "frag.spv") type = ShaderType::kFRAGMENT;
+			if(extension == "geom.spv") type = ShaderType::kGEOMETRY;
+			if(extension == "comp.spv") type = ShaderType::kCOMPUTE;
+
+			renderSystem.ResourceInitialize(ResourcePtr.get(), IShader::CreateInfo{
+				type,
 				loadedFileResult.value()
 			});
 
@@ -45,10 +52,10 @@ FIRE_RESOURCE_DEFINE(Vk_Shader)
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, Format("could not find file '%s'", filename.c_str()));
 }
 
-Vk_Shader::Vk_Shader(Application& app, ShaderType type)
+Vk_Shader::Vk_Shader(Application& app)
 : _renderSystem(app.GetSystems().GetRenderMgr().GetSystem())
 , _shader(VK_NULL_HANDLE)
-, _type(type)
+, _type(ShaderType::kVERTEX)
 {
 }
 
@@ -65,6 +72,7 @@ bool Vk_Shader::IsReady() const
 
 FIRE_RESOURCE_DEFINE(Vk_ShaderProgram)
 {
+	auto& renderSystem = App->GetSystems().GetRenderMgr().GetSystem();
 	Json::CharReaderBuilder charReaderBuilder;
 	RefPtr<Json::CharReader> _reader(charReaderBuilder.newCharReader());
 
@@ -83,6 +91,7 @@ FIRE_RESOURCE_DEFINE(Vk_ShaderProgram)
 				return FIRE_LOAD_FAIL(ResourceIOErrors::PARSING_ERROR, errors);
 			}
 
+			vector<Resource<IShader>> shaders;
 			if(root.isMember("vertex"))
 			{
 				string value(root["vertex"].asCString());
@@ -92,7 +101,8 @@ FIRE_RESOURCE_DEFINE(Vk_ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"vertex shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Vk_Shader, IShader>(value.c_str(), ShaderType::kVERTEX));
+				//ResourcePtr->AddShader(Mgr->Load<IShader>(value.c_str()));
+				shaders.push_back(Mgr->Load<IShader>(value.c_str()));
 			}
 			
 			if(root.isMember("fragment"))
@@ -104,7 +114,8 @@ FIRE_RESOURCE_DEFINE(Vk_ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"fragment shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Vk_Shader, IShader>(value.c_str(), ShaderType::kFRAGMENT));
+				//ResourcePtr->AddShader(Mgr->Load<IShader>(value.c_str()));
+				shaders.push_back(Mgr->Load<IShader>(value.c_str()));
 			}
 			
 			if(root.isMember("geometry"))
@@ -116,11 +127,12 @@ FIRE_RESOURCE_DEFINE(Vk_ShaderProgram)
 						ResourceIOErrors::FILE_READ_ERROR, 
 						"geometry shader file could not be found");
 				}
-				Resource->AddShader(Mgr.Load<Vk_Shader, IShader>(value.c_str(), ShaderType::kGEOMETRY));
+				//ResourcePtr->AddShader(Mgr->Load<IShader>(value.c_str()));
+				shaders.push_back(Mgr->Load<IShader>(value.c_str()));
 			}
 
 			FIRE_LOG_DEBUG("!!!!! LOAD LOGIC FOR Vk_ShaderProgram RUN! '%s'", filename.c_str());
-			Resource->Compile();
+			renderSystem.ResourceInitialize(ResourcePtr.get(), IShaderProgram::CreateInfo{shaders});
 			return FIRE_LOAD_SUCCESS;
 		}
 	}
@@ -155,47 +167,5 @@ bool Vk_ShaderProgram::IsReady() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Vk_ShaderProgram::Compile()
-{
-	vector<VkPipelineShaderStageCreateInfo> stages(_shaders.size());
-	for(auto shader : _shaders)
-	{
-		VkPipelineShaderStageCreateInfo info ={};
-		info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		switch(shader->GetType())
-		{
-		case ShaderType::kVERTEX:
-			info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-			break;
-		case ShaderType::kFRAGMENT:
-			info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-			break;
-		case ShaderType::kGEOMETRY:
-			info.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
-			break;
-		}
-		info.module = shader.get<Vk_Shader>()->_shader;
-		info.pName = "main";
-		stages.push_back(info);
-	}
-
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Vk_ShaderProgram::AddShader(Resource<IShader>& shader)
-{
-	//if(shader->GetType() == ShaderType::kVertex)
-	//{
-	//	//VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
-	//	//vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	//	//vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	//	//vertShaderStageInfo.module = shader->_shader;
-	//	//vertShaderStageInfo.pName = "main";
-	//}
-	_shaders.push_back(shader);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CLOSE_NAMESPACE(Firestorm);

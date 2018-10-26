@@ -25,7 +25,7 @@ OPEN_NAMESPACE(Firestorm);
 
 RenderMgr::RenderMgr(Application& app)
 : _app(app)
-, _system(_app.GetSystems().GetRenderMgr(), _app.GetSystems().GetWindow())
+, _system(_app)
 {
 }
 

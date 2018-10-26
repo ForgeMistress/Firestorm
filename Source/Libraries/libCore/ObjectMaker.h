@@ -18,20 +18,25 @@ OPEN_NAMESPACE(Firestorm);
 
 struct IMaker
 {
-	virtual void* Make() = 0;
+	virtual void* Make() const = 0;
 };
 
-/**
-	\class BasicMaker
-
-	A standard no-frills object maker.
- **/
-template <class T>
-struct BasicMaker : public IMaker
+template<class T>
+struct Maker : public IMaker
 {
+	eastl::function<void*()> _makeFunc;
+	template<class F>
+	Maker(F&& func)
+		: _makeFunc(eastl::forward<F>(func))
+	{}
 	virtual void* Make() const
+	{ 
+		return _makeFunc();
+	}
+	template<class T>
+	T* Make()
 	{
-		return new T();
+		return reinterpret_cast<T*>(_makeFunc());
 	}
 };
 
@@ -41,17 +46,21 @@ public:
 	ObjectMaker();
 	~ObjectMaker();
 
-	template<class T>
+	template<class Type>
 	bool RegisterMaker(IMaker* maker)
 	{
-		return RegisterMaker(T::MyType(), maker);
+		FIRE_ASSERT(maker != nullptr);
+		return RegisterMaker(Type::MyType(), maker);
 	}
-	bool RegisterMaker(FireClassID type, IMaker* maker);
+	bool RegisterMaker(FireClassID baseType, IMaker* maker);
 
-	template<class T, class... Args_t>
-	T* Make()
+	template<class T, class... Args>
+	T* Make(Args&&... args)
 	{
-		return reinterpret_cast<T*>(Make(T::MyType()));
+		auto type = T::MyType();
+		IMaker* maker = GetMaker(type);
+		Maker<T>* castedMaker = reinterpret_cast<Maker<T>*>(maker);
+		return reinterpret_cast<T*>(castedMaker->Make());
 	}
 	void* Make(FireClassID type);
 
@@ -64,11 +73,14 @@ public:
 
 private:
 	IMaker* GetMaker(FireClassID type) const;
+
 	unordered_map<FireClassID, IMaker*> _makers;
-	mutable std::mutex _s_allLock;
+
+	mutable std::mutex _allLock;
 };
 
 CLOSE_NAMESPACE(Firestorm);
+
 
 #endif
 

@@ -23,17 +23,21 @@ OPEN_NAMESPACE(Firestorm);
 
 ResourceMgr::ResourceMgr(Application& app)
 : _app(app)
-, _tg(_app.GetSystems().GetTaskGraph())
 {
 }
 
-ResMgrProxy::ResMgrProxy(Application& app, ResourceMgr& mgr, tf::SubflowBuilder& builder, const char* filename)
-: _app(app)
-, _mgr(mgr)
-, _tf(_app.GetSystems().GetTaskGraph())
-, _builder(builder)
-, _thisFilename(filename)
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ResourceMgr::~ResourceMgr()
 {
+	std::unique_lock<std::mutex> lock(_cacheLock);
+	for(auto cachePair : _caches)
+	{
+		delete cachePair.second;
+	}
+	_caches.clear();
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CLOSE_NAMESPACE(Firestorm);

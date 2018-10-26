@@ -20,6 +20,7 @@
 #include <libCore/Expected.h>
 #include <libCore/TaskGraph.h>
 #include <libCore/Logger.h>
+#include <libCore/ObjectMaker.h>
 #include <taskflow/taskflow.hpp>
 
 #include <libCore/EventDispatcher.h>
@@ -28,141 +29,187 @@ OPEN_NAMESPACE(Firestorm);
 
 class ResourceLoader;
 
-struct ResourceTypeID
-{
-#ifndef FIRE_FINAL
-	const char* Name;
-#endif
-};
+#define FIRE_RESOURCE_LOADOP_DECLARATION_                                                            \
+struct LoadOp final : public IResourceObject::ILoadOp				                                 \
+{																				                     \
+	ResourceReference ResourceRef;												                     \
+	class Application* App;														                     \
+	class ResourceMgr* Mgr;                                                                          \
+                                                                                                     \
+	LoadOp();                                                                                        \
+	class Application& GetApp() const;                                                               \
+	virtual void Set(class Application* app, class ResourceMgr* mgr, const char* filename) override; \
+	virtual void Operate() override;                                                                 \
+	LoadResult DoOperation(Ptr& Resource);                                                           \
+}
 
-#define FIRE_RESOURCE_DECLARE(RES)                                                    \
-private:                                                                              \
-	friend class ResourceMgr;														  \
-	friend struct ResMgrProxy;                                                        \
-	using PtrType = eastl::shared_ptr<RES>;                                           \
-	FIRE_MIRROR_DECLARE(RES);														  \
-	struct LoadOp																	  \
-	{																				  \
-		ResourceReference ResourceRef;												  \
-		class Application& App;														  \
-		class ResourceMgr& Mgr;                                                       \
-																					  \
-		LoadOp(class Application& app, class ResourceMgr& mgr, const char* filename); \
-		LoadResult operator()();					                                  \
-		LoadResult DoOperation(PtrType& Resource);                                    \
-	};                                                                                \
-	static ResourceCache<RES> _s_cache;                                               \
-	virtual IResourceCache* GetCache() const { return &_s_cache; }                    \
+#define FIRE_RESOURCE_DECLARE_BASE(RES)                                                         \
+private:                                                                                        \
+	FIRE_MIRROR_DECLARE(RES);														            \
+	friend class ResourceMgr;														            \
+	using Ptr = eastl::shared_ptr<RES>;                                                         \
+	using BaseType = RES;                                                                       \
+	FIRE_RESOURCE_LOADOP_DECLARATION_;                                                          \
+	static LoadOp _s_loadOp;                                                                    \
+	virtual IResourceObject::ILoadOp* GetLoadOperation() const override { return &_s_loadOp; }  \
 private:
-	
 
-#define FIRE_RESOURCE_DEFINE(RES)                                                                  \
-ResourceCache<RES> RES::_s_cache;                                                                  \
-RES::LoadOp::LoadOp(Application& app, ResourceMgr& mgr, const char* filename)	                   \
-: ResourceRef(filename)															                   \
-, App(app)																		                   \
-, Mgr(mgr)                                                                                         \
-{																				                   \
-}																				                   \
-LoadResult RES::LoadOp::operator()()								                               \
-{																						           \
-	eastl::string path(ResourceRef.GetPath());                                                     \
-	return DoOperation(_s_cache.GetCached(path.c_str()).GetShared());                              \
-}																						           \
-LoadResult RES::LoadOp::DoOperation(PtrType& Resource)
+#define FIRE_RESOURCE_DECLARE(RES, BASE)                                                        \
+private:                                                                                        \
+	FIRE_MIRROR_DECLARE(RES, BASE);												                \
+	friend class ResourceMgr;														            \
+	using Ptr = eastl::shared_ptr<RES>;                                                         \
+	using BaseType = BASE;                                                                      \
+	FIRE_RESOURCE_LOADOP_DECLARATION_;                                                          \
+	static LoadOp _s_loadOp;                                                                    \
+	virtual IResourceObject::ILoadOp* GetLoadOperation() const override { return &_s_loadOp; }  \
+private:
+
+#define FIRE_RESOURCE_LOADOP_CONSTRUCTOR(RES) \
+RES::LoadOp RES::_s_loadOp;                   \
+RES::LoadOp::LoadOp() {}                      \
+
+#define FIRE_RESOURCE_LOADOP_GETAPP(RES) \
+Application& RES::LoadOp::GetApp() const \
+{										 \
+	return *App;						 \
+}
+
+#define FIRE_RESOURCE_LOADOP_SET(RES)                                                       \
+void RES::LoadOp::Set(class Application* app, class ResourceMgr* mgr, const char* filename) \
+{                                                                                           \
+	App = app;																		        \
+	Mgr = mgr;																		        \
+	ResourceRef = ResourceReference(filename);										        \
+}																					        \
+
+#define fire_cast(to,item) \
+eastl::dynamic_pointer_cast<to>(item);
+
+#define FIRE_RESOURCE_LOADOP_INVOKE(RES)                             \
+void RES::LoadOp::Operate()								             \
+{																	 \
+	eastl::string path(ResourceRef.GetPath());                       \
+	auto cache = Mgr->GetCache<RES::BaseType>();                     \
+	auto casted = fire_cast(RES, cache->GetCachedPtr(path.c_str())); \
+	LoadResult res(DoOperation(casted));                             \
+}
+
+#define FIRE_RESOURCE_LOADOP_DOOP(RES) \
+LoadResult RES::LoadOp::DoOperation(Ptr& ResourcePtr)
+
+#define FIRE_RESOURCE_DEFINE(RES)         \
+	FIRE_RESOURCE_LOADOP_CONSTRUCTOR(RES) \
+	FIRE_RESOURCE_LOADOP_GETAPP(RES)      \
+	FIRE_RESOURCE_LOADOP_SET(RES)         \
+	FIRE_RESOURCE_LOADOP_INVOKE(RES)      \
+	FIRE_RESOURCE_LOADOP_DOOP(RES)
 
 class ResourceMgr final
 {
 public:
 	ResourceMgr(class Application& app);
+	~ResourceMgr();
 
 	/**
 		Schedule a resource of the provided type and the supplied filename for load and return a Resource
 		handle that can be used to track the progress of that load. For further details on tracking loads, see
 		the Resource type itself.
 	 **/
-	template<class ResType, class ReturnType = ResType, class... Args>
-	Resource<ReturnType> Load(const char* filename, Args&&... args)
+	template<class ResType, class... Args>
+	Resource<ResType> Load(const char* filename, Args&&... args)
 	{
-		AddResourceCache(&ResType::_s_cache);
-		if(ResType::_s_cache.IsCached(filename))
+		using PtrType = eastl::shared_ptr<ResType>;
+		auto cache = GetCache<ResType>();
+		if(cache->IsCached(filename))
 		{
 			FIRE_LOG_DEBUG("/!\\ RETURNING CACHED '%s' /!\\", filename);
-			return Resource<ReturnType>(ResType::_s_cache.GetCached(filename));
+			return Resource<ResType>(cache->GetCached(filename));
 		}
-
-		ResType::_s_cache.CacheResourceInstance(
-			filename,
-			eastl::make_shared<ResType>(
-				_app,
-				eastl::forward<Args>(args)...
+		cache->CacheResourceInstance(filename, 
+			PtrType(
+				_resourceMaker.Make<ResType>(
+					_app, 
+					eastl::forward<Args>(args)...
+				)
 			)
 		);
+		auto objPtr = cache->GetCached(filename);
 
-		typename ResType::LoadOp loadOp(_app, *this, filename);
-		LoadResult result(loadOp());
-		
-		return Resource<ReturnType>(ResType::_s_cache.GetCached(filename));
+		IResourceObject::ILoadOp* loadOp = objPtr->GetLoadOperation();
+		loadOp->Set(&_app, this, filename);
+		loadOp->Operate();
+
+		return Resource<ResType>(objPtr);
 	}
 
-	void AddResourceCache(IResourceCache* cache)
+	/**
+		BaseType can either be the base type of the resource (if there's an inheritence hierarachy)
+		or the type itself. If you need to establish a mapping between Base->Inherited, however,
+		you'll need to have BaseType be your base type and SuperType be the actual concrete type
+		that you want to be allocated.
+
+		This is necessary to be able to abstract away the superclass implementations of some
+		resource objects within libScene.
+	 **/
+	template<class Type, class F>
+	bool AddResourceMaker(F&& func)
 	{
-		std::unique_lock<std::mutex> lock(_cacheLock);
-		for(size_t i=0; i<_caches.size(); ++i)
+		FireClassID type = Type::MyType();
+		if(!_resourceMaker.IsMakerRegistered<Type>())
 		{
-			if(_caches[i] == cache)
-			{
-				return;
-			}
+			_resourceMaker.RegisterMaker<Type>(
+				new Maker<Type>(eastl::forward<F>(func))
+			);
+			return true;
 		}
-		_caches.push_back(cache);
+		return false;
 	}
 
 	void CleanOldResources()
 	{
 		std::unique_lock<std::mutex> lock(_cacheLock);
-		for(size_t i=0; i<_caches.size(); ++i)
+		for(auto& cachePair : _caches)
 		{
-			_caches[i]->ClearUnusedResources();
+			cachePair.second->ClearUnusedResources();
 		}
+	}
+
+	template<class T>
+	ResourceCache<T>* GetCache() const
+	{
+		std::unique_lock<std::mutex> lock(_cacheLock);
+		auto type = T::MyType();
+		FIRE_ASSERT_MSG(_caches.find(type) != _caches.end(), "cache of specified type was not found");
+		return reinterpret_cast<ResourceCache<T>*>(_caches[T::MyType()]);
 	}
 
 public:
-	class Application& _app;
-	class TaskGraph&   _tg;
-	std::mutex _cacheLock;
-	mutable vector<IResourceCache*> _caches;
-};
-
-struct ResMgrProxy
-{
-	Application& _app;
-	ResourceMgr& _mgr;
-	TaskGraph& _tf;
-	tf::SubflowBuilder& _builder;
-	string _thisFilename;
-
-	ResMgrProxy(Application& app, ResourceMgr& mgr, tf::SubflowBuilder& builder, const char* thisFilename);
-
-	template<class ResType>
-	Resource<ResType> LoadDependency(const char* filename)
+	template<class T>
+	void AddResourceCache()
 	{
-		if(ResType::_s_cache.IsCached(filename))
+		std::unique_lock<std::mutex> lock(_cacheLock);
+		auto type = T::MyType();
+		if(_caches.find(type) == _caches.end())
 		{
-			FIRE_LOG_DEBUG("/!\\ RETURNING CACHED '%s' /!\\", filename);
-			// need to figure out how to get thhese resource handles to reference the same pointer
-			return ResType::_s_cache.GetCached(filename);
+			_caches[type] = new ResourceCache<T>;
 		}
-	
-		FIRE_ASSERT(_tf.has(_thisFilename.c_str()));
-		auto[task, fut] = _tf.emplace(
-			[&, this, fname = string(filename)] (tf::SubflowBuilder& builder) -> LoadResult {
-				ResType::LoadOp loadOp(_app, *this, fname.c_str());
-				return loadOp(builder);
-			}, filename);
-		ResType::_s_cache.CacheResourceInstance(_app, filename, eastl::move(fut));
-		return ResType::_s_cache.GetCached(filename);
 	}
+
+	template<class T>
+	ResourcePtr MakeResource() const
+	{
+		std::unique_lock<std::mutex> lock(_makerLock);
+		FIRE_ASSERT(_resourceMakers.find(T::MyType()) != _resourceMakers.end());
+		return _resourceMakers[T::MyType()]->Make();
+	}
+
+	class Application& _app;
+
+	ObjectMaker _resourceMaker;
+
+	mutable std::mutex _cacheLock;
+	mutable unordered_map<FireClassID, IResourceCache*> _caches;
 };
 
 //**

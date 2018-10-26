@@ -67,8 +67,8 @@ public:
 			
 			float PosX{ 0 }, PosY{ 0 };
 			float ExtentX{ 0 }, ExtentY{ 0 };
-			float   MinDepth;
-			float   MaxDepth;
+			float MinDepth;
+			float MaxDepth;
 		};
 		vector<Viewport> Viewports;
 
@@ -81,13 +81,13 @@ public:
 
 		struct RasterizerState
 		{
-			bool DepthClampEnable{ false };
-			bool RasterizerDiscardEnable{ false };
-			PolyMode PolygonMode{ PolyMode::kFill };
-			float LineWidth{ 1.0f };
+			bool        DepthClampEnable{ false };
+			bool        RasterizerDiscardEnable{ false };
+			PolyMode    PolygonMode{ PolyMode::kFill };
+			float       LineWidth{ 1.0f };
 			CullingMode CullMode{ CullingMode::kBACK_BIT };
-			FrontFace FrontFace{ FrontFace::kCLOCKWISE };
-			bool DepthBiasEnable{ false };
+			FrontFace   FrontFace{ FrontFace::kCLOCKWISE };
+			bool        DepthBiasEnable{ false };
 		};
 		RasterizerState RasterizerState;
 
@@ -100,14 +100,14 @@ public:
 
 		struct ColorBlendAttachmentState
 		{
-			bool                   BlendEnable{ false };
-			BlendFactor            SrcColorBlendFactor;
-			BlendFactor            DstColorBlendFactor;
-			BlendOp                ColorBlendOp;
-			BlendFactor            SrcAlphaBlendFactor;
-			BlendFactor            DstAlphaBlendFactor;
-			BlendOp                AlphaBlendOp;
-			ColorComponentFlags    ColorWriteMask{
+			bool                BlendEnable{ false };
+			BlendFactor         SrcColorBlendFactor;
+			BlendFactor         DstColorBlendFactor;
+			BlendOp             ColorBlendOp;
+			BlendFactor         SrcAlphaBlendFactor;
+			BlendFactor         DstAlphaBlendFactor;
+			BlendOp             AlphaBlendOp;
+			ColorComponentFlags ColorWriteMask{
 				ColorComponentFlags::kR_BIT |
 				ColorComponentFlags::kG_BIT |
 				ColorComponentFlags::kB_BIT |
@@ -117,9 +117,9 @@ public:
 
 		struct PipelineColorBlendState
 		{
-			const void*                          Next;
+			const void*                          Next{ nullptr };
 			//VkPipelineColorBlendStateCreateFlags Flags;
-			bool                                 LogicOpEnable;
+			bool                                 LogicOpEnable{ false };
 			LogicOp                              LogicOp;
 			vector<ColorBlendAttachmentState>    Attachments;
 			float                                BlendConstants[4];
@@ -128,7 +128,7 @@ public:
 
 		CreateInfo(class RenderSystem& renderSystem);
 
-		Resource<Vk_ShaderProgram>   ShaderStage;
+		Resource<IShaderProgram>  ShaderStage;
 		IPipelineLayout*          Layout{ nullptr };
 		IRenderPass*              RenderPass{ nullptr };
 	};

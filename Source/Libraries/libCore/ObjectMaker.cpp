@@ -18,7 +18,7 @@ ObjectMaker::ObjectMaker()
 
 ObjectMaker::~ObjectMaker()
 {
-	std::scoped_lock lock(_s_allLock);
+	std::scoped_lock lock(_allLock);
 	for(auto makerPair : _makers)
 	{
 		delete makerPair.second;
@@ -26,20 +26,20 @@ ObjectMaker::~ObjectMaker()
 	_makers.clear();
 }
 
-bool ObjectMaker::RegisterMaker(FireClassID type, IMaker* maker)
+bool ObjectMaker::RegisterMaker(FireClassID key, IMaker* maker)
 {
-	std::scoped_lock lock(_s_allLock);
-	if(_makers.find(type) == _makers.end())
+	std::scoped_lock lock(_allLock);
+	if(_makers.find(key) == _makers.end())
 	{
-		_makers[type] = maker;
+		_makers[key] = maker;
 		return true;
 	}
 	return false;
 }
 
-void* ObjectMaker::Make(FireClassID type)
+void* ObjectMaker::Make(FireClassID key)
 {
-	IMaker* maker = GetMaker(type);
+	IMaker* maker = GetMaker(key);
 	return maker->Make();
 }
 
@@ -50,7 +50,7 @@ bool ObjectMaker::IsMakerRegistered(FireClassID type) const
 
 IMaker* ObjectMaker::GetMaker(FireClassID type) const
 {
-	std::scoped_lock<std::mutex> lock(_s_allLock);
+	std::scoped_lock<std::mutex> lock(_allLock);
 	auto found = _makers.find(type);
 	if(found != _makers.end())
 		return (*found).second;

@@ -20,6 +20,15 @@ FirestormApp::FirestormApp(std::thread::id mainThreadID)
 
 FirestormApp::~FirestormApp()
 {
+	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
+	auto& renderSystem = renderMgr.GetSystem();
+	renderSystem.Release(_renderPass);
+	renderSystem.Release(_pipelineLayout);
+	renderSystem.Release(_pipeline);
+
+	delete _renderPass;
+	delete _pipelineLayout;
+	delete _pipeline;
 }
 
 void FirestormApp::OnInitialize(int ac, char** av)
@@ -36,11 +45,11 @@ void FirestormApp::OnInitialize(int ac, char** av)
 		HandleApplicationWantsToClose(e);
 	});
 
-	_shaderResource = resourceMgr.Load<Vk_ShaderProgram>("/Shaders/Triangle.shader");
-	_shaderResource2 = resourceMgr.Load<Vk_ShaderProgram>("/Shaders/Triangle.shader");
+	_shaderResource = resourceMgr.Load<IShaderProgram>("/Shaders/Triangle.shader");
+	_shaderResource2 = resourceMgr.Load<IShaderProgram>("/Shaders/Triangle.shader");
 
 	IPipelineLayout::CreateInfo layoutInfo{};
-	IPipelineLayout* layout = renderMgr.GetSystem().Make(layoutInfo);
+	_pipelineLayout = renderMgr.GetSystem().Make(layoutInfo);
 
 	IRenderPass::CreateInfo renderPassInfo(renderMgr.GetSystem());
 
@@ -59,37 +68,15 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 	renderPassInfo.AddSubpass(subpass);
 
-	IRenderPass* renderPass = renderMgr.GetSystem().Make(renderPassInfo);
+	_renderPass = renderMgr.GetSystem().Make(renderPassInfo);
 
 	IPipeline::CreateInfo pipelineInfo{ renderMgr.GetSystem() };
 	pipelineInfo.ShaderStage = _shaderResource;
-	pipelineInfo.Layout = layout;
-	pipelineInfo.RenderPass = renderPass;
-	IPipeline* pipeline = renderMgr.GetSystem().Make(pipelineInfo);
+	pipelineInfo.Layout = _pipelineLayout;
+	pipelineInfo.RenderPass = _renderPass;
+	pipelineInfo.PipelineColorBlendState.Attachments.push_back(IPipeline::CreateInfo::ColorBlendAttachmentState());
+	_pipeline = renderMgr.GetSystem().Make(pipelineInfo);
 
-	FIRE_LOG_DEBUG("+++++ SIZEOF tf::Node: %d", sizeof(tf::Node));
-
-	using StaticWork   = std::function<void()>;
-	using DynamicWork  = std::function<void(tf::SubflowBuilder&)>;
-	using Graph = std::forward_list<tf::Node>;
-	using tfNodeVariant = std::variant<StaticWork, DynamicWork>;
-	union WorkUnion
-	{
-		StaticWork _static;
-		DynamicWork _dynamic;
-	};
-
-#define printsize(tag, type) FIRE_LOG_DEBUG("+++++    SIZEOF "#tag" ("#type"): %d", sizeof(type));
-
-	printsize(_name, std::string);
-	printsize(_work, tfNodeVariant);
-	printsize(_workUnion, WorkUnion);
-	printsize(_successors, std::vector<tf::Node*>);
-	printsize(_dependents, std::atomic<int>);
-	printsize(_dependents_SMALLER, std::atomic<uint8_t>);
-	printsize(_subgraph, std::optional<Graph>);
-	printsize(_subgraphRaw, Graph);
-	printsize(_topology, tf::Topology*);
 
 	//for(size_t i=0; i<1000; ++i)
 	//{
@@ -248,9 +235,10 @@ void FirestormApp::HandleApplicationWantsToClose(const ApplicationWantsToCloseEv
 void FirestormApp::RegisterResourceTypes()
 {
 	// Register the resource types.
-	// auto& systems = GetSystems();
-	// auto& renderMgr = systems.GetRenderMgr();
-	// auto& resourceMgr = systems.GetResourceMgr();
+	auto& systems = GetSystems();
+	auto& renderMgr = systems.GetRenderMgr();
+	auto& resourceMgr = systems.GetResourceMgr();
+	//resourceMgr.InstallResourceMaker<
 
 	// resourceMgr.InstallLoader<ShaderProgramResource>(renderMgr);
 	// resourceMgr.InstallLoader<MeshResource>(renderMgr);

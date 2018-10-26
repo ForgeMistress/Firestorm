@@ -35,7 +35,7 @@ using namespace eastl;
 class RenderSystem final
 {
 public:
-	RenderSystem(class RenderMgr& renderMgr, class Window& window);
+	RenderSystem(class Application& app);
 	~RenderSystem();
 
 	void Initialize();
@@ -45,20 +45,19 @@ public:
 	/**
 		Creation function for a shader instance that is used by the resource loader routines.
 	 **/
-	bool MakeWhole(class IShader* shader, const IShader::CreateInfo& info);
+	bool ResourceInitialize(class IShader* shader, const IShader::CreateInfo& info);
 
 	/**
 		Creation function for a shader program instance that is used by the resource loader routines.
 	**/
-	bool MakeWhole(class IShaderProgram* shaderProgram, const IShaderProgram::CreateInfo& info);
+	bool ResourceInitialize(class IShaderProgram* shaderProgram, const IShaderProgram::CreateInfo& info);
 
-	owner<class IShaderProgram*>  Make(const IShaderProgram::CreateInfo& info);
 	owner<class IPipelineLayout*> Make(const IPipelineLayout::CreateInfo& info);
 	owner<class IPipeline*>       Make(const IPipeline::CreateInfo& info);
 	owner<class IRenderPass*>     Make(const IRenderPass::CreateInfo& info);
 
 	// release functions.
-	void Release(class Vk_Shader* shader);
+	void Release(IShader* shader);
 	void Release(IPipeline* pipeline);
 	void Release(IPipelineLayout* layout);
 	void Release(IRenderPass* renderPass);
@@ -68,6 +67,8 @@ public:
 
 	size_t GetSwapchainImageFormat() const { return _swapChainImageFormat; }
 private:
+	void RegisterResourceMakers();
+
 	void CheckValidationLayers();
 	void CreateInstance();
 	void SetupDebugCallback();
@@ -105,8 +106,10 @@ private:
 
 	vector<const char*> GetRequiredExtensions() const;
 
+	class Application& _app;
 	class RenderMgr& _renderMgr;
 	class Window& _window;
+	class ResourceMgr& _resourceMgr;
 
 	VkInstance _instance{ nullptr };
 	VkDebugUtilsMessengerEXT _callback{ nullptr };

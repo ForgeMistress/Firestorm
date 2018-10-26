@@ -41,6 +41,11 @@ public:
 	 **/
 	string GetPathTo() const;
 
+	/**
+		Retrieve the file extension.
+	 **/
+	string GetExtension() const;
+
 private:
 	friend class ResourceMgr;
 	void SetResourcePath(const string& path);

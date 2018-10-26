@@ -8,6 +8,7 @@
 
 #include <libCore/libCore.h>
 #include <libCore/Object.h>
+#include <libCore/MirrorMacros.h>
 
 #include <libIO/libIO.h>
 #include <libIO/IResourceObject.h>

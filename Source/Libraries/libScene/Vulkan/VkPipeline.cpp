@@ -29,12 +29,12 @@ Vk_Pipeline::CreateInfo::CreateInfo(class RenderSystem& renderSystem)
 {
 	const auto& swapchainExtent = renderSystem.GetSwapchainExtent();
 	Viewports.push_back({
-		0.0f,
-		0.0f,
 		narrow_cast<float>(swapchainExtent.width),
 		narrow_cast<float>(swapchainExtent.height),
 		narrow_cast<float>(swapchainExtent.width),
-		narrow_cast<float>(swapchainExtent.height)
+		narrow_cast<float>(swapchainExtent.height),
+		0.0f,
+		1.0f
 	});
 
 	Scissors.push_back({

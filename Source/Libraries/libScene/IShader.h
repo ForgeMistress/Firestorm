@@ -19,6 +19,7 @@ OPEN_NAMESPACE(Firestorm);
 
 class IShader : public IResourceObject
 {
+	FIRE_MIRROR_DECLARE(IShader, IResourceObject);
 public:
 	struct CreateInfo
 	{
@@ -33,6 +34,7 @@ public:
 
 class IShaderProgram : public IResourceObject
 {
+	FIRE_MIRROR_DECLARE(IShaderProgram, IResourceObject);
 public:
 	struct CreateInfo
 	{

@@ -54,6 +54,22 @@ string ResourceReference::GetPathTo() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+string ResourceReference::GetExtension() const
+{
+	auto split = SplitString(_resourcePath, '.');
+	split.erase(split.begin());
+	string outstr;
+	for(auto str : split)
+	{
+		outstr.append(str.c_str());
+		if(str != split[split.size()-1])
+			outstr.append(".");
+	}
+	return outstr;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void ResourceReference::SetResourcePath(const string& path)
 {
 	_resourcePath = path;

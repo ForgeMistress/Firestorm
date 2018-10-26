@@ -26,8 +26,12 @@ public:
 private:
 	void RegisterResourceTypes();
 
-	Resource<Vk_ShaderProgram> _shaderResource;
-	Resource<Vk_ShaderProgram> _shaderResource2;
+	IPipelineLayout* _pipelineLayout{ nullptr };
+	IRenderPass* _renderPass{ nullptr };
+	IPipeline* _pipeline{ nullptr };
+
+	Resource<IShaderProgram> _shaderResource;
+	Resource<IShaderProgram> _shaderResource2;
 
 };
 

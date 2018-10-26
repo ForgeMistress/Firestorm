@@ -8,9 +8,10 @@
 //  Copyright (c) Project Firestorm 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "../RenderMgr.h"
 
+#include "../RenderMgr.h"
 #include "../Enumerations.h"
+
 #include "VkRenderSystem.h"
 #include "VkShaderProgram.h"
 #include "VkPipeline.h"
@@ -18,6 +19,7 @@
 
 #include <libCore/Logger.h>
 
+#include <libApp/Application.h>
 #include <libApp/Window.h>
 
 #include <EASTL/sort.h>
@@ -158,9 +160,11 @@ vector<VkAttachmentReference> map(const vector<IRenderPass::CreateInfo::Attachme
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RenderSystem::RenderSystem(RenderMgr& renderMgr, Window& window)
-: _renderMgr(renderMgr)
-, _window(window)
+RenderSystem::RenderSystem(Application& app)
+: _app(app)
+, _renderMgr(app.GetSystems().GetRenderMgr())
+, _window(app.GetSystems().GetWindow())
+, _resourceMgr(app.GetSystems().GetResourceMgr())
 , _deviceExtensions({
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 })
@@ -184,6 +188,8 @@ RenderSystem::~RenderSystem()
 
 void RenderSystem::Initialize()
 {
+	RegisterResourceMakers();
+
 	CheckValidationLayers();
 	CreateInstance();
 	SetupDebugCallback();
@@ -213,7 +219,7 @@ void RenderSystem::Shutdown()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool RenderSystem::MakeWhole(IShader* sshader, const IShader::CreateInfo& info)
+bool RenderSystem::ResourceInitialize(IShader* sshader, const IShader::CreateInfo& info)
 {
 	FIRE_ASSERT_MSG(sshader, "need to pass in an allocated shader b-baka");
 	Vk_Shader* shader = dynamic_cast<Vk_Shader*>(sshader);
@@ -226,6 +232,16 @@ bool RenderSystem::MakeWhole(IShader* sshader, const IShader::CreateInfo& info)
 	shader->_type = info.Type;
 
 	FIRE_VALIDATE_VK_CALL(vkCreateShaderModule, _device, &shaderModule, FIRE_VK_ALLOC, &shader->_shader);
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool RenderSystem::ResourceInitialize(class IShaderProgram* shaderProgram, const IShaderProgram::CreateInfo& info)
+{
+	Vk_ShaderProgram* prog = dynamic_cast<Vk_ShaderProgram*>(shaderProgram);
+	FIRE_ASSERT(prog != nullptr);
+	prog->_shaders = info.Shaders;
 	return true;
 }
 
@@ -255,12 +271,13 @@ IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// VkPipelineShaderStageCreateInfo
-	size_t numShaders = info.ShaderStage->_shaders.size();
+	const Vk_ShaderProgram* shaderProgram = info.ShaderStage.get<Vk_ShaderProgram>();
+	size_t numShaders = shaderProgram->_shaders.size();
 	vector<VkPipelineShaderStageCreateInfo> shaderStages;
 	shaderStages.reserve(numShaders);
-	for(size_t i=0; i<info.ShaderStage->_shaders.size(); ++i)
+	for(size_t i=0; i<shaderProgram->_shaders.size(); ++i)
 	{
-		shaderStages.push_back(map(info.ShaderStage->_shaders[i]));
+		shaderStages.push_back(map(shaderProgram->_shaders[i]));
 	}
 	// END VkPipelineShaderStageCreateInfo
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -469,9 +486,9 @@ IRenderPass* RenderSystem::Make(const IRenderPass::CreateInfo& info)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderSystem::Release(class Vk_Shader* shader)
+void RenderSystem::Release(IShader* shader)
 {
-	vkDestroyShaderModule(_device, shader->_shader, FIRE_VK_FREE);
+	vkDestroyShaderModule(_device, static_cast<Vk_Shader*>(shader)->_shader, FIRE_VK_FREE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -493,6 +510,21 @@ void RenderSystem::Release(IPipelineLayout* layout)
 void RenderSystem::Release(IRenderPass* renderPass)
 {
 	vkDestroyRenderPass(_device, static_cast<Vk_RenderPass*>(renderPass)->_vkRenderPass, FIRE_VK_FREE);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::RegisterResourceMakers()
+{
+	_resourceMgr.AddResourceCache<IShader>();
+	_resourceMgr.AddResourceCache<IShaderProgram>();
+
+	_resourceMgr.AddResourceMaker<IShader>([this] {
+		return new Vk_Shader(_app);
+	});
+	_resourceMgr.AddResourceMaker<IShaderProgram>([this] {
+		return new Vk_ShaderProgram(_app);
+	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
