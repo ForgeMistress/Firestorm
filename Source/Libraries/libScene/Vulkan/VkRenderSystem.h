@@ -38,7 +38,7 @@ public:
 	RenderSystem(class Application& app);
 	~RenderSystem();
 
-	void Initialize();
+	void InitializeSystem();
 	void Shutdown();
 
 	// creation functions.
@@ -77,6 +77,7 @@ private:
 	void CreateSurface();
 	void CreateSwapChain();
 	void CreateImageViews();
+	void CreateFramebuffers();
 
 	struct QueueFamilyIndices
 	{
@@ -125,6 +126,7 @@ private:
 	VkFormat _swapChainImageFormat;
 	VkExtent2D _swapChainExtent;
 	vector<VkImageView> _swapChainImageViews;
+	vector<VkFramebuffer> _swapChainFrameBuffers;
 #ifndef FIRE_FINAL
 	vector<const char*> _validationLayers;
 #endif

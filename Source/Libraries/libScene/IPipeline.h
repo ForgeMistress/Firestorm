@@ -126,7 +126,7 @@ public:
 		};
 		PipelineColorBlendState PipelineColorBlendState;
 
-		CreateInfo(class RenderSystem& renderSystem);
+		CreateInfo(const class RenderSystem& renderSystem);
 
 		Resource<IShaderProgram>  ShaderStage;
 		IPipelineLayout*          Layout{ nullptr };
@@ -137,5 +137,9 @@ public:
 };
 
 CLOSE_NAMESPACE(Firestorm);
+
+#ifdef FIRE_GFX_VULKAN
+#include "Vulkan/VkPipeline.h"
+#endif
 
 #endif

@@ -48,35 +48,6 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	_shaderResource = resourceMgr.Load<IShaderProgram>("/Shaders/Triangle.shader");
 	_shaderResource2 = resourceMgr.Load<IShaderProgram>("/Shaders/Triangle.shader");
 
-	IPipelineLayout::CreateInfo layoutInfo{};
-	_pipelineLayout = renderMgr.GetSystem().Make(layoutInfo);
-
-	IRenderPass::CreateInfo renderPassInfo(renderMgr.GetSystem());
-
-	IRenderPass::CreateInfo::AttachmentDescription attachDesc{};
-	attachDesc.Flags = static_cast<AttachmentDescriptionFlags>(0);
-	attachDesc.Format = renderMgr.GetSystem().GetSwapchainImageFormat();
-	attachDesc.FinalLayout = ImageLayout::kPRESENT_SRC;
-	renderPassInfo.AddAttachmentDesc(attachDesc);
-
-	IRenderPass::CreateInfo::AttachmentReference colorRef;
-	colorRef.Attachment = 0;
-	colorRef.Layout = ImageLayout::kCOLOR_ATTACHMENT_OPTIMAL;
-
-	IRenderPass::CreateInfo::SubpassDescription subpass;
-	subpass.ColorAttachments.push_back(colorRef);
-
-	renderPassInfo.AddSubpass(subpass);
-
-	_renderPass = renderMgr.GetSystem().Make(renderPassInfo);
-
-	IPipeline::CreateInfo pipelineInfo{ renderMgr.GetSystem() };
-	pipelineInfo.ShaderStage = _shaderResource;
-	pipelineInfo.Layout = _pipelineLayout;
-	pipelineInfo.RenderPass = _renderPass;
-	pipelineInfo.PipelineColorBlendState.Attachments.push_back(IPipeline::CreateInfo::ColorBlendAttachmentState());
-	_pipeline = renderMgr.GetSystem().Make(pipelineInfo);
-
 
 	//for(size_t i=0; i<1000; ++i)
 	//{

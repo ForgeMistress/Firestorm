@@ -60,9 +60,9 @@ public:
 		vector<SubpassDescription> Subpasses;
 		void AddSubpass(const SubpassDescription& subpass);
 
-		CreateInfo(class RenderSystem& renderSystem);
+		CreateInfo(const class RenderSystem& renderSystem);
 
-		class RenderSystem& _renderSystem;
+		const class RenderSystem& _renderSystem;
 	};
 
 	virtual ~IRenderPass() = default;

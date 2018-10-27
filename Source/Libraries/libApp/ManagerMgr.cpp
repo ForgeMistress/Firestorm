@@ -35,8 +35,8 @@ void ManagerMgr::Initialize()
 {
 	_Window.Initialize(WindowDesc{
 		"Firestorm Application",
-		800,
-		600
+		1024,
+		768
 	});
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	_RenderMgr.Initialize("");

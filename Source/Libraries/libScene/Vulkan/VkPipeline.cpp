@@ -25,7 +25,7 @@ Vk_PipelineLayout::~Vk_PipelineLayout()
 
 
 
-Vk_Pipeline::CreateInfo::CreateInfo(class RenderSystem& renderSystem)
+IPipeline::CreateInfo::CreateInfo(const class RenderSystem& renderSystem)
 {
 	const auto& swapchainExtent = renderSystem.GetSwapchainExtent();
 	Viewports.push_back({

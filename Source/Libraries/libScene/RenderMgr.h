@@ -22,6 +22,24 @@ class Application;
 class RenderMgr final
 {
 public:
+	struct PipelineHolder
+	{
+		IPipeline* Default;
+	};
+	PipelineHolder Pipelines;
+
+	struct PipelineLayoutHolder
+	{
+		IPipelineLayout* Default;
+	};
+	PipelineLayoutHolder PipelineLayouts;
+
+	struct FramebufferHolder
+	{
+
+	};
+	FramebufferHolder Framebuffers;
+public:
 	RenderMgr(Application& app);
 	~RenderMgr();
 
@@ -39,7 +57,17 @@ public:
 	RenderSystem& GetSystem() { return _system; }
 	const RenderSystem& GetSystem() const { return _system; }
 
+	IPipelineLayout::CreateInfo GetPipelineLayoutInfo() const;
+	IRenderPass::CreateInfo GetRenderPassInfo() const;
+	IPipeline::CreateInfo GetPipelineCreateInfo() const;
+	IPipeline::CreateInfo GetPipelineCreateInfo(Resource<IShaderProgram> shaderStage,
+                                                IPipelineLayout*         layout,
+                                                IRenderPass*             renderPass) const;
+
 private:
+	void CreateDefaultPipelines();
+	void CreateDefaultFramebuffers();
+
 	Application& _app;
 	RenderSystem _system;
 

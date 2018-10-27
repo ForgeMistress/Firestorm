@@ -11,8 +11,8 @@
 #define LIBSCENE_PIPELINE_H_
 #pragma once
 
-#ifdef FIRE_GFX_VULKAN
-#include "Vulkan/VkPipeline.h"
-#endif
+// #ifdef FIRE_GFX_VULKAN
+// #include "Vulkan/VkPipeline.h"
+// #endif
 
 #endif

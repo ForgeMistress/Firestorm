@@ -12,7 +12,7 @@
 
 OPEN_NAMESPACE(Firestorm);
 
-IRenderPass::CreateInfo::CreateInfo(class RenderSystem& renderSystem)
+IRenderPass::CreateInfo::CreateInfo(const class RenderSystem& renderSystem)
 : _renderSystem(renderSystem)
 {
 

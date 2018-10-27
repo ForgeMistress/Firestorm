@@ -186,7 +186,7 @@ RenderSystem::~RenderSystem()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderSystem::Initialize()
+void RenderSystem::InitializeSystem()
 {
 	RegisterResourceMakers();
 
@@ -747,6 +747,7 @@ void RenderSystem::CreateSwapChain()
 
 void RenderSystem::CreateImageViews()
 {
+	size_t num = _swapChainImages.size();
 	_swapChainImageViews.resize(_swapChainImages.size());
 	for(size_t i=0; i<_swapChainImages.size(); ++i)
 	{
@@ -768,7 +769,28 @@ void RenderSystem::CreateImageViews()
 		createInfo.subresourceRange.layerCount = 1;
 
 		FIRE_VALIDATE_VK_CALL(vkCreateImageView, _device, &createInfo, nullptr, &_swapChainImageViews[i]);
+	}
+}
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RenderSystem::CreateFramebuffers()
+{
+	_swapChainFrameBuffers.resize(_swapChainImageViews.size());
+	for(size_t i=0; i<_swapChainImageViews.size(); ++i)
+	{
+		VkImageView attachments[] ={
+			_swapChainImageViews[i]
+		};
+
+		VkFramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		//framebufferInfo.renderPass = renderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = _swapChainExtent.width;
+		framebufferInfo.height = _swapChainExtent.height;
+		framebufferInfo.layers = 1;
 	}
 }
 
