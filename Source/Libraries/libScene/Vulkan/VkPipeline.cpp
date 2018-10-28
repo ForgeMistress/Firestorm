@@ -23,28 +23,39 @@ Vk_PipelineLayout::~Vk_PipelineLayout()
 	//_renderSystem.Release(this);
 }
 
-
-
-IPipeline::CreateInfo::CreateInfo(const class RenderSystem& renderSystem)
+void IPipeline::CreateInfo::AddViewport(float posX, float posY,
+                                        float extentX, float extentY,
+                                        float minDepth, float maxDepth)
 {
+	Viewports.push_back({ posX,posY, extentX, extentY, minDepth, maxDepth });
+}
+
+IPipeline::CreateInfo IPipeline::MakeCreateInfo(const class RenderSystem& renderSystem,
+	                                            IPipelineLayout*          layout,
+	                                            IRenderPass*              renderPass)
+{
+	CreateInfo info;
 	const auto& swapchainExtent = renderSystem.GetSwapchainExtent();
-	Viewports.push_back({
-		narrow_cast<float>(swapchainExtent.width),
-		narrow_cast<float>(swapchainExtent.height),
+	info.AddViewport(
+		0,
+		0,
 		narrow_cast<float>(swapchainExtent.width),
 		narrow_cast<float>(swapchainExtent.height),
 		0.0f,
 		1.0f
-	});
+	);
 
-	Scissors.push_back({
+	info.Scissors.push_back({
 		0,
 		0,
 		swapchainExtent.width,
 		swapchainExtent.height
 	});
 
-	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
+	info.Layout = layout;
+	info.RenderPass = renderPass;
+
+	return info;
 }
 
 Vk_Pipeline::Vk_Pipeline(class RenderSystem& renderSystem)

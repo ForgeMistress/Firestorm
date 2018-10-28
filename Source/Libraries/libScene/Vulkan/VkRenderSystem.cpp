@@ -222,8 +222,7 @@ void RenderSystem::Shutdown()
 bool RenderSystem::ResourceInitialize(IShader* sshader, const IShader::CreateInfo& info)
 {
 	FIRE_ASSERT_MSG(sshader, "need to pass in an allocated shader b-baka");
-	Vk_Shader* shader = dynamic_cast<Vk_Shader*>(sshader);
-	FIRE_ASSERT_MSG(shader != nullptr, "shader was not a Vk_Shader");
+	Vk_Shader* shader = static_cast<Vk_Shader*>(sshader);
 
 	VkShaderModuleCreateInfo shaderModule ={};
 	shaderModule.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -231,7 +230,7 @@ bool RenderSystem::ResourceInitialize(IShader* sshader, const IShader::CreateInf
 	shaderModule.pCode = reinterpret_cast<const uint32_t*>(info.Data.data());
 	shader->_type = info.Type;
 
-	FIRE_VALIDATE_VK_CALL(vkCreateShaderModule, _device, &shaderModule, FIRE_VK_ALLOC, &shader->_shader);
+	FIRE_VALIDATE_VK_CALL(vkCreateShaderModule, _device, &shaderModule, FIRE_VK_ALLOC, &shader->_vkShader);
 	return true;
 }
 
@@ -239,10 +238,57 @@ bool RenderSystem::ResourceInitialize(IShader* sshader, const IShader::CreateInf
 
 bool RenderSystem::ResourceInitialize(class IShaderProgram* shaderProgram, const IShaderProgram::CreateInfo& info)
 {
-	Vk_ShaderProgram* prog = dynamic_cast<Vk_ShaderProgram*>(shaderProgram);
-	FIRE_ASSERT(prog != nullptr);
+	Vk_ShaderProgram* prog = static_cast<Vk_ShaderProgram*>(shaderProgram);
 	prog->_shaders = info.Shaders;
 	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RSPtr<IShader> RenderSystem::CreateShader()
+{
+	return RSPtr<IShader>(new Vk_Shader(*this), [this](IShader* p) {
+		Vk_Shader* ptr = static_cast<Vk_Shader*>(p);
+		if(ptr->_vkShader)
+			vkDestroyShaderModule(_device, ptr->_vkShader, FIRE_VK_FREE);
+		delete ptr;
+	});
+}
+
+RSPtr<IShaderProgram> RenderSystem::CreateShaderProgram()
+{
+	return RSPtr<IShaderProgram>(new Vk_ShaderProgram(*this), [this](IShaderProgram* p) {
+		delete p;
+	});
+}
+
+RSPtr<IPipelineLayout> RenderSystem::CreatePipelineLayout()
+{
+	return RSPtr<IPipelineLayout>(new Vk_PipelineLayout(*this), [this](IPipelineLayout* p) {
+		Vk_PipelineLayout* ptr = static_cast<Vk_PipelineLayout*>(p);
+		if(ptr->_vkLayout)
+			vkDestroyPipelineLayout(_device, ptr->_vkLayout, FIRE_VK_FREE);
+		delete p;
+	});
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RSPtr<IPipeline> RenderSystem::CreatePipeline()
+{
+	return RSPtr<IPipeline>(new Vk_Pipeline(*this), [this](IPipeline* p) {
+		Vk_Pipeline* ptr = static_cast<Vk_Pipeline*>(p);
+		if(ptr->_vkPipeline)
+			vkDestroyPipeline(_device, ptr->_vkPipeline, FIRE_VK_FREE);
+		delete p;
+	});
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RSPtr<IRenderPass> RenderSystem::CreateRenderPass()
+{
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -400,7 +446,7 @@ IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
 		1, 
 		&pipelineInfo, 
 		FIRE_VK_ALLOC, 
-		&pipeline->_pipeline);
+		&pipeline->_vkPipeline);
 	
 	return pipeline;
 }
@@ -488,14 +534,14 @@ IRenderPass* RenderSystem::Make(const IRenderPass::CreateInfo& info)
 
 void RenderSystem::Release(IShader* shader)
 {
-	vkDestroyShaderModule(_device, static_cast<Vk_Shader*>(shader)->_shader, FIRE_VK_FREE);
+	vkDestroyShaderModule(_device, static_cast<Vk_Shader*>(shader)->_vkShader, FIRE_VK_FREE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void RenderSystem::Release(IPipeline* pipeline)
 {
-	vkDestroyPipeline(_device, static_cast<Vk_Pipeline*>(pipeline)->_pipeline, FIRE_VK_FREE);
+	vkDestroyPipeline(_device, static_cast<Vk_Pipeline*>(pipeline)->_vkPipeline, FIRE_VK_FREE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -514,16 +560,50 @@ void RenderSystem::Release(IRenderPass* renderPass)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+uint32_t RenderSystem::GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32 *memTypeFound = nullptr)
+{
+	for (uint32_t i = 0; i < _memoryProperties.memoryTypeCount; i++)
+	{
+		if ((typeBits & 1) == 1)
+		{
+			if ((_memoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
+			{
+				if (memTypeFound)
+				{
+					*memTypeFound = true;
+				}
+				return i;
+			}
+		}
+		typeBits >>= 1;
+	}
+
+	if (memTypeFound)
+	{
+		*memTypeFound = false;
+		return 0;
+	}
+	else
+	{
+		throw std::runtime_error("Could not find a matching memory type");
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void RenderSystem::RegisterResourceMakers()
 {
 	_resourceMgr.AddResourceCache<IShader>();
 	_resourceMgr.AddResourceCache<IShaderProgram>();
+	_resourceMgr.AddResourceCache<IImage>();
 
 	_resourceMgr.AddResourceMaker<IShader>([this] {
-		return new Vk_Shader(_app);
+		return CreateShader();
+		//return new Vk_Shader(_app);
 	});
 	_resourceMgr.AddResourceMaker<IShaderProgram>([this] {
-		return new Vk_ShaderProgram(_app);
+		return CreateShaderProgram();
+		//return new Vk_ShaderProgram(_app);
 	});
 }
 
@@ -631,6 +711,7 @@ void RenderSystem::PickPhysicalDevice()
 		});
 	_physicalDevice = (*candidates.begin()).second;
 	FIRE_ASSERT_MSG(_physicalDevice != VK_NULL_HANDLE, "failed to find a suitable gpu");
+	vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &_memoryProperties);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

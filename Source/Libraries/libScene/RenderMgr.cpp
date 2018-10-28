@@ -86,52 +86,52 @@ const char* RenderMgr::GetShadingLanguageName() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-IPipelineLayout::CreateInfo RenderMgr::GetPipelineLayoutInfo() const
-{
-	return IPipelineLayout::CreateInfo();
-}
+//IPipelineLayout::CreateInfo RenderMgr::GetPipelineLayoutInfo() const
+//{
+//	return IPipelineLayout::CreateInfo();
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-IRenderPass::CreateInfo RenderMgr::GetRenderPassInfo() const
-{
-	IRenderPass::CreateInfo renderPassInfo(_system);
-
-	IRenderPass::CreateInfo::AttachmentDescription attachDesc{};
-	attachDesc.Flags = static_cast<AttachmentDescriptionFlags>(0);
-	attachDesc.Format = _system.GetSwapchainImageFormat();
-	attachDesc.FinalLayout = ImageLayout::kPRESENT_SRC;
-	renderPassInfo.AddAttachmentDesc(attachDesc);
-
-	IRenderPass::CreateInfo::AttachmentReference colorRef;
-	colorRef.Attachment = 0;
-	colorRef.Layout = ImageLayout::kCOLOR_ATTACHMENT_OPTIMAL;
-
-	IRenderPass::CreateInfo::SubpassDescription subpass;
-	subpass.ColorAttachments.push_back(colorRef);
-
-	return renderPassInfo;
-}
+//IRenderPass::CreateInfo RenderMgr::GetRenderPassInfo() const
+//{
+//	IRenderPass::CreateInfo renderPassInfo(_system);
+//
+//	IRenderPass::CreateInfo::AttachmentDescription attachDesc{};
+//	attachDesc.Flags = static_cast<AttachmentDescriptionFlags>(0);
+//	attachDesc.Format = _system.GetSwapchainImageFormat();
+//	attachDesc.FinalLayout = ImageLayout::kPRESENT_SRC;
+//	renderPassInfo.AddAttachmentDesc(attachDesc);
+//
+//	IRenderPass::CreateInfo::AttachmentReference colorRef;
+//	colorRef.Attachment = 0;
+//	colorRef.Layout = ImageLayout::kCOLOR_ATTACHMENT_OPTIMAL;
+//
+//	IRenderPass::CreateInfo::SubpassDescription subpass;
+//	subpass.ColorAttachments.push_back(colorRef);
+//
+//	return renderPassInfo;
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-IPipeline::CreateInfo RenderMgr::GetPipelineCreateInfo() const
-{
-	return IPipeline::CreateInfo(_system);
-}
-
-
-IPipeline::CreateInfo RenderMgr::GetPipelineCreateInfo(Resource<IShaderProgram> shaderStage,
-                                                       IPipelineLayout*         layout,
-                                                       IRenderPass*             renderPass) const
-{
-	IPipeline::CreateInfo pipelineInfo(_system);
-	pipelineInfo.ShaderStage = shaderStage;
-	pipelineInfo.Layout = layout;
-	pipelineInfo.RenderPass = renderPass;
-	pipelineInfo.PipelineColorBlendState.Attachments.push_back(IPipeline::CreateInfo::ColorBlendAttachmentState());
-	return pipelineInfo;
-}
+//IPipeline::CreateInfo RenderMgr::GetPipelineCreateInfo() const
+//{
+//	return IPipeline::CreateInfo(_system);
+//}
+//
+//
+//IPipeline::CreateInfo RenderMgr::GetPipelineCreateInfo(Resource<IShaderProgram> shaderStage,
+//                                                       IPipelineLayout*         layout,
+//                                                       IRenderPass*             renderPass) const
+//{
+//	IPipeline::CreateInfo pipelineInfo(_system);
+//	pipelineInfo.ShaderStage = shaderStage;
+//	pipelineInfo.Layout = layout;
+//	pipelineInfo.RenderPass = renderPass;
+//	pipelineInfo.PipelineColorBlendState.Attachments.push_back(IPipeline::CreateInfo::ColorBlendAttachmentState());
+//	return pipelineInfo;
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

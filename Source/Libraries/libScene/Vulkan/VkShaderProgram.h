@@ -28,21 +28,21 @@ class Vk_Shader final : public IShader
 {
 	FIRE_RESOURCE_DECLARE(Vk_Shader, IShader);
 public:
-	Vk_Shader(class Application& app);
+	Vk_Shader(class RenderSystem& system);
 	virtual ~Vk_Shader();
 
 	virtual bool IsReady() const;
 
 	virtual ShaderType GetType() const override { return _type; }
 
-	VkShaderModule GetModule() const { return _shader; }
+	VkShaderModule GetModule() const { return _vkShader; }
 private:
 	friend class RenderSystem;
 	friend class Vk_ShaderProgram;
 
 	class RenderSystem& _renderSystem;
 	ShaderType          _type{ ShaderType::kVERTEX };
-	VkShaderModule      _shader;
+	VkShaderModule      _vkShader;
 	bool                _isCompiled{ false };
 };
 
@@ -52,14 +52,14 @@ class Vk_ShaderProgram final : public IShaderProgram
 {
 	FIRE_RESOURCE_DECLARE(Vk_ShaderProgram, IShaderProgram);
 public:
-	Vk_ShaderProgram(class Application& app);
+	Vk_ShaderProgram(class RenderSystem& system);
 	virtual ~Vk_ShaderProgram();
 
 	virtual bool IsReady() const;
 private:
 	friend class RenderSystem;
 
-	class RenderMgr&          _renderMgr;
+	class RenderSystem&       _renderSystem;
 	std::mutex                _slock;
 	vector<Resource<IShader>> _shaders;
 	bool                      _isCompiled{ false };

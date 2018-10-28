@@ -19,6 +19,7 @@
 #include "../IPipeline.h"
 #include "../IRenderPass.h"
 #include "../IShader.h"
+#include "../IImage.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -52,6 +53,12 @@ public:
 	**/
 	bool ResourceInitialize(class IShaderProgram* shaderProgram, const IShaderProgram::CreateInfo& info);
 
+	RSPtr<IShader>         CreateShader();
+	RSPtr<IShaderProgram>  CreateShaderProgram();
+	RSPtr<IPipelineLayout> CreatePipelineLayout();
+	RSPtr<IPipeline>       CreatePipeline();
+	RSPtr<IRenderPass>     CreateRenderPass();
+
 	owner<class IPipelineLayout*> Make(const IPipelineLayout::CreateInfo& info);
 	owner<class IPipeline*>       Make(const IPipeline::CreateInfo& info);
 	owner<class IRenderPass*>     Make(const IRenderPass::CreateInfo& info);
@@ -66,6 +73,17 @@ public:
 	const VkExtent2D& GetSwapchainExtent() const { return _swapChainExtent; }
 
 	size_t GetSwapchainImageFormat() const { return _swapChainImageFormat; }
+
+
+
+	VkInstance GetInstance() const { return _instance; }
+	VkPhysicalDevice GetPhysicalDevice() const { return _physicalDevice; }
+	VkDevice GetDevice() const { return _device; }
+	VkQueue GetGraphicsQueue() const { return _graphicsQueue; }
+	VkQueue GetPresentQueue() const { return _presentQueue; }
+
+	uint32_t GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32 *memTypeFound = nullptr);
+
 private:
 	void RegisterResourceMakers();
 
@@ -130,6 +148,8 @@ private:
 #ifndef FIRE_FINAL
 	vector<const char*> _validationLayers;
 #endif
+
+	VkPhysicalDeviceMemoryProperties _memoryProperties;
 };
 
 CLOSE_NAMESPACE(Firestorm);

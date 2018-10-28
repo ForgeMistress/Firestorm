@@ -49,7 +49,7 @@ public:
 		struct SubpassDescription
 		{
 
-			//RenderFlags                     Flags;
+			size_t                          Flags;
 			PipelineBindPoint               PipelineBindPoint{ PipelineBindPoint::kGRAPHICS };
 			vector<AttachmentReference>     ColorAttachments;
 			vector<AttachmentReference>     InputAttachments;
@@ -59,13 +59,11 @@ public:
 		};
 		vector<SubpassDescription> Subpasses;
 		void AddSubpass(const SubpassDescription& subpass);
-
-		CreateInfo(const class RenderSystem& renderSystem);
-
-		const class RenderSystem& _renderSystem;
 	};
 
 	virtual ~IRenderPass() = default;
+
+	static CreateInfo MakeCreateInfo(const class RenderSystem& renderSystem);
 };
 
 CLOSE_NAMESPACE(Firestorm);

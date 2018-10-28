@@ -52,9 +52,9 @@ FIRE_RESOURCE_DEFINE(Vk_Shader)
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, Format("could not find file '%s'", filename.c_str()));
 }
 
-Vk_Shader::Vk_Shader(Application& app)
-: _renderSystem(app.GetSystems().GetRenderMgr().GetSystem())
-, _shader(VK_NULL_HANDLE)
+Vk_Shader::Vk_Shader(RenderSystem& system)
+: _renderSystem(system)
+, _vkShader(VK_NULL_HANDLE)
 , _type(ShaderType::kVERTEX)
 {
 }
@@ -65,7 +65,7 @@ Vk_Shader::~Vk_Shader()
 
 bool Vk_Shader::IsReady() const
 {
-	return _shader != VK_NULL_HANDLE;
+	return _vkShader != VK_NULL_HANDLE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,8 +139,8 @@ FIRE_RESOURCE_DEFINE(Vk_ShaderProgram)
 	return FIRE_LOAD_FAIL(ResourceIOErrors::FILE_NOT_FOUND_ERROR, "not found, dummy");
 }
 
-Vk_ShaderProgram::Vk_ShaderProgram(Application& app)
-: _renderMgr(app.GetSystems().GetRenderMgr())
+Vk_ShaderProgram::Vk_ShaderProgram(RenderSystem& system)
+: _renderSystem(system)
 {
 }
 

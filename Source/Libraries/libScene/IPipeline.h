@@ -11,12 +11,10 @@
 #define LIBSCENE_IPIPELINE_H_
 #pragma once
 
-#include "ShaderProgram.h"
-#include "PrimitiveTopology.h"
 #include "Enumerations.h"
+
+#include "IShader.h"
 #include "IRenderPass.h"
-#include "ShaderProgram.h"
-#include <libMath/Vector.h>
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -71,6 +69,7 @@ public:
 			float MaxDepth;
 		};
 		vector<Viewport> Viewports;
+		void AddViewport(float posX, float posY, float extentX, float extentY, float minDepth, float maxDepth);
 
 		struct Scissor
 		{
@@ -126,14 +125,16 @@ public:
 		};
 		PipelineColorBlendState PipelineColorBlendState;
 
-		CreateInfo(const class RenderSystem& renderSystem);
-
 		Resource<IShaderProgram>  ShaderStage;
 		IPipelineLayout*          Layout{ nullptr };
 		IRenderPass*              RenderPass{ nullptr };
 	};
 
 	virtual ~IPipeline() = default;
+
+	static CreateInfo MakeCreateInfo(const class RenderSystem& renderSystem,
+                                     IPipelineLayout*          layout = nullptr,
+                                     IRenderPass*              renderPass = nullptr);
 };
 
 CLOSE_NAMESPACE(Firestorm);

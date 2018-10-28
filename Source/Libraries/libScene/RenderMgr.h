@@ -24,13 +24,13 @@ class RenderMgr final
 public:
 	struct PipelineHolder
 	{
-		IPipeline* Default;
+		RSPtr<IPipeline> Default;
 	};
 	PipelineHolder Pipelines;
 
 	struct PipelineLayoutHolder
 	{
-		IPipelineLayout* Default;
+		RSPtr<IPipelineLayout> Default;
 	};
 	PipelineLayoutHolder PipelineLayouts;
 
@@ -57,12 +57,12 @@ public:
 	RenderSystem& GetSystem() { return _system; }
 	const RenderSystem& GetSystem() const { return _system; }
 
-	IPipelineLayout::CreateInfo GetPipelineLayoutInfo() const;
-	IRenderPass::CreateInfo GetRenderPassInfo() const;
-	IPipeline::CreateInfo GetPipelineCreateInfo() const;
-	IPipeline::CreateInfo GetPipelineCreateInfo(Resource<IShaderProgram> shaderStage,
-                                                IPipelineLayout*         layout,
-                                                IRenderPass*             renderPass) const;
+	//IPipelineLayout::CreateInfo GetPipelineLayoutInfo() const;
+	//IRenderPass::CreateInfo GetRenderPassInfo() const;
+	//IPipeline::CreateInfo GetPipelineCreateInfo() const;
+	//IPipeline::CreateInfo GetPipelineCreateInfo(Resource<IShaderProgram> shaderStage,
+    //                                            IPipelineLayout*         layout,
+    //                                            IRenderPass*             renderPass) const;
 
 private:
 	void CreateDefaultPipelines();

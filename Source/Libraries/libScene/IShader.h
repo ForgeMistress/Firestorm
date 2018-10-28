@@ -46,4 +46,8 @@ public:
 
 CLOSE_NAMESPACE(Firestorm);
 
+#ifdef FIRE_GFX_VULKAN
+#include "Vulkan/VkShaderProgram.h"
+#endif
+
 #endif

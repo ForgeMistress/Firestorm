@@ -12,7 +12,6 @@
 #pragma once
 
 #include "../RenderMgr.h"
-#include "../PrimitiveTopology.h"
 
 #include "../IPipeline.h"
 
@@ -32,7 +31,7 @@ private:
 	friend class RenderSystem;
 	class RenderSystem& _renderSystem;
 
-	VkPipelineLayout _vkLayout;
+	VkPipelineLayout _vkLayout{ nullptr };
 };
 
 class Vk_Pipeline final : public IPipeline
@@ -45,7 +44,7 @@ private:
 	friend class RenderSystem;
 	class RenderSystem& _renderSystem;
 
-	VkPipeline _pipeline;
+	VkPipeline _vkPipeline{ nullptr };
 };
 
 CLOSE_NAMESPACE(Firestorm);

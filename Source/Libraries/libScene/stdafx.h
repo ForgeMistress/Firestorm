@@ -15,6 +15,17 @@
 #include <libIO/ResourceMgr.h>
 #include <libIO/ResourceCache.h>
 
+#include <libMath/Vector.h>
+#include <libMath/Matrix.h>
+#include <libMath/Quaternion.h>
+
 #include <json/json.h>
+
+OPEN_NAMESPACE(Firestorm);
+
+template<class T>
+using RSPtr = eastl::shared_ptr<T>;
+
+CLOSE_NAMESPACE(Firestorm);
 
 #endif
