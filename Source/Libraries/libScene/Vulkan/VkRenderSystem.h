@@ -53,11 +53,11 @@ public:
 	**/
 	bool ResourceInitialize(class IShaderProgram* shaderProgram, const IShaderProgram::CreateInfo& info);
 
-	RSPtr<IShader>         CreateShader();
-	RSPtr<IShaderProgram>  CreateShaderProgram();
-	RSPtr<IPipelineLayout> CreatePipelineLayout();
-	RSPtr<IPipeline>       CreatePipeline();
-	RSPtr<IRenderPass>     CreateRenderPass();
+	eastl::shared_ptr<IShader>         CreateShader();
+	eastl::shared_ptr<IShaderProgram>  CreateShaderProgram();
+	eastl::shared_ptr<IPipelineLayout> CreatePipelineLayout();
+	eastl::shared_ptr<IPipeline>       CreatePipeline();
+	eastl::shared_ptr<IRenderPass>     CreateRenderPass();
 
 	owner<class IPipelineLayout*> Make(const IPipelineLayout::CreateInfo& info);
 	owner<class IPipeline*>       Make(const IPipeline::CreateInfo& info);

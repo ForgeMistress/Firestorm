@@ -50,14 +50,6 @@ bool Vk_FramebufferAttachment::IsDepthStencil()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-IFramebuffer::CreateInfo IFramebuffer::MakeCreateInfo(RenderSystem& renderSystem)
-{
-	IFramebuffer::CreateInfo createInfo;
-	return createInfo;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 Vk_Framebuffer::Vk_Framebuffer(RenderSystem& system)
 : _renderSystem(system)
 {
@@ -74,7 +66,7 @@ Vk_Framebuffer::~Vk_Framebuffer()
 		vkFreeMemory(_renderSystem.GetDevice(), attachment.Memory, nullptr);
 	}
 	vkDestroySampler(_renderSystem.GetDevice(), _vkSampler, nullptr);
-	//vkDestroyRenderPass(_renderSystem.GetDevice(), _vkRenderPass, nullptr);
+	vkDestroyRenderPass(_renderSystem.GetDevice(), _vkRenderPass, nullptr);
 	vkDestroyFramebuffer(_renderSystem.GetDevice(), _vkFramebuffer, nullptr);
 }
 

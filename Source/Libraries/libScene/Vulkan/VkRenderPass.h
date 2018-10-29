@@ -12,7 +12,6 @@
 #pragma once
 
 #include "../RenderMgr.h"
-#include "../PrimitiveTopology.h"
 
 #include "../IRenderPass.h"
 
