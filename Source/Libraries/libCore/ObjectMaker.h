@@ -18,25 +18,20 @@ OPEN_NAMESPACE(Firestorm);
 
 struct IMaker
 {
-	virtual void* Make() const = 0;
 };
 
 template<class T>
 struct Maker : public IMaker
 {
-	eastl::function<void*()> _makeFunc;
+	eastl::function<eastl::shared_ptr<T>()> _makeFunc;
 	template<class F>
 	Maker(F&& func)
-		: _makeFunc(eastl::forward<F>(func))
+	: _makeFunc(eastl::forward<F>(func))
 	{}
-	virtual void* Make() const
-	{ 
-		return _makeFunc();
-	}
-	template<class T>
-	T* Make()
+
+	eastl::shared_ptr<T> Make()
 	{
-		return reinterpret_cast<T*>(_makeFunc());
+		return eastl::reinterpret_pointer_cast<T>(_makeFunc());
 	}
 };
 
@@ -55,14 +50,13 @@ public:
 	bool RegisterMaker(FireClassID baseType, IMaker* maker);
 
 	template<class T, class... Args>
-	T* Make(Args&&... args)
+	eastl::shared_ptr<T> Make(Args&&... args)
 	{
 		auto type = T::MyType();
 		IMaker* maker = GetMaker(type);
 		Maker<T>* castedMaker = reinterpret_cast<Maker<T>*>(maker);
-		return reinterpret_cast<T*>(castedMaker->Make());
+		return castedMaker->Make();
 	}
-	void* Make(FireClassID type);
 
 	template<class T>
 	bool IsMakerRegistered()

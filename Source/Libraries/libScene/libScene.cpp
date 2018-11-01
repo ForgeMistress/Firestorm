@@ -2,7 +2,6 @@
 #include "libScene.h"
 
 #include "MeshResource.h"
-#include "IShaderProgram.h"
 
 OPEN_NAMESPACE(Firestorm);
 

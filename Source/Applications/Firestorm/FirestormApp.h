@@ -5,7 +5,7 @@
 #include <libIO/ResourceHandle.h>
 #include <libCore/SOA.h>
 
-#include <libScene/ShaderProgram.h>
+#include <libScene/IShader.h>
 
 using namespace Firestorm;
 

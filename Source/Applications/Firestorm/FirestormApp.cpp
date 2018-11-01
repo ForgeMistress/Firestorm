@@ -6,7 +6,7 @@
 #include <libIO/libIO.h>
 #include <libIO/ResourceMgr.h>
 
-#include <libScene/ShaderProgram.h>
+#include <libScene/IShader.h>
 #include <libScene/MeshResource.h>
 #include <libScene/SceneGraphResource.h>
 

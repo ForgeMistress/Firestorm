@@ -20,6 +20,7 @@
 #include "../IRenderPass.h"
 #include "../IShader.h"
 #include "../IImage.h"
+#include "../ITexture.h"
 
 OPEN_NAMESPACE(Firestorm);
 
@@ -58,6 +59,7 @@ public:
 	eastl::shared_ptr<IPipelineLayout> CreatePipelineLayout();
 	eastl::shared_ptr<IPipeline>       CreatePipeline();
 	eastl::shared_ptr<IRenderPass>     CreateRenderPass();
+	eastl::shared_ptr<ITexture>        CreateTexture();
 
 	owner<class IPipelineLayout*> Make(const IPipelineLayout::CreateInfo& info);
 	owner<class IPipeline*>       Make(const IPipeline::CreateInfo& info);

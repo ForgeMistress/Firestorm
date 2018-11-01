@@ -245,9 +245,9 @@ bool RenderSystem::ResourceInitialize(class IShaderProgram* shaderProgram, const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RSPtr<IShader> RenderSystem::CreateShader()
+shared_ptr<IShader> RenderSystem::CreateShader()
 {
-	return RSPtr<IShader>(new Vk_Shader(*this), [this](IShader* p) {
+	return shared_ptr<IShader>(new Vk_Shader(*this), [this](IShader* p) {
 		Vk_Shader* ptr = static_cast<Vk_Shader*>(p);
 		if(ptr->_vkShader)
 			vkDestroyShaderModule(_device, ptr->_vkShader, FIRE_VK_FREE);
@@ -255,16 +255,16 @@ RSPtr<IShader> RenderSystem::CreateShader()
 	});
 }
 
-RSPtr<IShaderProgram> RenderSystem::CreateShaderProgram()
+shared_ptr<IShaderProgram> RenderSystem::CreateShaderProgram()
 {
-	return RSPtr<IShaderProgram>(new Vk_ShaderProgram(*this), [this](IShaderProgram* p) {
+	return shared_ptr<IShaderProgram>(new Vk_ShaderProgram(*this), [this](IShaderProgram* p) {
 		delete p;
 	});
 }
 
-RSPtr<IPipelineLayout> RenderSystem::CreatePipelineLayout()
+shared_ptr<IPipelineLayout> RenderSystem::CreatePipelineLayout()
 {
-	return RSPtr<IPipelineLayout>(new Vk_PipelineLayout(*this), [this](IPipelineLayout* p) {
+	return shared_ptr<IPipelineLayout>(new Vk_PipelineLayout(*this), [this](IPipelineLayout* p) {
 		Vk_PipelineLayout* ptr = static_cast<Vk_PipelineLayout*>(p);
 		if(ptr->_vkLayout)
 			vkDestroyPipelineLayout(_device, ptr->_vkLayout, FIRE_VK_FREE);
@@ -274,9 +274,9 @@ RSPtr<IPipelineLayout> RenderSystem::CreatePipelineLayout()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RSPtr<IPipeline> RenderSystem::CreatePipeline()
+shared_ptr<IPipeline> RenderSystem::CreatePipeline()
 {
-	return RSPtr<IPipeline>(new Vk_Pipeline(*this), [this](IPipeline* p) {
+	return shared_ptr<IPipeline>(new Vk_Pipeline(*this), [this](IPipeline* p) {
 		Vk_Pipeline* ptr = static_cast<Vk_Pipeline*>(p);
 		if(ptr->_vkPipeline)
 			vkDestroyPipeline(_device, ptr->_vkPipeline, FIRE_VK_FREE);
@@ -286,9 +286,18 @@ RSPtr<IPipeline> RenderSystem::CreatePipeline()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RSPtr<IRenderPass> RenderSystem::CreateRenderPass()
+shared_ptr<IRenderPass> RenderSystem::CreateRenderPass()
 {
+	return nullptr;
+}
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+shared_ptr<ITexture> RenderSystem::CreateTexture()
+{
+	return shared_ptr<ITexture>(new Vk_Texture(*this), [this](ITexture* p) {
+
+	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -560,7 +569,7 @@ void RenderSystem::Release(IRenderPass* renderPass)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t RenderSystem::GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32 *memTypeFound = nullptr)
+uint32_t RenderSystem::GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32 *memTypeFound)
 {
 	for (uint32_t i = 0; i < _memoryProperties.memoryTypeCount; i++)
 	{
@@ -597,13 +606,13 @@ void RenderSystem::RegisterResourceMakers()
 	_resourceMgr.AddResourceCache<IShaderProgram>();
 	_resourceMgr.AddResourceCache<IImage>();
 
-	_resourceMgr.AddResourceMaker<IShader>([this] {
+	_resourceMgr.AddResourceMaker<IShader>([this]() -> eastl::shared_ptr<IShader>
+	{
 		return CreateShader();
-		//return new Vk_Shader(_app);
 	});
-	_resourceMgr.AddResourceMaker<IShaderProgram>([this] {
+	_resourceMgr.AddResourceMaker<IShaderProgram>([this]() -> eastl::shared_ptr<IShaderProgram> 
+	{
 		return CreateShaderProgram();
-		//return new Vk_ShaderProgram(_app);
 	});
 }
 

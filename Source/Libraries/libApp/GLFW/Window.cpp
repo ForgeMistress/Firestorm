@@ -158,7 +158,7 @@ void Window::Process()
 void Window::SetPosition(const Vector2& position)
 {
 	if(_windowHandle)
-		glfwSetWindowPos(_windowHandle, position.x, position.y);
+		glfwSetWindowPos(_windowHandle, narrow<int>(position.x), narrow<int>(position.y));
 }
 
 Vector2 Window::GetPosition() const

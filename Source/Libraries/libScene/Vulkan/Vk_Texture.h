@@ -1,29 +1,31 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  VkImage
+//  Vk_Texture
 //
-//  Vulkan implementation of IImage.
+//  Implementation of ITexture for Vulkan.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) Project Firestorm 2018
+//  Copyright (c) Project Firestorm 2018
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef LIBSCENE_VKIMAGE_H_
-#define LIBSCENE_VKIMAGE_H_
+#ifndef LIBSCENE_VKTEXTURE_H_
+#define LIBSCENE_VKTEXTURE_H_
 #pragma once
 
-#include "../IImage.h"
+#include "../RenderMgr.h"
+#include "../ITexture.h"
 
 OPEN_NAMESPACE(Firestorm);
 
-class Vk_Image : public IImage
+class Vk_Texture : public ITexture
 {
 public:
-	Vk_Image(class RenderSystem& renderSystem);
-	virtual ~Vk_Image();
+	Vk_Texture(class RenderSystem& renderSystem);
+	virtual ~Vk_Texture();
 private:
 	class RenderSystem& _renderSystem;
 };
 
 CLOSE_NAMESPACE(Firestorm);
+
 
 #endif
