@@ -20,15 +20,15 @@ FirestormApp::FirestormApp(std::thread::id mainThreadID)
 
 FirestormApp::~FirestormApp()
 {
-	RenderMgr& renderMgr = GetSystems().GetRenderMgr();
-	auto& renderSystem = renderMgr.GetSystem();
-	renderSystem.Release(_renderPass);
-	renderSystem.Release(_pipelineLayout);
-	renderSystem.Release(_pipeline);
-
-	delete _renderPass;
-	delete _pipelineLayout;
-	delete _pipeline;
+	//RenderMgr& renderMgr = GetSystems().GetRenderMgr();
+	//auto& renderSystem = renderMgr.GetSystem();
+	//renderSystem.Release(_renderPass);
+	//renderSystem.Release(_pipelineLayout);
+	//renderSystem.Release(_pipeline);
+	//
+	//delete _renderPass;
+	//delete _pipelineLayout;
+	//delete _pipeline;
 }
 
 void FirestormApp::OnInitialize(int ac, char** av)
@@ -46,8 +46,10 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	});
 
 	_shaderResource = resourceMgr.Load<IShaderProgram>("/Shaders/Triangle.shader");
-	_shaderResource2 = resourceMgr.Load<IShaderProgram>("/Shaders/Triangle.shader");
 
+	IPipelineLayout::CreateInfo pipelineLayoutInfo;
+	_pipelineLayout = renderMgr.GetSystem().CreatePipelineLayout();
+	renderMgr.GetSystem().ResourceInitialize(_pipelineLayout.get(), )
 
 	//for(size_t i=0; i<1000; ++i)
 	//{
@@ -123,36 +125,12 @@ void FirestormApp::OnInitialize(int ac, char** av)
 	FIRE_ASSERT(_commandBuffer != nullptr);*/
 }
 
-void FirestormApp::OnUpdate(double deltaT)
+void FirestormApp::OnProcess(double deltaT)
 {
-	static bool message = false;
-	if(message == false)
-	{
-		if(_shaderResource.IsFinished())
-		{
-			message = true;
-			FIRE_LOG_DEBUG("!! Finished loading shader: '/Shaders/Triangle.shader'");
-		}
-	}
-
-	static bool message2 = false;
-	if(message2 == false)
-	{
-		if(_shaderResource2.IsFinished())
-		{
-			message2 = true;
-			FIRE_LOG_DEBUG("!! Finished loading cached shader: '/Shaders/Triangle.shader'");
-		}
-	}
-	if(_shaderResource.IsFinished() && _shaderResource2.IsFinished())
-	{
-		FIRE_ASSERT_MSG(_shaderResource.get() == _shaderResource2.get(), "the two resources were not the same pointer");
-		//_shaderResource->PrintNumShaders();
-	}
 }
 
-void FirestormApp::OnRender()
-{
+//void FirestormApp::OnRender()
+//{
 	/*try
 	{
 		if(_commandBuffer == nullptr)
@@ -187,7 +165,7 @@ void FirestormApp::OnRender()
 		FIRE_LOG_ERROR(e.what());
 		Close();
 	}*/
-}
+//}
 
 void FirestormApp::OnClose()
 {

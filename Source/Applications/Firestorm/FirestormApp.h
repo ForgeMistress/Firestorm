@@ -16,8 +16,7 @@ public:
 	virtual ~FirestormApp();
 
 	virtual void OnInitialize(int ac, char** av) override;
-	virtual void OnUpdate(double deltaT) override;
-	virtual void OnRender() override;
+	virtual void OnProcess(double deltaT) override;
 	virtual void OnClose() override;
 	virtual int  OnShutdown() override;
 
@@ -26,13 +25,11 @@ public:
 private:
 	void RegisterResourceTypes();
 
-	IPipelineLayout* _pipelineLayout{ nullptr };
-	IRenderPass* _renderPass{ nullptr };
-	IPipeline* _pipeline{ nullptr };
+	shared_ptr<IPipelineLayout> _pipelineLayout{ nullptr };
+	shared_ptr<IRenderPass>     _renderPass{ nullptr };
+	shared_ptr<IPipeline>       _pipeline{ nullptr };
 
 	Resource<IShaderProgram> _shaderResource;
-	Resource<IShaderProgram> _shaderResource2;
-
 };
 
 #endif

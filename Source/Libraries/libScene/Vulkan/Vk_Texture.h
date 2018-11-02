@@ -18,9 +18,12 @@ OPEN_NAMESPACE(Firestorm);
 
 class Vk_Texture : public ITexture
 {
+	FIRE_RESOURCE_DECLARE(Vk_Texture, ITexture);
 public:
 	Vk_Texture(class RenderSystem& renderSystem);
 	virtual ~Vk_Texture();
+
+	bool IsReady() const override { return true; }
 private:
 	class RenderSystem& _renderSystem;
 };

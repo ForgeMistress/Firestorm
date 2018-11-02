@@ -62,8 +62,7 @@ public:
 	//	END GLOBAL SYSTEMS
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	virtual void OnInitialize(int ac, char** av) = 0;
-	virtual void OnUpdate(double deltaT) = 0;
-	virtual void OnRender() = 0;
+	virtual void OnProcess(double deltaT) = 0;
 	virtual void OnClose() = 0;
 	virtual int  OnShutdown() = 0;
 

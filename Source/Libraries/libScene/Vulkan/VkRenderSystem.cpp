@@ -16,6 +16,7 @@
 #include "VkShaderProgram.h"
 #include "VkPipeline.h"
 #include "VkRenderPass.h"
+#include "Vk_Texture.h"
 
 #include <libCore/Logger.h>
 
@@ -150,14 +151,6 @@ vector<VkAttachmentReference> map(const vector<IRenderPass::CreateInfo::Attachme
 
 }
 
-
-
-#define FIRE_VALIDATE_VK_CALL(function, ...)                                \
-{                                                                           \
-	VkResult result = function ( __VA_ARGS__ );                             \
-	FIRE_ASSERT_MSG(result == VK_SUCCESS, "vulkan call "#function"failed"); \
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 RenderSystem::RenderSystem(Application& app)
@@ -230,7 +223,7 @@ bool RenderSystem::ResourceInitialize(IShader* sshader, const IShader::CreateInf
 	shaderModule.pCode = reinterpret_cast<const uint32_t*>(info.Data.data());
 	shader->_type = info.Type;
 
-	FIRE_VALIDATE_VK_CALL(vkCreateShaderModule, _device, &shaderModule, FIRE_VK_ALLOC, &shader->_vkShader);
+	FIRE_VK_VALIDATE(vkCreateShaderModule(_device, &shaderModule, FIRE_VK_ALLOC, &shader->_vkShader));
 	return true;
 }
 
@@ -255,6 +248,8 @@ shared_ptr<IShader> RenderSystem::CreateShader()
 	});
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 shared_ptr<IShaderProgram> RenderSystem::CreateShaderProgram()
 {
 	return shared_ptr<IShaderProgram>(new Vk_ShaderProgram(*this), [this](IShaderProgram* p) {
@@ -262,9 +257,33 @@ shared_ptr<IShaderProgram> RenderSystem::CreateShaderProgram()
 	});
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+shared_ptr<IShaderProgram> RenderSystem::CreateShaderProgram(const IShaderProgram::CreateInfo& info)
+{
+	return nullptr;
+	//return shared_ptr<IShaderProgram>(Make(info), [this](IShaderProgram* p) {
+	//	delete p;
+	//});
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 shared_ptr<IPipelineLayout> RenderSystem::CreatePipelineLayout()
 {
 	return shared_ptr<IPipelineLayout>(new Vk_PipelineLayout(*this), [this](IPipelineLayout* p) {
+		Vk_PipelineLayout* ptr = static_cast<Vk_PipelineLayout*>(p);
+		if(ptr->_vkLayout)
+			vkDestroyPipelineLayout(_device, ptr->_vkLayout, FIRE_VK_FREE);
+		delete p;
+	});
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+shared_ptr<IPipelineLayout> RenderSystem::CreatePipelineLayout(const IPipelineLayout::CreateInfo& info)
+{
+	return shared_ptr<IPipelineLayout>(Make(info), [this](IPipelineLayout* p) {
 		Vk_PipelineLayout* ptr = static_cast<Vk_PipelineLayout*>(p);
 		if(ptr->_vkLayout)
 			vkDestroyPipelineLayout(_device, ptr->_vkLayout, FIRE_VK_FREE);
@@ -448,14 +467,16 @@ IPipeline* RenderSystem::Make(const IPipeline::CreateInfo& info)
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 	Vk_Pipeline* pipeline = new Vk_Pipeline(*this);
-	FIRE_VALIDATE_VK_CALL(
-		vkCreateGraphicsPipelines, 
-		_device, 
-		VK_NULL_HANDLE, 
-		1, 
-		&pipelineInfo, 
-		FIRE_VK_ALLOC, 
-		&pipeline->_vkPipeline);
+	FIRE_VK_VALIDATE(
+		vkCreateGraphicsPipelines(
+			_device, 
+			VK_NULL_HANDLE, 
+			1, 
+			&pipelineInfo, 
+			FIRE_VK_ALLOC, 
+			&pipeline->_vkPipeline
+		)
+	);
 	
 	return pipeline;
 }
@@ -535,7 +556,7 @@ IRenderPass* RenderSystem::Make(const IRenderPass::CreateInfo& info)
 	renderPassInfo.pSubpasses = subpasses.data();
 
 	Vk_RenderPass* renderPass = new Vk_RenderPass(*this);
-	FIRE_VALIDATE_VK_CALL(vkCreateRenderPass, _device, &renderPassInfo, FIRE_VK_ALLOC, &renderPass->_vkRenderPass);
+	FIRE_VK_VALIDATE(vkCreateRenderPass(_device, &renderPassInfo, FIRE_VK_ALLOC, &renderPass->_vkRenderPass));
 	return renderPass;
 }
 
@@ -605,14 +626,20 @@ void RenderSystem::RegisterResourceMakers()
 	_resourceMgr.AddResourceCache<IShader>();
 	_resourceMgr.AddResourceCache<IShaderProgram>();
 	_resourceMgr.AddResourceCache<IImage>();
+	_resourceMgr.AddResourceCache<ITexture>();
 
-	_resourceMgr.AddResourceMaker<IShader>([this]() -> eastl::shared_ptr<IShader>
+	_resourceMgr.AddResourceMaker<IShader>([this]() -> shared_ptr<IShader>
 	{
 		return CreateShader();
 	});
-	_resourceMgr.AddResourceMaker<IShaderProgram>([this]() -> eastl::shared_ptr<IShaderProgram> 
+	_resourceMgr.AddResourceMaker<IShaderProgram>([this]() -> shared_ptr<IShaderProgram>
 	{
 		return CreateShaderProgram();
+	});
+	_resourceMgr.AddResourceMaker<ITexture>([this]() -> shared_ptr<ITexture>
+	{
+		return nullptr;
+		//return CreateTexture();
 	});
 }
 
@@ -671,7 +698,7 @@ void RenderSystem::CreateInstance()
 	createInfo.enabledLayerCount = 0;
 #endif
 
-	FIRE_VALIDATE_VK_CALL(vkCreateInstance, &createInfo, nullptr, &_instance);
+	FIRE_VK_VALIDATE(vkCreateInstance(&createInfo, nullptr, &_instance));
 }
 
 void RenderSystem::SetupDebugCallback()
@@ -692,7 +719,7 @@ void RenderSystem::SetupDebugCallback()
 	debugCreateInfo.pfnUserCallback = VulkanDebugCallback;
 	debugCreateInfo.pUserData = nullptr; // Optional
 
-	FIRE_VALIDATE_VK_CALL(CreateDebugUtilsMessengerEXT, _instance, &debugCreateInfo, nullptr, &_callback);
+	FIRE_VK_VALIDATE(CreateDebugUtilsMessengerEXT(_instance, &debugCreateInfo, nullptr, &_callback));
 #endif
 }
 
@@ -762,7 +789,7 @@ void RenderSystem::CreateLogicalDevice()
 #else
 	deviceInfo.enabledLayerCount = 0;
 #endif
-	FIRE_VALIDATE_VK_CALL(vkCreateDevice, _physicalDevice, &deviceInfo, nullptr, &_device);
+	FIRE_VK_VALIDATE(vkCreateDevice(_physicalDevice, &deviceInfo, nullptr, &_device));
 
 	vkGetDeviceQueue(_device, indices.GraphicsFamily.value(), 0, &_graphicsQueue);
 	vkGetDeviceQueue(_device, indices.PresentFamily.value(), 0, &_presentQueue);
@@ -772,7 +799,7 @@ void RenderSystem::CreateLogicalDevice()
 
 void RenderSystem::CreateSurface()
 {
-	FIRE_VALIDATE_VK_CALL(glfwCreateWindowSurface, _instance, _window.GetWindowHandle(), nullptr, &_surface);
+	FIRE_VK_VALIDATE(glfwCreateWindowSurface(_instance, _window.GetWindowHandle(), nullptr, &_surface));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -858,7 +885,7 @@ void RenderSystem::CreateImageViews()
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		FIRE_VALIDATE_VK_CALL(vkCreateImageView, _device, &createInfo, nullptr, &_swapChainImageViews[i]);
+		FIRE_VK_VALIDATE(vkCreateImageView(_device, &createInfo, nullptr, &_swapChainImageViews[i]));
 	}
 }
 

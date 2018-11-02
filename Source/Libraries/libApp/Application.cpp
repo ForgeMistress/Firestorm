@@ -93,8 +93,7 @@ int Application::Run()
 			start = end;
 		}*/
 
-		OnUpdate(deltaT);
-		OnRender();
+		OnProcess(deltaT);
 
 		taskGraph.dispatch();
 
