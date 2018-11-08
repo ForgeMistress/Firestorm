@@ -16,6 +16,7 @@
 #include <EASTL/type_traits.h>
 #include <EASTL/chrono.h>
 #include <EASTL/tuple.h>
+#include <EASTL/variant.h>
 #include <cassert>
 #include <stdint.h>
 #include <atomic>
