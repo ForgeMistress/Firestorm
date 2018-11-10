@@ -49,7 +49,7 @@ void FirestormApp::OnInitialize(int ac, char** av)
 
 	IPipelineLayout::CreateInfo pipelineLayoutInfo;
 	_pipelineLayout = renderMgr.GetSystem().CreatePipelineLayout();
-	renderMgr.GetSystem().ResourceInitialize(_pipelineLayout.get(), )
+	//renderMgr.GetSystem().ResourceInitialize(_pipelineLayout.get(), )
 
 	//for(size_t i=0; i<1000; ++i)
 	//{
