@@ -55,7 +55,9 @@ public:
 	bool ResourceInitialize(class IShaderProgram* shaderProgram, const IShaderProgram::CreateInfo& info);
 
 	shared_ptr<IShader>         CreateShader();
+
 	shared_ptr<IShaderProgram>  CreateShaderProgram();
+	shared_ptr<IShaderProgram>  CreateShaderProgram(const IShaderProgram::CreateInfo& info);
 
 	shared_ptr<IPipelineLayout> CreatePipelineLayout();
 	shared_ptr<IPipelineLayout> CreatePipelineLayout(const IPipelineLayout::CreateInfo& info);

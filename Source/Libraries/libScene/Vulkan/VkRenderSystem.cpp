@@ -850,7 +850,7 @@ void RenderSystem::CreateSwapChain()
 
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	FIRE_VALIDATE_VK_CALL(vkCreateSwapchainKHR, _device, &createInfo, nullptr, &_swapChain);
+	FIRE_VK_VALIDATE(vkCreateSwapchainKHR(_device, &createInfo, nullptr, &_swapChain));
 
 	vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, nullptr);
 	_swapChainImages.resize(imageCount);
