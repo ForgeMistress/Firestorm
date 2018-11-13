@@ -11,6 +11,8 @@
 #define LIBCORE_JSONSERIALIZER_H_
 #pragma once
 
+#include <EASTL/stack.h>
+
 #include <json/json.h>
 #include "Serializer.h"
 
@@ -51,10 +53,16 @@ public:
 	void Read(const Key& key, double& value)        override;
 	void Read(const Key& key, eastl::string& value) override;
 private:
+	void Write(const Key& key, Json::Value& value);
+
+	void Push(const Key& key);
+	void Pop();
+
 	bool IsWritingArray() const;
 	bool IsWritingObject() const;
+
 	Json::Value _value;
-	eastl::list<Json::Value*> _valueStack;
+	eastl::stack<Json::Value*> _valueStack;
 };
 
 CLOSE_NAMESPACE(Firestorm);
