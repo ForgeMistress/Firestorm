@@ -41,13 +41,13 @@ public:
 	void Write(const Key& key, double& value)        override;
 	void Write(const Key& key, eastl::string& value) override;
 
-	void Read(const Key& key, uint32_t& value)      override;
 	void Read(const Key& key, int8_t& value)        override;
 	void Read(const Key& key, int16_t& value)       override;
 	void Read(const Key& key, int32_t& value)       override;
 	void Read(const Key& key, int64_t& value)       override;
 	void Read(const Key& key, uint8_t& value)       override;
 	void Read(const Key& key, uint16_t& value)      override;
+	void Read(const Key& key, uint32_t& value)      override;
 	void Read(const Key& key, uint64_t& value)      override;
 	void Read(const Key& key, float& value)         override;
 	void Read(const Key& key, double& value)        override;
